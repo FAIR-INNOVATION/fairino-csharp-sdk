@@ -1,0 +1,8 @@
+D:\code\FRRobot\bin\x64\Release\CookComputing.XmlRpcV2.dll
+D:\code\FRRobot\obj\x64\Release\FRRobot.csproj.AssemblyReference.cache
+D:\code\FRRobot\obj\x64\Release\FRRobot.csproj.CoreCompileInputs.cache
+D:\code\FRRobot\obj\x64\Release\FRRobot.csproj.CopyComplete
+D:\code\FRRobot\bin\x64\Release\libfairino.dll
+D:\code\FRRobot\bin\x64\Release\libfairino.pdb
+D:\code\FRRobot\obj\x64\Release\libfairino.dll
+D:\code\FRRobot\obj\x64\Release\libfairino.pdb

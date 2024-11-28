@@ -1,0 +1,14 @@
+D:\code\testFrRobot\bin\x64\Debug\testFrRobot.exe.config
+D:\code\testFrRobot\bin\x64\Debug\testFrRobot.exe
+D:\code\testFrRobot\bin\x64\Debug\testFrRobot.pdb
+D:\code\testFrRobot\bin\x64\Debug\CookComputing.XmlRpcV2.dll
+D:\code\testFrRobot\bin\x64\Debug\libfairino.dll
+D:\code\testFrRobot\obj\x64\Debug\testFrRobot.csproj.AssemblyReference.cache
+D:\code\testFrRobot\obj\x64\Debug\testFrRobot.csproj.SuggestedBindingRedirects.cache
+D:\code\testFrRobot\obj\x64\Debug\testFrRobot.Form1.resources
+D:\code\testFrRobot\obj\x64\Debug\testFrRobot.Properties.Resources.resources
+D:\code\testFrRobot\obj\x64\Debug\testFrRobot.csproj.GenerateResource.cache
+D:\code\testFrRobot\obj\x64\Debug\testFrRobot.csproj.CoreCompileInputs.cache
+D:\code\testFrRobot\obj\x64\Debug\testFrRobot.csproj.CopyComplete
+D:\code\testFrRobot\obj\x64\Debug\testFrRobot.exe
+D:\code\testFrRobot\obj\x64\Debug\testFrRobot.pdb

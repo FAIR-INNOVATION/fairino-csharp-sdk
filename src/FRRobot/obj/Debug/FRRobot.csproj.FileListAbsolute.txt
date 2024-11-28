@@ -1,0 +1,8 @@
+D:\0techs\3C#SDK\fairino_csharp_-sdk\src\FRRobot\bin\Debug\libfairino.dll
+D:\0techs\3C#SDK\fairino_csharp_-sdk\src\FRRobot\bin\Debug\libfairino.pdb
+D:\0techs\3C#SDK\fairino_csharp_-sdk\src\FRRobot\bin\Debug\CookComputing.XmlRpcV2.dll
+D:\0techs\3C#SDK\fairino_csharp_-sdk\src\FRRobot\obj\Debug\FRRobot.csproj.AssemblyReference.cache
+D:\0techs\3C#SDK\fairino_csharp_-sdk\src\FRRobot\obj\Debug\FRRobot.csproj.CoreCompileInputs.cache
+D:\0techs\3C#SDK\fairino_csharp_-sdk\src\FRRobot\obj\Debug\FRRobot.csproj.CopyComplete
+D:\0techs\3C#SDK\fairino_csharp_-sdk\src\FRRobot\obj\Debug\libfairino.dll
+D:\0techs\3C#SDK\fairino_csharp_-sdk\src\FRRobot\obj\Debug\libfairino.pdb
