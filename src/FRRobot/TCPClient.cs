@@ -16,7 +16,7 @@ namespace Fairino
         public Socket mSocket;
         private NetworkStream mNetworkStream;
         private bool isConnected = false;
-        private bool reconnEnable = true;  // 重连使能  
+        private bool reconnEnable = false;  // 重连使能  
         private int reconnTimes = 100;     // 重连次数  
         private int curReconnTimes = 0;    // 当前重连次数  
         private int reconnPeriod = 200;    // 重连时间间隔（毫秒）  
@@ -46,7 +46,7 @@ namespace Fairino
             }
             catch (Exception)
             {
-                return 0;
+                return -1;
             }
             return 0;
         }
@@ -68,12 +68,17 @@ namespace Fairino
         {
             curReconnTimes = 0;
             reconnState = true;
+            //if (reconnEnable==true)
+            //{
+            //    Console.WriteLine("reconnEnable" + reconnEnable);
+            //}
             if (!reconnEnable)
             {
+               
                 reconnState = false;
                 return false;
             }
-
+     
             while (curReconnTimes < reconnTimes)
             {
                 Close();

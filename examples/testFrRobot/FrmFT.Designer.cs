@@ -47,6 +47,15 @@
             this.btnEndLuaDrag = new System.Windows.Forms.Button();
             this.btnEndGripper = new System.Windows.Forms.Button();
             this.btnUploadAxleLua = new System.Windows.Forms.Button();
+            this.btn_getGripper = new System.Windows.Forms.Button();
+            this.button4 = new System.Windows.Forms.Button();
+            this.button5 = new System.Windows.Forms.Button();
+            this.button6 = new System.Windows.Forms.Button();
+            this.button7 = new System.Windows.Forms.Button();
+            this.TestTCP = new System.Windows.Forms.Button();
+            this.TestTCP6 = new System.Windows.Forms.Button();
+            this.button10 = new System.Windows.Forms.Button();
+            this.ExtAxisLaserTracking = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // btnDragStart
@@ -191,7 +200,7 @@
             // 
             // button3
             // 
-            this.button3.Location = new System.Drawing.Point(582, 422);
+            this.button3.Location = new System.Drawing.Point(262, 368);
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(200, 88);
             this.button3.TabIndex = 9;
@@ -239,11 +248,110 @@
             this.btnUploadAxleLua.UseVisualStyleBackColor = true;
             this.btnUploadAxleLua.Click += new System.EventHandler(this.btnUploadAxleLua_Click);
             // 
+            // btn_getGripper
+            // 
+            this.btn_getGripper.Location = new System.Drawing.Point(771, 433);
+            this.btn_getGripper.Name = "btn_getGripper";
+            this.btn_getGripper.Size = new System.Drawing.Size(181, 47);
+            this.btn_getGripper.TabIndex = 14;
+            this.btn_getGripper.Text = "奇异保护";
+            this.btn_getGripper.UseVisualStyleBackColor = true;
+            this.btn_getGripper.Click += new System.EventHandler(this.btn_getGripper_Click);
+            // 
+            // button4
+            // 
+            this.button4.Location = new System.Drawing.Point(771, 553);
+            this.button4.Name = "button4";
+            this.button4.Size = new System.Drawing.Size(152, 39);
+            this.button4.TabIndex = 15;
+            this.button4.Text = "滤波";
+            this.button4.UseVisualStyleBackColor = true;
+            this.button4.Click += new System.EventHandler(this.button4_Click);
+            // 
+            // button5
+            // 
+            this.button5.Location = new System.Drawing.Point(771, 504);
+            this.button5.Name = "button5";
+            this.button5.Size = new System.Drawing.Size(152, 31);
+            this.button5.TabIndex = 16;
+            this.button5.Text = "夹爪状态";
+            this.button5.UseVisualStyleBackColor = true;
+            this.button5.Click += new System.EventHandler(this.button5_Click);
+            // 
+            // button6
+            // 
+            this.button6.Location = new System.Drawing.Point(771, 623);
+            this.button6.Name = "button6";
+            this.button6.Size = new System.Drawing.Size(152, 38);
+            this.button6.TabIndex = 17;
+            this.button6.Text = "碰撞守护";
+            this.button6.UseVisualStyleBackColor = true;
+            this.button6.Click += new System.EventHandler(this.button6_Click);
+            // 
+            // button7
+            // 
+            this.button7.Location = new System.Drawing.Point(998, 292);
+            this.button7.Name = "button7";
+            this.button7.Size = new System.Drawing.Size(116, 33);
+            this.button7.TabIndex = 18;
+            this.button7.Text = "TestReWeld";
+            this.button7.UseVisualStyleBackColor = true;
+            this.button7.Click += new System.EventHandler(this.button7_Click);
+            // 
+            // TestTCP
+            // 
+            this.TestTCP.Location = new System.Drawing.Point(998, 362);
+            this.TestTCP.Name = "TestTCP";
+            this.TestTCP.Size = new System.Drawing.Size(116, 33);
+            this.TestTCP.TabIndex = 19;
+            this.TestTCP.Text = "TestTCP";
+            this.TestTCP.UseVisualStyleBackColor = true;
+            this.TestTCP.Click += new System.EventHandler(this.TestTCP_Click);
+            // 
+            // TestTCP6
+            // 
+            this.TestTCP6.Location = new System.Drawing.Point(998, 423);
+            this.TestTCP6.Name = "TestTCP6";
+            this.TestTCP6.Size = new System.Drawing.Size(116, 33);
+            this.TestTCP6.TabIndex = 20;
+            this.TestTCP6.Text = "TestTCP6";
+            this.TestTCP6.UseVisualStyleBackColor = true;
+            this.TestTCP6.Click += new System.EventHandler(this.TestTCP6_Click);
+            // 
+            // button10
+            // 
+            this.button10.Location = new System.Drawing.Point(998, 480);
+            this.button10.Name = "button10";
+            this.button10.Size = new System.Drawing.Size(116, 33);
+            this.button10.TabIndex = 21;
+            this.button10.Text = "稳定性";
+            this.button10.UseVisualStyleBackColor = true;
+            this.button10.Click += new System.EventHandler(this.button10_Click);
+            // 
+            // ExtAxisLaserTracking
+            // 
+            this.ExtAxisLaserTracking.Location = new System.Drawing.Point(998, 553);
+            this.ExtAxisLaserTracking.Name = "ExtAxisLaserTracking";
+            this.ExtAxisLaserTracking.Size = new System.Drawing.Size(116, 25);
+            this.ExtAxisLaserTracking.TabIndex = 22;
+            this.ExtAxisLaserTracking.Text = "ExtAxisLaserTracking";
+            this.ExtAxisLaserTracking.UseVisualStyleBackColor = true;
+            this.ExtAxisLaserTracking.Click += new System.EventHandler(this.ExtAxisLaserTracking_Click);
+            // 
             // FrmFT
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1142, 718);
+            this.Controls.Add(this.ExtAxisLaserTracking);
+            this.Controls.Add(this.button10);
+            this.Controls.Add(this.TestTCP6);
+            this.Controls.Add(this.TestTCP);
+            this.Controls.Add(this.button7);
+            this.Controls.Add(this.button6);
+            this.Controls.Add(this.button5);
+            this.Controls.Add(this.button4);
+            this.Controls.Add(this.btn_getGripper);
             this.Controls.Add(this.btnUploadAxleLua);
             this.Controls.Add(this.btnEndGripper);
             this.Controls.Add(this.btnEndLuaDrag);
@@ -291,5 +399,14 @@
         private System.Windows.Forms.Button btnEndLuaDrag;
         private System.Windows.Forms.Button btnEndGripper;
         private System.Windows.Forms.Button btnUploadAxleLua;
+        private System.Windows.Forms.Button btn_getGripper;
+        private System.Windows.Forms.Button button4;
+        private System.Windows.Forms.Button button5;
+        private System.Windows.Forms.Button button6;
+        private System.Windows.Forms.Button button7;
+        private System.Windows.Forms.Button TestTCP;
+        private System.Windows.Forms.Button TestTCP6;
+        private System.Windows.Forms.Button button10;
+        private System.Windows.Forms.Button ExtAxisLaserTracking;
     }
 }

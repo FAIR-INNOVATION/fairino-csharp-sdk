@@ -147,11 +147,5 @@
   <ItemGroup>
     <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\FRRobot\FRRobot.csproj">
-      <Project>{a50c0309-4334-4bed-9372-bd8b7d4d4654}</Project>
-      <Name>FRRobot</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

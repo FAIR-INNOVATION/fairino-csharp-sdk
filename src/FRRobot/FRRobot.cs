@@ -59,7 +59,7 @@ namespace fairino
         private string g_sendbuf = "";
         private string g_recvbuf = "";
 
-        private bool reconnEnable = true;  // 重连使能  
+        private bool reconnEnable = false;  // 重连使能  
         private int reconnTimes = 100;     // 重连次数  
         private int curReconnTimes = 0;    // 当前重连次数  
         private int reconnPeriod = 200;    // 重连时间间隔（毫秒）  
@@ -84,13 +84,17 @@ namespace fairino
             proxy = XmlRpcProxyGen.Create<ICallSupervisor>();
         }
 
-
-        public int SetReconnectParam(bool enable, int times, int period)
+        /// <summary>  
+        /// 设置重连参数  
+        /// </summary>  
+        /// <param name="enable">是否使能，true:使能，false:不使能</param>  
+        /// <param name="times">重连次数</param>  
+        /// <param name="period">重连时间间隔（毫秒）</param>  
+        public void SetReconnectParam(bool enable, int times, int period)
         {
             reconnEnable = enable;
             reconnTimes = times;
             reconnPeriod = period;
-            return 0;
         }
 
         private void RobotStateRoutineThread()
@@ -221,7 +225,7 @@ namespace fairino
                                         if (checksum == checkdata)
                                         {
                                             int size = Marshal.SizeOf(robot_state_pkg);
-
+                                            
                                             if (size > state_pkg.Length)
                                             {
                                                 if (log != null)
@@ -230,7 +234,9 @@ namespace fairino
                                                 }
                                                 return;
                                             }
-
+                                            //Console.WriteLine("size:"+size);
+                                            //Console.WriteLine(" state_pkg.Length:" + state_pkg.Length);
+                                           
                                             IntPtr structPtr = Marshal.AllocHGlobal(size);
                                             Marshal.Copy(state_pkg, 0, structPtr, size);
                                             robot_state_pkg = (ROBOT_STATE_PKG)Marshal.PtrToStructure(structPtr, typeof(ROBOT_STATE_PKG));
@@ -528,7 +534,15 @@ namespace fairino
             stateThread.Start();
             Thread cmdsendThread = new Thread(RobotInstCmdSendRoutineThread);
             cmdsendThread.Start();
-            Thread.Sleep(1000);
+            Thread.Sleep(2000);
+            if (IsSockComError())
+            {
+                log.LogInfo("RPC Fail.");
+
+                Console.WriteLine("RPC Fail." + g_sock_com_err);
+                return g_sock_com_err;
+            }
+            Console.WriteLine("RPC ");
             Thread cmdrecvThread = new Thread(RobotInstCmdRecvRoutineThread);
             cmdrecvThread.Start();
             Thread taskThread = new Thread(RobotTaskRoutineThread);
@@ -627,7 +641,15 @@ namespace fairino
                 return (int)RobotError.ERR_RPC_ERROR;
             }
         }
+        public int GetSafetyCode()
+        {
+            if (robot_state_pkg.safety_stop0_state == 1 || robot_state_pkg.safety_stop1_state == 1)
+            {
+                return 99;
+            }
 
+            return 0;
+        }
         /**
          * @brief 控制机器人手自动模式切换
          * @param [in] mode 0-自动模式，1-手动模式
@@ -833,6 +855,11 @@ namespace fairino
             {
                 return g_sock_com_err;
             }
+            if (GetSafetyCode() != 0)
+            {
+
+                return GetSafetyCode();
+            }
             try
             {
                 int rtn = proxy.StartJOG(refType, nb, dir, vel, acc, max_dis);
@@ -932,6 +959,11 @@ namespace fairino
             {
                 return g_sock_com_err;
             }
+            if (GetSafetyCode() != 0)
+            {
+
+                return GetSafetyCode();
+            }
             try
             {
                 double[] joint = joint_pos.jPos;
@@ -979,6 +1011,11 @@ namespace fairino
             if (IsSockComError())
             {
                 return g_sock_com_err;
+            }
+            if (GetSafetyCode() != 0)
+            {
+
+                return GetSafetyCode();
             }
             try
             {
@@ -1061,6 +1098,11 @@ namespace fairino
             {
                 return g_sock_com_err;
             }
+            if (GetSafetyCode() != 0)
+            {
+
+                return GetSafetyCode();
+            }
             try
             {
                 double[] jointP = joint_pos_p.jPos;
@@ -1121,6 +1163,11 @@ namespace fairino
             {
                 return g_sock_com_err;
             }
+            if (GetSafetyCode() != 0)
+            {
+
+                return GetSafetyCode();
+            }
             try
             {
                 double[] jointP = joint_pos_p.jPos;
@@ -1173,6 +1220,11 @@ namespace fairino
             {
                 return g_sock_com_err;
             }
+            if (GetSafetyCode() != 0)
+            {
+
+                return GetSafetyCode();
+            }
             try
             {
                 double[] jointPos = joint_pos.jPos;
@@ -1210,6 +1262,11 @@ namespace fairino
             if (IsSockComError())
             {
                 return g_sock_com_err;
+            }
+            if (GetSafetyCode() != 0)
+            {
+
+                return GetSafetyCode();
             }
             try
             {
@@ -1277,6 +1334,11 @@ namespace fairino
             {
                 return g_sock_com_err;
             }
+            if (GetSafetyCode() != 0)
+            {
+
+                return GetSafetyCode();
+            }
             try
             {
                 double[] jointPos = joint_pos.jPos;
@@ -1316,6 +1378,11 @@ namespace fairino
             {
                 return g_sock_com_err;
             }
+            if (GetSafetyCode() != 0)
+            {
+
+                return GetSafetyCode();
+            }
             try
             {
                 double[] descPos = new double[6] { desc_pose.tran.x, desc_pose.tran.y, desc_pose.tran.z, desc_pose.rpy.rx, desc_pose.rpy.ry, desc_pose.rpy.rz };
@@ -1354,6 +1421,11 @@ namespace fairino
             {
                 return g_sock_com_err;
             }
+            if (GetSafetyCode() != 0)
+            {
+
+                return GetSafetyCode();
+            }
             try
             {
                 double[] descPos = new double[6] { desc_pos.tran.x, desc_pos.tran.y, desc_pos.tran.z, desc_pos.rpy.rx, desc_pos.rpy.ry, desc_pos.rpy.rz };
@@ -1383,6 +1455,11 @@ namespace fairino
             if (IsSockComError())
             {
                 return g_sock_com_err;
+            }
+            if (GetSafetyCode() != 0)
+            {
+
+                return GetSafetyCode();
             }
             try
             {
@@ -1419,6 +1496,11 @@ namespace fairino
             if (IsSockComError())
             {
                 return g_sock_com_err;
+            }
+            if (GetSafetyCode() != 0)
+            {
+
+                return GetSafetyCode();
             }
             try
             {
@@ -1482,6 +1564,11 @@ namespace fairino
             {
                 return g_sock_com_err;
             }
+            if (GetSafetyCode() != 0)
+            {
+
+                return GetSafetyCode();
+            }
             try
             {
                 int rtn = proxy.NewSplineStart(type, averageTime);
@@ -1519,6 +1606,11 @@ namespace fairino
             if (IsSockComError())
             {
                 return g_sock_com_err;
+            }
+            if (GetSafetyCode() != 0)
+            {
+
+                return GetSafetyCode();
             }
             try
             {
@@ -1610,7 +1702,11 @@ namespace fairino
             {
                 return g_sock_com_err;
             }
+            if (GetSafetyCode() != 0)
+            {
 
+                return GetSafetyCode();
+            }
             while (is_sendcmd == true) //说明当前正在处理上一条指令
             {
                 Thread.Sleep(10);
@@ -1636,7 +1732,11 @@ namespace fairino
             {
                 return g_sock_com_err;
             }
+            if (GetSafetyCode() != 0)
+            {
 
+                return GetSafetyCode();
+            }
             while (is_sendcmd == true) //说明当前正在处理上一条指令
             {
                 Thread.Sleep(10);
@@ -1663,6 +1763,11 @@ namespace fairino
             if (IsSockComError())
             {
                 return g_sock_com_err;
+            }
+            if (GetSafetyCode() != 0)
+            {
+
+                return GetSafetyCode();
             }
             try
             {
@@ -2378,7 +2483,11 @@ namespace fairino
             {
                 return g_sock_com_err;
             }
+            if (GetSafetyCode() != 0)
+            {
 
+                return GetSafetyCode();
+            }
             try
             {
                 object[] result = proxy.ComputeTool();
@@ -2449,7 +2558,11 @@ namespace fairino
             {
                 return g_sock_com_err;
             }
+            if (GetSafetyCode() != 0)
+            {
 
+                return GetSafetyCode();
+            }
             try
             {
                 object[] result = proxy.ComputeTcp4();
@@ -2595,7 +2708,11 @@ namespace fairino
             {
                 return g_sock_com_err;
             }
+            if (GetSafetyCode() != 0)
+            {
 
+                return GetSafetyCode();
+            }
             try
             {
                 object[] result = proxy.ComputeExTCF();
@@ -2739,7 +2856,11 @@ namespace fairino
             {
                 return g_sock_com_err;
             }
+            if (GetSafetyCode() != 0)
+            {
 
+                return GetSafetyCode();
+            }
             try
             {
                 object[] result = proxy.ComputeWObjCoord(method, refFrame);
@@ -2840,10 +2961,11 @@ namespace fairino
 
         /**
          * @brief  设置末端负载重量
+         * @param  [in] loadNum 负载编号
          * @param  [in] weight  负载重量，单位kg
          * @return  错误码
          */
-        public int SetLoadWeight(float weight)
+        public int SetLoadWeight(int loadNum, float weight)
         {
             if (IsSockComError())
             {
@@ -2852,7 +2974,7 @@ namespace fairino
 
             try
             {
-                int rtn = proxy.SetLoadWeight(weight);
+                int rtn = proxy.SetLoadWeight(loadNum,weight);
                 if (log != null)
                 {
                     log.LogInfo($"SetLoadWeight({weight}) : {rtn}");
@@ -3041,10 +3163,11 @@ namespace fairino
          * @param  [in] strategy  0-报错停止，1-继续运行
          * @param  [in] safeTime  安全停止时间[1000 - 2000]ms
          * @param  [in] safeDistance  安全停止距离[1-150]mm
+         * @param  [in] safeVel  tcp安全停止速度 [50-250]mm/s
          * @param  [in] safetyMargin  j1-j6安全系数[1-10]
          * @return  错误码
          */
-        public int SetCollisionStrategy(int strategy, int safeTime, int safeDistance, int[] safetyMargin)
+        public int SetCollisionStrategy(int strategy, int safeTime, int safeDistance, int safeVel,int[] safetyMargin)
         {
             if (IsSockComError())
             {
@@ -3053,7 +3176,7 @@ namespace fairino
 
             try
             {
-                int rtn = proxy.SetCollisionStrategy(strategy, safeTime, safeDistance, safetyMargin);
+                int rtn = proxy.SetCollisionStrategy(strategy, safeTime, safeDistance, safeVel,safetyMargin);
                 if (log != null)
                 {
                     log.LogInfo($"SetCollisionStrategy({strategy}) : {rtn}");
@@ -4625,7 +4748,11 @@ namespace fairino
             {
                 return g_sock_com_err;
             }
+            if (GetSafetyCode() != 0)
+            {
 
+                return GetSafetyCode();
+            }
             try
             {
                 int rtn = proxy.MoveTPD(name, blend, ovl);
@@ -4689,7 +4816,11 @@ namespace fairino
             {
                 return g_sock_com_err;
             }
+            if (GetSafetyCode() != 0)
+            {
 
+                return GetSafetyCode();
+            }
             try
             {
                 int rtn = proxy.MoveTrajectoryJ();
@@ -5196,7 +5327,11 @@ namespace fairino
             {
                 return g_sock_com_err;
             }
+            if (GetSafetyCode() != 0)
+            {
 
+                return GetSafetyCode();
+            }
             try
             {
                 int rtn = proxy.ProgramRun();
@@ -5227,7 +5362,11 @@ namespace fairino
             {
                 return g_sock_com_err;
             }
+            if (GetSafetyCode() != 0)
+            {
 
+                return GetSafetyCode();
+            }
             try
             {
                 int rtn = proxy.ProgramPause();
@@ -5257,7 +5396,11 @@ namespace fairino
             {
                 return g_sock_com_err;
             }
+            if (GetSafetyCode() != 0)
+            {
 
+                return GetSafetyCode();
+            }
             try
             {
                 int rtn = proxy.ProgramResume();
@@ -5460,7 +5603,11 @@ namespace fairino
             {
                 return g_sock_com_err;
             }
+            if (GetSafetyCode() != 0)
+            {
 
+                return GetSafetyCode();
+            }
             try
             {
                 int rtn = proxy.MoveGripper(index, pos, vel, force, max_time, block, type, rotNum, rotVel, rotTorque);
@@ -5695,7 +5842,11 @@ namespace fairino
             {
                 return g_sock_com_err;
             }
+            if (GetSafetyCode() != 0)
+            {
 
+                return GetSafetyCode();
+            }
             try
             {
                 double[] descPos = new double[6] { desc_pos.tran.x, desc_pos.tran.y, desc_pos.tran.z, desc_pos.rpy.rx, desc_pos.rpy.ry, desc_pos.rpy.rz };
@@ -5740,7 +5891,11 @@ namespace fairino
             {
                 return g_sock_com_err;
             }
+            if (GetSafetyCode() != 0)
+            {
 
+                return GetSafetyCode();
+            }
             try
             {
                 double[] descPos = new double[6] { desc_pos.tran.x, desc_pos.tran.y, desc_pos.tran.z, desc_pos.rpy.rx, desc_pos.rpy.ry, desc_pos.rpy.rz };
@@ -5769,15 +5924,14 @@ namespace fairino
                 return (int)RobotError.ERR_RPC_ERROR;
             }
         }
-
-        /**
-         * @brief  配置力传感器
-         * @param  [in] company  力传感器厂商，17-坤维科技，19-航天十一院，20-ATI传感器，21-中科米点，22-伟航敏芯
-         * @param  [in] device  设备号，坤维(0-KWR75B)，航天十一院(0-MCS6A-200-4)，ATI(0-AXIA80-M8)，中科米点(0-MST2010)，伟航敏芯(0-WHC6L-YB-10A)
-         * @param  [in] softvesion  软件版本号，暂不使用，默认为0
-         * @param  [in] bus 设备挂在末端总线位置，暂不使用，默认为0
-         * @return  错误码
-         */
+     /**
+	 * @brief  配置力传感器
+	 * @param  [in] company  力传感器厂商，17-坤维科技，19-航天十一院，20-ATI传感器，21-中科米点，22-伟航敏芯，23-NBIT，24-鑫精诚(XJC)，26-NSR
+	 * @param  [in] device  设备号，坤维(0-KWR75B)，航天十一院(0-MCS6A-200-4)，ATI(0-AXIA80-M8)，中科米点(0-MST2010)，伟航敏芯(0-WHC6L-YB-10A)，NBIT(0-XLH93003ACS)，鑫精诚XJC(0-XJC-6F-D82)，NSR(0-NSR-FTSensorA)
+	 * @param  [in] softvesion  软件版本号，暂不使用，默认为0
+	 * @param  [in] bus 设备挂在末端总线位置，暂不使用，默认为0
+	 * @return  错误码
+	 */
         public int FT_SetConfig(int company, int device, int softvesion, int bus)
         {
             if (IsSockComError())
@@ -9090,7 +9244,11 @@ namespace fairino
             {
                 return g_sock_com_err;
             }
+            if (GetSafetyCode() != 0)
+            {
 
+                return GetSafetyCode();
+            }
             try
             {
                 int rtn = proxy.AuxServoSetTargetPos(servoId, pos, speed, acc);
@@ -9123,7 +9281,11 @@ namespace fairino
             {
                 return g_sock_com_err;
             }
+            if (GetSafetyCode() != 0)
+            {
 
+                return GetSafetyCode();
+            }
             try
             {
                 int rtn = proxy.AuxServoSetTargetSpeed(servoId, speed, acc);
@@ -9155,7 +9317,11 @@ namespace fairino
             {
                 return g_sock_com_err;
             }
+            if (GetSafetyCode() != 0)
+            {
 
+                return GetSafetyCode();
+            }
             try
             {
                 int rtn = proxy.AuxServoSetTargetTorque(servoId, torque);
@@ -9190,7 +9356,11 @@ namespace fairino
             {
                 return g_sock_com_err;
             }
+            if (GetSafetyCode() != 0)
+            {
 
+                return GetSafetyCode();
+            }
             try
             {
                 int rtn = proxy.AuxServoHoming(servoId, mode, searchVel, latchVel, acc);
@@ -9455,7 +9625,11 @@ namespace fairino
             {
                 return g_sock_com_err;
             }
+            if (GetSafetyCode() != 0)
+            {
 
+                return GetSafetyCode();
+            }
             try
             {
                 int rtn = proxy.MoveAOStart(AONum, maxTCPSpeed, maxAOPercent, zeroZoneCmp);
@@ -9519,7 +9693,11 @@ namespace fairino
             {
                 return g_sock_com_err;
             }
+            if (GetSafetyCode() != 0)
+            {
 
+                return GetSafetyCode();
+            }
             try
             {
                 int rtn = proxy.MoveToolAOStart(AONum, maxTCPSpeed, maxAOPercent, zeroZoneCmp);
@@ -9780,7 +9958,11 @@ namespace fairino
             {
                 return g_sock_com_err;
             }
+            if (GetSafetyCode() != 0)
+            {
 
+                return GetSafetyCode();
+            }
             try
             {
                 int rtn = proxy.ExtAxisStartJog(6, axisID, direction, vel, acc, maxDistance);
@@ -9941,6 +10123,11 @@ namespace fairino
             {
                 return g_sock_com_err;
             }
+            if (GetSafetyCode() != 0)
+            {
+
+                return GetSafetyCode();
+            }
             try
             {
                 int rtn = proxy.TractorMoveL( distance, vel);
@@ -9974,6 +10161,11 @@ namespace fairino
             if (IsSockComError())
             {
                 return g_sock_com_err;
+            }
+            if (GetSafetyCode() != 0)
+            {
+
+                return GetSafetyCode();
             }
             try
             {
@@ -10102,7 +10294,11 @@ namespace fairino
             {
                 return g_sock_com_err;
             }
+            if (GetSafetyCode() != 0)
+            {
 
+                return GetSafetyCode();
+            }
             try
             {
                 //单独调用时，默认异步运动
@@ -10846,6 +11042,11 @@ namespace fairino
             {
                 return g_sock_com_err;
             }
+            if (GetSafetyCode() != 0)
+            {
+
+                return GetSafetyCode();
+            }
             try
             {
                 double[] joint = joint_pos.jPos;
@@ -10900,6 +11101,11 @@ namespace fairino
             if (IsSockComError())
             {
                 return g_sock_com_err;
+            }
+            if (GetSafetyCode() != 0)
+            {
+
+                return GetSafetyCode();
             }
             try
             {
@@ -10966,6 +11172,11 @@ namespace fairino
             {
                 return g_sock_com_err;
             }
+            if (GetSafetyCode() != 0)
+            {
+
+                return GetSafetyCode();
+            }
             try
             {
                 int rtn = 0;
@@ -11026,14 +11237,19 @@ namespace fairino
             {
                 return g_sock_com_err;
             }
+            if (GetSafetyCode() != 0)
+            {
+
+                return GetSafetyCode();
+            }
             //try
             //{
-                int rtn = proxy.WireSearchStart(refPos, searchVel, searchDis, autoBackFlag, autoBackVel, autoBackDis, offectFlag);
-                if (log != null)
-                {
-                    log.LogInfo($"WireSearchStart({refPos}, {searchVel}, {searchDis}, {autoBackFlag}, {autoBackVel}, {autoBackDis}, {offectFlag}) : {rtn}");
-                }
-                return rtn;
+            int rtn = proxy.WireSearchStart(refPos, searchVel, searchDis, autoBackFlag, autoBackVel, autoBackDis, offectFlag);
+            if (log != null)
+            {
+                log.LogInfo($"WireSearchStart({refPos}, {searchVel}, {searchDis}, {autoBackFlag}, {autoBackVel}, {autoBackDis}, {offectFlag}) : {rtn}");
+            }
+            return rtn;
             //}
             //catch
             //{
@@ -11237,7 +11453,7 @@ namespace fairino
         }
 
         /**
-         * @brief  焊丝寻位接触点写入数据库
+         * @brief  电弧跟踪AI通带选择
          * @param  [in] channel 电弧跟踪AI通带选择,[0-3]
          * @return  错误码
          */
@@ -12868,6 +13084,17 @@ namespace fairino
             }
         }
 
+        /**
+        * @brief 偏移量坐标变化-多层多道焊
+        * @param [in] pointO 基准点笛卡尔位姿
+        * @param [in] pointX 基准点X向偏移方向点笛卡尔位姿
+        * @param [in] pointZ 基准点Z向偏移方向点笛卡尔位姿
+        * @param [in] dx x方向偏移量(mm)
+        * @param [in] z方向偏移量(mm)
+        * @param [in] 绕y轴偏移量(°)
+        * @param [out] 计算结果偏移量
+        * @return 错误码
+        */
         public int MultilayerOffsetTrsfToBase(DescTran pointO, DescTran pointX, DescTran pointZ, double dx, double dy, double db, ref DescPose offset)
         {
             if (IsSockComError())
@@ -13860,6 +14087,567 @@ namespace fairino
                     log.LogError($"LuaUpLoadUpdate({filePath}) : {rtn}");
                 }
                 return rtn;
+            }
+        }
+        /**
+        * @brief  获取旋转夹爪的旋转圈数
+        * @param  [out] fault  0-无错误，1-有错误
+        * @param  [out] num  旋转圈数
+        * @return  错误码
+        */
+        public int GetGripperRotNum(ref UInt16 fault, ref double num)
+        {
+            int errcode = 0;
+
+            if (g_sock_com_err == (int)RobotError.ERR_SUCCESS)
+            {
+                fault = robot_state_pkg.gripper_fault;
+                num = robot_state_pkg.gripperRotNum;
+            }
+            else
+            {
+                errcode = g_sock_com_err;
+            }
+
+
+            return errcode;
+        }
+        /**
+        * @brief  获取旋转夹爪的旋转速度百分比
+        * @param  [out] fault  0-无错误，1-有错误
+        * @param  [out] speed  旋转速度百分比
+        * @return  错误码
+        */
+        public int GetGripperRotSpeed(ref UInt16 fault, ref int speed)
+        {
+            int errcode = 0;
+
+            if (g_sock_com_err == (int)RobotError.ERR_SUCCESS)
+            {
+                fault = robot_state_pkg.gripper_fault;
+                speed = robot_state_pkg.gripperRotSpeed;
+            }
+            else
+            {
+                errcode = g_sock_com_err;
+            }
+            return errcode;
+        }
+        /**
+        * @brief  获取旋转夹爪的旋转力矩百分比
+        * @param  [out] fault  0-无错误，1-有错误
+        * @param  [out] torque  旋转力矩百分比
+        * @return  错误码
+        */
+        public int GetGripperRotTorque(ref UInt16 fault, ref int torque)
+        {
+            int errcode = 0;
+
+            if (g_sock_com_err == (int)RobotError.ERR_SUCCESS)
+            {
+                fault = robot_state_pkg.gripper_fault;
+                torque = robot_state_pkg.gripperRotTorque;
+            }
+            else
+            {
+                errcode = g_sock_com_err;
+            }
+
+            return errcode;
+        }
+        /**
+        * @brief 开始Ptp运动FIR滤波
+        * @param [in] maxAcc 最大加速度极值(deg/s2)
+        * @return 错误码
+        */
+        public int PtpFIRPlanningStart(double maxAcc)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+                int rtn = proxy.PtpFIRPlanningStart(maxAcc);
+                if (log != null)
+                {
+                    log.LogInfo($"PtpFIRPlanningStart({maxAcc}");
+                }
+                return rtn;
+            }
+            catch
+            {
+                if (log != null)
+                {
+                    log.LogError($"RPC exception");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+           
+        }
+        /**
+        * @brief 上传轨迹J文件
+        * @param [in] filePath 上传轨迹文件的全路径名   C://test/testJ.txt
+        * @return 错误码
+        */
+        public int TrajectoryJUpLoad(string filePath)
+        {
+            return FileUpLoad(20, filePath);
+        }
+
+        /**
+         * @brief 删除轨迹J文件
+         * @param [in] fileName 文件名称 testJ.txt
+         * @return 错误码
+         */
+
+        public int TrajectoryJDelete(string fileName)
+        {
+            return FileDelete(20, fileName);
+        }
+        /**
+        * @brief 关闭Ptp运动FIR滤波
+        * @return 错误码
+        */
+        public int PtpFIRPlanningEnd()
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+                int rtn = proxy.PtpFIRPlanningEnd();
+                if (log != null)
+                {
+                    log.LogInfo($"PtpFIRPlanningEnd:({rtn}");
+                }
+                return rtn;
+            }
+            catch
+            {
+                if (log != null)
+                {
+                    log.LogError($"RPC exception");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+        * @brief 开始LIN、ARC运动FIR滤波
+        * @param [in] maxAccLin 线加速度极值(mm/s2)
+        * @param [in] maxAccDeg 角加速度极值(deg/s2)
+        * @param [in] maxJerkLin 线加加速度极值(mm/s3)
+        * @param [in] maxJerkDeg 角加加速度极值(deg/s3)
+        * @return 错误码
+        */
+        public int LinArcFIRPlanningStart(double maxAccLin, double maxAccDeg, double maxJerkLin, double maxJerkDeg)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            try
+            {
+                int rtn = proxy.LinArcFIRPlanningStart(maxAccLin, maxAccDeg, maxJerkLin, maxJerkDeg);
+                if (log != null)
+                {
+                    log.LogInfo($"LinArcFIRPlanningStart:({rtn}");
+                }
+                return rtn;
+            }
+            catch
+            {
+                if (log != null)
+                {
+                    log.LogError($"RPC exception");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+        /**
+        * @brief 关闭LIN、ARC运动FIR滤波
+        * @return 错误码
+        */
+        public int LinArcFIRPlanningEnd()
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            try
+            {
+                int rtn = proxy.LinArcFIRPlanningEnd();
+                if (log != null)
+                {
+                    log.LogInfo($"LinArcFIRPlanningEnd:({rtn}");
+                }
+                return rtn;
+            }
+            catch
+            {
+                if (log != null)
+                {
+                    log.LogError($"RPC exception");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+        * @brief 根据点位信息计算工具坐标系
+        * @param [in] method 计算方法；0-四点法；1-六点法
+        * @param [in] pos 关节位置组，四点法时数组长度为4个，六点法时数组长度为6个
+        * @return 错误码
+        */
+
+        public int ComputeToolCoordWithPoints(int method, JointPos[] pos, ref DescPose coordRtn)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+                double[] param0 = new double[6];
+                double[] param1 = new double[6];
+                double[] param2 = new double[6];
+                double[] param3 = new double[6];
+                double[] param4 = new double[6];
+                double[] param5 = new double[6];
+
+                // 填充前4行的数据
+                for (int j = 0; j < 6; j++)
+                {
+                    param0[j] = pos[0].jPos[j];
+                    param1[j] = pos[1].jPos[j];
+                    param2[j] = pos[2].jPos[j];
+                    param3[j] = pos[3].jPos[j];
+                }
+
+                // 根据 method 填充最后两行的数据
+                if (method == 0)
+                {
+                    for (int j = 0; j < 6; j++)
+                    {
+                        param4[j] = 0.0;
+                        param5[j] = 0.0;
+                    }
+                }
+                else if (method == 1)
+                {
+                    for (int j = 0; j < 6; j++)
+                    {
+                        param4[j] = pos[4].jPos[j];
+                        param5[j] = pos[5].jPos[j];
+                    }
+                }
+                object[] result = proxy.ComputeToolCoordWithPoints(method, param0, param1, param2, param3, param4, param5);
+                if ((int)result[0] == 0)
+                {
+                    coordRtn.tran.x = (double)result[1];
+                    coordRtn.tran.y = (double)result[2];
+                    coordRtn.tran.z = (double)result[3];
+                    coordRtn.rpy.rx = (double)result[4];
+                    coordRtn.rpy.ry = (double)result[5];
+                    coordRtn.rpy.rz = (double)result[6];
+                }
+                if (log != null)
+                {
+                    log.LogInfo($"ComputeToolCoordWithPoints:({(int)result[0]}");
+                }
+                return (int)result[0];
+            }
+            catch
+            {
+                if (log != null)
+                {
+                    log.LogError($"RPC exception");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+        /**
+        * @brief 根据点位信息计算工件坐标系
+        * @param [in] method 计算方法；0：原点-x轴-z轴  1：原点-x轴-xy平面
+        * @param [in] pos 三个TCP位置组
+        * @param [in] refFrame 参考坐标系
+        * @return 错误码
+        */
+        public int ComputeWObjCoordWithPoints(int method, DescPose[] pos, int refFrame, ref DescPose coordRtn)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+                double[] param0 = new double[6];
+                double[] param1 = new double[6];
+                double[] param2 = new double[6];
+                param0[0] = pos[0].tran.x;
+                param0[1] = pos[0].tran.y;
+                param0[2] = pos[0].tran.z;
+                param0[3] = pos[0].rpy.rx;
+                param0[4] = pos[0].rpy.ry;
+                param0[5] = pos[0].rpy.rz;
+
+                // 填充 param1
+                param1[0] = pos[1].tran.x;
+                param1[1] = pos[1].tran.y;
+                param1[2] = pos[1].tran.z;
+                param1[3] = pos[1].rpy.rx;
+                param1[4] = pos[1].rpy.ry;
+                param1[5] = pos[1].rpy.rz;
+
+                // 填充 param2
+                param2[0] = pos[2].tran.x;
+                param2[1] = pos[2].tran.y;
+                param2[2] = pos[2].tran.z;
+                param2[3] = pos[2].rpy.rx;
+                param2[4] = pos[2].rpy.ry;
+                param2[5] = pos[2].rpy.rz;
+                object[] result = proxy.ComputeWObjCoordWithPoints(method, param0, param1, param2, refFrame);
+                if ((int)result[0] == 0)
+                {
+                    coordRtn.tran.x = (double)result[1];
+                    coordRtn.tran.y = (double)result[2];
+                    coordRtn.tran.z = (double)result[3];
+                    coordRtn.rpy.rx = (double)result[4];
+                    coordRtn.rpy.ry = (double)result[5];
+                    coordRtn.rpy.rz = (double)result[6];
+                }
+                if (log != null)
+                {
+                    log.LogInfo($"LinArcFIRPlanningEnd:({(int)result[0]}");
+                }
+                return (int)result[0];
+            }
+            catch
+            {
+                if (log != null)
+                {
+                    log.LogError($"RPC exception");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+        /**
+        * @brief 设置机器人焊接电弧意外中断检测参数
+        * @param [in] checkEnable 是否使能检测；0-不使能；1-使能
+        * @param [in] arcInterruptTimeLength 电弧中断确认时长(ms)
+        * @return 错误码
+        */
+        public int WeldingSetCheckArcInterruptionParam(int checkEnable, int arcInterruptTimeLength)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+                int rtn = proxy.WeldingSetCheckArcInterruptionParam(checkEnable, arcInterruptTimeLength);
+                if (log != null)
+                {
+                    log.LogInfo($"WeldingSetCheckArcInterruptionParam:({rtn}");
+                }
+                return rtn;
+            }
+            catch
+            {
+                if (log != null)
+                {
+                    log.LogError($"RPC exception");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+        /**
+        * @brief 获取机器人焊接电弧意外中断检测参数
+        * @param [out] checkEnable 是否使能检测；0-不使能；1-使能
+        * @param [out] arcInterruptTimeLength 电弧中断确认时长(ms)
+        * @return 错误码
+        */
+        public int WeldingGetCheckArcInterruptionParam(ref int checkEnable, ref int arcInterruptTimeLength)
+        {
+   
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            try
+            {
+                object[] rtn = proxy.WeldingGetCheckArcInterruptionParam();
+                checkEnable = (int)rtn[1];
+                arcInterruptTimeLength = (int)rtn[2];
+                if (log != null)
+                {
+                    log.LogInfo($"WeldingGetCheckArcInterruptionParam:({rtn}");
+                }
+                return (int)rtn[0];
+            }
+            catch
+            {
+                if (log != null)
+                {
+                    log.LogError($"RPC exception");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+        /**
+        * @brief 设置机器人焊接中断恢复参数
+        * @param[in] enable 是否使能焊接中断恢复
+        * @param[in] length 焊缝重叠距离(mm)
+        * @param[in] velocity 机器人回到再起弧点速度百分比(0-100)
+        * @param[in] moveType 机器人运动到再起弧点方式；0-LIN；1-PTP
+        * @return 错误码
+        */
+        public int WeldingSetReWeldAfterBreakOffParam(int enable, double length, double velocity, int moveType)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+                int rtn = proxy.WeldingSetReWeldAfterBreakOffParam(enable, length, velocity, moveType);
+                if (log != null)
+                {
+                    log.LogInfo($"WeldingSetReWeldAfterBreakOffParam:({rtn}");
+                }
+                return rtn;
+            }
+            catch
+            {
+                if (log != null)
+                {
+                    log.LogError($"RPC exception");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+        /**
+        * @brief 获取机器人焊接中断恢复参数
+        * @param [out] enable 是否使能焊接中断恢复
+        * @param [out] length 焊缝重叠距离(mm)
+        * @param [out] velocity 机器人回到再起弧点速度百分比(0-100)
+        * @param [out] moveType 机器人运动到再起弧点方式；0-LIN；1-PTP
+        * @return 错误码
+        */
+        public int WeldingGetReWeldAfterBreakOffParam(ref int enable, ref double length, ref double velocity, ref int moveType)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            try
+            {
+                object[] result = proxy.WeldingGetReWeldAfterBreakOffParam();
+                enable = (int)result[1];
+                length = (double)result[2];
+                velocity = (double)result[3];
+                moveType = (int)result[4];
+                if (log != null)
+                {
+                    log.LogInfo($"WeldingSetCheckArcInterruptionParam:({(int)result[0]}");
+                }
+                return (int)result[0];
+            }
+            catch
+            {
+                if (log != null)
+                {
+                    log.LogError($"RPC exception");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+        /**
+        * @brief 设置机器人焊接中断后恢复焊接
+        * @return 错误码
+        */
+        public int WeldingStartReWeldAfterBreakOff()
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+                int result = proxy.WeldingStartReWeldAfterBreakOff();
+                if (log != null)
+                {
+                    log.LogInfo($"WeldingSetCheckArcInterruptionParam:({result}");
+                }
+                return result;
+            }
+            catch
+            {
+                if (log != null)
+                {
+                    log.LogError($"RPC exception");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+        /**
+        * @brief 设置机器人焊接中断后退出焊接
+        * @return 错误码
+        */
+        public int WeldingAbortWeldAfterBreakOff()
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            try
+            {
+                int result = proxy.WeldingAbortWeldAfterBreakOff();
+                if (log != null)
+                {
+                    log.LogInfo($"WeldingSetCheckArcInterruptionParam:({result}");
+                }
+                return (int)result;
+            }
+            catch
+            {
+                if (log != null)
+                {
+                    log.LogError($"RPC exception");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        public int LaserSensorRecord(int status, int delayMode, int delayTime, int delayDisExAxisNum, double delayDis, double sensitivePara, double speed)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+                int result = proxy.LaserSensorRecord(status, delayMode, delayTime, delayDisExAxisNum, delayDis, sensitivePara, speed);
+                if (log != null)
+                {
+                    log.LogInfo($"WeldingSetCheckArcInterruptionParam:({result}");
+                }
+                return (int)result;
+            }
+            catch
+            {
+                if (log != null)
+                {
+                    log.LogError($"RPC exception");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
     }
