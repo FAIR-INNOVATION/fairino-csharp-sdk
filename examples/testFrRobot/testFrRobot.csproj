@@ -8,7 +8,7 @@
     <OutputType>WinExe</OutputType>
     <RootNamespace>testFrRobot</RootNamespace>
     <AssemblyName>testFrRobot</AssemblyName>
-    <TargetFrameworkVersion>v4.8.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
@@ -57,7 +57,8 @@
     <Reference Include="CookComputing.XmlRpcV2, Version=3.0.0.0, Culture=neutral, PublicKeyToken=a7d6e17aa302004d, processorArchitecture=MSIL">
       <HintPath>..\..\packages\xmlrpcnet.3.0.0.266\lib\net20\CookComputing.XmlRpcV2.dll</HintPath>
     </Reference>
-    <Reference Include="libfairino">
+    <Reference Include="libfairino, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\src\FRRobot\bin\Release\libfairino.dll</HintPath>
     </Reference>
     <Reference Include="System" />
@@ -73,6 +74,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Class1.cs" />
+    <Compile Include="RobotController.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>

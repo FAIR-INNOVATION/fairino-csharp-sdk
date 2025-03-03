@@ -86,19 +86,20 @@ namespace Fairino
                 {
                     if (log != null)
                     {
-                        
                         log.LogInfo("SDK Disconnected from robot, try to reconnect robot success! ");
                     }
-                    Console.WriteLine("SDK Disconnected from robot, try to reconnect robot success! ");
+                    //Console.WriteLine("SDK Disconnected from robot, try to reconnect robot success! ");
                     reconnState = false;
                     return true;
                 }
                 else
                 {
                     curReconnTimes++;
+                    //Console.WriteLine("reconnPeriod   重连时间" + reconnPeriod);
+                    //Console.WriteLine("reconnTimes    重连次数" + reconnTimes);
                     if (log != null)
                     {
-                       
+      
                         log.LogInfo($"SDK Disconnected from robot, try to reconnect robot failed! {curReconnTimes} / {reconnTimes}");
                     }
                     System.Threading.Thread.Sleep(reconnPeriod); // 等待重连间隔  
@@ -112,6 +113,8 @@ namespace Fairino
         {
             this.mSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             IPEndPoint iPEndPoint = new IPEndPoint(IPAddress.Parse(ip), port);
+
+ 
             try
             {
                 this.mSocket.Connect(iPEndPoint);

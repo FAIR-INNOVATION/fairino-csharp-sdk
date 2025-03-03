@@ -1858,6 +1858,7 @@ namespace fairino
 
         [XmlRpcMethod("LaserSensorRecord")]
         int LaserSensorRecord(int status, int delayMode, int delayTime, int delayDisExAxisNum, double delayDis, double sensitivePara, double speed);
+        
     }
     internal class RPCHandle
     {
