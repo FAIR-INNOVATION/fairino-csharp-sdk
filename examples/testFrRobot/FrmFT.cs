@@ -981,14 +981,14 @@ namespace testFrRobot
         private void button11_Click(object sender, EventArgs e)
         {
             // 示例使用
-      
+
         }
 
         private void button13_Click(object sender, EventArgs e)
         {
 
-            int config= 0;
-            int rtn =    0;
+            int config = 0;
+            int rtn = 0;
             int rrpc;
             bool isConnected = true; // 标记连接状态
 
@@ -1042,7 +1042,7 @@ namespace testFrRobot
                 {
                     rtn = robot.MoveJ(p3Joint, p3Desc, 0, 0, 100, 100, 100, exaxisPos, -1, 0, offdese);
                 }
- 
+
                 rtn = robot.GetInverseKin(0, p4Desc, -1, ref p4Joint);
                 if (p4Joint.jPos[0] != currentState.jt_cur_pos[0])
                 {
@@ -1050,7 +1050,7 @@ namespace testFrRobot
                 }
                 if (rtn != 0)
                 {
-                    Console.WriteLine("断开通信3::"+ rtn);
+                    Console.WriteLine("断开通信3::" + rtn);
                     isConnected = false; // 更新连接状态为断开
                 }
 
@@ -1070,35 +1070,36 @@ namespace testFrRobot
         private void ThreadMethod1()
         {
             bool isConnected = true; // 标记连接状态
-            while (isConnected) {
-                try
+            while (isConnected)
             {
-                var pkg = new ROBOT_STATE_PKG();
-                int error = robot.GetRobotRealTimeState(ref pkg);
-                if (error == 0)
+                try
                 {
-                    lock (stateLock)
+                    var pkg = new ROBOT_STATE_PKG();
+                    int error = robot.GetRobotRealTimeState(ref pkg);
+                    if (error == 0)
                     {
-                        currentState = pkg;
-                    }
-                    //bool reeor = robot.GetReconnectState();
-                    //Console.WriteLine($"重连状态 {reeor}");
+                        lock (stateLock)
+                        {
+                            currentState = pkg;
+                        }
+                        //bool reeor = robot.GetReconnectState();
+                        //Console.WriteLine($"重连状态 {reeor}");
                         //for (int i = 0; i < 6; i++)
                         //{
                         //    Console.WriteLine($"关节当前位置 {currentState.jt_cur_pos[i]}");
                         //}
                     }
-                else
-                {
-                    isConnected = false;
-                    Console.WriteLine($"通信异常_____________________________________________ :" +error);
+                    else
+                    {
+                        isConnected = false;
+                        Console.WriteLine($"通信异常_____________________________________________ :" + error);
+                    }
+                    Thread.Sleep(50); // 50ms更新间隔
                 }
-                Thread.Sleep(50); // 50ms更新间隔
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"状态更新异常 : {ex.Message}");
-            }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"状态更新异常 : {ex.Message}");
+                }
             }
         }
 
@@ -1107,7 +1108,8 @@ namespace testFrRobot
 
             var pkg = new ROBOT_STATE_PKG();
 
-            while (true){
+            while (true)
+            {
 
                 //bool reeor = robot.GetReconnectState();
                 //Console.WriteLine($"重连状态 {reeor}");
@@ -1138,7 +1140,44 @@ namespace testFrRobot
 
             int rrpc = robot.RPC("192.168.58.2"); //与控制箱建立连接
 
-            Console.WriteLine("rrpc"+ rrpc);
+            Console.WriteLine("rrpc" + rrpc);
+        }
+
+        private void button16_Click(object sender, EventArgs e)
+
+        {
+            int config = 0;
+            int rtn = 0;
+            bool isConnected = true; // 标记连接状态
+
+            DescPose p1Desc = new DescPose(-423.723, -145.123, 546.173, -161.851, -29.236, 150.755);
+            JointPos p1Joint = new JointPos(6.001, -103.515, 102.462, -122.922, -90.77, -59.761);
+
+            DescPose p2Desc = new DescPose(-458.433, -678.096, 290.075, -176.815, -6.699, -161.689);
+            JointPos p2Joint = new JointPos(48.905, -43.486, 53.364, -107.265, -90.655, -59.635);
+
+            ExaxisPos exaxisPos = new ExaxisPos(0, 0, 0, 0);
+            DescPose offdese = new DescPose(0, 0, 0, 0, 0, 0);
+
+            while (isConnected)
+            {
+
+                rtn = robot.MoveL(p1Joint, p1Desc, 0, 0, 100, 100, 100, -1, exaxisPos, 0, 0, offdese, 0, 10);
+
+                if (rtn != 0)
+                {
+                    Console.WriteLine("断开通信1::" + rtn);
+                    isConnected = false; // 更新连接状态为断开
+                }
+                rtn = robot.MoveL(p2Joint, p2Desc, 0, 0, 100, 100, 100, -1, exaxisPos, 0, 0, offdese, 0, 10);
+                if (rtn != 0)
+                {
+                    Console.WriteLine("断开通信2::" + rtn);
+                    isConnected = false; // 更新连接状态为断开
+                }
+                    Console.WriteLine("执行结果::" + rtn);
+                }
+
+            }
         }
     }
-}

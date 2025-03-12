@@ -1858,7 +1858,25 @@ namespace fairino
 
         [XmlRpcMethod("LaserSensorRecord")]
         int LaserSensorRecord(int status, int delayMode, int delayTime, int delayDisExAxisNum, double delayDis, double sensitivePara, double speed);
-        
+
+        [XmlRpcMethod("WeaveChangeStart")]
+        int WeaveChangeStart(int weaveNum);
+
+        [XmlRpcMethod("WeaveChangeEnd")]
+        int WeaveChangeEnd();
+
+        [XmlRpcMethod("LoadTrajectoryLA")]
+        int LoadTrajectoryLA(string name, int mode, double errorLim, int type, double precision, double vamx, double amax, double jmax);
+
+        [XmlRpcMethod("MoveTrajectoryLA")]
+        int MoveTrajectoryLA();
+
+        [XmlRpcMethod("CustomCollisionDetectionStart")]
+        int CustomCollisionDetectionStart(int flag, double[] jointDetectionThreshould, double[] tcpDetectionThreshould, int block);
+
+        [XmlRpcMethod("CustomCollisionDetectionEnd")]
+        int CustomCollisionDetectionEnd();
+
     }
     internal class RPCHandle
     {
