@@ -41,7 +41,7 @@ namespace fairino
     {
         ICallSupervisor proxy = null;
 
-        const string SDK_VERSION = "C#SDK V1.1.0";
+        const string SDK_VERSION = "C#SDK V1.1.1";
 
         private string robot_ip = "192.168.58.2";//机器人ip
         private int g_sock_com_err = (int)RobotError.ERR_SUCCESS;

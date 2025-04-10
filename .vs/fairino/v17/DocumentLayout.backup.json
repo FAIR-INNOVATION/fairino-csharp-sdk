@@ -63,20 +63,8 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 8,
+          "SelectedChildIndex": 7,
           "Children": [
-            {
-              "$type": "Document",
-              "DocumentIndex": 10,
-              "Title": "FRLog.cs",
-              "DocumentMoniker": "E:\\\u9879\u76EE\\sdk\\\u65B0\u5EFA\u6587\u4EF6\u5939\\fairino-csharp-sdk3.8.0\\src\\FRRobot\\FRLog.cs",
-              "RelativeDocumentMoniker": "src\\FRRobot\\FRLog.cs",
-              "ToolTip": "E:\\\u9879\u76EE\\sdk\\\u65B0\u5EFA\u6587\u4EF6\u5939\\fairino-csharp-sdk3.8.0\\src\\FRRobot\\FRLog.cs",
-              "RelativeToolTip": "src\\FRRobot\\FRLog.cs",
-              "ViewState": "AgIAAOwAAAAAAAAAAAAgwPgAAAAJAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-02-24T09:27:50.052Z"
-            },
             {
               "$type": "Document",
               "DocumentIndex": 2,
@@ -168,10 +156,22 @@
               "RelativeDocumentMoniker": "src\\FRRobot\\RPCHandle.cs",
               "ToolTip": "E:\\\u9879\u76EE\\sdk\\\u65B0\u5EFA\u6587\u4EF6\u5939\\fairino-csharp-sdk3.8.0\\src\\FRRobot\\RPCHandle.cs",
               "RelativeToolTip": "src\\FRRobot\\RPCHandle.cs",
-              "ViewState": "AgIAAD0HAAAAAAAAAAAowEgHAAAoAAAAAAAAAA==",
+              "ViewState": "AgIAAD0HAAAAAAAAAAAowEkHAAAdAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-02-24T09:16:43.272Z",
               "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "FRLog.cs",
+              "DocumentMoniker": "E:\\\u9879\u76EE\\sdk\\\u65B0\u5EFA\u6587\u4EF6\u5939\\fairino-csharp-sdk3.8.0\\src\\FRRobot\\FRLog.cs",
+              "RelativeDocumentMoniker": "src\\FRRobot\\FRLog.cs",
+              "ToolTip": "E:\\\u9879\u76EE\\sdk\\\u65B0\u5EFA\u6587\u4EF6\u5939\\fairino-csharp-sdk3.8.0\\src\\FRRobot\\FRLog.cs",
+              "RelativeToolTip": "src\\FRRobot\\FRLog.cs",
+              "ViewState": "AgIAAOwAAAAAAAAAAAAgwPgAAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-02-24T09:27:50.052Z"
             },
             {
               "$type": "Document",
