@@ -33,7 +33,7 @@ namespace testFrRobot
             string path = "D://log/";
             robot.LoggerInit(FrLogType.BUFFER, FrLogLevel.INFO, path, 5, 5);
             robot.SetLoggerLevel(FrLogLevel.INFO);
-            robot.SetReconnectParam(true, 50, 200);//断线重连参数
+            robot.SetReconnectParam(true, 100, 100);//断线重连参数
             rrpc =robot.RPC("192.168.58.2"); //与控制箱建立连接
              //20004端口接收超时时间
             //robot.SetReceivePortTimeout(40);
