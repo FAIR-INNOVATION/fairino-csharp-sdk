@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>fairino</RootNamespace>
     <AssemblyName>libfairino</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
     <TargetFrameworkProfile />
@@ -74,6 +74,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RobotTypes.cs" />
     <Compile Include="RPCHandle.cs" />
+    <Compile Include="StatusTCPClient.cs" />
     <Compile Include="TCPClient.cs" />
   </ItemGroup>
   <ItemGroup>

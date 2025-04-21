@@ -556,10 +556,12 @@ namespace fairino
 
         /**
         * @brief  设置末端负载重量
+        * @param  [in] loadNum 负载编号
         * @param  [in] weight  负载重量，单位kg
         * @return  错误码
-        */[XmlRpcMethod("SetLoadWeight")]
-        int SetLoadWeight(double weight);
+        */
+        [XmlRpcMethod("SetLoadWeight")]
+        int SetLoadWeight(int loadNum, double weight);
 
         /**
         * @brief  设置末端负载质心坐标
@@ -604,7 +606,7 @@ namespace fairino
         * @param  [in] strategy  0-报错停止，1-继续运行
         * @return  错误码	 
         */[XmlRpcMethod("SetCollisionStrategy")]
-        int SetCollisionStrategy(int strategy, int safeTime, int safeDistance, int[] safetyMargin);
+        int SetCollisionStrategy(int strategy, int safeTime, int safeDistance, int safeVel ,int[] safetyMargin);
 
         /**
         * @brief  设置正限位
@@ -1051,12 +1053,12 @@ namespace fairino
         object[] ComputePostPick(double[] desc_pos, double zlength, double zangle);
 
         /**
-        * @brief  配置力传感器
-        * @param  [in] company  力传感器厂商，17-坤维科技，19-航天十一院，20-ATI传感器，21-中科米点，22-伟航敏芯
-        * @param  [in] device  设备号，坤维(0-KWR75B)，航天十一院(0-MCS6A-200-4)，ATI(0-AXIA80-M8)，中科米点(0-MST2010)，伟航敏芯(0-WHC6L-YB-10A)
-        * @param  [in] softvesion  软件版本号，暂不使用，默认为0
-        * @param  [in] bus 设备挂在末端总线位置，暂不使用，默认为0
-        * @return  错误码
+	    * @brief  配置力传感器
+	    * @param  [in] company  力传感器厂商，17-坤维科技，19-航天十一院，20-ATI传感器，21-中科米点，22-伟航敏芯，23-NBIT，24-鑫精诚(XJC)，26-NSR
+	    * @param  [in] device  设备号，坤维(0-KWR75B)，航天十一院(0-MCS6A-200-4)，ATI(0-AXIA80-M8)，中科米点(0-MST2010)，伟航敏芯(0-WHC6L-YB-10A)，NBIT(0-XLH93003ACS)，鑫精诚XJC(0-XJC-6F-D82)，NSR(0-NSR-FTSensorA)
+	    * @param  [in] softvesion  软件版本号，暂不使用，默认为0
+	    * @param  [in] bus 设备挂在末端总线位置，暂不使用，默认为0
+	    * @return  错误码
         */[XmlRpcMethod("FT_SetConfig")]
         int FT_SetConfig(int company, int device, int softvesion, int bus);
 
@@ -1285,6 +1287,37 @@ namespace fairino
          */[XmlRpcMethod("GetSSHKeygen")]
         object[] GetSSHKeygen();
 
+        /**
+        * @brief 获取SSH公钥
+        * @param [out] keygen 公钥
+        * @return 错误码
+        */
+        [XmlRpcMethod("PtpFIRPlanningStart")]
+        int PtpFIRPlanningStart(double maxAcc);
+
+        /**
+        * @brief 关闭Ptp运动FIR滤波
+        * @return 错误码
+        */
+        [XmlRpcMethod("PtpFIRPlanningEnd")]
+        int PtpFIRPlanningEnd();
+        /**
+        * @brief 开始LIN、ARC运动FIR滤波
+        * @param [in] maxAccLin 线加速度极值(mm/s2)
+        * @param [in] maxAccDeg 角加速度极值(deg/s2)
+        * @param [in] maxJerkLin 线加加速度极值(mm/s3)
+        * @param [in] maxJerkDeg 角加加速度极值(deg/s3)
+        * @return 错误码
+        */
+        [XmlRpcMethod("LinArcFIRPlanningStart")]
+        int LinArcFIRPlanningStart(double maxAccLin, double maxAccDeg, double maxJerkLin, double maxJerkDeg);
+
+        /**
+        * @brief 关闭LIN、ARC运动FIR滤波
+        * @return 错误码
+        */
+        [XmlRpcMethod("LinArcFIRPlanningEnd")]
+        int LinArcFIRPlanningEnd();
         /**
         * @brief 下发SCP指令
         * @param [in] mode 0-上传（上位机->控制器），1-下载（控制器->上位机）
@@ -1797,6 +1830,53 @@ namespace fairino
 
         [XmlRpcMethod("SetSysServoBootMode")]
         int SetSysServoBootMode();
+
+        [XmlRpcMethod("WeldingAbortWeldAfterBreakOff")]
+        int WeldingAbortWeldAfterBreakOff();
+
+        [XmlRpcMethod("WeldingStartReWeldAfterBreakOff")]
+        int WeldingStartReWeldAfterBreakOff();
+
+        [XmlRpcMethod("WeldingGetReWeldAfterBreakOffParam")]
+        object[] WeldingGetReWeldAfterBreakOffParam();
+
+
+        [XmlRpcMethod("WeldingSetReWeldAfterBreakOffParam")]
+        int WeldingSetReWeldAfterBreakOffParam(int enable, double length, double velocity, int moveType);
+
+        [XmlRpcMethod("WeldingGetCheckArcInterruptionParam")]
+        object[] WeldingGetCheckArcInterruptionParam();
+
+        [XmlRpcMethod("WeldingSetCheckArcInterruptionParam")]
+        int WeldingSetCheckArcInterruptionParam(int checkEnable, int arcInterruptTimeLength);
+
+        [XmlRpcMethod("ComputeWObjCoordWithPoints")]
+        object[] ComputeWObjCoordWithPoints(int method, double[] param0, double[] param1, double[] param2, int refFrame);
+
+        [XmlRpcMethod("ComputeToolCoordWithPoints")]
+        object[] ComputeToolCoordWithPoints(int method, double[] param0, double[] param1, double[] param2, double[] param3, double[] param4,double[] param5);
+
+        [XmlRpcMethod("LaserSensorRecord")]
+        int LaserSensorRecord(int status, int delayMode, int delayTime, int delayDisExAxisNum, double delayDis, double sensitivePara, double speed);
+
+        [XmlRpcMethod("WeaveChangeStart")]
+        int WeaveChangeStart(int weaveNum);
+
+        [XmlRpcMethod("WeaveChangeEnd")]
+        int WeaveChangeEnd();
+
+        [XmlRpcMethod("LoadTrajectoryLA")]
+        int LoadTrajectoryLA(string name, int mode, double errorLim, int type, double precision, double vamx, double amax, double jmax);
+
+        [XmlRpcMethod("MoveTrajectoryLA")]
+        int MoveTrajectoryLA();
+
+        [XmlRpcMethod("CustomCollisionDetectionStart")]
+        int CustomCollisionDetectionStart(int flag, double[] jointDetectionThreshould, double[] tcpDetectionThreshould, int block);
+
+        [XmlRpcMethod("CustomCollisionDetectionEnd")]
+        int CustomCollisionDetectionEnd();
+
     }
     internal class RPCHandle
     {

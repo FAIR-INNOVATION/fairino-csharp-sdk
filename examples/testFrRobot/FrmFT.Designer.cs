@@ -47,6 +47,23 @@
             this.btnEndLuaDrag = new System.Windows.Forms.Button();
             this.btnEndGripper = new System.Windows.Forms.Button();
             this.btnUploadAxleLua = new System.Windows.Forms.Button();
+            this.btn_getGripper = new System.Windows.Forms.Button();
+            this.button4 = new System.Windows.Forms.Button();
+            this.button5 = new System.Windows.Forms.Button();
+            this.button6 = new System.Windows.Forms.Button();
+            this.button7 = new System.Windows.Forms.Button();
+            this.TestTCP = new System.Windows.Forms.Button();
+            this.TestTCP6 = new System.Windows.Forms.Button();
+            this.button10 = new System.Windows.Forms.Button();
+            this.ExtAxisLaserTracking = new System.Windows.Forms.Button();
+            this.button8 = new System.Windows.Forms.Button();
+            this.button9 = new System.Windows.Forms.Button();
+            this.button11 = new System.Windows.Forms.Button();
+            this.button12 = new System.Windows.Forms.Button();
+            this.button13 = new System.Windows.Forms.Button();
+            this.button14 = new System.Windows.Forms.Button();
+            this.button15 = new System.Windows.Forms.Button();
+            this.button16 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // btnDragStart
@@ -191,7 +208,7 @@
             // 
             // button3
             // 
-            this.button3.Location = new System.Drawing.Point(582, 422);
+            this.button3.Location = new System.Drawing.Point(319, 264);
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(200, 88);
             this.button3.TabIndex = 9;
@@ -239,11 +256,198 @@
             this.btnUploadAxleLua.UseVisualStyleBackColor = true;
             this.btnUploadAxleLua.Click += new System.EventHandler(this.btnUploadAxleLua_Click);
             // 
+            // btn_getGripper
+            // 
+            this.btn_getGripper.Location = new System.Drawing.Point(771, 433);
+            this.btn_getGripper.Name = "btn_getGripper";
+            this.btn_getGripper.Size = new System.Drawing.Size(181, 47);
+            this.btn_getGripper.TabIndex = 14;
+            this.btn_getGripper.Text = "奇异保护";
+            this.btn_getGripper.UseVisualStyleBackColor = true;
+            this.btn_getGripper.Click += new System.EventHandler(this.btn_getGripper_Click);
+            // 
+            // button4
+            // 
+            this.button4.Location = new System.Drawing.Point(771, 553);
+            this.button4.Name = "button4";
+            this.button4.Size = new System.Drawing.Size(152, 39);
+            this.button4.TabIndex = 15;
+            this.button4.Text = "滤波";
+            this.button4.UseVisualStyleBackColor = true;
+            this.button4.Click += new System.EventHandler(this.button4_Click);
+            // 
+            // button5
+            // 
+            this.button5.Location = new System.Drawing.Point(771, 504);
+            this.button5.Name = "button5";
+            this.button5.Size = new System.Drawing.Size(152, 31);
+            this.button5.TabIndex = 16;
+            this.button5.Text = "夹爪状态";
+            this.button5.UseVisualStyleBackColor = true;
+            this.button5.Click += new System.EventHandler(this.button5_Click);
+            // 
+            // button6
+            // 
+            this.button6.Location = new System.Drawing.Point(771, 623);
+            this.button6.Name = "button6";
+            this.button6.Size = new System.Drawing.Size(152, 38);
+            this.button6.TabIndex = 17;
+            this.button6.Text = "碰撞守护";
+            this.button6.UseVisualStyleBackColor = true;
+            this.button6.Click += new System.EventHandler(this.button6_Click);
+            // 
+            // button7
+            // 
+            this.button7.Location = new System.Drawing.Point(998, 292);
+            this.button7.Name = "button7";
+            this.button7.Size = new System.Drawing.Size(116, 33);
+            this.button7.TabIndex = 18;
+            this.button7.Text = "TestReWeld";
+            this.button7.UseVisualStyleBackColor = true;
+            this.button7.Click += new System.EventHandler(this.button7_Click);
+            // 
+            // TestTCP
+            // 
+            this.TestTCP.Location = new System.Drawing.Point(998, 362);
+            this.TestTCP.Name = "TestTCP";
+            this.TestTCP.Size = new System.Drawing.Size(116, 33);
+            this.TestTCP.TabIndex = 19;
+            this.TestTCP.Text = "TestTCP";
+            this.TestTCP.UseVisualStyleBackColor = true;
+            this.TestTCP.Click += new System.EventHandler(this.TestTCP_Click);
+            // 
+            // TestTCP6
+            // 
+            this.TestTCP6.Location = new System.Drawing.Point(998, 423);
+            this.TestTCP6.Name = "TestTCP6";
+            this.TestTCP6.Size = new System.Drawing.Size(116, 33);
+            this.TestTCP6.TabIndex = 20;
+            this.TestTCP6.Text = "TestTCP6";
+            this.TestTCP6.UseVisualStyleBackColor = true;
+            this.TestTCP6.Click += new System.EventHandler(this.TestTCP6_Click);
+            // 
+            // button10
+            // 
+            this.button10.Location = new System.Drawing.Point(998, 480);
+            this.button10.Name = "button10";
+            this.button10.Size = new System.Drawing.Size(116, 33);
+            this.button10.TabIndex = 21;
+            this.button10.Text = "稳定性";
+            this.button10.UseVisualStyleBackColor = true;
+            this.button10.Click += new System.EventHandler(this.button10_Click);
+            // 
+            // ExtAxisLaserTracking
+            // 
+            this.ExtAxisLaserTracking.Location = new System.Drawing.Point(998, 519);
+            this.ExtAxisLaserTracking.Name = "ExtAxisLaserTracking";
+            this.ExtAxisLaserTracking.Size = new System.Drawing.Size(116, 25);
+            this.ExtAxisLaserTracking.TabIndex = 22;
+            this.ExtAxisLaserTracking.Text = "ExtAxisLaserTracking";
+            this.ExtAxisLaserTracking.UseVisualStyleBackColor = true;
+            this.ExtAxisLaserTracking.Click += new System.EventHandler(this.ExtAxisLaserTracking_Click);
+            // 
+            // button8
+            // 
+            this.button8.Location = new System.Drawing.Point(1014, 553);
+            this.button8.Name = "button8";
+            this.button8.Size = new System.Drawing.Size(75, 23);
+            this.button8.TabIndex = 23;
+            this.button8.Text = "button8";
+            this.button8.UseVisualStyleBackColor = true;
+            this.button8.Click += new System.EventHandler(this.button8_Click);
+            // 
+            // button9
+            // 
+            this.button9.Location = new System.Drawing.Point(998, 208);
+            this.button9.Name = "button9";
+            this.button9.Size = new System.Drawing.Size(110, 47);
+            this.button9.TabIndex = 24;
+            this.button9.Text = "稳定性";
+            this.button9.UseVisualStyleBackColor = true;
+            this.button9.Click += new System.EventHandler(this.button9_Click);
+            // 
+            // button11
+            // 
+            this.button11.Location = new System.Drawing.Point(998, 124);
+            this.button11.Name = "button11";
+            this.button11.Size = new System.Drawing.Size(110, 47);
+            this.button11.TabIndex = 25;
+            this.button11.Text = "HW";
+            this.button11.UseVisualStyleBackColor = true;
+            this.button11.Click += new System.EventHandler(this.button11_Click);
+            // 
+            // button12
+            // 
+            this.button12.Location = new System.Drawing.Point(324, 445);
+            this.button12.Name = "button12";
+            this.button12.Size = new System.Drawing.Size(133, 35);
+            this.button12.TabIndex = 26;
+            this.button12.Text = "断开连接";
+            this.button12.UseVisualStyleBackColor = true;
+            this.button12.Click += new System.EventHandler(this.button12_Click);
+            // 
+            // button13
+            // 
+            this.button13.Location = new System.Drawing.Point(324, 555);
+            this.button13.Name = "button13";
+            this.button13.Size = new System.Drawing.Size(133, 35);
+            this.button13.TabIndex = 27;
+            this.button13.Text = "运动";
+            this.button13.UseVisualStyleBackColor = true;
+            this.button13.Click += new System.EventHandler(this.button13_Click);
+            // 
+            // button14
+            // 
+            this.button14.Location = new System.Drawing.Point(324, 386);
+            this.button14.Name = "button14";
+            this.button14.Size = new System.Drawing.Size(133, 35);
+            this.button14.TabIndex = 28;
+            this.button14.Text = "获取坐标";
+            this.button14.UseVisualStyleBackColor = true;
+            this.button14.Click += new System.EventHandler(this.button14_Click);
+            // 
+            // button15
+            // 
+            this.button15.Location = new System.Drawing.Point(324, 500);
+            this.button15.Name = "button15";
+            this.button15.Size = new System.Drawing.Size(133, 35);
+            this.button15.TabIndex = 29;
+            this.button15.Text = "错误";
+            this.button15.UseVisualStyleBackColor = true;
+            this.button15.Click += new System.EventHandler(this.button15_Click);
+            // 
+            // button16
+            // 
+            this.button16.Location = new System.Drawing.Point(528, 423);
+            this.button16.Name = "button16";
+            this.button16.Size = new System.Drawing.Size(201, 112);
+            this.button16.TabIndex = 30;
+            this.button16.Text = "断线重连";
+            this.button16.UseVisualStyleBackColor = true;
+            this.button16.Click += new System.EventHandler(this.button16_Click);
+            // 
             // FrmFT
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1142, 718);
+            this.Controls.Add(this.button16);
+            this.Controls.Add(this.button15);
+            this.Controls.Add(this.button14);
+            this.Controls.Add(this.button13);
+            this.Controls.Add(this.button12);
+            this.Controls.Add(this.button11);
+            this.Controls.Add(this.button9);
+            this.Controls.Add(this.button8);
+            this.Controls.Add(this.ExtAxisLaserTracking);
+            this.Controls.Add(this.button10);
+            this.Controls.Add(this.TestTCP6);
+            this.Controls.Add(this.TestTCP);
+            this.Controls.Add(this.button7);
+            this.Controls.Add(this.button6);
+            this.Controls.Add(this.button5);
+            this.Controls.Add(this.button4);
+            this.Controls.Add(this.btn_getGripper);
             this.Controls.Add(this.btnUploadAxleLua);
             this.Controls.Add(this.btnEndGripper);
             this.Controls.Add(this.btnEndLuaDrag);
@@ -291,5 +495,22 @@
         private System.Windows.Forms.Button btnEndLuaDrag;
         private System.Windows.Forms.Button btnEndGripper;
         private System.Windows.Forms.Button btnUploadAxleLua;
+        private System.Windows.Forms.Button btn_getGripper;
+        private System.Windows.Forms.Button button4;
+        private System.Windows.Forms.Button button5;
+        private System.Windows.Forms.Button button6;
+        private System.Windows.Forms.Button button7;
+        private System.Windows.Forms.Button TestTCP;
+        private System.Windows.Forms.Button TestTCP6;
+        private System.Windows.Forms.Button button10;
+        private System.Windows.Forms.Button ExtAxisLaserTracking;
+        private System.Windows.Forms.Button button8;
+        private System.Windows.Forms.Button button9;
+        private System.Windows.Forms.Button button11;
+        private System.Windows.Forms.Button button12;
+        private System.Windows.Forms.Button button13;
+        private System.Windows.Forms.Button button14;
+        private System.Windows.Forms.Button button15;
+        private System.Windows.Forms.Button button16;
     }
 }

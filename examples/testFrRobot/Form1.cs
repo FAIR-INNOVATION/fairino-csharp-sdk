@@ -23,15 +23,21 @@ namespace testFrRobot
     {
 
         Robot robot;
+        int rrpc ;
+
+
         public Form1()
         {
             InitializeComponent();
             robot = new Robot();//实例化机器人对象
-            robot.RPC("192.168.58.2"); //与控制箱建立连接
-            robot.SetReconnectParam(true, 100, 200);//断线重连参数
             string path = "D://log/";
             robot.LoggerInit(FrLogType.BUFFER, FrLogLevel.INFO, path, 5, 5);
             robot.SetLoggerLevel(FrLogLevel.INFO);
+            robot.SetReconnectParam(true, 100, 100);//断线重连参数
+            rrpc =robot.RPC("192.168.58.2"); //与控制箱建立连接
+             //20004端口接收超时时间
+            //robot.SetReceivePortTimeout(40);
+
         }
 
         private void btnStandard_Click(object sender, EventArgs e)
@@ -40,36 +46,15 @@ namespace testFrRobot
             string version = "";
             byte state = 0;
             int num = 0;
-       
 
+            //int rrpc=robot.RPC("192.168.58.2"); //与控制箱建立连接
             num++;
             robot.GetSDKVersion(ref version);
-            Console.WriteLine($"SDK version : {version}");
+            Console.WriteLine($"rrpc : {rrpc}");
 
 
             int rtn = robot.GetControllerIP(ref ip);
             Console.WriteLine($"controller ip : {ip}  rtn  {rtn} num {num}");
-
-
-            //robot.Mode(1);
-            //Thread.Sleep(1000);
-            //robot.DragTeachSwitch(1);
-            //rtn = robot.IsInDragTeach(ref state);
-            //Console.WriteLine($"drag state : {state}");
-            //Thread.Sleep(3000);
-            //robot.DragTeachSwitch(0);
-            //Thread.Sleep(1000);
-            //robot.IsInDragTeach(ref state);
-            //Console.WriteLine($"drag state : {state}");
-            //Thread.Sleep(3000);
-
-            //robot.RobotEnable(0);
-            //Thread.Sleep(3000);
-            //robot.RobotEnable(1);
-
-            //robot.Mode(0);
-            //Thread.Sleep(1000);
-            //robot.Mode(1);
         }
 
         private void btnJOG_Click(object sender, EventArgs e)
@@ -636,7 +621,7 @@ namespace testFrRobot
                 Console.WriteLine($"sys value {i} : {value}");
             }
 
-            int loadrtn = robot.SetLoadWeight(2.5f);
+            int loadrtn = robot.SetLoadWeight(1,2.5f);
             Console.WriteLine($"load rtn: {loadrtn}");
             coord.x = 3.0;
             coord.y = 4.0;
@@ -709,7 +694,7 @@ namespace testFrRobot
             robot.SetAnticollision(mode, level1, config);
             mode = 1;
             robot.SetAnticollision(mode, level2, config);
-            robot.SetCollisionStrategy(2,1000,20, safetyMargin);
+            robot.SetCollisionStrategy(2,1000,20, 150,safetyMargin);
 
             double[] plimit = new double[6] { 170.0, 80.0, 150.0, 80.0, 170.0, 160.0 };
             int rtn = robot.SetLimitPositive(plimit);
@@ -982,7 +967,7 @@ namespace testFrRobot
             robot.FT_Activate(act);
             Thread.Sleep(1000);
 
-            robot.SetLoadWeight(0.0f);
+            robot.SetLoadWeight(1,0.0f);
             Thread.Sleep(1000);
             DescTran coord = new DescTran(0, 0, 0);
           

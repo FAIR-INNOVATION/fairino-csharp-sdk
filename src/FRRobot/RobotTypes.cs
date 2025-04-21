@@ -26,7 +26,15 @@ namespace fairino
             jPos = new double[6] { j1, j2, j3, j4, j5, j6};
         }
     }
-
+    /**
+    * @brief 焊接中断状态
+    */
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
+    public struct WELDING_BREAKOFF_STATE
+    {
+        public byte breakOffState;  // 焊接中断状态
+        public byte weldArcState;   // 焊接电弧中断状态
+    }
     /**
     * @brief 笛卡尔空间位置数据类型
     */
@@ -280,6 +288,13 @@ namespace fairino
         public ROBOT_TIME robotTime;     //机器人系统时间
         public int softwareUpgradeState; //软件升级状态  0-空闲中或上传升级包中；1~100：升级完成百分比；-1:升级软件失败；-2：校验失败；-3：版本校验失败；-4：解压失败；-5：用户配置升级失败；-6：外设配置升级失败；-7：扩展轴配置升级失败；-8：机器人配置升级失败；-9：DH参数配置升级失败
         public UInt16 endLuaErrCode;    //末端LUA运行状态 
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
+        public  UInt16[] cl_analog_output;  //控制箱模拟量输出				  Control box analog output
+        public UInt16 tl_analog_output;     //工具模拟量输出				  Tool analog output
+        public float gripperRotNum;           //旋转夹爪当前旋转圈数			  The current number of turns of the rotating clamp
+        public byte gripperRotSpeed;       //旋转夹爪当前旋转速度百分比	  Percentage of the current rotation speed of the rotary clamp
+        public byte gripperRotTorque;	   //旋转夹爪当前旋转力矩百分比	  Percentage of the current rotating torque of the rotating clamp
+        public WELDING_BREAKOFF_STATE weldingBreakOffState;
         public UInt16 check_sum;         /* 和校验 */                  // + 2 = 609
     }
 

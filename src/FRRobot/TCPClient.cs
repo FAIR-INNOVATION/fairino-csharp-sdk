@@ -16,7 +16,7 @@ namespace Fairino
         public Socket mSocket;
         private NetworkStream mNetworkStream;
         private bool isConnected = false;
-        private bool reconnEnable = true;  // 重连使能  
+        private bool reconnEnable = false;  // 重连使能  
         private int reconnTimes = 100;     // 重连次数  
         private int curReconnTimes = 0;    // 当前重连次数  
         private int reconnPeriod = 200;    // 重连时间间隔（毫秒）  
@@ -46,7 +46,7 @@ namespace Fairino
             }
             catch (Exception)
             {
-                return 0;
+                return -1;
             }
             return 0;
         }
@@ -68,12 +68,17 @@ namespace Fairino
         {
             curReconnTimes = 0;
             reconnState = true;
+            //if (reconnEnable==true)
+            //{
+            //    Console.WriteLine("reconnEnable" + reconnEnable);
+            //}
             if (!reconnEnable)
             {
+               
                 reconnState = false;
                 return false;
             }
-
+     
             while (curReconnTimes < reconnTimes)
             {
                 Close();
@@ -81,20 +86,21 @@ namespace Fairino
                 {
                     if (log != null)
                     {
-                        
-                        log.LogInfo("SDK Disconnected from robot, try to reconnect robot success! ");
+                        //log.LogInfo("SDK Disconnected from robot, try to reconnect robot success! ");
                     }
-                    Console.WriteLine("SDK Disconnected from robot, try to reconnect robot success! ");
+             
                     reconnState = false;
                     return true;
                 }
                 else
                 {
                     curReconnTimes++;
+                    //Console.WriteLine("reconnPeriod   重连时间" + reconnPeriod);
+                    //Console.WriteLine("reconnTimes    重连次数" + reconnTimes);
                     if (log != null)
                     {
-                       
-                        log.LogInfo($"SDK Disconnected from robot, try to reconnect robot failed! {curReconnTimes} / {reconnTimes}");
+      
+                        //log.LogInfo($"SDK Disconnected from robot, try to reconnect robot failed999! {curReconnTimes} / {reconnTimes}");
                     }
                     System.Threading.Thread.Sleep(reconnPeriod); // 等待重连间隔  
                 }
@@ -107,10 +113,12 @@ namespace Fairino
         {
             this.mSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             IPEndPoint iPEndPoint = new IPEndPoint(IPAddress.Parse(ip), port);
+
+ 
             try
             {
                 this.mSocket.Connect(iPEndPoint);
-                Console.WriteLine("连接成功");
+                //Console.WriteLine("连接成功");
                 //mNetworkStream = new NetworkStream(mSocket);
                 //mSocket.NoDelay = true;
                 //mSocket.ReceiveTimeout = reconnPeriod;
