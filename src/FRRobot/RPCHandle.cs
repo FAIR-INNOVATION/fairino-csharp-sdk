@@ -1262,8 +1262,9 @@ namespace fairino
         * @brief 传动带参数配置
         * @param [in] 
         * @return 错误码
-        */[XmlRpcMethod("ConveyorSetParam")]
-        int ConveyorSetParam(double[] param);
+        */
+        [XmlRpcMethod("ConveyorSetParam")]
+        int ConveyorSetParam(double[] param, int followType, int startDis, int endDis);
 
         /**
         * @brief 传动带抓取点补偿
@@ -1387,7 +1388,7 @@ namespace fairino
         int WeldingSetVoltage(int ioType, double voltage, int AOIndex, int blend);
 
         [XmlRpcMethod("WeaveSetPara")]
-        int WeaveSetPara(int weaveNum, int weaveType, double weaveFrequency, int weaveIncStayTime, double weaveRange, double weaveLeftRange, double weaveRightRange, int additionalStayTime, int weaveLeftStayTime, int weaveRightStayTime, int weaveCircleRadio, int weaveStationary, double weaveYawAngle);
+        int WeaveSetPara(int weaveNum, int weaveType, double weaveFrequency, int weaveIncStayTime, double weaveRange, double weaveLeftRange, double weaveRightRange, int additionalStayTime, int weaveLeftStayTime, int weaveRightStayTime, int weaveCircleRadio, int weaveStationary, double weaveYawAngle, double weaveRotAngle);
 
         [XmlRpcMethod("WeaveOnlineSetPara")]
         int WeaveOnlineSetPara(int weaveNum, int weaveType, double weaveFrequency, int weaveIncStayTime, double weaveRange, int weaveLeftStayTime, int weaveRightStayTime, int weaveCircleRadio, int weaveStationary);
@@ -1614,13 +1615,13 @@ namespace fairino
         int SetPointToDatabase(string varName, double[] pos);
 
         [XmlRpcMethod("ArcWeldTraceControl")]
-        int ArcWeldTraceControl(int flag, double delaytime, int isLeftRight, double[] paramLR, int isUpLow, double[] paramUD, int axisSelect, int referenceType, double referSampleStartUd, double referSampleCountUd, double referenceCurrent);
+        int ArcWeldTraceControl(int flag, double delaytime, int isLeftRight, double[] paramLR, int isUpLow, double[] paramUD, int axisSelect, int referenceType, double referSampleStartUd, double referSampleCountUd, double referenceCurrent, int offsetType, int offsetParameter);
 
         [XmlRpcMethod("ArcWeldTraceExtAIChannelConfig")]
         int ArcWeldTraceExtAIChannelConfig(int channel);
 
         [XmlRpcMethod("EndForceDragControl")]
-        int EndForceDragControl(int status, int asaptiveFlag, int interfereDragFlag, double[] M, double[] B, double[] K, double[] F, double Fmax, double Vmax);
+        int EndForceDragControl(int status, int asaptiveFlag, int interfereDragFlag, int ingularityConstraintsFlag, double[] M, double[] B, double[] K, double[] F, double Fmax, double Vmax);
 
         [XmlRpcMethod("SetForceSensorDragAutoFlag")]
         int SetForceSensorDragAutoFlag(int status);
@@ -1754,7 +1755,7 @@ namespace fairino
         int ArcWeldTraceReplayEnd();
 
         [XmlRpcMethod("MultilayerOffsetTrsfToBase")]
-        object[] MultilayerOffsetTrsfToBase(double pointOX, double pointOY, double pointOZ, double pointXX, double pointXY, double pointXZ, double pointZX, double pointZY, double pointZZ, double dx, double dy, double db);
+        object[] MultilayerOffsetTrsfToBase(double pointOX, double pointOY, double pointOZ, double pointXX, double pointXY, double pointXZ, double pointZX, double pointZY, double pointZZ, double dx, double dz, double dry);
 
         [XmlRpcMethod("AngularSpeedStart")]
         int AngularSpeedStart(int ratio);
@@ -1877,6 +1878,46 @@ namespace fairino
         [XmlRpcMethod("CustomCollisionDetectionEnd")]
         int CustomCollisionDetectionEnd();
 
+
+        [XmlRpcMethod("AccSmoothStart")]
+        int AccSmoothStart(int saveFlag);
+
+        [XmlRpcMethod("AccSmoothEnd")]
+        int AccSmoothEnd(int saveFlag);
+
+        [XmlRpcMethod("RbLogDownloadPrepare")]
+        int RbLogDownloadPrepare();
+
+        [XmlRpcMethod("AllDataSourceDownloadPrepare")]
+        int AllDataSourceDownloadPrepare();
+
+        [XmlRpcMethod("DataPackageDownloadPrepare")]
+        int DataPackageDownloadPrepare();
+
+        [XmlRpcMethod("GetRobotSN")]
+        object[] GetRobotSN();
+
+        [XmlRpcMethod("ShutDownRobotOS")]
+        int ShutDownRobotOS();
+
+        [XmlRpcMethod("ConveryComDetect")]
+        int ConveryComDetect(int timeout);
+
+
+        [XmlRpcMethod("ConveyorComDetectTrigger")]
+        int ConveyorComDetectTrigger();
+
+        [XmlRpcMethod("ArcWeldTraceAIChannelCurrent")]
+        int ArcWeldTraceAIChannelCurrent(int channel);
+
+        [XmlRpcMethod("ArcWeldTraceAIChannelVoltage")]
+        int ArcWeldTraceAIChannelVoltage(int channel);
+
+        [XmlRpcMethod("ArcWeldTraceCurrentPara")]
+        int ArcWeldTraceCurrentPara(float AILow, float AIHigh, float currentLow, float currentHigh);
+
+        [XmlRpcMethod("ArcWeldTraceVoltagePara")]
+        int ArcWeldTraceVoltagePara(float AILow, float AIHigh, float voltageLow, float voltageHigh);
     }
     internal class RPCHandle
     {

@@ -60,10 +60,6 @@
             this.button9 = new System.Windows.Forms.Button();
             this.button11 = new System.Windows.Forms.Button();
             this.button12 = new System.Windows.Forms.Button();
-            this.button13 = new System.Windows.Forms.Button();
-            this.button14 = new System.Windows.Forms.Button();
-            this.button15 = new System.Windows.Forms.Button();
-            this.button16 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // btnDragStart
@@ -208,7 +204,7 @@
             // 
             // button3
             // 
-            this.button3.Location = new System.Drawing.Point(319, 264);
+            this.button3.Location = new System.Drawing.Point(262, 368);
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(200, 88);
             this.button3.TabIndex = 9;
@@ -338,7 +334,7 @@
             // 
             // ExtAxisLaserTracking
             // 
-            this.ExtAxisLaserTracking.Location = new System.Drawing.Point(998, 519);
+            this.ExtAxisLaserTracking.Location = new System.Drawing.Point(998, 553);
             this.ExtAxisLaserTracking.Name = "ExtAxisLaserTracking";
             this.ExtAxisLaserTracking.Size = new System.Drawing.Size(116, 25);
             this.ExtAxisLaserTracking.TabIndex = 22;
@@ -348,93 +344,49 @@
             // 
             // button8
             // 
-            this.button8.Location = new System.Drawing.Point(1014, 553);
+            this.button8.Location = new System.Drawing.Point(998, 601);
             this.button8.Name = "button8";
-            this.button8.Size = new System.Drawing.Size(75, 23);
+            this.button8.Size = new System.Drawing.Size(116, 25);
             this.button8.TabIndex = 23;
-            this.button8.Text = "button8";
+            this.button8.Text = "轨迹前瞻";
             this.button8.UseVisualStyleBackColor = true;
             this.button8.Click += new System.EventHandler(this.button8_Click);
             // 
             // button9
             // 
-            this.button9.Location = new System.Drawing.Point(998, 208);
+            this.button9.Location = new System.Drawing.Point(531, 368);
             this.button9.Name = "button9";
-            this.button9.Size = new System.Drawing.Size(110, 47);
+            this.button9.Size = new System.Drawing.Size(157, 88);
             this.button9.TabIndex = 24;
-            this.button9.Text = "稳定性";
+            this.button9.Text = "自定义碰撞检测阈值";
             this.button9.UseVisualStyleBackColor = true;
             this.button9.Click += new System.EventHandler(this.button9_Click);
             // 
             // button11
             // 
-            this.button11.Location = new System.Drawing.Point(998, 124);
+            this.button11.Location = new System.Drawing.Point(286, 480);
             this.button11.Name = "button11";
-            this.button11.Size = new System.Drawing.Size(110, 47);
+            this.button11.Size = new System.Drawing.Size(157, 88);
             this.button11.TabIndex = 25;
-            this.button11.Text = "HW";
+            this.button11.Text = "状态反馈";
             this.button11.UseVisualStyleBackColor = true;
             this.button11.Click += new System.EventHandler(this.button11_Click);
             // 
             // button12
             // 
-            this.button12.Location = new System.Drawing.Point(324, 445);
+            this.button12.Location = new System.Drawing.Point(531, 480);
             this.button12.Name = "button12";
-            this.button12.Size = new System.Drawing.Size(133, 35);
+            this.button12.Size = new System.Drawing.Size(157, 88);
             this.button12.TabIndex = 26;
-            this.button12.Text = "断开连接";
+            this.button12.Text = "清除错误";
             this.button12.UseVisualStyleBackColor = true;
             this.button12.Click += new System.EventHandler(this.button12_Click);
-            // 
-            // button13
-            // 
-            this.button13.Location = new System.Drawing.Point(324, 555);
-            this.button13.Name = "button13";
-            this.button13.Size = new System.Drawing.Size(133, 35);
-            this.button13.TabIndex = 27;
-            this.button13.Text = "运动";
-            this.button13.UseVisualStyleBackColor = true;
-            this.button13.Click += new System.EventHandler(this.button13_Click);
-            // 
-            // button14
-            // 
-            this.button14.Location = new System.Drawing.Point(324, 386);
-            this.button14.Name = "button14";
-            this.button14.Size = new System.Drawing.Size(133, 35);
-            this.button14.TabIndex = 28;
-            this.button14.Text = "获取坐标";
-            this.button14.UseVisualStyleBackColor = true;
-            this.button14.Click += new System.EventHandler(this.button14_Click);
-            // 
-            // button15
-            // 
-            this.button15.Location = new System.Drawing.Point(324, 500);
-            this.button15.Name = "button15";
-            this.button15.Size = new System.Drawing.Size(133, 35);
-            this.button15.TabIndex = 29;
-            this.button15.Text = "错误";
-            this.button15.UseVisualStyleBackColor = true;
-            this.button15.Click += new System.EventHandler(this.button15_Click);
-            // 
-            // button16
-            // 
-            this.button16.Location = new System.Drawing.Point(528, 423);
-            this.button16.Name = "button16";
-            this.button16.Size = new System.Drawing.Size(201, 112);
-            this.button16.TabIndex = 30;
-            this.button16.Text = "断线重连";
-            this.button16.UseVisualStyleBackColor = true;
-            this.button16.Click += new System.EventHandler(this.button16_Click);
             // 
             // FrmFT
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1142, 718);
-            this.Controls.Add(this.button16);
-            this.Controls.Add(this.button15);
-            this.Controls.Add(this.button14);
-            this.Controls.Add(this.button13);
             this.Controls.Add(this.button12);
             this.Controls.Add(this.button11);
             this.Controls.Add(this.button9);
@@ -508,9 +460,5 @@
         private System.Windows.Forms.Button button9;
         private System.Windows.Forms.Button button11;
         private System.Windows.Forms.Button button12;
-        private System.Windows.Forms.Button button13;
-        private System.Windows.Forms.Button button14;
-        private System.Windows.Forms.Button button15;
-        private System.Windows.Forms.Button button16;
     }
 }
