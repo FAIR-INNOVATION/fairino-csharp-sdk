@@ -134,6 +134,7 @@
             this.btnFTtest = new System.Windows.Forms.Button();
             this.btnUpgrade = new System.Windows.Forms.Button();
             this.btnGetSysTime = new System.Windows.Forms.Button();
+            this.button1 = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.groupStandard.SuspendLayout();
             this.groupMove.SuspendLayout();
@@ -1260,9 +1261,20 @@
             this.btnGetSysTime.UseVisualStyleBackColor = true;
             this.btnGetSysTime.Click += new System.EventHandler(this.btnGetSysTime_Click);
             // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(1254, 537);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(66, 107);
+            this.button1.TabIndex = 86;
+            this.button1.Text = "测试";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
             // Form1
             // 
             this.ClientSize = new System.Drawing.Size(1561, 746);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.btnGetSysTime);
             this.Controls.Add(this.btnUpgrade);
             this.Controls.Add(this.btnFTtest);
@@ -1427,6 +1439,7 @@
         private System.Windows.Forms.Button btnFTtest;
         private System.Windows.Forms.Button btnUpgrade;
         private System.Windows.Forms.Button btnGetSysTime;
+        private System.Windows.Forms.Button button1;
     }
 }
 

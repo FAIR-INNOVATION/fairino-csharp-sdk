@@ -15,6 +15,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using fairino;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using System.Diagnostics;
 
 
 namespace testFrRobot
@@ -24,20 +25,16 @@ namespace testFrRobot
 
         Robot robot;
         int rrpc ;
-
-
         public Form1()
         {
             InitializeComponent();
             robot = new Robot();//实例化机器人对象
+            robot.SetReconnectParam(true, 100, 200);//断线重连参数
+            rrpc =robot.RPC("192.168.58.2"); //与控制箱建立连接
+          
             string path = "D://log/";
             robot.LoggerInit(FrLogType.BUFFER, FrLogLevel.INFO, path, 5, 5);
             robot.SetLoggerLevel(FrLogLevel.INFO);
-            robot.SetReconnectParam(true, 100, 100);//断线重连参数
-            rrpc =robot.RPC("192.168.58.2"); //与控制箱建立连接
-             //20004端口接收超时时间
-            //robot.SetReceivePortTimeout(40);
-
         }
 
         private void btnStandard_Click(object sender, EventArgs e)
@@ -1757,8 +1754,8 @@ namespace testFrRobot
         private void btnSetConvey_Click(object sender, EventArgs e)
         {
             float[] param = new float[2];
-            int rtn = robot.ConveyorSetParam(1, 10000, 2.0, 1, 1, 20);
-            Console.WriteLine($"ConveyorSetParam: rtn  {rtn}");
+            //int rtn = robot.ConveyorSetParam(1, 10000, 2.0, 1, 1, 20);
+            //Console.WriteLine($"ConveyorSetParam: rtn  {rtn}");
         }
 
         private void btnDownload_Click(object sender, EventArgs e)
@@ -1988,10 +1985,19 @@ namespace testFrRobot
 
         private void btnUploadLua_Click(object sender, EventArgs e)
         {
+        
+            string filePath = "D://zUP/program_4test.tar.gz";
             string errstr = "";
-            robot.LuaUpload(txtLuaPath.Text, ref errstr);
-            Console.WriteLine(errstr);
+            var stopwatch = Stopwatch.StartNew(); // 开始计时
 
+            // 调用 LuaUpload 方法，并传递 errstr 作为引用参数
+            int rtn=robot.LuaUpload(filePath, ref errstr);
+
+            stopwatch.Stop(); // 停止计时
+
+            // 打印错误信息和执行时间
+            Console.WriteLine($"Error message: {rtn}");
+            Console.WriteLine($"Execution time for LuaUpload: {stopwatch.ElapsedMilliseconds} ms");
         }
 
         private void btnDownLoadLua_Click(object sender, EventArgs e)
@@ -2107,6 +2113,12 @@ namespace testFrRobot
                 Console.WriteLine($"cur robot time is {pkg.robotTime.ToString()}");
                 Thread.Sleep(50);
             }
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            Test testInterface = new Test(robot);
+            testInterface.ShowDialog();
         }
     }
 }
