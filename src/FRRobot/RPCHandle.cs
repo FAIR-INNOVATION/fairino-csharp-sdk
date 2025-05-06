@@ -1262,8 +1262,7 @@ namespace fairino
         * @brief 传动带参数配置
         * @param [in] 
         * @return 错误码
-        */
-        [XmlRpcMethod("ConveyorSetParam")]
+        */[XmlRpcMethod("ConveyorSetParam")]
         int ConveyorSetParam(double[] param, int followType, int startDis, int endDis);
 
         /**
@@ -1615,13 +1614,13 @@ namespace fairino
         int SetPointToDatabase(string varName, double[] pos);
 
         [XmlRpcMethod("ArcWeldTraceControl")]
-        int ArcWeldTraceControl(int flag, double delaytime, int isLeftRight, double[] paramLR, int isUpLow, double[] paramUD, int axisSelect, int referenceType, double referSampleStartUd, double referSampleCountUd, double referenceCurrent, int offsetType, int offsetParameter);
+        int ArcWeldTraceControl(int flag, double delaytime, int isLeftRight, double[] paramLR, int isUpLow, double[] paramUD, int axisSelect, int referenceType, double referSampleStartUd, double referSampleCountUd, double referenceCurrent);
 
         [XmlRpcMethod("ArcWeldTraceExtAIChannelConfig")]
         int ArcWeldTraceExtAIChannelConfig(int channel);
 
         [XmlRpcMethod("EndForceDragControl")]
-        int EndForceDragControl(int status, int asaptiveFlag, int interfereDragFlag, int ingularityConstraintsFlag, double[] M, double[] B, double[] K, double[] F, double Fmax, double Vmax);
+        int EndForceDragControl(int status, int asaptiveFlag, int interfereDragFlag, double[] M, double[] B, double[] K, double[] F, double Fmax, double Vmax);
 
         [XmlRpcMethod("SetForceSensorDragAutoFlag")]
         int SetForceSensorDragAutoFlag(int status);
@@ -1755,7 +1754,7 @@ namespace fairino
         int ArcWeldTraceReplayEnd();
 
         [XmlRpcMethod("MultilayerOffsetTrsfToBase")]
-        object[] MultilayerOffsetTrsfToBase(double pointOX, double pointOY, double pointOZ, double pointXX, double pointXY, double pointXZ, double pointZX, double pointZY, double pointZZ, double dx, double dz, double dry);
+        object[] MultilayerOffsetTrsfToBase(double pointOX, double pointOY, double pointOZ, double pointXX, double pointXY, double pointXZ, double pointZX, double pointZY, double pointZZ, double dx, double dy, double db);
 
         [XmlRpcMethod("AngularSpeedStart")]
         int AngularSpeedStart(int ratio);
@@ -1879,6 +1878,7 @@ namespace fairino
         int CustomCollisionDetectionEnd();
 
 
+
         [XmlRpcMethod("AccSmoothStart")]
         int AccSmoothStart(int saveFlag);
 
@@ -1918,6 +1918,7 @@ namespace fairino
 
         [XmlRpcMethod("ArcWeldTraceVoltagePara")]
         int ArcWeldTraceVoltagePara(float AILow, float AIHigh, float voltageLow, float voltageHigh);
+
     }
     internal class RPCHandle
     {

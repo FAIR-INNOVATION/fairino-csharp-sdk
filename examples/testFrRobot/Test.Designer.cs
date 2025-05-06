@@ -50,10 +50,10 @@
             this.flowLayoutPanel1.Controls.Add(this.button5);
             this.flowLayoutPanel1.Controls.Add(this.button6);
             this.flowLayoutPanel1.Controls.Add(this.button7);
-            this.flowLayoutPanel1.Location = new System.Drawing.Point(12, 12);
+            this.flowLayoutPanel1.Location = new System.Drawing.Point(330, 42);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
             this.flowLayoutPanel1.Size = new System.Drawing.Size(140, 367);
-            this.flowLayoutPanel1.TabIndex = 2;
+            this.flowLayoutPanel1.TabIndex = 3;
             // 
             // button1
             // 
@@ -93,6 +93,7 @@
             this.button4.TabIndex = 3;
             this.button4.Text = "传送带通讯";
             this.button4.UseVisualStyleBackColor = true;
+            this.button4.Click += new System.EventHandler(this.button4_Click);
             // 
             // texBox
             // 
@@ -139,6 +140,7 @@
             this.Controls.Add(this.flowLayoutPanel1);
             this.Name = "Test";
             this.Text = "Test";
+            this.Load += new System.EventHandler(this.Test_Load);
             this.flowLayoutPanel1.ResumeLayout(false);
             this.flowLayoutPanel1.PerformLayout();
             this.ResumeLayout(false);
