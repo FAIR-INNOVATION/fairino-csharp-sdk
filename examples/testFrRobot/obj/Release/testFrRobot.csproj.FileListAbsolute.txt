@@ -136,59 +136,58 @@ E:\项目\sdk\fairino_csharp_-sdk-3.7.8\examples\testFrRobot\bin\Release\CookCom
 E:\项目\sdk\fairino_csharp_-sdk-3.7.8\examples\testFrRobot\bin\Release\libfairino.dll
 E:\项目\sdk\fairino_csharp_-sdk-3.7.8\examples\testFrRobot\bin\Release\libfairino.pdb
 E:\项目\sdk\fairino_csharp_-sdk-3.7.8\examples\testFrRobot\obj\Release\testFrRo.66D88683.Up2Date
-E:\项目\sdk\fairino_csharp_-sdk-3.8.0\examples\testFrRobot\obj\Release\testFrRobot.csproj.AssemblyReference.cache
-E:\项目\sdk\fairino_csharp_-sdk-3.8.0\examples\testFrRobot\obj\Release\testFrRobot.Form1.resources
-E:\项目\sdk\fairino_csharp_-sdk-3.8.0\examples\testFrRobot\obj\Release\testFrRobot.Frm485Servo.resources
-E:\项目\sdk\fairino_csharp_-sdk-3.8.0\examples\testFrRobot\obj\Release\testFrRobot.FrmFT.resources
-E:\项目\sdk\fairino_csharp_-sdk-3.8.0\examples\testFrRobot\obj\Release\testFrRobot.FrmUDP.resources
-E:\项目\sdk\fairino_csharp_-sdk-3.8.0\examples\testFrRobot\obj\Release\testFrRobot.FrmWeld.resources
-E:\项目\sdk\fairino_csharp_-sdk-3.8.0\examples\testFrRobot\obj\Release\testFrRobot.Properties.Resources.resources
-E:\项目\sdk\fairino_csharp_-sdk-3.8.0\examples\testFrRobot\obj\Release\testFrRobot.csproj.GenerateResource.cache
-E:\项目\sdk\fairino_csharp_-sdk-3.8.0\examples\testFrRobot\obj\Release\testFrRobot.csproj.CoreCompileInputs.cache
-E:\项目\sdk\fairino_csharp_-sdk-3.8.0\examples\testFrRobot\obj\Release\testFrRobot.exe
-E:\项目\sdk\fairino_csharp_-sdk-3.8.0\examples\testFrRobot\obj\Release\testFrRobot.pdb
-E:\项目\sdk\fairino_csharp_-sdk-3.8.0\examples\testFrRobot\bin\Release\testFrRobot.exe.config
-E:\项目\sdk\fairino_csharp_-sdk-3.8.0\examples\testFrRobot\bin\Release\testFrRobot.exe
-E:\项目\sdk\fairino_csharp_-sdk-3.8.0\examples\testFrRobot\bin\Release\testFrRobot.pdb
-E:\项目\sdk\fairino_csharp_-sdk-3.8.0\examples\testFrRobot\bin\Release\CookComputing.XmlRpcV2.dll
-E:\项目\sdk\fairino_csharp_-sdk-3.8.0\examples\testFrRobot\bin\Release\libfairino.dll
-E:\项目\sdk\fairino_csharp_-sdk-3.8.0\examples\testFrRobot\bin\Release\libfairino.pdb
-E:\项目\sdk\fairino_csharp_-sdk-3.8.0\examples\testFrRobot\obj\Release\testFrRo.66D88683.Up2Date
-E:\项目\sdk\fairino_csharp_-sdk-3.8.1\examples\testFrRobot\bin\Release\testFrRobot.exe.config
-E:\项目\sdk\fairino_csharp_-sdk-3.8.1\examples\testFrRobot\bin\Release\testFrRobot.exe
-E:\项目\sdk\fairino_csharp_-sdk-3.8.1\examples\testFrRobot\bin\Release\testFrRobot.pdb
-E:\项目\sdk\fairino_csharp_-sdk-3.8.1\examples\testFrRobot\bin\Release\CookComputing.XmlRpcV2.dll
-E:\项目\sdk\fairino_csharp_-sdk-3.8.1\examples\testFrRobot\bin\Release\libfairino.dll
-E:\项目\sdk\fairino_csharp_-sdk-3.8.1\examples\testFrRobot\bin\Release\libfairino.pdb
-E:\项目\sdk\fairino_csharp_-sdk-3.8.1\examples\testFrRobot\obj\Release\testFrRobot.csproj.AssemblyReference.cache
-E:\项目\sdk\fairino_csharp_-sdk-3.8.1\examples\testFrRobot\obj\Release\testFrRobot.Form1.resources
-E:\项目\sdk\fairino_csharp_-sdk-3.8.1\examples\testFrRobot\obj\Release\testFrRobot.Frm485Servo.resources
-E:\项目\sdk\fairino_csharp_-sdk-3.8.1\examples\testFrRobot\obj\Release\testFrRobot.FrmFT.resources
-E:\项目\sdk\fairino_csharp_-sdk-3.8.1\examples\testFrRobot\obj\Release\testFrRobot.FrmUDP.resources
-E:\项目\sdk\fairino_csharp_-sdk-3.8.1\examples\testFrRobot\obj\Release\testFrRobot.FrmWeld.resources
-E:\项目\sdk\fairino_csharp_-sdk-3.8.1\examples\testFrRobot\obj\Release\testFrRobot.Properties.Resources.resources
-E:\项目\sdk\fairino_csharp_-sdk-3.8.1\examples\testFrRobot\obj\Release\testFrRobot.csproj.GenerateResource.cache
-E:\项目\sdk\fairino_csharp_-sdk-3.8.1\examples\testFrRobot\obj\Release\testFrRobot.csproj.CoreCompileInputs.cache
-E:\项目\sdk\fairino_csharp_-sdk-3.8.1\examples\testFrRobot\obj\Release\testFrRo.66D88683.Up2Date
-E:\项目\sdk\fairino_csharp_-sdk-3.8.1\examples\testFrRobot\obj\Release\testFrRobot.exe
-E:\项目\sdk\fairino_csharp_-sdk-3.8.1\examples\testFrRobot\obj\Release\testFrRobot.pdb
-E:\项目\sdk\fairino_csharp_-sdk-3.8.2.0\examples\testFrRobot\obj\Release\testFrRobot.csproj.AssemblyReference.cache
-E:\项目\sdk\fairino_csharp_-sdk-3.8.2.0\examples\testFrRobot\obj\Release\testFrRobot.Form1.resources
-E:\项目\sdk\fairino_csharp_-sdk-3.8.2.0\examples\testFrRobot\obj\Release\testFrRobot.Frm485Servo.resources
-E:\项目\sdk\fairino_csharp_-sdk-3.8.2.0\examples\testFrRobot\obj\Release\testFrRobot.FrmFT.resources
-E:\项目\sdk\fairino_csharp_-sdk-3.8.2.0\examples\testFrRobot\obj\Release\testFrRobot.FrmUDP.resources
-E:\项目\sdk\fairino_csharp_-sdk-3.8.2.0\examples\testFrRobot\obj\Release\testFrRobot.FrmWeld.resources
-E:\项目\sdk\fairino_csharp_-sdk-3.8.2.0\examples\testFrRobot\obj\Release\testFrRobot.Properties.Resources.resources
-E:\项目\sdk\fairino_csharp_-sdk-3.8.2.0\examples\testFrRobot\obj\Release\testFrRobot.Test.resources
-E:\项目\sdk\fairino_csharp_-sdk-3.8.2.0\examples\testFrRobot\obj\Release\testFrRobot.csproj.GenerateResource.cache
-E:\项目\sdk\fairino_csharp_-sdk-3.8.2.0\examples\testFrRobot\obj\Release\testFrRobot.csproj.CoreCompileInputs.cache
-E:\项目\sdk\fairino_csharp_-sdk-3.8.2.0\examples\testFrRobot\obj\Release\testFrRobot.exe
-E:\项目\sdk\fairino_csharp_-sdk-3.8.2.0\examples\testFrRobot\obj\Release\testFrRobot.pdb
-E:\项目\sdk\fairino_csharp_-sdk-3.8.2.0\examples\testFrRobot\bin\Release\testFrRobot.exe.config
-E:\项目\sdk\fairino_csharp_-sdk-3.8.2.0\examples\testFrRobot\bin\Release\testFrRobot.exe
-E:\项目\sdk\fairino_csharp_-sdk-3.8.2.0\examples\testFrRobot\bin\Release\testFrRobot.pdb
-E:\项目\sdk\fairino_csharp_-sdk-3.8.2.0\examples\testFrRobot\bin\Release\CookComputing.XmlRpcV2.dll
-E:\项目\sdk\fairino_csharp_-sdk-3.8.2.0\examples\testFrRobot\bin\Release\libfairino.dll
-E:\项目\sdk\fairino_csharp_-sdk-3.8.2.0\examples\testFrRobot\bin\Release\libfairino.pdb
-E:\项目\sdk\fairino_csharp_-sdk-3.8.2.0\examples\testFrRobot\obj\Release\testFrRo.66D88683.Up2Date
-E:\项目\sdk\fairino_csharp_-sdk-3.8.1\examples\testFrRobot\obj\Release\testFrRobot.Test.resources
+E:\项目\sdk\新建文件夹\fairino-csharp-sdk\examples\testFrRobot\bin\Release\testFrRobot.exe.config
+E:\项目\sdk\新建文件夹\fairino-csharp-sdk\examples\testFrRobot\bin\Release\testFrRobot.exe
+E:\项目\sdk\新建文件夹\fairino-csharp-sdk\examples\testFrRobot\bin\Release\testFrRobot.pdb
+E:\项目\sdk\新建文件夹\fairino-csharp-sdk\examples\testFrRobot\bin\Release\CookComputing.XmlRpcV2.dll
+E:\项目\sdk\新建文件夹\fairino-csharp-sdk\examples\testFrRobot\bin\Release\libfairino.pdb
+E:\项目\sdk\新建文件夹\fairino-csharp-sdk\examples\testFrRobot\obj\Release\testFrRobot.csproj.AssemblyReference.cache
+E:\项目\sdk\新建文件夹\fairino-csharp-sdk\examples\testFrRobot\obj\Release\testFrRobot.Form1.resources
+E:\项目\sdk\新建文件夹\fairino-csharp-sdk\examples\testFrRobot\obj\Release\testFrRobot.Frm485Servo.resources
+E:\项目\sdk\新建文件夹\fairino-csharp-sdk\examples\testFrRobot\obj\Release\testFrRobot.FrmFT.resources
+E:\项目\sdk\新建文件夹\fairino-csharp-sdk\examples\testFrRobot\obj\Release\testFrRobot.FrmUDP.resources
+E:\项目\sdk\新建文件夹\fairino-csharp-sdk\examples\testFrRobot\obj\Release\testFrRobot.FrmWeld.resources
+E:\项目\sdk\新建文件夹\fairino-csharp-sdk\examples\testFrRobot\obj\Release\testFrRobot.Properties.Resources.resources
+E:\项目\sdk\新建文件夹\fairino-csharp-sdk\examples\testFrRobot\obj\Release\testFrRobot.csproj.GenerateResource.cache
+E:\项目\sdk\新建文件夹\fairino-csharp-sdk\examples\testFrRobot\obj\Release\testFrRobot.csproj.CoreCompileInputs.cache
+E:\项目\sdk\新建文件夹\fairino-csharp-sdk\examples\testFrRobot\obj\Release\testFrRo.66D88683.Up2Date
+E:\项目\sdk\新建文件夹\fairino-csharp-sdk\examples\testFrRobot\obj\Release\testFrRobot.exe
+E:\项目\sdk\新建文件夹\fairino-csharp-sdk\examples\testFrRobot\obj\Release\testFrRobot.pdb
+E:\项目\sdk\新建文件夹\fairino-csharp-sdk\examples\testFrRobot\bin\Release\libfairino.dll
+E:\项目\sdk\新建文件夹\fairino-csharp-sdk3.8.0\examples\testFrRobot\bin\Release\testFrRobot.exe.config
+E:\项目\sdk\新建文件夹\fairino-csharp-sdk3.8.0\examples\testFrRobot\bin\Release\testFrRobot.exe
+E:\项目\sdk\新建文件夹\fairino-csharp-sdk3.8.0\examples\testFrRobot\bin\Release\testFrRobot.pdb
+E:\项目\sdk\新建文件夹\fairino-csharp-sdk3.8.0\examples\testFrRobot\bin\Release\CookComputing.XmlRpcV2.dll
+E:\项目\sdk\新建文件夹\fairino-csharp-sdk3.8.0\examples\testFrRobot\bin\Release\libfairino.dll
+E:\项目\sdk\新建文件夹\fairino-csharp-sdk3.8.0\examples\testFrRobot\bin\Release\libfairino.pdb
+E:\项目\sdk\新建文件夹\fairino-csharp-sdk3.8.0\examples\testFrRobot\obj\Release\testFrRobot.csproj.AssemblyReference.cache
+E:\项目\sdk\新建文件夹\fairino-csharp-sdk3.8.0\examples\testFrRobot\obj\Release\testFrRobot.Form1.resources
+E:\项目\sdk\新建文件夹\fairino-csharp-sdk3.8.0\examples\testFrRobot\obj\Release\testFrRobot.Frm485Servo.resources
+E:\项目\sdk\新建文件夹\fairino-csharp-sdk3.8.0\examples\testFrRobot\obj\Release\testFrRobot.FrmFT.resources
+E:\项目\sdk\新建文件夹\fairino-csharp-sdk3.8.0\examples\testFrRobot\obj\Release\testFrRobot.FrmUDP.resources
+E:\项目\sdk\新建文件夹\fairino-csharp-sdk3.8.0\examples\testFrRobot\obj\Release\testFrRobot.FrmWeld.resources
+E:\项目\sdk\新建文件夹\fairino-csharp-sdk3.8.0\examples\testFrRobot\obj\Release\testFrRobot.Properties.Resources.resources
+E:\项目\sdk\新建文件夹\fairino-csharp-sdk3.8.0\examples\testFrRobot\obj\Release\testFrRobot.csproj.GenerateResource.cache
+E:\项目\sdk\新建文件夹\fairino-csharp-sdk3.8.0\examples\testFrRobot\obj\Release\testFrRobot.csproj.CoreCompileInputs.cache
+E:\项目\sdk\新建文件夹\fairino-csharp-sdk3.8.0\examples\testFrRobot\obj\Release\testFrRo.66D88683.Up2Date
+E:\项目\sdk\新建文件夹\fairino-csharp-sdk3.8.0\examples\testFrRobot\obj\Release\testFrRobot.exe
+E:\项目\sdk\新建文件夹\fairino-csharp-sdk3.8.0\examples\testFrRobot\obj\Release\testFrRobot.pdb
+E:\项目\sdk\fairino-csharp_-sdk-3.8.0 - 副本\examples\testFrRobot\obj\Release\testFrRobot.csproj.AssemblyReference.cache
+E:\项目\sdk\fairino-csharp_-sdk-3.8.0 - 副本\examples\testFrRobot\obj\Release\testFrRobot.Form1.resources
+E:\项目\sdk\fairino-csharp_-sdk-3.8.0 - 副本\examples\testFrRobot\obj\Release\testFrRobot.Frm485Servo.resources
+E:\项目\sdk\fairino-csharp_-sdk-3.8.0 - 副本\examples\testFrRobot\obj\Release\testFrRobot.FrmFT.resources
+E:\项目\sdk\fairino-csharp_-sdk-3.8.0 - 副本\examples\testFrRobot\obj\Release\testFrRobot.FrmUDP.resources
+E:\项目\sdk\fairino-csharp_-sdk-3.8.0 - 副本\examples\testFrRobot\obj\Release\testFrRobot.FrmWeld.resources
+E:\项目\sdk\fairino-csharp_-sdk-3.8.0 - 副本\examples\testFrRobot\obj\Release\testFrRobot.Properties.Resources.resources
+E:\项目\sdk\fairino-csharp_-sdk-3.8.0 - 副本\examples\testFrRobot\obj\Release\testFrRobot.Test.resources
+E:\项目\sdk\fairino-csharp_-sdk-3.8.0 - 副本\examples\testFrRobot\obj\Release\testFrRobot.csproj.GenerateResource.cache
+E:\项目\sdk\fairino-csharp_-sdk-3.8.0 - 副本\examples\testFrRobot\obj\Release\testFrRobot.csproj.CoreCompileInputs.cache
+E:\项目\sdk\fairino-csharp_-sdk-3.8.0 - 副本\examples\testFrRobot\obj\Release\testFrRobot.exe
+E:\项目\sdk\fairino-csharp_-sdk-3.8.0 - 副本\examples\testFrRobot\obj\Release\testFrRobot.pdb
+E:\项目\sdk\fairino-csharp_-sdk-3.8.0 - 副本\examples\testFrRobot\bin\Release\testFrRobot.exe.config
+E:\项目\sdk\fairino-csharp_-sdk-3.8.0 - 副本\examples\testFrRobot\bin\Release\testFrRobot.exe
+E:\项目\sdk\fairino-csharp_-sdk-3.8.0 - 副本\examples\testFrRobot\bin\Release\testFrRobot.pdb
+E:\项目\sdk\fairino-csharp_-sdk-3.8.0 - 副本\examples\testFrRobot\bin\Release\CookComputing.XmlRpcV2.dll
+E:\项目\sdk\fairino-csharp_-sdk-3.8.0 - 副本\examples\testFrRobot\bin\Release\libfairino.dll
+E:\项目\sdk\fairino-csharp_-sdk-3.8.0 - 副本\examples\testFrRobot\bin\Release\libfairino.pdb
+E:\项目\sdk\fairino-csharp_-sdk-3.8.0 - 副本\examples\testFrRobot\obj\Release\testFrRo.66D88683.Up2Date

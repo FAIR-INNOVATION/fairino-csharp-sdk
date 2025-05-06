@@ -146,7 +146,6 @@
             this.btnAngleWeave = new System.Windows.Forms.Button();
             this.btnWeldReply = new System.Windows.Forms.Button();
             this.btnAngluar = new System.Windows.Forms.Button();
-            this.btnweld = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -1168,22 +1167,11 @@
             this.btnAngluar.UseVisualStyleBackColor = true;
             this.btnAngluar.Click += new System.EventHandler(this.btnAngluar_Click);
             // 
-            // btnweld
-            // 
-            this.btnweld.Location = new System.Drawing.Point(1367, 243);
-            this.btnweld.Name = "btnweld";
-            this.btnweld.Size = new System.Drawing.Size(92, 41);
-            this.btnweld.TabIndex = 110;
-            this.btnweld.Text = "摆动渐变";
-            this.btnweld.UseVisualStyleBackColor = true;
-            this.btnweld.Click += new System.EventHandler(this.btnweld_Click);
-            // 
             // FrmWeld
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1479, 654);
-            this.Controls.Add(this.btnweld);
             this.Controls.Add(this.btnAngluar);
             this.Controls.Add(this.btnWeldReply);
             this.Controls.Add(this.btnAngleWeave);
@@ -1428,6 +1416,5 @@
         private System.Windows.Forms.Button btnAngleWeave;
         private System.Windows.Forms.Button btnWeldReply;
         private System.Windows.Forms.Button btnAngluar;
-        private System.Windows.Forms.Button btnweld;
     }
 }

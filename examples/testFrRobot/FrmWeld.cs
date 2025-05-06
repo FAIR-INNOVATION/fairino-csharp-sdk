@@ -443,12 +443,12 @@ namespace testFrRobot
 
             robot.SetSpeed(int.Parse(txtWeldSpeed.Text));
             robot.MoveL(startjointPos, startdescPose, 13, 0, 5, 100, 100, -1, exaxisPos, 0, 0, offdese);
-            robot.ArcWeldTraceControl(1, 0, 0, 0.06, 5, 5, 300, 1, -0.06, 5, 5, 300, 1, 0, 4, 1, 10,0,0);
+            robot.ArcWeldTraceControl(1, 0, 0, 0.06, 5, 5, 300, 1, -0.06, 5, 5, 300, 1, 0, 4, 1, 10);
             robot.ARCStart(1, 0, 10000);
             robot.MoveL(endjointPos, enddescPose, 13, 0,5, 100, 100, -1, exaxisPos, 0, 0, offdese);
             robot.ARCEnd(1, 0, 10000);
 
-            robot.ArcWeldTraceControl(0, 0, 0, 0.06, 5, 5, 300, 1, -0.06, 5, 5, 300, 1, 0, 4, 1, 10,0,0);
+            robot.ArcWeldTraceControl(0, 0, 0, 0.06, 5, 5, 300, 1, -0.06, 5, 5, 300, 1, 0, 4, 1, 10);
             //robot.ArcWeldTraceExtAIChannelConfig(1);
             
         }
@@ -553,17 +553,17 @@ namespace testFrRobot
             ExaxisPos epos = new ExaxisPos(0, 0, 0, 0);
             DescPose offset_pos = new DescPose(0, 0, 0, 0, 0, 0);
 
-            //robot.WeaveSetPara(0, 4, 2.000000, 0, 10.000000, 0.000000, 0.000000, 0, 0, 0, 0, 0, 60.000000);
-            //robot.MoveJ(j1, desc_p1, 13, 0, 100, 100, 100, epos, -1, 0, offset_pos);
-            //robot.WeaveStart(0);
-            //robot.MoveL(j2, desc_p2, 13, 0, 10, 100, 100, -1, epos, 0, 0, offset_pos, 0, 100);
-            //robot.WeaveEnd(0);
+            robot.WeaveSetPara(0, 3, 2.000000, 0, 10.000000, 0.000000, 0.000000, 0, 0, 0, 0, 0, 0, 0);
+            robot.MoveJ(j1, desc_p1, 13, 0, 100, 100, 100, epos, -1, 0, offset_pos);
+            robot.WeaveStart(0);
+            robot.MoveL(j2, desc_p2, 13, 0, 10, 100, 100, -1, epos, 0, 0, offset_pos, 0, 100);
+            robot.WeaveEnd(0);
 
-            //robot.WeaveSetPara(0, 0, 1.000000, 0, 10.000000, 0.000000, 0.000000, 0, 0, 0, 0, 0, 30.000000);
-            //robot.MoveJ(j1, desc_p1, 13, 0, 100, 100, 100, epos, -1, 0, offset_pos);
-            //robot.WeaveStart(0);
-            //robot.MoveL(j2, desc_p2, 13, 0, 10, 100, 100, -1, epos, 0, 0, offset_pos, 0, 100);
-            //robot.WeaveEnd(0);
+            robot.WeaveSetPara(0, 3, 2.000000, 0, 10.000000, 0.000000, 0.000000, 0, 0, 0, 0, 0, 0, 0);
+            robot.MoveJ(j1, desc_p1, 13, 0, 100, 100, 100, epos, -1, 0, offset_pos);
+            robot.WeaveStart(0);
+            robot.MoveL(j2, desc_p2, 13, 0, 10, 100, 100, -1, epos, 0, 0, offset_pos, 0, 100);
+            robot.WeaveEnd(0);
         }
 
         private void btnWeldReply_Click(object sender, EventArgs e)
@@ -617,13 +617,13 @@ namespace testFrRobot
             error = robot.WeaveStart(0);
             Console.WriteLine("WeaveStart return:  " + error);
 
-            error = robot.ArcWeldTraceControl(1, 0, 1, 0.06, 5, 5, 50, 1, 0.06, 5, 5, 55, 0, 0, 4, 1, 10,0,0);
+            error = robot.ArcWeldTraceControl(1, 0, 1, 0.06, 5, 5, 50, 1, 0.06, 5, 5, 55, 0, 0, 4, 1, 10);
             Console.WriteLine("ArcWeldTraceControl return:  " + error);
 
             error = robot.MoveL(mulitilineorigin2_joint, mulitilineorigin2_desc, 13, 0, 1, 100, 100, -1, epos, 0, 0, offset, 0, 100);
             Console.WriteLine("MoveL return:  " + error);
 
-            error = robot.ArcWeldTraceControl(0, 0, 1, 0.06, 5, 5, 50, 1, 0.06, 5, 5, 55, 0, 0, 4, 1, 10,0,0);
+            error = robot.ArcWeldTraceControl(0, 0, 1, 0.06, 5, 5, 50, 1, 0.06, 5, 5, 55, 0, 0, 4, 1, 10);
             Console.WriteLine("ArcWeldTraceControl return:  " + error);
 
             error = robot.WeaveEnd(0);
@@ -741,59 +741,6 @@ namespace testFrRobot
             error = robot.MoveL(JP7, DP7, tool, user, vel, acc, ovl * 0.1f, blend, epos, 0, offsetFlag, offset, 0, 100);
             robot.AngularSpeedEnd();
             error = robot.MoveL(JP8, DP8, tool, user, vel, acc, ovl * 0.1f, blend, epos, 0, offsetFlag, offset, 0, 100);
-        }
-
-        private void btnweld_Click(object sender, EventArgs e)
-        {
-            //摆动渐变
-            DescPose p1Desc = new DescPose(-72.912, -587.664, 31.849, 43.283, -6.731, 15.068);
-            JointPos p1Joint = new JointPos(74.620, -80.903, 94.608, -109.882, -90.436, -13.432);
-
-            DescPose p2Desc = new DescPose(-104.915, -483.712, -25.231, 42.228, -6.572, 18.433);
-            JointPos p2Joint = new JointPos(66.431, -92.875, 116.362, -120.516, -88.627, -24.731);
-
-            DescPose p3Desc = new DescPose(-240.651, -483.840, -7.161, 46.577, -5.286, 8.318);
-            JointPos p3Joint = new JointPos(56.457, -84.796, 104.618, -114.497, -92.422, -25.430);
-
-            ExaxisPos exaxisPos = new ExaxisPos(0.0, 0.0, 0.0, 0.0);
-            DescPose offdese = new DescPose(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-            robot.WeldingSetVoltage(1, 19, 0, 0);
-            robot.WeldingSetCurrent(1, 190, 0, 0);
-            robot.MoveJ(p1Joint, p1Desc, 1, 1, 100, 100, 100, exaxisPos, -1, 0, offdese);
-            robot.MoveL(p2Joint, p2Desc, 1, 1, 100, 100, 50, -1, exaxisPos, 0, 0, offdese);
-            robot.ARCStart(1, 0, 10000);
-            robot.ArcWeldTraceControl(1, 0, 1, 0.06, 5, 5, 60, 1, 0.06, 5, 5, 80, 0, 0, 4, 1, 10, 0, 0);
-            robot.WeaveStart(0);
-            robot.WeaveChangeStart(1);
-            robot.MoveL(p3Joint, p3Desc, 1, 1, 100, 100, 1, -1, exaxisPos, 0, 0, offdese);
-            robot.WeaveChangeEnd();
-            robot.WeaveEnd(0);
-            robot.ArcWeldTraceControl(0, 0, 1, 0.06, 5, 5, 60, 1, 0.06, 5, 5, 80, 0, 0, 4, 1, 10, 0, 0);
-            robot.ARCEnd(1, 0, 10000);
-
-            ////电弧跟踪
-            //DescPose p1Desc = new DescPose(-72.912, -587.664, 31.849, 43.283, -6.731, 15.068);
-            //JointPos p1Joint = new JointPos(74.620, -80.903, 94.608, -109.882, -90.436, -13.432);
-
-            //DescPose p2Desc = new DescPose( -104.915, -483.712, -25.231, 42.228, -6.572, 18.433);
-            //JointPos p2Joint = new JointPos(66.431, -92.875, 116.362, -120.516, -88.627, -24.731);
-
-            //DescPose p3Desc = new DescPose(-242.834, -498.697, -23.681, 46.576, -5.286, 8.318);
-            //JointPos p3Joint = new JointPos( 57.153, -82.046, 104.060, -116.659, -92.478, -24.735 );
-
-            //ExaxisPos exaxisPos = new ExaxisPos(0.0, 0.0, 0.0, 0.0);
-            //DescPose offdese = new DescPose(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-            //robot.WeldingSetVoltage(1, 19, 0, 0);
-            //robot.WeldingSetCurrent(1, 190, 0, 0);
-            //robot.MoveJ(p1Joint, p1Desc, 1, 1, 100, 100, 100, exaxisPos, -1, 0, offdese);
-            //robot.MoveL(p2Joint, p2Desc, 1, 1, 100, 100, 50, -1, exaxisPos, 0, 0, offdese);
-            //robot.ARCStart(1, 0, 10000);
-            //robot.ArcWeldTraceControl(1, 0, 1, 0.06, 5, 5, 60, 1, 0.06, 5, 5, 60, 0, 0, 4, 1, 10, 2, 2);
-            //robot.WeaveStart(0);
-            //robot.MoveL(p3Joint, p3Desc, 1, 1, 100, 100, 1, -1, exaxisPos, 0, 0, offdese);
-            //robot.WeaveEnd(0);
-            //robot.ArcWeldTraceControl(0, 0, 1, 0.06, 5, 5, 60, 1, 0.06, 5, 5, 60, 0, 0, 4, 1, 10, 2, 2);
-            //robot.ARCEnd(1, 0, 10000);
         }
     }
 }
