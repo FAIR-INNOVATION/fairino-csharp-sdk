@@ -41,7 +41,7 @@ namespace fairino
     {
         ICallSupervisor proxy = null;
 
-        const string SDK_VERSION = "C#SDK V1.1.2";
+        const string SDK_VERSION = "C#SDK V1.1.3";
 
         private string robot_ip = "192.168.58.2";//机器人ip
         private int g_sock_com_err = (int)RobotError.ERR_SUCCESS;
@@ -50,7 +50,7 @@ namespace fairino
         const int BUFFER_SIZE = 1024 * 4;
         const int MAX_CHECK_CNT_COM = 25;
         const int MAX_UPLOAD_FILE_SIZE = 500 * 1024 * 1024;//最大上传文件为2Mb
-
+        private const int DOWNLOAD_POINT_TABLE_PORT = 20011;//点位表下载
         //private Socket sock_cli_cmd;//实时指令发送接收通讯
         //private Socket sock_cli_state;//实时状态反馈通讯
         private byte robot_realstate_exit = 0;//实时状态反馈线程循环标志
@@ -81,7 +81,7 @@ namespace fairino
         private StatusTCPClient sock_cli_state; //实时状态反馈通讯
         private TCPClient sock_cli_cmd;//实时指令发送接收通讯
 
-        private int ReceivePortTimeout = 100;//20004端口接受超时时间
+        private int ReceivePortTimeout = 200;//20004端口接受超时时间
         public Robot()
         {
             proxy = XmlRpcProxyGen.Create<ICallSupervisor>();
@@ -647,6 +647,7 @@ namespace fairino
             robot_realstate_exit = 1;
             robot_task_exit = 1;
 
+            Thread.Sleep(100);
             if (sock_cli_cmd.mSocket != null)
             {
                 sock_cli_cmd.mSocket.Close();
@@ -956,7 +957,7 @@ namespace fairino
          * @param  [in]  max_dis 单次点动最大角度，单位[°]或距离，单位[mm]
          * @return  错误码
          */
-        public int StartJOG(byte refType, byte nb, byte dir, float vel, float acc, float max_dis)
+        public int StartJOG(int refType, int nb, int dir, float vel, float acc, float max_dis)
         {
             if (IsSockComError())
             {
@@ -1124,25 +1125,24 @@ namespace fairino
 
             }
         }
-
         /**
-         * @brief  笛卡尔空间直线运动
-         * @param  [in] joint_pos  目标关节位置,单位deg
-         * @param  [in] desc_pos   目标笛卡尔位姿
-         * @param  [in] tool  工具坐标号，范围[0~14]
-         * @param  [in] user  工件坐标号，范围[0~14]
-         * @param  [in] vel  速度百分比，范围[0~100]
-         * @param  [in] acc  加速度百分比，范围[0~100],暂不开放
-         * @param  [in] ovl  速度缩放因子，范围[0~100]
-         * @param  [in] blendR [-1.0]-运动到位(阻塞)，[0~1000.0]-平滑半径(非阻塞)，单位mm	 
-         * @param  [in] epos  扩展轴位置，单位mm
-         * @param  [in] search  0-不焊丝寻位，1-焊丝寻位
-         * @param  [in] offset_flag  0-不偏移，1-基坐标系/工件坐标系下偏移，2-工具坐标系下偏移
-         * @param  [in] offset_pos  位姿偏移量
-         * @param  [in] overSpeedStrategy  超速处理策略，1-标准；2-超速时报错停止；3-自适应降速，默认为0
-         * @param  [in] speedPercent  允许降速阈值百分比[0-100]，默认10%
-         * @return  错误码
-         */
+       * @brief  笛卡尔空间直线运动
+       * @param  [in] joint_pos  目标关节位置,单位deg
+       * @param  [in] desc_pos   目标笛卡尔位姿
+       * @param  [in] tool  工具坐标号，范围[0~14]
+       * @param  [in] user  工件坐标号，范围[0~14]
+       * @param  [in] vel  速度百分比，范围[0~100]
+       * @param  [in] acc  加速度百分比，范围[0~100],暂不开放
+       * @param  [in] ovl  速度缩放因子，范围[0~100]
+       * @param  [in] blendR [-1.0]-运动到位(阻塞)，[0~1000.0]-平滑半径(非阻塞)，单位mm
+       * @param  [in] epos  扩展轴位置，单位mm
+       * @param  [in] search  0-不焊丝寻位，1-焊丝寻位
+       * @param  [in] offset_flag  0-不偏移，1-基坐标系/工件坐标系下偏移，2-工具坐标系下偏移
+       * @param  [in] offset_pos  位姿偏移量
+       * @param  [in] overSpeedStrategy  超速处理策略，1-标准；2-超速时报错停止；3-自适应降速，默认为0
+       * @param  [in] speedPercent  允许降速阈值百分比[0-100]，默认10%
+       * @return  错误码
+       */
         public int MoveL(JointPos joint_pos, DescPose desc_pos, int tool, int user, float vel, float acc, float ovl, float blendR, ExaxisPos epos, byte search, byte offset_flag, DescPose offset_pos, int overSpeedStrategy = 0, int speedPercent = 10)
         {
             if (IsSockComError())
@@ -1174,7 +1174,7 @@ namespace fairino
                 double[] desc = new double[6] { desc_pos.tran.x, desc_pos.tran.y, desc_pos.tran.z, desc_pos.rpy.rx, desc_pos.rpy.ry, desc_pos.rpy.rz };
                 double[] exteraxis = epos.ePos;
                 double[] offect = new double[6] { offset_pos.tran.x, offset_pos.tran.y, offset_pos.tran.z, offset_pos.rpy.rx, offset_pos.rpy.ry, offset_pos.rpy.rz };
-                rtn = proxy.MoveL(joint, desc, tool, user, vel, acc, ovl, blendR, exteraxis, search, offset_flag, offect);
+                rtn = proxy.MoveL(joint, desc, tool, user, vel, acc, ovl, blendR, 0,exteraxis, search, offset_flag, offect);
                 if (log != null)
                 {
                     log.LogInfo($"MoveL({joint[0]},{joint[1]},{joint[2]},{joint[3]},{joint[4]},{joint[5]},{desc[0]},{desc[1]},{desc[2]},{desc[3]},{desc[4]},{desc[5]},{tool},{user},{vel},{acc},{ovl},{blendR}" +
@@ -1192,6 +1192,102 @@ namespace fairino
                     {
                         return rtn;
                     }
+                }
+                if ((robot_state_pkg.main_code != 0 || robot_state_pkg.sub_code != 0) && rtn == 0)
+                {
+                    rtn = 14;
+                }
+                return rtn;
+            }
+            catch
+            {
+                if (IsSockComError())
+                {
+                    if (log != null)
+                    {
+                        log.LogError($"RPC exception");
+                    }
+                    return g_sock_com_err;
+
+                }
+                else
+                {
+                    return (int)RobotError.ERR_SUCCESS;
+                }
+            }
+        }
+        /**
+         * @brief  笛卡尔空间直线运动
+         * @param  [in] joint_pos  目标关节位置,单位deg
+         * @param  [in] desc_pos   目标笛卡尔位姿
+         * @param  [in] tool  工具坐标号，范围[0~14]
+         * @param  [in] user  工件坐标号，范围[0~14]
+         * @param  [in] vel  速度百分比，范围[0~100]
+         * @param  [in] acc  加速度百分比，范围[0~100],暂不开放
+         * @param  [in] ovl  速度缩放因子，范围[0~100]
+         * @param  [in] blendR [-1.0]-运动到位(阻塞)，[0~1000.0]-平滑半径(非阻塞)，单位mm
+         * @param  [in] blendMode 过渡方式；0-内切过渡；1-角点过渡
+         * @param  [in] epos  扩展轴位置，单位mm
+         * @param  [in] search  0-不焊丝寻位，1-焊丝寻位
+         * @param  [in] offset_flag  0-不偏移，1-基坐标系/工件坐标系下偏移，2-工具坐标系下偏移
+         * @param  [in] offset_pos  位姿偏移量
+         * @param  [in] overSpeedStrategy  超速处理策略，1-标准；2-超速时报错停止；3-自适应降速，默认为0
+         * @param  [in] speedPercent  允许降速阈值百分比[0-100]，默认10%
+         * @return  错误码
+         */
+        public int MoveL(JointPos joint_pos, DescPose desc_pos, int tool, int user, float vel, float acc, float ovl, float blendR, int blendMode, ExaxisPos epos, byte search, byte offset_flag, DescPose offset_pos, int overSpeedStrategy = 0, int speedPercent = 10)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            if (GetSafetyCode() != 0)
+            {
+
+                return GetSafetyCode();
+            }
+            try
+            {
+                int rtn = -1;
+                if (overSpeedStrategy > 1)
+                {
+                    rtn = proxy.JointOverSpeedProtectStart(overSpeedStrategy, speedPercent);
+                    if (log != null)
+                    {
+                        log.LogInfo($"JointOverSpeedProtectStart({overSpeedStrategy},{speedPercent}) : {rtn}");
+                    }
+                    if (rtn != 0)
+                    {
+                        return rtn;
+                    }
+                }
+
+                double[] joint = joint_pos.jPos;
+                double[] desc = new double[6] { desc_pos.tran.x, desc_pos.tran.y, desc_pos.tran.z, desc_pos.rpy.rx, desc_pos.rpy.ry, desc_pos.rpy.rz };
+                double[] exteraxis = epos.ePos;
+                double[] offect = new double[6] { offset_pos.tran.x, offset_pos.tran.y, offset_pos.tran.z, offset_pos.rpy.rx, offset_pos.rpy.ry, offset_pos.rpy.rz };
+                rtn = proxy.MoveL(joint, desc, tool, user, vel, acc, ovl, blendR, blendMode, exteraxis, search, offset_flag, offect);
+                if (log != null)
+                {
+                    log.LogInfo($"MoveL({joint[0]},{joint[1]},{joint[2]},{joint[3]},{joint[4]},{joint[5]},{desc[0]},{desc[1]},{desc[2]},{desc[3]},{desc[4]},{desc[5]},{tool},{user},{vel},{acc},{ovl},{blendR}" +
+                        $"{epos.ePos[0]},{epos.ePos[1]},{epos.ePos[2]},{epos.ePos[3]},{search},{offset_flag},{offect[0]},{offect[1]},{offect[2]},{offect[3]},{offect[4]},{offect[5]}) : {rtn}");
+                }
+
+                if (overSpeedStrategy > 1)
+                {
+                    rtn = proxy.JointOverSpeedProtectEnd();
+                    if (log != null)
+                    {
+                        log.LogInfo($"JointOverSpeedProtectEnd() : {rtn}");
+                    }
+                    if (rtn != 0)
+                    {
+                        return rtn;
+                    }
+                }
+                if ((robot_state_pkg.main_code != 0 || robot_state_pkg.sub_code != 0) && rtn == 0)
+                {
+                    rtn = 14;
                 }
                 return rtn;
             }
@@ -7931,20 +8027,20 @@ namespace fairino
         }
 
         /**
-  * @brief 传动带参数配置
-  * @param [in] para[0] 编码器通道 1~2
-  * @param [in] para[1] 编码器转一圈的脉冲数
-  * @param [in] para[2] 编码器转一圈传送带行走距离
-  * @param [in] para[3] 工件坐标系编号 针对跟踪运动功能选择工件坐标系编号，跟踪抓取、TPD跟踪设为0
-  * @param [in] para[4] 是否配视觉  0 不配  1 配
-  * @param [in] para[5] 速度比  针对传送带跟踪抓取选项（1-100）  其他选项默认为1 
-  * @param [in] followType 跟踪运动类型，0-跟踪运动；1-追检运动
-  * @param [in] startDis 追检抓取需要设置， 跟踪起始距离， -1：自动计算(工件到达机器人下方后自动追检)，单位mm， 默认值0
-  * @param [in] endDis 追检抓取需要设置，跟踪终止距离， 单位mm， 默认值100
-  * @return 错误码
-  */
+        * @brief 传动带参数配置
+        * @param [in] para[0] 编码器通道 1~2
+        * @param [in] para[1] 编码器转一圈的脉冲数
+        * @param [in] para[2] 编码器转一圈传送带行走距离
+        * @param [in] para[3] 工件坐标系编号 针对跟踪运动功能选择工件坐标系编号，跟踪抓取、TPD跟踪设为0
+        * @param [in] para[4] 是否配视觉  0 不配  1 配
+        * @param [in] para[5] 速度比  针对传送带跟踪抓取选项（1-100）  其他选项默认为1 
+        * @param [in] followType 跟踪运动类型，0-跟踪运动；1-追检运动
+        * @param [in] startDis 追检抓取需要设置， 跟踪起始距离， -1：自动计算(工件到达机器人下方后自动追检)，单位mm， 默认值0
+        * @param [in] endDis 追检抓取需要设置，跟踪终止距离， 单位mm， 默认值100
+        * @return 错误码
+        */
 
-        public int ConveyorSetParam(int encChannel, int resolution, double lead, int wpAxis, int vision, double speedRadio, int followType, int startDis, int endDis)
+        public int ConveyorSetParam(int encChannel, int resolution, double lead, int wpAxis, int vision, double speedRadio, int followType=0, int startDis=0, int endDis=100)
         {
             if (IsSockComError())
             {
@@ -8033,7 +8129,7 @@ namespace fairino
          * @param [in] type 用于焊接模式下，板材类型
          * @return 错误码
          */
-        public int ConveyorTrackMoveL(string name, int tool, int wobj, float vel, float acc, float ovl, float blendR)
+        public int ConveyorTrackMoveL(string name, int tool, int wobj, float vel, float acc, float ovl, float blendR, int flag, int type)
         {
             if (IsSockComError())
             {
@@ -8246,6 +8342,7 @@ namespace fairino
                 object[] result = proxy.GetDHCompensation();
                 if ((int)result[0] == 0)
                 {
+                    Console.WriteLine("wefaegag");
                     dhCompensation[0] = (double)result[1];
                     dhCompensation[1] = (double)result[2];
                     dhCompensation[2] = (double)result[3];
@@ -9253,7 +9350,7 @@ namespace fairino
            * @param [in] weaveYawAngle 摆动方向方位角(绕摆动Z轴旋转)，单位°
            * @return 错误码 
            */
-        public int WeaveSetPara(int weaveNum, int weaveType, double weaveFrequency, int weaveIncStayTime, double weaveRange, double weaveLeftRange, double weaveRightRange, int additionalStayTime, int weaveLeftStayTime, int weaveRightStayTime, int weaveCircleRadio, int weaveStationary, double weaveYawAngle, double weaveRotAngle)
+        public int WeaveSetPara(int weaveNum, int weaveType, double weaveFrequency, int weaveIncStayTime, double weaveRange, double weaveLeftRange, double weaveRightRange, int additionalStayTime, int weaveLeftStayTime, int weaveRightStayTime, int weaveCircleRadio, int weaveStationary, double weaveYawAngle, double weaveRotAngle=0)
         {
             if (IsSockComError())
             {
@@ -9590,17 +9687,19 @@ namespace fairino
                 int i = 0;
                 while (i < (int)(distance / (weldLength + noWeldLength)) * 2 + 2)
                 {
+                    Console.WriteLine("efeses");
                     if (i % 2 == 0)
                     {
                         weldNum += 1;
                         if (weldNum * weldLength + noWeldNum * noWeldLength > distance)
                         {
+                           
                             DescPose endOffPos = new DescPose(0, 0, 0, 0, 0, 0);
                             DescPose tmpWeldDesc = new DescPose(0, 0, 0, 0, 0, 0);
                             JointPos tmpJoint = new JointPos(0, 0, 0, 0, 0, 0);
                             int tmpTool = 0;
                             int tmpUser = 0;
-                            rtn = GetSegmentWeldPoint(startDesePos, endDesePos, distance, ref tmpWeldDesc, ref tmpJoint, ref tmpTool, ref tmpUser);
+                            //rtn = GetSegmentWeldPoint(startDesePos, endDesePos, distance, ref tmpWeldDesc, ref tmpJoint, ref tmpTool, ref tmpUser);
                             if (rtn != 0) //起弧前要先计算一下焊接点，
                             {
                                 return rtn;
@@ -9618,7 +9717,7 @@ namespace fairino
                                     return rtn;
                                 }
                             }
-                            rtn = MoveL(tmpJoint, tmpWeldDesc, tmpTool, tmpUser, vel, acc, ovl, blendR, epos, search, 0, endOffPos);
+                            rtn = MoveL(endJPos, endDesePos, tmpTool, tmpUser, vel, acc, ovl, blendR, epos, search, 0, endOffPos);
                             if (rtn != 0)
                             {
                                 ARCEnd(weldIOType, arcNum, weldTimeout);
@@ -9942,125 +10041,220 @@ namespace fairino
          */
         private int FileDownLoad(int fileType, string fileName, string saveFilePath)
         {
+            // 1. 检查Socket连接状态
             if (IsSockComError())
             {
+                if (log != null) log.LogError("Socket通信异常");
                 return g_sock_com_err;
             }
-
             try
             {
-                //判断保存的文件路径是否存在
-                if (!Directory.Exists(saveFilePath))
+                // 2. 参数有效性检查
+                if (string.IsNullOrEmpty(fileName))
                 {
+                    if (log != null) log.LogError("文件名不能为空");
+                    return (int)RobotError.ERR_FILE_NAME;
+                }
+
+                if (string.IsNullOrEmpty(saveFilePath))
+                {
+                    if (log != null) log.LogError("保存路径不能为空");
                     return (int)RobotError.ERR_SAVE_FILE_PATH_NOT_FOUND;
                 }
+
+                // 3. 检查保存路径是否存在（跨平台实现）
+                try
+                {
+                    if (!Directory.Exists(saveFilePath))
+                    {
+                        if (log != null) log.LogError($"路径不存在: {saveFilePath}");
+                        return (int)RobotError.ERR_SAVE_FILE_PATH_NOT_FOUND;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    if (log != null) log.LogError($"路径检查异常: {ex.Message}");
+                    return (int)RobotError.ERR_SAVE_FILE_PATH_NOT_FOUND;
+                }
+
+                if (log != null) log.LogInfo($"路径验证通过: {saveFilePath}");
+
+                // 4. 发起RPC调用
+
                 int rtn = proxy.FileDownload(fileType, fileName);
                 if (rtn != 0)
                 {
-                    return rtn;
+                    if (rtn == -1)
+                    {
+                        if (log != null) log.LogError("文件不存在");
+                        return (int)RobotError.ERR_POINTTABLE_NOTFOUND;
+                    }
+                    else
+                    {
+                        if (log != null) log.LogError($"文件下载请求失败，错误码: {rtn}");
+                        return rtn;
+                    }
                 }
-                Console.WriteLine($"the downliad is {rtn}");
 
-                IPAddress ipAddr = IPAddress.Parse(robot_ip);
-
-                IPEndPoint ipEndPoint = new IPEndPoint(ipAddr, 20011);
-
+                // 5. 建立Socket连接
                 Socket client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                client.ReceiveTimeout = 5000; // 15秒超时
+                client.SendTimeout = 5000;
 
-                IAsyncResult connResult = client.BeginConnect(ipEndPoint, null, null);
-                connResult.AsyncWaitHandle.WaitOne(2000, true);  //等待2秒
-
-                client.ReceiveTimeout = 2000;
-                client.SendTimeout = 2000;
-
-                if (!connResult.IsCompleted)
+                try
+                {
+                    // 使用20011作为端口号
+                    IAsyncResult connectResult = client.BeginConnect(robot_ip, DOWNLOAD_POINT_TABLE_PORT, null, null);
+                    if (!connectResult.AsyncWaitHandle.WaitOne(5000)) // 5秒连接超时
+                    {
+                        client.Close();
+                        if (log != null) log.LogError("连接服务器超时");
+                        return (int)RobotError.ERR_SOCKET_COM_FAILED;
+                    }
+                    client.EndConnect(connectResult);
+                }
+                catch (Exception ex)
                 {
                     client.Close();
-                    return (int)RobotError.ERR_OTHER;
-                }
-                byte[] totalbuffer = new byte[1024 * 1024 * 50];//50Mb
-                int totalSize = 0;
-                string recvMd5 = "";
-                int recvSize = 0;
-                bool findHeadFlag = false;
-
-                while (true)
-                {
-                    byte[] buffer = new byte[1024];
-                    int num = client.Receive(buffer);
-                    if (num < 1)
-                    {
-                        return (int)RobotError.ERR_OTHER;
-                    }
-
-                    buffer.CopyTo(totalbuffer, totalSize);
-                    totalSize += num;
-
-                    if (!findHeadFlag && totalSize > 4 && Encoding.UTF8.GetString(totalbuffer, 0, 4) == "/f/b")
-                    {
-                        findHeadFlag = true;
-                    }
-
-                    if (findHeadFlag && totalSize > 12 + 32)
-                    {
-                        recvSize = int.Parse(Encoding.UTF8.GetString(totalbuffer, 4, 8));
-                        recvMd5 = Encoding.UTF8.GetString(totalbuffer, 12, 32);
-                    }
-
-                    if (findHeadFlag && totalSize == recvSize)
-                    {
-                        break;
-                    }
-                }
-                if (totalSize == 0)
-                {
-                    return (int)RobotError.ERR_OTHER;
+                    if (log != null) log.LogError($"连接服务器失败: {ex.Message}");
+                    return (int)RobotError.ERR_RPC_ERROR;
                 }
 
-                byte[] fileBuffer = new byte[1024 * 1024 * 50];//最大50M
-                fileBuffer = subBytes(totalbuffer, 12 + 32, totalSize - 16 - 32);
-                FileStream fsWriter = new FileStream(saveFilePath + fileName, FileMode.Create, FileAccess.Write, FileShare.None);
+                // 6. 接收文件数据
+                byte[] totalBuffer = new byte[1024 * 1024 * 50]; // 50MB缓冲区
+                int totalBytes = 0;
+                string expectedMd5 = "";
+                int expectedSize = 0;
+                bool headerFound = false;
+                bool sizeMd5Found = false;
+                bool downloadSuccess = false;
+                DateTime startTime = DateTime.Now;
 
-                fsWriter.Write(fileBuffer, 0, totalSize - 16 - 32);
-                fsWriter.Flush();
-                fsWriter.Close();
-
-                string checkMd5 = getMD5ByMD5CryptoService(saveFilePath + fileName).ToLower();
-                if (checkMd5 == recvMd5)
+                try
                 {
-                    client.Send(System.Text.Encoding.Default.GetBytes("SUCCESS"));
-                    if (log != null)
+                    while (true)
                     {
-                        log.LogInfo($"PointTableDownLoad({fileName}, {saveFilePath}) : {"success"}");
+                        // 超时检查
+                        if ((DateTime.Now - startTime).TotalMilliseconds > 15000) // 15秒超时
+                        {
+                            if (log != null) log.LogError("下载超时");
+                            break;
+                        }
+
+                        byte[] buffer = new byte[8192]; // 8KB缓冲区
+                        int received = client.Receive(buffer);
+                        if (received < 1)
+                        {
+                            if (log != null) log.LogError("接收数据异常");
+                            break;
+                        }
+
+                        // 追加到总缓冲区
+                        Buffer.BlockCopy(buffer, 0, totalBuffer, totalBytes, received);
+                        totalBytes += received;
+
+                        // 检查文件头 (4字节)
+                        if (!headerFound && totalBytes >= 4)
+                        {
+                            string header = Encoding.ASCII.GetString(totalBuffer, 0, 4);
+                            if (header != "/f/b")
+                            {
+                                if (log != null) log.LogError($"无效文件头: {header}");
+                                break;
+                            }
+                            headerFound = true;
+                            if (log != null) log.LogInfo("找到文件头");
+                        }
+
+                        // 提取长度和MD5 (4字节头 + 10字节长度 + 32字节MD5 = 46字节)
+                        if (headerFound && !sizeMd5Found && totalBytes >= 46)
+                        {
+                            string sizeStr = Encoding.ASCII.GetString(totalBuffer, 4, 10);
+                            if (!int.TryParse(sizeStr, out expectedSize))
+                            {
+                                if (log != null) log.LogError($"无效长度格式: {sizeStr}");
+                                break;
+                            }
+
+                            expectedMd5 = Encoding.ASCII.GetString(totalBuffer, 14, 32);
+                            sizeMd5Found = true;
+
+                            if (log != null)
+                                log.LogInfo($"预期大小: {expectedSize}, MD5: {expectedMd5}");
+                        }
+
+                        // 检查是否接收完成
+                        if (headerFound && sizeMd5Found && totalBytes == expectedSize)
+                        {
+                            downloadSuccess = true;
+                            break;
+                        }
                     }
+
+                    if (!downloadSuccess)
+                    {
+                        if (log != null) log.LogError("文件下载未完成");
+                        return (int)RobotError.ERR_DOWN_LOAD_FILE_FAILED;
+                    }
+
+                    // 7. 验证文件尾 (最后4字节)
+                    //string footer = Encoding.ASCII.GetString(totalBuffer, totalBytes - 4, 4);
+                    //if (footer != "/b/f")
+                    //{
+                    //    if (log != null) log.LogError($"无效文件尾: {footer}");
+                    //}
+
+                    // 8. 提取文件内容 (跳过46字节头，去掉4字节尾)
+                    int contentLength = totalBytes - 46 - 4;
+                    byte[] fileContent = new byte[contentLength];
+                    Buffer.BlockCopy(totalBuffer, 46, fileContent, 0, contentLength);
+
+                    // 9. 计算并校验MD5
+                    string computedMd5;
+                    using (MD5 md5 = MD5.Create())
+                    {
+                        byte[] hash = md5.ComputeHash(fileContent);
+                        computedMd5 = BitConverter.ToString(hash).Replace("-", "").ToLower();
+                    }
+
+                    if (computedMd5 != expectedMd5.ToLower())
+                    {
+                        if (log != null)
+                            log.LogError($"MD5校验失败，预期: {expectedMd5}, 实际: {computedMd5}");
+                        return (int)RobotError.ERR_DOWN_LOAD_FILE_CHECK_FAILED;
+                    }
+
+                    // 10. 保存文件
+                    string fullPath = Path.Combine(saveFilePath, fileName);
+                    try
+                    {
+                        System.IO.File.WriteAllBytes(fullPath, fileContent);
+                        if (log != null) log.LogInfo($"文件保存成功: {fullPath}");
+                    }
+                    catch (Exception ex)
+                    {
+                        if (log != null) log.LogError($"文件保存失败: {ex.Message}");
+                        return (int)RobotError.ERR_DOWN_LOAD_FILE_WRITE_FAILED;
+                    }
+
+                    // 11. 发送成功响应
+                    client.Send(Encoding.ASCII.GetBytes("SUCCESS"));
                     return 0;
                 }
-                else
+                finally
                 {
-                    client.Send(System.Text.Encoding.Default.GetBytes("FAIL"));
-                    System.IO.File.Delete(saveFilePath + fileName);
-                    if (log != null)
-                    {
-                        log.LogInfo($"PointTableDownLoad({fileName}, {saveFilePath}) : {"FAIL"}");
-                    }
-                    return (int)RobotError.ERR_OTHER;
+                    client.Close();
                 }
             }
-            catch
+            catch (SocketException sockEx)
             {
-                if (IsSockComError())
-                {
-                    if (log != null)
-                    {
-                        log.LogError($"RPC exception");
-                    }
-                    return g_sock_com_err;
-
-                }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                if (log != null) log.LogError($"Socket异常: {sockEx.Message}");
+                return g_sock_com_err;
+            }
+            catch (Exception ex)
+            {
+                if (log != null) log.LogError($"系统异常: {ex.Message}");
+                return g_sock_com_err;
             }
         }
 
@@ -11279,9 +11473,10 @@ namespace fairino
          * @param [in] reconnectEnable	通讯断开自动重连使能 0-不使能 1-使能
          * @param [in] reconnectPeriod	重连周期间隔(ms)
          * @param [in] reconnectNum	重连次数
+         * @param [in] selfConnect 断电重启是否自动建立连接；0-不建立连接；1-建立连接
          * @return 错误码
          */
-        public int ExtDevSetUDPComParam(string ip, int port, int period, int lossPkgTime, int lossPkgNum, int disconnectTime, int reconnectEnable, int reconnectPeriod, int reconnectNum)
+        public int ExtDevSetUDPComParam(string ip, int port, int period, int lossPkgTime, int lossPkgNum, int disconnectTime, int reconnectEnable, int reconnectPeriod, int reconnectNum, int selfConnect)
         {
             if (IsSockComError())
             {
@@ -11290,7 +11485,7 @@ namespace fairino
 
             try
             {
-                int rtn = proxy.ExtDevSetUDPComParam(ip, port, period, lossPkgTime, lossPkgNum, disconnectTime, reconnectEnable, reconnectPeriod, reconnectNum);
+                int rtn = proxy.ExtDevSetUDPComParam(ip, port, period, lossPkgTime, lossPkgNum, disconnectTime, reconnectEnable, reconnectPeriod, reconnectNum, selfConnect);
                 if (log != null)
                 {
                     log.LogInfo($"ExtDevSetUDPComParam({ip}, {port}, {period}, {lossPkgTime}, {lossPkgNum}, {disconnectTime}, {reconnectEnable}, {reconnectPeriod}, {reconnectNum}) : {rtn}");
@@ -13261,9 +13456,11 @@ namespace fairino
          * @param  [in] referSampleStartUd 上下基准电流采样开始计数(反馈)，cyc
          * @param  [in] referSampleCountUd 上下基准电流采样循环计数(反馈)，cyc
          * @param  [in] referenceCurrent 上下基准电流mA
+         * @param  [in] offsetType 偏置跟踪类型，0-不偏置；1-采样；2-百分比  /version 3.7.9
+         * @param  [in] offsetParameter 偏置参数；采样(偏置采样开始时间，默认采一周期)；百分比(偏置百分比(-100 ~ 100)) /version 3.7.9
          * @return  错误码
          */
-        public int ArcWeldTraceControl(int flag, double delaytime, int isLeftRight, double klr, double tStartLr, double stepMaxLr, double sumMaxLr, int isUpLow, double kud, double tStartUd, double stepMaxUd, double sumMaxUd, int axisSelect, int referenceType, double referSampleStartUd, double referSampleCountUd, double referenceCurrent)
+        public int ArcWeldTraceControl(int flag, double delaytime, int isLeftRight, double klr, double tStartLr, double stepMaxLr, double sumMaxLr, int isUpLow, double kud, double tStartUd, double stepMaxUd, double sumMaxUd, int axisSelect, int referenceType, double referSampleStartUd, double referSampleCountUd, double referenceCurrent, int offsetType=0, int offsetParameter=0)
         {
             if (IsSockComError())
             {
@@ -13273,15 +13470,14 @@ namespace fairino
             {
                 double[] paramLR = new double[4] { klr, tStartLr, stepMaxLr, sumMaxLr };
                 double[] paramUD = new double[4] { kud, tStartUd, stepMaxUd, sumMaxUd };
-                int rtn = proxy.ArcWeldTraceControl(flag, delaytime, isLeftRight, paramLR, isUpLow, paramUD, axisSelect, referenceType, referSampleStartUd, referSampleCountUd, referenceCurrent);
+                int rtn = proxy.ArcWeldTraceControl(flag, delaytime, isLeftRight, paramLR, isUpLow, paramUD, axisSelect, referenceType, referSampleStartUd, referSampleCountUd, referenceCurrent, offsetType, offsetParameter);
                 if (log != null)
                 {
-                    log.LogInfo($"ArcWeldTraceControl({flag}, {delaytime}, {isLeftRight}, {klr}, {tStartLr}, {stepMaxLr}, {sumMaxLr}, {isUpLow}, {kud}, {tStartUd}, {stepMaxUd}, {sumMaxUd}, {axisSelect}, {referenceType}, {referSampleStartUd}, {referSampleCountUd}, {referenceCurrent}) : {rtn}");
+                    log.LogInfo($"ArcWeldTraceControl({flag}, {delaytime}, {isLeftRight}, {klr}, {tStartLr}, {stepMaxLr}, {sumMaxLr}, {isUpLow}, {kud}, {tStartUd}, {stepMaxUd}, {sumMaxUd}, {axisSelect}, {referenceType}, {referSampleStartUd}, {referSampleCountUd}, {referenceCurrent},{offsetType}, {offsetParameter}) : {rtn}");
                 }
                 return rtn;
             }
-            catch
-            {
+            catch { 
                 if (IsSockComError())
                 {
                     if (log != null)
@@ -13336,20 +13532,22 @@ namespace fairino
             }
         }
 
+
         /**
-         * @brief  力传感器辅助拖动
-         * @param  [in] status 控制状态，0-关闭；1-开启
-         * @param  [in] asaptiveFlag 自适应开启标志，0-关闭；1-开启
-         * @param  [in] interfereDragFlag 干涉区拖动标志，0-关闭；1-开启
-         * @param  [in] M 惯性系数
-         * @param  [in] B 阻尼系数
-         * @param  [in] K 刚度系数
-         * @param  [in] F 拖动六维力阈值
-         * @param  [in] Fmax 最大拖动力限制 Nm
-         * @param  [in] Vmax 最大关节速度限制 °/s
-         * @return  错误码
-         */
-        public int EndForceDragControl(int status, int asaptiveFlag, int interfereDragFlag, double[] M, double[] B, double[] K, double[] F, double Fmax, double Vmax)
+        * @brief  力传感器辅助拖动
+        * @param  [in] status 控制状态，0-关闭；1-开启
+        * @param  [in] asaptiveFlag 自适应开启标志，0-关闭；1-开启
+        * @param  [in] interfereDragFlag 干涉区拖动标志，0-关闭；1-开启
+        * @param  [in] ingularityConstraintsFlag 奇异点策略，0-规避；1-穿越
+        * @param  [in] M 惯性系数
+        * @param  [in] B 阻尼系数
+        * @param  [in] K 刚度系数
+        * @param  [in] F 拖动六维力阈值
+        * @param  [in] Fmax 最大拖动力限制 Nm
+        * @param  [in] Vmax 最大关节速度限制 °/s
+        * @return  错误码
+        */
+        public int EndForceDragControl(int status, int asaptiveFlag, int interfereDragFlag, int ingularityConstraintsFlag, double[] M, double[] B, double[] K, double[] F, double Fmax, double Vmax)
         {
             if (IsSockComError())
             {
@@ -13357,10 +13555,10 @@ namespace fairino
             }
             try
             {
-                int rtn = proxy.EndForceDragControl(status, asaptiveFlag, interfereDragFlag, M, B, K, F, Fmax, Vmax);
+                int rtn = proxy.EndForceDragControl(status, asaptiveFlag, interfereDragFlag, ingularityConstraintsFlag,M, B, K, F, Fmax, Vmax);
                 if (log != null)
                 {
-                    log.LogInfo($"EndForceDragControl({status}, {asaptiveFlag}, {interfereDragFlag}, {M}, {B}, {K}, {F}, {Fmax}, {Vmax}) : {rtn}");
+                    log.LogInfo($"EndForceDragControl({status}, {asaptiveFlag}, {interfereDragFlag},{ingularityConstraintsFlag}, {M}, {B}, {K}, {F}, {Fmax}, {Vmax}) : {rtn}");
                 }
                 return rtn;
             }
@@ -14855,9 +15053,10 @@ namespace fairino
         /**
          * @brief 设置机器人碰撞检测方法
          * @param  [in] method 碰撞检测方法：0-电流模式；1-双编码器；2-电流和双编码器同时开启
+         * @param [in] thresholdMode 碰撞等级阈值方式；0-碰撞等级固定阈值方式；1-自定义碰撞检测阈值
          * @return  错误码
          */
-        public int SetCollisionDetectionMethod(int method)
+        public int SetCollisionDetectionMethod(int method,int thresholdMode=0)
         {
             if (IsSockComError())
             {
@@ -14865,7 +15064,7 @@ namespace fairino
             }
             try
             {
-                int rtn = proxy.SetCollisionDetectionMethod(method);
+                int rtn = proxy.SetCollisionDetectionMethod(method, thresholdMode);
                 if (log != null)
                 {
                     log.LogInfo($"SetCollisionDetectionMethod({method}) : {rtn}");
@@ -15686,7 +15885,7 @@ namespace fairino
 	     * @param [out] period
 	     * @return  错误码
 	     */
-        public int GetAxleCommunicationParam(ref int baudRate, ref int dataBit, ref int stopBit, ref int verify, ref int timeout, ref int timeoutTimes, ref int period)
+        public int GetAxleCommunicationParam(ref AxleComParam getParam)
         {
             if (IsSockComError())
             {
@@ -15698,17 +15897,17 @@ namespace fairino
                 object[] result = proxy.GetAxleCommunicationParam();
                 if ((int)result[0] == 0)
                 {
-                    baudRate = (int)result[1];
-                    dataBit = (int)result[2];
-                    stopBit = (int)result[3];
-                    verify = (int)result[4];
-                    timeout = (int)result[5];
-                    timeoutTimes = (int)result[6];
-                    period = (int)result[7];
+                    getParam.baudRate = (int)result[1];
+                    getParam.dataBit = (int)result[2];
+                    getParam.stopBit = (int)result[3];
+                    getParam.verify = (int)result[4];
+                    getParam.timeout = (int)result[5];
+                    getParam.timeoutTimes = (int)result[6];
+                    getParam.period = (int)result[7];
                 }
                 if (log != null)
                 {
-                    log.LogInfo($"GetAxleCommunicationParam(ref {baudRate}, ref {dataBit}, ref {stopBit}, ref {verify}, ref {timeout}, ref {timeoutTimes}, ref {period}) : {(int)result[0]}");
+                    log.LogInfo($"GetAxleCommunicationParam(ref {getParam.baudRate}, ref {getParam.dataBit}, ref {getParam.stopBit}, ref {getParam.verify}, ref {getParam.timeout}, ref {getParam.timeoutTimes}, ref {getParam.period}) : {(int)result[0]}");
                 }
                 return (int)result[0];
             }
@@ -15740,7 +15939,7 @@ namespace fairino
          * @param [in] period
          * @return  错误码
          */
-        public int SetAxleCommunicationParam(int baudRate, int dataBit, int stopBit, int verify, int timeout, int timeoutTimes, int period)
+        public int SetAxleCommunicationParam(AxleComParam param)
         {
             if (IsSockComError())
             {
@@ -15748,10 +15947,10 @@ namespace fairino
             }
             try
             {
-                int rtn = proxy.SetAxleCommunicationParam(baudRate, dataBit, stopBit, verify, timeout, timeoutTimes, period);
+                int rtn = proxy.SetAxleCommunicationParam(param.baudRate, param.dataBit, param.stopBit, param.verify, param.timeout, param.timeoutTimes, param.period);
                 if (log != null)
                 {
-                    log.LogInfo($"SetAxleCommunicationParam({baudRate}, {dataBit}, {stopBit}, {verify}, {timeout}, {timeoutTimes}, {period}) : {rtn}");
+                    log.LogInfo($"SetAxleCommunicationParam({param.baudRate}, {param.dataBit}, {param.stopBit}, {param.verify}, {param.timeout}, {param.timeoutTimes}, {param.period}) : {rtn}");
                 }
                 return rtn;
             }
@@ -16555,9 +16754,10 @@ namespace fairino
         /**
         * @brief 开始Ptp运动FIR滤波
         * @param [in] maxAcc 最大加速度极值(deg/s2)
+        * @param [in] maxJek 统一关节急动度极值(deg/s3)
         * @return 错误码
         */
-        public int PtpFIRPlanningStart(double maxAcc)
+        public int PtpFIRPlanningStart(double maxAcc, double maxJek=1000)
         {
             if (IsSockComError())
             {
@@ -16565,7 +16765,7 @@ namespace fairino
             }
             try
             {
-                int rtn = proxy.PtpFIRPlanningStart(maxAcc);
+                int rtn = proxy.PtpFIRPlanningStart(maxAcc, maxJek);
                 if (log != null)
                 {
                     log.LogInfo($"PtpFIRPlanningStart({maxAcc}");
@@ -17138,14 +17338,15 @@ namespace fairino
                 }
             }
         }
-
         /**
-   * @brief  摆动渐变开始
-   * @param  [in] weaveNum 摆动编号
-   * @return  错误码
-   * @version  3.7.9
-   */
-        public int WeaveChangeStart(int weaveNum)
+        * @brief  摆动渐变开始
+        * @param [in] weaveChangeFlag 1-变摆动参数；2-变摆动参数+焊接速度
+        * @param [in] weaveNum 摆动编号 
+        * @param [in] velStart 焊接开始速度，(cm/min)
+        * @param [in] velEnd 焊接结束速度，(cm/min)
+        * @return  错误码
+        */
+        public int WeaveChangeStart(int weaveChangeFlag, int weaveNum, double velStart, double velEnd)
         {
             if (IsSockComError())
             {
@@ -17153,7 +17354,7 @@ namespace fairino
             }
             try
             {
-                int result = proxy.WeaveChangeStart(weaveNum);
+                int result = proxy.WeaveChangeStart(weaveChangeFlag, weaveNum, velStart, velEnd);
                 if (log != null)
                 {
                     log.LogInfo($"WeldingSetCheckArcInterruptionParam:({result}");
@@ -17740,7 +17941,695 @@ namespace fairino
             // 6. 返回错误码（原C++代码缺少返回值，这里返回errcode）
             return errcode;
         }
+        /**
+      * @brief 电弧跟踪焊机电流反馈AI通道选择
+      * @param [in]  channel 通道；0-扩展AI0；1-扩展AI1；2-扩展AI2；3-扩展AI3；4-控制箱AI0；5-控制箱AI1
+      * @return 错误码
+      */
+        public int ArcWeldTraceAIChannelCurrent(int channel)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            if (GetSafetyCode() != 0)
+            {
+                return GetSafetyCode();
+            }
+            int errcode = 0;
+            try
+            {
+                errcode = proxy.ArcWeldTraceAIChannelCurrent(channel);
 
+
+                return errcode;
+            }
+            catch
+            {
+                if (IsSockComError())
+                {
+                    if (log != null)
+                    {
+                        log.LogError($"RPC exception");
+                    }
+                    return g_sock_com_err;
+                }
+                else
+                {
+                    return (int)RobotError.ERR_RPC_ERROR;
+                }
+            }
+        }
+
+        /**
+         * @brief 电弧跟踪焊机电压反馈AI通道选择
+         * @param [in]  channel 通道；0-扩展AI0；1-扩展AI1；2-扩展AI2；3-扩展AI3；4-控制箱AI0；5-控制箱AI1
+         * @return 错误码
+         */
+        public int ArcWeldTraceAIChannelVoltage(int channel)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            if (GetSafetyCode() != 0)
+            {
+                return GetSafetyCode();
+            }
+            int errcode = 0;
+            try
+            {
+                errcode = proxy.ArcWeldTraceAIChannelVoltage(channel);
+
+
+                return errcode;
+            }
+            catch
+            {
+                if (IsSockComError())
+                {
+                    if (log != null)
+                    {
+                        log.LogError($"RPC exception");
+                    }
+                    return g_sock_com_err;
+                }
+                else
+                {
+                    return (int)RobotError.ERR_RPC_ERROR;
+                }
+            }
+        }
+
+        /**
+         * @brief 电弧跟踪焊机电流反馈转换参数
+         * @param [in] AILow AI通道下限，默认值0V，范围[0-10V]
+         * @param [in] AIHigh AI通道上限，默认值10V，范围[0-10V]
+         * @param [in] currentLow AI通道下限对应焊机电流值，默认值0V，范围[0-200V]
+         * @param [in] currentHigh AI通道上限对应焊机电流值，默认值100V，范围[0-200V]
+         * @return 错误码
+         */
+        public int ArcWeldTraceCurrentPara(float AILow, float AIHigh, float currentLow, float currentHigh)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            if (GetSafetyCode() != 0)
+            {
+                return GetSafetyCode();
+            }
+            int errcode = 0;
+            try
+            {
+                errcode = proxy.ArcWeldTraceCurrentPara(AILow, AIHigh, currentLow, currentHigh);
+
+
+                return errcode;
+            }
+            catch
+            {
+                if (IsSockComError())
+                {
+                    if (log != null)
+                    {
+                        log.LogError($"RPC exception");
+                    }
+                    return g_sock_com_err;
+                }
+                else
+                {
+                    Console.WriteLine("wertyuio");
+                    return (int)RobotError.ERR_RPC_ERROR;
+                }
+            }
+        }
+
+        /**
+         * @brief 电弧跟踪焊机电压反馈转换参数
+         * @param [in] AILow AI通道下限，默认值0V，范围[0-10V]
+         * @param [in] AIHigh AI通道上限，默认值10V，范围[0-10V]
+         * @param [in] voltageLow AI通道下限对应焊机电压值，默认值0V，范围[0-200V]
+         * @param [in] voltageHigh AI通道上限对应焊机电压值，默认值100V，范围[0-200V]
+         * @return 错误码
+         */
+        public int ArcWeldTraceVoltagePara(float AILow, float AIHigh, float voltageLow, float voltageHigh)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            if (GetSafetyCode() != 0)
+            {
+                return GetSafetyCode();
+            }
+            int errcode = 0;
+            try
+            {
+                errcode = proxy.ArcWeldTraceVoltagePara(AILow, AIHigh, voltageLow, voltageHigh);
+
+
+                return errcode;
+            }
+            catch
+            {
+                if (IsSockComError())
+                {
+                    if (log != null)
+                    {
+                        log.LogError($"RPC exception");
+                    }
+                    return g_sock_com_err;
+                }
+                else
+                {
+                    return (int)RobotError.ERR_RPC_ERROR;
+                }
+            }
+        }
+        /**
+ * @brief 设置焊接电压渐变开始
+ * @param [in] IOType 控制类型；0-控制箱IO；1-数字通信协议(UDP);2-数字通信协议(ModbusTCP)
+ * @param [in] voltageStart 起始焊接电压(V)
+ * @param [in] voltageEnd 终止焊接电压(V)
+ * @param [in] AOIndex 控制箱AO端口号(0-1)
+ * @param [in] blend 是否平滑 0-不平滑；1-平滑
+ * @return 错误码
+ */
+        public int WeldingSetVoltageGradualChangeStart(int IOType, double voltageStart, double voltageEnd, int AOIndex, int blend)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            if (GetSafetyCode() != 0)
+            {
+                return GetSafetyCode();
+            }
+            int errcode = 0;
+            try
+            {
+                errcode = proxy.WeldingSetVoltageGradualChangeStart(IOType, voltageStart, voltageEnd, AOIndex, blend);
+
+
+                return errcode;
+            }
+            catch
+            {
+                if (IsSockComError())
+                {
+                    if (log != null)
+                    {
+                        log.LogError($"RPC exception");
+                    }
+                    return g_sock_com_err;
+                }
+                else
+                {
+                    return (int)RobotError.ERR_RPC_ERROR;
+                }
+            }
+
+        }
+
+        /**
+         * @brief 设置焊接电压渐变结束
+         * @return 错误码
+         */
+        public int WeldingSetVoltageGradualChangeEnd()
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            if (GetSafetyCode() != 0)
+            {
+                return GetSafetyCode();
+            }
+            int errcode = 0;
+            try
+            {
+                errcode = proxy.WeldingSetVoltageGradualChangeEnd();
+
+
+                return errcode;
+            }
+            catch
+            {
+                if (IsSockComError())
+                {
+                    if (log != null)
+                    {
+                        log.LogError($"RPC exception");
+                    }
+                    return g_sock_com_err;
+                }
+                else
+                {
+                    return (int)RobotError.ERR_RPC_ERROR;
+                }
+            }
+        }
+
+        /**
+         * @brief 设置焊接电流渐变开始
+         * @param [in] IOType 控制类型；0-控制箱IO；1-数字通信协议(UDP);2-数字通信协议(ModbusTCP)
+         * @param [in] voltageStart 起始焊接电流(A)
+         * @param [in] voltageEnd 终止焊接电流(A)
+         * @param [in] AOIndex 控制箱AO端口号(0-1)
+         * @param [in] blend 是否平滑 0-不平滑；1-平滑
+         * @return 错误码
+         */
+        public int WeldingSetCurrentGradualChangeStart(int IOType, double currentStart, double currentEnd, int AOIndex, int blend)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            if (GetSafetyCode() != 0)
+            {
+                return GetSafetyCode();
+            }
+            int errcode = 0;
+            try
+            {
+                errcode = proxy.WeldingSetCurrentGradualChangeStart(IOType, currentStart, currentEnd, AOIndex, blend);
+
+
+                return errcode;
+            }
+            catch
+            {
+                if (IsSockComError())
+                {
+                    if (log != null)
+                    {
+                        log.LogError($"RPC exception");
+                    }
+                    return g_sock_com_err;
+                }
+                else
+                {
+                    return (int)RobotError.ERR_RPC_ERROR;
+                }
+            }
+
+        }
+
+        /**
+         * @brief 设置焊接电流渐变结束
+         * @return 错误码
+         */
+        public int WeldingSetCurrentGradualChangeEnd()
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            if (GetSafetyCode() != 0)
+            {
+                return GetSafetyCode();
+            }
+            int errcode = 0;
+            try
+            {
+                errcode = proxy.WeldingSetCurrentGradualChangeEnd();
+
+
+                return errcode;
+            }
+            catch
+            {
+                if (IsSockComError())
+                {
+                    if (log != null)
+                    {
+                        log.LogError($"RPC exception");
+                    }
+                    return g_sock_com_err;
+                }
+                else
+                {
+                    return (int)RobotError.ERR_RPC_ERROR;
+                }
+            }
+        }
+
+        /**
+        * @brief 获取SmartTool按钮状态
+        * @param [out] state SmartTool手柄按钮状态;(bit0:0-通信正常；1-通信掉线；bit1-撤销操作；bit2-清空程序；
+        bit3-A键；bit4-B键；bit5-C键；bit6-D键；bit7-E键；bit8-IO键；bit9-手自动；bit10开始)
+        * @return 错误码
+        */
+        public int GetSmarttoolBtnState(ref int state)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            state = robot_state_pkg.smartToolState;
+
+            return 0;
+        }
+
+        /**
+        * @brief 获取扩展轴坐标系
+        * @param [out] coord 扩展轴坐标系
+        * @return 错误码
+        */
+        public int ExtAxisGetCoord(ref DescPose coord)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+                object[] result = proxy.ExtAxisGetCoord();
+                if ((int)result[0] == 0)
+                {
+                    coord.tran.x = (double)result[1];
+                    coord.tran.y = (double)result[2];
+                    coord.tran.z = (double)result[3];
+                    coord.rpy.rx = (double)result[4];
+                    coord.rpy.ry = (double)result[5];
+                    coord.rpy.rz = (double)result[6];
+                }
+                if (log != null)
+                {
+                    log.LogInfo($"ExtAxisGetCoord(ref {coord.tran.x},ref {coord.tran.y},ref {coord.tran.z},ref {coord.rpy.rx},ref {coord.rpy.ry},ref {coord.rpy.rz}) : {(int)result[0]}");
+                }
+                return (int)result[0];
+            }
+            catch
+            {
+                if (IsSockComError())
+                {
+                    if (log != null)
+                    {
+                        log.LogError($"RPC exception");
+                    }
+                    return g_sock_com_err;
+                }
+                else
+                {
+                    return (int)RobotError.ERR_RPC_ERROR;
+                }
+            }
+        }
+        /**
+        * @brief 下发SCP指令
+        * @param [in] mode 0-上传（上位机->控制器），1-下载（控制器->上位机）
+        * @param [in] sshname 上位机用户名
+        * @param [in] sship 上位机ip地址
+        * @param [in] usr_file_url 上位机文件路径
+        * @param [in] robot_file_url 机器人控制器文件路径
+        * @return 错误码
+        */
+        public int SetSSHScpCmd(int mode, string sshname, string sship, string usr_file_url, string robot_file_url)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+                int errcode = proxy.SetSSHScpCmd(mode, sshname, sship, usr_file_url, robot_file_url);
+
+
+                return errcode;
+            }
+            catch
+            {
+                if (IsSockComError())
+                {
+                    if (log != null)
+                    {
+                        log.LogError($"RPC exception");
+                    }
+                    return g_sock_com_err;
+                }
+                else
+                {
+                    return (int)RobotError.ERR_RPC_ERROR;
+                }
+            }
+        }
+
+
+
+        //        /**
+        //        * @brief  螺旋线探索
+        //        * @param  [in] rcs 参考坐标系，0-工具坐标系，1-基坐标系
+        //        * @param  [in] dr 每圈半径进给量
+        //        * @param  [in] ft 力/扭矩阈值，fx,fy,fz,tx,ty,tz，范围[0~100]
+        //        * @param  [in] max_t_ms 最大探索时间，单位ms
+        //        * @param  [in] max_vel 最大线速度，单位mm/s
+        //        * @return  错误码
+        //        */
+        //        public int FT_SpiralSearch(int rcs, float dr, float ft, float max_t_ms, float max_vel)
+        //        {
+        //            if (IsSockComError())
+        //            {
+        //                return g_sock_com_err;
+        //            }
+        //            int errcode = 0;
+        //            try
+        //            {
+        //                errcode = proxy.FT_SpiralSearch(rcs,  dr,  ft,  max_t_ms,  max_vel);
+
+        //                if (log != null)
+        //                {
+        //                    log.LogInfo($"FT_SpiralSearch(ref {rcs},ref {dr},ref {ft},ref {max_t_ms},ref {max_vel}: {errcode}");
+        //                }
+        //                return errcode;
+        //            }
+        //            catch
+        //            {
+        //                if (IsSockComError())
+        //                {
+        //                    if (log != null)
+        //                    {
+        //                        log.LogError($"RPC exception");
+        //                    }
+        //                    return g_sock_com_err;
+        //                }
+        //                else
+        //                {
+        //                    return (int)RobotError.ERR_RPC_ERROR;
+        //                }
+        //            }
+        //        }
+        //        /**
+        //        * @brief  旋转插入
+        //        * @param  [in] rcs 参考坐标系，0-工具坐标系，1-基坐标系
+        //        * @param  [in] angVelRot 旋转角速度，单位deg/s
+        //        * @param  [in] ft  力/扭矩阈值，fx,fy,fz,tx,ty,tz，范围[0~100]
+        //        * @param  [in] max_angle 最大旋转角度，单位deg
+        //        * @param  [in] orn 力/扭矩方向，1-沿z轴方向，2-绕z轴方向
+        //        * @param  [in] max_angAcc 最大旋转加速度，单位deg/s^2，暂不使用，默认为0
+        //        * @param  [in] rotorn  旋转方向，1-顺时针，2-逆时针
+        //        * @return  错误码
+        //*/
+        //        public int FT_RotInsertion(int rcs, float angVelRot, float ft, float max_angle, uint8_t orn, float max_angAcc, uint8_t rotorn)
+        //        {
+        //            if (IsSockComError())
+        //            {
+        //                return g_sock_com_err;
+        //            }
+        //            int errcode = 0;
+        //            try
+        //            {
+        //                errcode = proxy.FT_SpiralSearch(rcs, dr, ft, max_t_ms, max_vel);
+
+        //                if (log != null)
+        //                {
+        //                    log.LogInfo($"FT_SpiralSearch(ref {rcs},ref {dr},ref {ft},ref {max_t_ms},ref {max_vel}: {errcode}");
+        //                }
+        //                return errcode;
+        //            }
+        //            catch
+        //            {
+        //                if (IsSockComError())
+        //                {
+        //                    if (log != null)
+        //                    {
+        //                        log.LogError($"RPC exception");
+        //                    }
+        //                    return g_sock_com_err;
+        //                }
+        //                else
+        //                {
+        //                    return (int)RobotError.ERR_RPC_ERROR;
+        //                }
+        //            }
+        //        }
+        //        /**
+        //        * @brief  直线插入
+        //        * @param  [in] rcs 参考坐标系，0-工具坐标系，1-基坐标系
+        //        * @param  [in] ft  力/扭矩阈值，fx,fy,fz,tx,ty,tz，范围[0~100]
+        //        * @param  [in] lin_v 直线速度，单位mm/s
+        //        * @param  [in] lin_a 直线加速度，单位mm/s^2，暂不使用
+        //        * @param  [in] max_dis 最大插入距离，单位mm
+        //        * @param  [in] linorn  插入方向，0-负方向，1-正方向
+        //        * @return  错误码
+        //        */
+        //        public int FT_LinInsertion(int rcs, float ft, float lin_v, float lin_a, float max_dis, uint8_t linorn)
+        //        {
+        //            if (IsSockComError())
+        //            {
+        //                return g_sock_com_err;
+        //            }
+        //            int errcode = 0;
+        //            try
+        //            {
+        //                errcode = proxy.FT_SpiralSearch(rcs, dr, ft, max_t_ms, max_vel);
+
+        //                if (log != null)
+        //                {
+        //                    log.LogInfo($"FT_SpiralSearch(ref {rcs},ref {dr},ref {ft},ref {max_t_ms},ref {max_vel}: {errcode}");
+        //                }
+        //                return errcode;
+        //            }
+        //            catch
+        //            {
+        //                if (IsSockComError())
+        //                {
+        //                    if (log != null)
+        //                    {
+        //                        log.LogError($"RPC exception");
+        //                    }
+        //                    return g_sock_com_err;
+        //                }
+        //                else
+        //                {
+        //                    return (int)RobotError.ERR_RPC_ERROR;
+        //                }
+        //            }
+        //        }
+
+
+        //        /**
+        //        * @brief  表面定位
+        //        * @param  [in] rcs 参考坐标系，0-工具坐标系，1-基坐标系
+        //        * @param  [in] dir  移动方向，1-正方向，2-负方向
+        //        * @param  [in] axis 移动轴，1-x轴，2-y轴，3-z轴
+        //        * @param  [in] lin_v 探索直线速度，单位mm/s
+        //        * @param  [in] lin_a 探索直线加速度，单位mm/s^2，暂不使用，默认为0
+        //        * @param  [in] max_dis 最大探索距离，单位mm
+        //        * @param  [in] ft  动作终止力/扭矩阈值，fx,fy,fz,tx,ty,tz
+        //        * @return  错误码
+        //*/
+        //        public int FT_FindSurface(int rcs, uint8_t dir, uint8_t axis, float lin_v, float lin_a, float max_dis, float ft)
+        //        {
+        //            if (IsSockComError())
+        //            {
+        //                return g_sock_com_err;
+        //            }
+        //            int errcode = 0;
+        //            try
+        //            {
+        //                errcode = proxy.FT_SpiralSearch(rcs, dr, ft, max_t_ms, max_vel);
+
+        //                if (log != null)
+        //                {
+        //                    log.LogInfo($"FT_SpiralSearch(ref {rcs},ref {dr},ref {ft},ref {max_t_ms},ref {max_vel}: {errcode}");
+        //                }
+        //                return errcode;
+        //            }
+        //            catch
+        //            {
+        //                if (IsSockComError())
+        //                {
+        //                    if (log != null)
+        //                    {
+        //                        log.LogError($"RPC exception");
+        //                    }
+        //                    return g_sock_com_err;
+        //                }
+        //                else
+        //                {
+        //                    return (int)RobotError.ERR_RPC_ERROR;
+        //                }
+        //            }
+        //        }
+
+
+        //        /**
+        //        * @brief  计算中间平面位置开始
+        //        * @return  错误码
+        //        */
+        //        public int FT_CalCenterStart()
+        //        {
+        //            if (IsSockComError())
+        //            {
+        //                return g_sock_com_err;
+        //            }
+        //            int errcode = 0;
+        //            try
+        //            {
+        //                errcode = proxy.FT_SpiralSearch(rcs, dr, ft, max_t_ms, max_vel);
+
+        //                if (log != null)
+        //                {
+        //                    log.LogInfo($"FT_SpiralSearch(ref {rcs},ref {dr},ref {ft},ref {max_t_ms},ref {max_vel}: {errcode}");
+        //                }
+        //                return errcode;
+        //            }
+        //            catch
+        //            {
+        //                if (IsSockComError())
+        //                {
+        //                    if (log != null)
+        //                    {
+        //                        log.LogError($"RPC exception");
+        //                    }
+        //                    return g_sock_com_err;
+        //                }
+        //                else
+        //                {
+        //                    return (int)RobotError.ERR_RPC_ERROR;
+        //                }
+        //            }
+        //        }
+        //        /**
+        //        * @brief  计算中间平面位置结束
+        //        * @param  [out] pos 中间平面位姿
+        //        * @return  错误码
+        //        */
+        //        public int FT_CalCenterEnd(DescPose* pos)
+        //        {
+        //            if (IsSockComError())
+        //            {
+        //                return g_sock_com_err;
+        //            }
+        //            int errcode = 0;
+        //            try
+        //            {
+        //                errcode = proxy.FT_SpiralSearch(rcs, dr, ft, max_t_ms, max_vel);
+
+        //                if (log != null)
+        //                {
+        //                    log.LogInfo($"FT_SpiralSearch(ref {rcs},ref {dr},ref {ft},ref {max_t_ms},ref {max_vel}: {errcode}");
+        //                }
+        //                return errcode;
+        //            }
+        //            catch
+        //            {
+        //                if (IsSockComError())
+        //                {
+        //                    if (log != null)
+        //                    {
+        //                        log.LogError($"RPC exception");
+        //                    }
+        //                    return g_sock_com_err;
+        //                }
+        //                else
+        //                {
+        //                    return (int)RobotError.ERR_RPC_ERROR;
+        //                }
+        //            }
+        //        }
     }
 }
 

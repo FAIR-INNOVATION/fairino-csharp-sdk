@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO.Ports;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 //using System.Threading.Tasks;
 
 namespace fairino
@@ -138,6 +140,40 @@ namespace fairino
     }
 
     /**
+* @brief 力传感器的受力分量和力矩分量
+* 
+* 	     * @param [out] baudRate 
+	     * @param [out] dataBit 
+	     * @param [out] stopBit
+	     * @param [out] verify
+	     * @param [out] timeout
+	     * @param [out] timeoutTimes
+	     * @param [out] period
+*/
+    [StructLayout(LayoutKind.Sequential)]
+    public struct AxleComParam
+    {
+        public int baudRate;    //波特率：支持 1-9600，2-14400，3-19200，4-38400，5-56000，6-67600，7-115200，8-128000；
+        public int dataBit; //数据位：数据位支持（8,9），目前常用为 8
+        public int stopBit; //停止位：1-1，2-0.5，3-2，4-1.5，目前常用为 1
+        public int verify;  //校验位：0-None，1-Odd，2-Even,目前常用为 0；
+        public int timeout;  //超时次数：1~10，主要进行超时重发，减少偶发异常提高用户体验
+        public int timeoutTimes; //超时次数：1~10，主要进行超时重发，减少偶发异常提高用户体验
+        public int period;   //周期性指令时间间隔：1~1000ms，主要用于周期性指令每次下发的时间间隔
+        public AxleComParam(int baud_Rate, int data_Bit, int stop_Bit, int verify_, int timeout_, int timeout_Times, int period_)
+        {
+            baudRate = baud_Rate;
+            dataBit = data_Bit;
+            stopBit = stop_Bit;
+            verify = verify_;
+            timeout = timeout_;
+            timeoutTimes = timeout_Times;
+            period = period_;
+        }
+    }
+
+
+    /**
     * @brief  螺旋参数数据类型
     */
     [StructLayout(LayoutKind.Sequential)]
@@ -228,15 +264,15 @@ namespace fairino
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 6)]
         public double[] actual_qdd;                             //机器人当前关节加速度  16 + 8 * 6 * 5 = 256
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
-        public double[] target_TCP_CmpSpeed;                    //机器人TCP合成指令速度                         //256 + 8* 2 = 272
+        public double[] target_TCP_CmpSpeed;                    //机器人TCP合成指令速度                        
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 6)]
-        public double[] target_TCP_Speed;                       //机器人TCP指令速度                        //272 + 8 * 6 = 320 
+        public double[] target_TCP_Speed;                       //机器人TCP指令速度                        
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
-        public double[] actual_TCP_CmpSpeed;                    //机器人TCP合成实际速度                        //320 + 16 = 336
+        public double[] actual_TCP_CmpSpeed;                    //机器人TCP合成实际速度                     
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 6)]
-        public double[] actual_TCP_Speed;                       //机器人TCP实际速度                      //336 + 8 * 6 = 384
+        public double[] actual_TCP_Speed;                       //机器人TCP实际速度                     
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 6)]
-        public double[] jt_cur_tor;                             //当前扭矩         //384 + 8 * 6 = 432 
+        public double[] jt_cur_tor;                             //当前扭矩       
         public int tool;                        //工具号
         public int user;                        //工件号
         public byte cl_dgt_output_h;            //数字输出15-8
@@ -244,14 +280,14 @@ namespace fairino
         public byte tl_dgt_output_l;            //工具数字输出7-0(仅bit0-bit1有效)
         public byte cl_dgt_input_h;             //数字输入15-8
         public byte cl_dgt_input_l;             //数字输入7-0
-        public byte tl_dgt_input_l;             //工具数字输入7-0(仅bit0-bit1有效)                    // + 14 = 446
+        public byte tl_dgt_input_l;             //工具数字输入7-0(仅bit0-bit1有效)                  
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
         public UInt16[] cl_analog_input;        //控制箱模拟量输入
-        public UInt16 tl_anglog_input;          //工具模拟量输入                              // + 6 = 452
+        public UInt16 tl_anglog_input;          //工具模拟量输入                            
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 6)]
         public double[] ft_sensor_raw_data;     //力/扭矩传感器原始数据
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 6)]
-        public double[] ft_sensor_data;         //力/扭矩传感器数据                           // + 8 * 12 = 548
+        public double[] ft_sensor_data;         //力/扭矩传感器数据                          
         public byte ft_sensor_active;           //力/扭矩传感器激活状态， 0-复位，1-激活
         public byte EmergencyStop;              //急停标志
         public int motion_done;                 //到位信号
@@ -261,15 +297,15 @@ namespace fairino
         public int trajectory_pnum;             //轨迹点编号
         public byte safety_stop0_state;  /* 安全停止信号SI0 */
         public byte safety_stop1_state;  /* 安全停止信号SI1 */
-        public byte gripper_fault_id;    /* 错误夹爪号 */               // + 19 = 567
+        public byte gripper_fault_id;    /* 错误夹爪号 */             
         public UInt16 gripper_fault;     /* 夹爪故障 */
         public UInt16 gripper_active;    /* 夹爪激活状态 */
         public byte gripper_position;    /* 夹爪位置 */
         public byte gripper_speed;       /* 夹爪速度 */
         public byte gripper_current;     /* 夹爪电流 */
         public int gripper_tmp;          /* 夹爪温度 */
-        public int gripper_voltage;      /* 夹爪电压 */                 // + 15 = 582
-        public ROBOT_AUX_STATE auxState; /* 485扩展轴状态 */            // + 25 = 607
+        public int gripper_voltage;      /* 夹爪电压 */                 
+        public ROBOT_AUX_STATE auxState; /* 485扩展轴状态 */          
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
         public EXT_AXIS_STATUS[] extAxisStatus;  /* UDP扩展轴状态 */
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 8)]
@@ -294,8 +330,12 @@ namespace fairino
         public float gripperRotNum;           //旋转夹爪当前旋转圈数			  The current number of turns of the rotating clamp
         public byte gripperRotSpeed;       //旋转夹爪当前旋转速度百分比	  Percentage of the current rotation speed of the rotary clamp
         public byte gripperRotTorque;	   //旋转夹爪当前旋转力矩百分比	  Percentage of the current rotating torque of the rotating clamp
-        public WELDING_BREAKOFF_STATE weldingBreakOffState;
-        public UInt16 check_sum;         /* 和校验 */                  // + 2 = 609
+        public WELDING_BREAKOFF_STATE weldingBreakOffState;//焊接中断状态
+
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 6)]
+        public double[] jt_tgt_tor;//关节指令力矩
+        public int smartToolState; //SmartTool手柄按钮状态
+        public UInt16 check_sum;         /* 和校验 */                 
     }
 
     enum RobotError
@@ -419,7 +459,17 @@ namespace fairino
         ERR_LUAFILENITFOUND = 144,                  //LUA文件不存在
         ERR_JOINTCONFIGCHANGE = 151,                //关节配置发生变化
         ERR_WEAVEPOINTDISTANCETOOSMALL = 152,       //摆焊指令点间距过小
-        ERR_ARCLENGTHTOOSMALL = 153            //圆弧指令点间距太小
+        ERR_ARCLENGTHTOOSMALL = 153,           //圆弧指令点间距太小
+
+        ERR_SOCKET_RECV_FAILED = -16,   /* socket接收失败 */
+        ERR_SOCKET_SEND_FAILED = -15,    /* socket发送失败 */
+        ERR_FILE_OPEN_FAILED = -14,   /* 文件打开失败 */
+        ERR_FILE_TOO_LARGE = -13,   /* 文件大小超限 */
+        ERR_UPLOAD_FILE_ERROR = -12,   /* 上传文件异常 */
+        ERR_FILE_NAME = -11,  /* 文件名称异常 */
+        ERR_DOWN_LOAD_FILE_WRITE_FAILED = -10,   /* 下载文件写入失败 */
+        ERR_DOWN_LOAD_FILE_CHECK_FAILED = -9,     /* 文件下载校验失败 */
+        ERR_DOWN_LOAD_FILE_FAILED = -8,   /* 文件下载失败 */
 
 
 

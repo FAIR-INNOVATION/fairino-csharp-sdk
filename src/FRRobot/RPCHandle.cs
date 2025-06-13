@@ -126,6 +126,7 @@ namespace fairino
         [XmlRpcMethod("MoveJ")]
         int MoveJ(double[] joint_pos, double[] desc_pos, int tool, int user, double vel, double acc, double ovl, double[] epos, double blendT, int offset_flag, double[] offset_pos);
 
+
         /**
         * @brief  笛卡尔空间直线运动
         * @param  [in] joint_pos  目标关节位置,单位deg
@@ -135,7 +136,7 @@ namespace fairino
         * @param  [in] vel  速度百分比，范围[0~100]
         * @param  [in] acc  加速度百分比，范围[0~100],暂不开放
         * @param  [in] ovl  速度缩放因子，范围[0~100]
-        * @param  [in] blendR [-1.0]-运动到位(阻塞)，[0~1000.0]-平滑半径(非阻塞)，单位mm	 
+        * @param  [in] blendR [-1.0]-运动到位(阻塞)，[0~1000.0]-平滑半径(非阻塞)，单位mm
         * @param  [in] epos  扩展轴位置，单位mm
         * @param  [in] search  0-不焊丝寻位，1-焊丝寻位
         * @param  [in] offset_flag  0-不偏移，1-基坐标系/工件坐标系下偏移，2-工具坐标系下偏移
@@ -144,6 +145,26 @@ namespace fairino
         */
         [XmlRpcMethod("MoveL")]
         int MoveL(double[] joint_pos, double[] desc_pos, int tool, int user, double vel, double acc, double ovl, double blendR, double[] epos, int search, int offset_flag, double[] offset_pos);
+
+        /**
+        * @brief  笛卡尔空间直线运动
+        * @param  [in] joint_pos  目标关节位置,单位deg
+        * @param  [in] desc_pos   目标笛卡尔位姿
+        * @param  [in] tool  工具坐标号，范围[1~15]
+        * @param  [in] user  工件坐标号，范围[1~15]
+        * @param  [in] vel  速度百分比，范围[0~100]
+        * @param  [in] acc  加速度百分比，范围[0~100],暂不开放
+        * @param  [in] ovl  速度缩放因子，范围[0~100]
+        * @param  [in] blendR [-1.0]-运动到位(阻塞)，[0~1000.0]-平滑半径(非阻塞)，单位mm
+        * @param  [in] blendMode 过渡方式；0-内切过渡；1-角点过渡
+        * @param  [in] epos  扩展轴位置，单位mm
+        * @param  [in] search  0-不焊丝寻位，1-焊丝寻位
+        * @param  [in] offset_flag  0-不偏移，1-基坐标系/工件坐标系下偏移，2-工具坐标系下偏移
+        * @param  [in] offset_pos  位姿偏移量
+        * @return  错误码
+        */
+        [XmlRpcMethod("MoveL")]
+        int MoveL(double[] joint_pos, double[] desc_pos, int tool, int user, double vel, double acc, double ovl, double blendR, int blendMode, double[] epos, int search, int offset_flag, double[] offset_pos);
 
         /**
         * @brief  笛卡尔空间圆弧运动
@@ -1293,7 +1314,7 @@ namespace fairino
         * @return 错误码
         */
         [XmlRpcMethod("PtpFIRPlanningStart")]
-        int PtpFIRPlanningStart(double maxAcc);
+        int PtpFIRPlanningStart(double maxAcc, double maxJek);
 
         /**
         * @brief 关闭Ptp运动FIR滤波
@@ -1486,7 +1507,7 @@ namespace fairino
         int MoveToolAOStop();
 
         [XmlRpcMethod("ExtDevSetUDPComParam")]
-        int ExtDevSetUDPComParam(string ip, int port, int period, int lossPkgTime, int lossPkgNum, int disconnectTime, int reconnectEnable, int reconnectPeriod, int reconnectNum);
+        int ExtDevSetUDPComParam(string ip, int port, int period, int lossPkgTime, int lossPkgNum, int disconnectTime, int reconnectEnable, int reconnectPeriod, int reconnectNum, int selfConnect);
 
         [XmlRpcMethod("ExtDevGetUDPComParam")]
         object[] ExtDevGetUDPComParam();
@@ -1614,13 +1635,13 @@ namespace fairino
         int SetPointToDatabase(string varName, double[] pos);
 
         [XmlRpcMethod("ArcWeldTraceControl")]
-        int ArcWeldTraceControl(int flag, double delaytime, int isLeftRight, double[] paramLR, int isUpLow, double[] paramUD, int axisSelect, int referenceType, double referSampleStartUd, double referSampleCountUd, double referenceCurrent);
+        int ArcWeldTraceControl(int flag, double delaytime, int isLeftRight, double[] paramLR, int isUpLow, double[] paramUD, int axisSelect, int referenceType, double referSampleStartUd, double referSampleCountUd, double referenceCurrent, int offsetType, int offsetParameter);
 
         [XmlRpcMethod("ArcWeldTraceExtAIChannelConfig")]
         int ArcWeldTraceExtAIChannelConfig(int channel);
 
         [XmlRpcMethod("EndForceDragControl")]
-        int EndForceDragControl(int status, int asaptiveFlag, int interfereDragFlag, double[] M, double[] B, double[] K, double[] F, double Fmax, double Vmax);
+        int EndForceDragControl(int status, int asaptiveFlag, int interfereDragFlag, int ingularityConstraintsFlag,double[] M, double[] B, double[] K, double[] F, double Fmax, double Vmax);
 
         [XmlRpcMethod("SetForceSensorDragAutoFlag")]
         int SetForceSensorDragAutoFlag(int status);
@@ -1724,7 +1745,7 @@ namespace fairino
         int SetExtDIWeldBreakOffRecover(int reWeldDINum, int abortWeldDINum);
 
         [XmlRpcMethod("SetCollisionDetectionMethod")]
-        int SetCollisionDetectionMethod(int method);
+        int SetCollisionDetectionMethod(int method, int thresholdMode);
 
         [XmlRpcMethod("SetStaticCollisionOnOff")]
         int SetStaticCollisionOnOff(int status);
@@ -1860,7 +1881,7 @@ namespace fairino
         int LaserSensorRecord(int status, int delayMode, int delayTime, int delayDisExAxisNum, double delayDis, double sensitivePara, double speed);
 
         [XmlRpcMethod("WeaveChangeStart")]
-        int WeaveChangeStart(int weaveNum);
+        int WeaveChangeStart(int weaveChangeFlag, int weaveNum, double velStart, double velEnd);
 
         [XmlRpcMethod("WeaveChangeEnd")]
         int WeaveChangeEnd();
@@ -1918,6 +1939,24 @@ namespace fairino
 
         [XmlRpcMethod("ArcWeldTraceVoltagePara")]
         int ArcWeldTraceVoltagePara(float AILow, float AIHigh, float voltageLow, float voltageHigh);
+
+        [XmlRpcMethod("WeldingSetVoltageGradualChangeStart")]
+        int WeldingSetVoltageGradualChangeStart(int IOType, double voltageStart, double voltageEnd, int AOIndex, int blend);
+
+        [XmlRpcMethod("WeldingSetVoltageGradualChangeEnd")]
+        int WeldingSetVoltageGradualChangeEnd();
+
+        [XmlRpcMethod("WeldingSetCurrentGradualChangeStart")]
+        int WeldingSetCurrentGradualChangeStart(int IOType, double currentStart, double currentEnd, int AOIndex, int blend);
+
+        [XmlRpcMethod("WeldingSetCurrentGradualChangeEnd")]
+        int WeldingSetCurrentGradualChangeEnd();
+
+        [XmlRpcMethod("ExtAxisGetCoord")]
+        object[] ExtAxisGetCoord();
+
+        [XmlRpcMethod("FT_SpiralSearch")]
+        int FT_SpiralSearch(int rcs, float dr, float ft, float max_t_ms, float max_vel);
 
     }
     internal class RPCHandle
