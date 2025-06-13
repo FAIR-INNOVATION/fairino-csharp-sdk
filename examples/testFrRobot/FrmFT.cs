@@ -36,7 +36,7 @@ namespace testFrRobot
             double[] B = new double[6] { 150, 150, 150, 5.0, 5.0, 1.0 };
             double[] K = new double[6] { 0, 0, 0, 0, 0, 0 };
             double[] F = new double[6] { 10, 10, 10, 1, 1, 1 };
-            robot.EndForceDragControl(1, 0, 0, M, B, K, F, 50, 180);
+            robot.EndForceDragControl(1, 0, 0,0, M, B, K, F, 50, 180);
         }
 
         private void btnStopDrag_Click(object sender, EventArgs e)
@@ -45,7 +45,7 @@ namespace testFrRobot
             double[] B = new double[6] { 150, 150, 150, 5.0, 5.0, 1.0 };
             double[] K = new double[6] { 0, 0, 0, 0, 0, 0 };
             double[] F = new double[6] { 10, 10, 10, 1, 1, 1 };
-            robot.EndForceDragControl(0, 0, 0, M, B, K, F, 50, 100);
+            robot.EndForceDragControl(0, 0, 0,0, M, B, K, F, 50, 100);
         }
 
         private void btnSixStart_Click(object sender, EventArgs e)
@@ -123,7 +123,7 @@ namespace testFrRobot
 
         private void btnStaticStart_Click(object sender, EventArgs e)
         {
-            robot.SetCollisionDetectionMethod(1);
+            robot.SetCollisionDetectionMethod(1,0);
             //robot.SetStaticCollisionOnOff(1);
         }
 
@@ -205,10 +205,10 @@ namespace testFrRobot
         private void btnEndLuaDrag_Click(object sender, EventArgs e)
         {
             ROBOT_STATE_PKG pkg = new ROBOT_STATE_PKG();
-            robot.SetAxleCommunicationParam(7, 8, 1, 0, 5, 3, 1);
+            //robot.SetAxleCommunicationParam(7, 8, 1, 0, 5, 3, 1);
 
             int baudRate = 0, dataBit = 0, stopBit = 0, verify = 0, timeout = 0, timeoutTimes = 0, period = 0;
-            robot.GetAxleCommunicationParam(ref baudRate, ref dataBit, ref stopBit, ref verify, ref timeout, ref timeoutTimes, ref period);
+           // robot.GetAxleCommunicationParam(ref baudRate, ref dataBit, ref stopBit, ref verify, ref timeout, ref timeoutTimes, ref period);
 
             robot.SetAxleLuaEnable(1);
             int luaEnableStatus = 0;
@@ -229,20 +229,20 @@ namespace testFrRobot
             double[] B = new double[6] { 150, 150, 150, 5.0, 5.0, 1.0 };
             double[] K = new double[6] { 0, 0, 0, 0, 0, 0 };
             double[] F = new double[6] { 10, 10, 10, 1, 1, 1 };
-            robot.EndForceDragControl(1, 0, 0, M, B, K, F, 50, 180);
+            robot.EndForceDragControl(1, 0, 0,0, M, B, K, F, 50, 180);
 
             Thread.Sleep(10 * 1000);
 
-            robot.EndForceDragControl(0, 0, 0, M, B, K, F, 50, 100);
+            robot.EndForceDragControl(0, 0, 0,0, M, B, K, F, 50, 100);
         }
 
         private void btnEndGripper_Click(object sender, EventArgs e)
         {
             ROBOT_STATE_PKG pkg = new ROBOT_STATE_PKG();
-            robot.SetAxleCommunicationParam(7, 8, 1, 0, 5, 3, 1);
+           // robot.SetAxleCommunicationParam(7, 8, 1, 0, 5, 3, 1);
 
             int baudRate = 0, dataBit = 0, stopBit = 0, verify = 0, timeout = 0, timeoutTimes = 0, period = 0;
-            robot.GetAxleCommunicationParam(ref baudRate, ref dataBit, ref stopBit, ref verify, ref timeout, ref timeoutTimes, ref period);
+            //robot.GetAxleCommunicationParam(ref baudRate, ref dataBit, ref stopBit, ref verify, ref timeout, ref timeoutTimes, ref period);
 
             robot.SetAxleLuaEnable(1);
             int luaEnableStatus = 0;
@@ -383,7 +383,7 @@ namespace testFrRobot
             ExaxisPos exaxisPos = new ExaxisPos(0, 0, 0, 0);
             DescPose offdese = new DescPose(0, 0, 0, 0, 0, 0);
 
-            robot.MoveL(startjointPos, startdescPose, 0, 0, 30, 100, 100, -1, exaxisPos, 0, 0, offdese, 1, 1);
+            robot.MoveL(startjointPos, startdescPose, 0, 0, 30, 100, 100, -1, 0, exaxisPos, 0, 0, offdese, 1, 1);
             robot.SingularAvoidStart(2, 10, 5, 5);
             robot.MoveC(midjointPos, middescPose, 0, 0, 30, 100, exaxisPos, 0, offdese, endjointPos, enddescPose, 0, 0, 30, 100, exaxisPos, 0, offdese, 100, -1);
             robot.SingularAvoidEnd();
@@ -406,13 +406,13 @@ namespace testFrRobot
             if (enable)
             {
                 robot.LinArcFIRPlanningStart(1000, 1000, 1000, 1000);
-                robot.MoveL(startjointPos, startdescPose, 0, 0, 100, 100, 100, -1, exaxisPos, 0, 0, offdese, 1, 1);
+                robot.MoveL(startjointPos, startdescPose, 0, 0, 100, 100, 100, -1, 0, exaxisPos, 0, 0, offdese, 1, 1);
                 robot.MoveC(midjointPos, middescPose, 0, 0, 100, 100, exaxisPos, 0, offdese, endjointPos, enddescPose, 0, 0, 100, 100, exaxisPos, 0, offdese, 100, -1);
                 robot.LinArcFIRPlanningEnd();
             }
             else
             {
-                robot.MoveL(startjointPos, startdescPose, 0, 0, 100, 100, 100, -1, exaxisPos, 0, 0, offdese, 1, 1);
+                robot.MoveL(startjointPos, startdescPose, 0, 0, 100, 100, 100, -1, 0, exaxisPos, 0, 0, offdese, 1, 1);
                 robot.MoveC(midjointPos, middescPose, 0, 0, 100, 100, exaxisPos, 0, offdese, endjointPos, enddescPose, 0, 0, 100, 100, exaxisPos, 0, offdese, 100, -1);
             }
         }
@@ -430,14 +430,14 @@ namespace testFrRobot
             if (enable)
             {
                 robot.LinArcFIRPlanningStart(5000, 5000, 5000, 5000);
-                robot.MoveL(startjointPos, startdescPose, 0, 0, 100, 100, 100, -1, exaxisPos, 0, 0, offdese, 1, 1);
-                robot.MoveL(endjointPos, enddescPose, 0, 0, 100, 100, 100, -1, exaxisPos, 0, 0, offdese, 1, 1);
+                robot.MoveL(startjointPos, startdescPose, 0, 0, 100, 100, 100, -1, 0, exaxisPos, 0, 0, offdese, 1, 1);
+                robot.MoveL(endjointPos, enddescPose, 0, 0, 100, 100, 100, -1, 0, exaxisPos, 0, 0, offdese, 1, 1);
                 robot.LinArcFIRPlanningEnd();
             }
             else
             {
-                robot.MoveL(startjointPos, startdescPose, 0, 0, 100, 100, 100, -1, exaxisPos, 0, 0, offdese, 1, 1);
-                robot.MoveL(endjointPos, enddescPose, 0, 0, 100, 100, 100, -1, exaxisPos, 0, 0, offdese, 1, 1);
+                robot.MoveL(startjointPos, startdescPose, 0, 0, 100, 100, 100, -1, 0, exaxisPos, 0, 0, offdese, 1, 1);
+                robot.MoveL(endjointPos, enddescPose, 0, 0, 100, 100, 100, -1, 0, exaxisPos, 0, 0, offdese, 1, 1);
             }
         }
 
@@ -455,14 +455,14 @@ namespace testFrRobot
             if (enable)
             {
                 robot.LinArcFIRPlanningStart(5000, 5000, 5000, 5000);
-                robot.MoveL(startjointPos, startdescPose, 0, 0, 100, 100, 100, -1, exaxisPos, 0, 0, offdese, 1, 1);
-                robot.MoveL(endjointPos, enddescPose, 0, 0, 100, 100, 100, -1, exaxisPos, 0, 0, offdese, 1, 1);
+                robot.MoveL(startjointPos, startdescPose, 0, 0, 100, 100, 100, -1, 0, exaxisPos, 0, 0, offdese, 1, 1);
+                robot.MoveL(endjointPos, enddescPose, 0, 0, 100, 100, 100, -1, 0, exaxisPos, 0, 0, offdese, 1, 1);
                 robot.LinArcFIRPlanningEnd();
             }
             else
             {
-                robot.MoveL(startjointPos, startdescPose, 0, 0, 100, 100, 100, -1, exaxisPos, 0, 0, offdese, 1, 1);
-                robot.MoveL(endjointPos, enddescPose, 0, 0, 100, 100, 100, -1, exaxisPos, 0, 0, offdese, 1, 1);
+                robot.MoveL(startjointPos, startdescPose, 0, 0, 100, 100, 100, -1, 0, exaxisPos, 0, 0, offdese, 1, 1);
+                robot.MoveL(endjointPos, enddescPose, 0, 0, 100, 100, 100, -1, 0, exaxisPos, 0, 0, offdese, 1, 1);
             }
         }
 
@@ -479,7 +479,7 @@ namespace testFrRobot
 
             if (enable)
             {
-                robot.PtpFIRPlanningStart(1000);
+                robot.PtpFIRPlanningStart(1000,1000);
                 robot.MoveJ(startjointPos, startdescPose, 0, 0, 100, 100, 100, exaxisPos, -1, 0, offdese);
                 robot.MoveJ(endjointPos, enddescPose, 0, 0, 100, 100, 100, exaxisPos, -1, 0, offdese);
                 robot.PtpFIRPlanningEnd();
@@ -887,7 +887,7 @@ namespace testFrRobot
             ExaxisPos exaxisPosStart = new ExaxisPos(0.0, 0.0, 0.0, 0.0);
             robot.MoveJ(p1Joint, p1Desc, 8, 0, 100, 100, 100, exaxisPos, -1, 0, offdese);
             robot.ExtAxisMove(exaxisPosStart, 50.0);
-            robot.MoveL(p2Joint, p2Desc, 8, 0, 100, 100, 100, -1, exaxisPos, 0, 0, offdese);
+            robot.MoveL(p2Joint, p2Desc, 8, 0, 100, 100, 100, -1, 0, exaxisPos, 0, 0, offdese);
             robot.LaserSensorRecord(4, 1, 10, 2, 35, 0.1, 100);
             ExaxisPos exaxisPosTarget = new ExaxisPos(0.000, 400.015, 0.000, 0.000);
             robot.ExtAxisMove(exaxisPosTarget, 10.0);
@@ -1029,7 +1029,7 @@ namespace testFrRobot
                 rtn = robot.GetInverseKin(0, p2Desc, -1, ref p2Joint);
                 if (p2Joint.jPos[0] != currentState.jt_cur_pos[0])
                 {
-                    rtn = robot.MoveL(p2Joint, p2Desc, 0, 0, 30, 100, 100, -1, exaxisPos, 0, 0, offdese, 1, 1);
+                    rtn = robot.MoveL(p2Joint, p2Desc, 0, 0, 30, 100, 100, -1, 0, exaxisPos, 0, 0, offdese, 1, 1);
                 }
                 if (rtn != 0)
                 {
@@ -1046,7 +1046,7 @@ namespace testFrRobot
                 rtn = robot.GetInverseKin(0, p4Desc, -1, ref p4Joint);
                 if (p4Joint.jPos[0] != currentState.jt_cur_pos[0])
                 {
-                    rtn = robot.MoveL(p4Joint, p4Desc, 0, 0, 30, 100, 100, -1, exaxisPos, 0, 0, offdese, 1, 1);
+                    rtn = robot.MoveL(p4Joint, p4Desc, 0, 0, 30, 100, 100, -1, 0, exaxisPos, 0, 0, offdese, 1, 1);
                 }
                 if (rtn != 0)
                 {
@@ -1162,14 +1162,14 @@ namespace testFrRobot
             while (isConnected)
             {
 
-                rtn = robot.MoveL(p1Joint, p1Desc, 0, 0, 100, 100, 100, -1, exaxisPos, 0, 0, offdese, 0, 10);
+                rtn = robot.MoveL(p1Joint, p1Desc, 0, 0, 100, 100, 100, -1, 0, exaxisPos, 0, 0, offdese, 0, 10);
 
                 if (rtn != 0)
                 {
                     Console.WriteLine("断开通信1::" + rtn);
                     isConnected = false; // 更新连接状态为断开
                 }
-                rtn = robot.MoveL(p2Joint, p2Desc, 0, 0, 100, 100, 100, -1, exaxisPos, 0, 0, offdese, 0, 10);
+                rtn = robot.MoveL(p2Joint, p2Desc, 0, 0, 100, 100, 100, -1, 0, exaxisPos, 0, 0, offdese, 0, 10);
                 if (rtn != 0)
                 {
                     Console.WriteLine("断开通信2::" + rtn);

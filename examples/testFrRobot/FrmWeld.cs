@@ -205,7 +205,7 @@ namespace testFrRobot
 
             robot.SetSpeed(int.Parse(txtWeldSpeed.Text));
 
-            robot.MoveL(startjointPos, startdescPose, 1, 0, 100, 100, 100, 0, exaxisPos, 0, 0, offdese);
+            robot.MoveL(startjointPos, startdescPose, 1, 0, 100, 100, 100, 0, 0, exaxisPos, 0, 0, offdese);
             //robot.ARCStart(int.Parse(txtIOType.Text), int.Parse(txtArcNum.Text), int.Parse(txtWeldTimeOut.Text));
             if (chkWeave.Checked)
             {
@@ -213,7 +213,7 @@ namespace testFrRobot
                 Console.WriteLine(rtn);
             }
 
-            robot.MoveL(endjointPos, enddescPose, 1, 0, 100, 100, 100, -1, exaxisPos, 0, 0, offdese);
+            robot.MoveL(endjointPos, enddescPose, 1, 0, 100, 100, 100, -1, 0, exaxisPos, 0, 0, offdese);
             //robot.ARCEnd(int.Parse(txtIOType.Text), int.Parse(txtArcNum.Text), int.Parse(txtWeldTimeOut.Text));
             Console.WriteLine("44444444444444444444");
             if (chkWeave.Checked)
@@ -308,7 +308,7 @@ namespace testFrRobot
 
             while(true)
             {
-                 robot.MoveL(startjointPos, startdescPose, 1, 0, 100, 100, 100, -1, exaxisPos, 0, 0, offdese);
+                 robot.MoveL(startjointPos, startdescPose, 1, 0, 100, 100, 100, -1, 0, exaxisPos, 0, 0, offdese);
 
                 robot.SetForwardWireFeed(int.Parse(txtIOType.Text), 1);
                 robot.SetReverseWireFeed(int.Parse(txtIOType.Text), 1);
@@ -342,7 +342,7 @@ namespace testFrRobot
                 int AOIndex = 0;
                 robot.WeldingGetCurrentRelation(ref curmin, ref curmax, ref vurvolmin, ref curvolmax, ref AOIndex);
                 robot.WeldingGetVoltageRelation(ref volmin, ref volmax, ref volvolmin, ref volvolmax, ref AOIndex);
-                robot.MoveL(endjointPos, enddescPose, 1, 0, 100, 100, 100, -1, exaxisPos, 0, 0, offdese);
+                robot.MoveL(endjointPos, enddescPose, 1, 0, 100, 100, 100, -1, 0, exaxisPos, 0, 0, offdese);
                 Thread.Sleep(1000);
             }
 
@@ -376,8 +376,8 @@ namespace testFrRobot
             DescPose descEnd = new DescPose(122.471, 55.718, 62.209, -177.207, 1.375, -76.310);
             JointPos jointEnd = new JointPos(-119.728, -113.017, -94.027, -62.061, 87.199, 91.326);
 
-            robot.MoveL(jointStart, descStart, 1, 1, 100, 100, 100, -1, exaxisPos, 0, 0, offdese); 
-            robot.MoveL(jointEnd, descEnd, 1, 1, 100, 100, 100, -1, exaxisPos, 0, 0, offdese);
+            robot.MoveL(jointStart, descStart, 1, 1, 100, 100, 100, -1, 0, exaxisPos, 0, 0, offdese); 
+            robot.MoveL(jointEnd, descEnd, 1, 1, 100, 100, 100, -1, 0, exaxisPos, 0, 0, offdese);
 
             DescPose descREF0A = new DescPose(147.139, -21.436, 60.717, -179.633, -3.051, -83.170);
             JointPos jointREF0A = new JointPos(-121.731, -106.193, -102.561, -64.734, 89.972, 96.171);
@@ -392,27 +392,27 @@ namespace testFrRobot
             JointPos jointREF1B = new JointPos(-133.133, -119.029, -83.326, -70.976, 89.069, 91.401);
 
             robot.WireSearchStart(0, 10, 100, 0, 10, 100, 0);
-            robot.MoveL(jointREF0A, descREF0A, 1, 1, 100, 100, 100, -1, exaxisPos, 0, 0, offdese);  //起点
-            robot.MoveL(jointREF0B, descREF0B, 1, 1, 100, 100, 100, -1, exaxisPos, 1, 0, offdese);  //方向点
+            robot.MoveL(jointREF0A, descREF0A, 1, 1, 100, 100, 100, -1, 0, exaxisPos, 0, 0, offdese);  //起点
+            robot.MoveL(jointREF0B, descREF0B, 1, 1, 100, 100, 100, -1, 0, exaxisPos, 1, 0, offdese);  //方向点
             robot.WireSearchWait("REF0");
             robot.WireSearchEnd(0, 10, 100, 0, 10, 100, 0);
 
             robot.WireSearchStart(0, 10, 100, 0, 10, 100, 0);
-            robot.MoveL(jointREF1A, descREF1A, 1, 1, 100, 100, 100, -1, exaxisPos, 0, 0, offdese);  //起点
-            robot.MoveL(jointREF1B, descREF1B, 1, 1, 100, 100, 100, -1, exaxisPos, 1, 0, offdese);  //方向点
+            robot.MoveL(jointREF1A, descREF1A, 1, 1, 100, 100, 100, -1, 0, exaxisPos, 0, 0, offdese);  //起点
+            robot.MoveL(jointREF1B, descREF1B, 1, 1, 100, 100, 100, -1, 0, exaxisPos, 1, 0, offdese);  //方向点
             robot.WireSearchWait("REF1");
             robot.WireSearchEnd(0, 10, 100, 0, 10, 100, 0);
 
 
             robot.WireSearchStart(0, 10, 100, 0, 10, 100, 0);
-            robot.MoveL(jointREF0A, descREF0A, 1, 1, 100, 100, 100, -1, exaxisPos, 0, 0, offdese);  //起点
-            robot.MoveL(jointREF0B, descREF0B, 1, 1, 100, 100, 100, -1, exaxisPos, 1, 0, offdese);  //方向点
+            robot.MoveL(jointREF0A, descREF0A, 1, 1, 100, 100, 100, -1, 0, exaxisPos, 0, 0, offdese);  //起点
+            robot.MoveL(jointREF0B, descREF0B, 1, 1, 100, 100, 100, -1, 0, exaxisPos, 1, 0, offdese);  //方向点
             robot.WireSearchWait("RES0");
             robot.WireSearchEnd(0, 10, 100, 0, 10, 100, 0);
 
             robot.WireSearchStart(0, 10, 100, 0, 10, 100, 0);
-            robot.MoveL(jointREF1A, descREF1A, 1, 1, 100, 100, 100, -1, exaxisPos, 0, 0, offdese);  //起点
-            robot.MoveL(jointREF1B, descREF1B, 1, 1, 100, 100, 100, -1, exaxisPos, 1, 0, offdese);  //方向点
+            robot.MoveL(jointREF1A, descREF1A, 1, 1, 100, 100, 100, -1, 0, exaxisPos, 0, 0, offdese);  //起点
+            robot.MoveL(jointREF1B, descREF1B, 1, 1, 100, 100, 100, -1, 0, exaxisPos, 1, 0, offdese);  //方向点
             robot.WireSearchWait("RES1");
             robot.WireSearchEnd(0, 10, 100, 0, 10, 100, 0);
 
@@ -422,8 +422,8 @@ namespace testFrRobot
             DescPose offectPos = new DescPose();
             robot.GetWireSearchOffset(0, 0, varNameRef, varNameRes, ref offectFlag, ref offectPos);
             robot.PointsOffsetEnable(0, offectPos);
-            robot.MoveL(jointStart, descStart, 1, 1, 100, 100, 100, -1, exaxisPos, 0, 0, offdese);
-            robot.MoveL(jointEnd, descEnd, 1, 1, 100, 100, 100, -1, exaxisPos, 1, 0, offdese);
+            robot.MoveL(jointStart, descStart, 1, 1, 100, 100, 100, -1, 0, exaxisPos, 0, 0, offdese);
+            robot.MoveL(jointEnd, descEnd, 1, 1, 100, 100, 100, -1, 0, exaxisPos, 1, 0, offdese);
             robot.PointsOffsetDisable();
         }
 
@@ -445,12 +445,12 @@ namespace testFrRobot
             robot.MoveL(startjointPos, startdescPose, 13, 0, 5, 100, 100, -1, exaxisPos, 0, 0, offdese);
             robot.ArcWeldTraceControl(1, 0, 0, 0.06, 5, 5, 300, 1, -0.06, 5, 5, 300, 1, 0, 4, 1, 10);
             robot.ARCStart(1, 0, 10000);
-            robot.MoveL(endjointPos, enddescPose, 13, 0,5, 100, 100, -1, exaxisPos, 0, 0, offdese);
+            robot.MoveL(endjointPos, enddescPose, 13, 0, 5, 100, 100, -1, exaxisPos, 0, 0, offdese);
             robot.ARCEnd(1, 0, 10000);
 
             robot.ArcWeldTraceControl(0, 0, 0, 0.06, 5, 5, 300, 1, -0.06, 5, 5, 300, 1, 0, 4, 1, 10);
-            //robot.ArcWeldTraceExtAIChannelConfig(1);
-            
+            robot.ArcWeldTraceExtAIChannelConfig(1);
+
         }
 
         private void btnSetDatabase_Click(object sender, EventArgs e)
@@ -512,9 +512,9 @@ namespace testFrRobot
             ExaxisPos exaxisPos = new ExaxisPos(0, 0, 0, 0);
             DescPose offdese = new DescPose(0, 0, 0, 0, 0, 0);
 
-            robot.MoveL(startjointPos, startdescPose, 1, 0, 100, 100, 100, -1, exaxisPos, 0, 0, offdese);
+            robot.MoveL(startjointPos, startdescPose, 1, 0, 100, 100, 100, -1, 0, exaxisPos, 0, 0, offdese);
             robot.WeaveStartSim(0);
-            robot.MoveL(endjointPos, enddescPose, 1, 0, 100, 100, 100, -1, exaxisPos, 0, 0, offdese);
+            robot.MoveL(endjointPos, enddescPose, 1, 0, 100, 100, 100, -1, 0, exaxisPos, 0, 0, offdese);
             robot.WeaveEndSim(0);
         }
 
@@ -534,9 +534,9 @@ namespace testFrRobot
             ExaxisPos exaxisPos = new ExaxisPos(0, 0, 0, 0);
             DescPose offdese = new DescPose(0, 0, 0, 0, 0, 0);
 
-            robot.MoveL(startjointPos, startdescPose, 1, 0, 100, 100, 100, -1, exaxisPos, 0, 0, offdese);
+            robot.MoveL(startjointPos, startdescPose, 1, 0, 100, 100, 100, -1, 0, exaxisPos, 0, 0, offdese);
             robot.WeaveInspectStart(0);
-            robot.MoveL(endjointPos, enddescPose, 1, 0, 100, 100, 100, -1, exaxisPos, 0, 0, offdese);
+            robot.MoveL(endjointPos, enddescPose, 1, 0, 100, 100, 100, -1, 0, exaxisPos, 0, 0, offdese);
             robot.WeaveInspectEnd(0);
         }
 
@@ -556,13 +556,13 @@ namespace testFrRobot
             robot.WeaveSetPara(0, 3, 2.000000, 0, 10.000000, 0.000000, 0.000000, 0, 0, 0, 0, 0, 0, 0);
             robot.MoveJ(j1, desc_p1, 13, 0, 100, 100, 100, epos, -1, 0, offset_pos);
             robot.WeaveStart(0);
-            robot.MoveL(j2, desc_p2, 13, 0, 10, 100, 100, -1, epos, 0, 0, offset_pos, 0, 100);
+            robot.MoveL(j2, desc_p2, 13, 0, 10, 100, 100, -1, 0, epos, 0, 0, offset_pos, 0, 100);
             robot.WeaveEnd(0);
 
             robot.WeaveSetPara(0, 3, 2.000000, 0, 10.000000, 0.000000, 0.000000, 0, 0, 0, 0, 0, 0, 0);
             robot.MoveJ(j1, desc_p1, 13, 0, 100, 100, 100, epos, -1, 0, offset_pos);
             robot.WeaveStart(0);
-            robot.MoveL(j2, desc_p2, 13, 0, 10, 100, 100, -1, epos, 0, 0, offset_pos, 0, 100);
+            robot.MoveL(j2, desc_p2, 13, 0, 10, 100, 100, -1, 0, epos, 0, 0, offset_pos, 0, 100);
             robot.WeaveEnd(0);
         }
 
@@ -593,22 +593,22 @@ namespace testFrRobot
             DescPose offset = new DescPose(0, 0, 0, 0, 0, 0);
 
           
-            int error = robot.MoveJ(mulitilinesafe_joint, mulitilinesafe_desc, 13, 0, 10, 100, 100, epos, -1, 0, offset);
+            int error = robot.MoveJ(mulitilinesafe_joint, mulitilinesafe_desc, 13, 0, 10, 100, 100,  epos, -1, 0, offset);
             Console.WriteLine("MoveJ return:  " + error);
 
-            error = robot.MoveL(mulitilineorigin1_joint, mulitilineorigin1_desc, 13, 0, 10, 100, 100, -1, epos, 0, 0, offset, 0, 100);
+            error = robot.MoveL(mulitilineorigin1_joint, mulitilineorigin1_desc, 13, 0, 10, 100, 100, -1, 0, epos, 0, 0, offset, 0, 100);
             Console.WriteLine("MoveL return:  " + error);
 
             error = robot.MoveJ(mulitilinesafe_joint, mulitilinesafe_desc, 13, 0, 10, 100, 100, epos, -1, 0, offset);
             Console.WriteLine("MoveJ return:  " + error);
 
-            error = robot.MoveL(mulitilineorigin2_joint, mulitilineorigin2_desc, 13, 0, 10, 100, 100, -1, epos, 0, 0, offset, 0, 100);
+            error = robot.MoveL(mulitilineorigin2_joint, mulitilineorigin2_desc, 13, 0, 10, 100, 100, -1, 0, epos, 0, 0, offset, 0, 100);
             Console.WriteLine("MoveL return:  " + error);
 
             error = robot.MoveJ(mulitilinesafe_joint, mulitilinesafe_desc, 13, 0, 10, 100, 100, epos, -1, 0, offset);
             Console.WriteLine("MoveJ return:  " + error);
 
-            error = robot.MoveL(mulitilineorigin1_joint, mulitilineorigin1_desc, 13, 0, 10, 100, 100, -1, epos, 0, 0, offset, 0, 100);
+            error = robot.MoveL(mulitilineorigin1_joint, mulitilineorigin1_desc, 13, 0, 10, 100, 100, -1, 0, epos, 0, 0, offset, 0, 100);
             Console.WriteLine("MoveJ return:  " + error);
 
             error = robot.ARCStart(1, 0, 3000);
@@ -617,13 +617,13 @@ namespace testFrRobot
             error = robot.WeaveStart(0);
             Console.WriteLine("WeaveStart return:  " + error);
 
-            error = robot.ArcWeldTraceControl(1, 0, 1, 0.06, 5, 5, 50, 1, 0.06, 5, 5, 55, 0, 0, 4, 1, 10);
+            error = robot.ArcWeldTraceControl(1, 0, 0, 0.06, 5, 5, 300, 1, -0.06, 5, 5, 300, 1, 0, 4, 1, 10, 0, 0); ;
             Console.WriteLine("ArcWeldTraceControl return:  " + error);
 
-            error = robot.MoveL(mulitilineorigin2_joint, mulitilineorigin2_desc, 13, 0, 1, 100, 100, -1, epos, 0, 0, offset, 0, 100);
+            error = robot.MoveL(mulitilineorigin2_joint, mulitilineorigin2_desc, 13, 0, 1, 100, 100, -1, 0, epos, 0, 0, offset, 0, 100);
             Console.WriteLine("MoveL return:  " + error);
 
-            error = robot.ArcWeldTraceControl(0, 0, 1, 0.06, 5, 5, 50, 1, 0.06, 5, 5, 55, 0, 0, 4, 1, 10);
+            error = robot.ArcWeldTraceControl(1, 0, 0, 0.06, 5, 5, 300, 1, -0.06, 5, 5, 300, 1, 0, 4, 1, 10, 0, 0); ;
             Console.WriteLine("ArcWeldTraceControl return:  " + error);
 
             error = robot.WeaveEnd(0);
@@ -639,7 +639,7 @@ namespace testFrRobot
             error = robot.MultilayerOffsetTrsfToBase(mulitilineorigin1_desc.tran, mulitilineX1_desc.tran, mulitilineZ1_desc.tran, 10.0, 0.0, 0.0, ref offset);
             Console.WriteLine("MultilayerOffsetTrsfToBase return:  " + error);
 
-            error = robot.MoveL(mulitilineorigin1_joint, mulitilineorigin1_desc, 13, 0, 10, 100, 100, -1, epos, 0, 1, offset, 0, 100);
+            error = robot.MoveL(mulitilineorigin1_joint, mulitilineorigin1_desc, 13, 0, 10, 100, 100, -1, 0, epos, 0, 1, offset, 0, 100);
             Console.WriteLine("MoveJ return:  " + error);
 
             error = robot.ARCStart(1, 0, 3000);
@@ -651,7 +651,7 @@ namespace testFrRobot
             error = robot.ArcWeldTraceReplayStart();
             Console.WriteLine("ArcWeldTraceReplayStart return:  " + error);
 
-            error = robot.MoveL(mulitilineorigin2_joint, mulitilineorigin2_desc, 13, 0, 2, 100, 100, -1, epos, 0, 1, offset, 0, 100);
+            error = robot.MoveL(mulitilineorigin2_joint, mulitilineorigin2_desc, 13, 0, 2, 100, 100, -1, 0, epos, 0, 1, offset, 0, 100);
             Console.WriteLine("MoveL return:  " + error);
 
             error = robot.ArcWeldTraceReplayEnd();
@@ -666,7 +666,7 @@ namespace testFrRobot
             error = robot.MultilayerOffsetTrsfToBase(mulitilineorigin1_desc.tran, mulitilineX1_desc.tran, mulitilineZ1_desc.tran, 0, 10, 0, ref offset);
             Console.WriteLine("MultilayerOffsetTrsfToBase return:  " + error);
 
-            error = robot.MoveL(mulitilineorigin1_joint, mulitilineorigin1_desc, 13, 0, 10, 100, 100, -1, epos, 0, 1, offset, 0, 100);
+            error = robot.MoveL(mulitilineorigin1_joint, mulitilineorigin1_desc, 13, 0, 10, 100, 100, -1, 0, epos, 0, 1, offset, 0, 100);
             Console.WriteLine("MoveJ return:  " + error);
 
             error = robot.ARCStart(1, 0, 3000);
@@ -678,7 +678,7 @@ namespace testFrRobot
             error = robot.ArcWeldTraceReplayStart();
             Console.WriteLine("ArcWeldTraceReplayStart return:  " + error);
 
-            error = robot.MoveL(mulitilineorigin2_joint, mulitilineorigin2_desc, 13, 0, 2, 100, 100, -1, epos, 0, 1, offset, 0, 100);
+            error = robot.MoveL(mulitilineorigin2_joint, mulitilineorigin2_desc, 13, 0, 2, 100, 100, -1, 0, epos, 0, 1, offset, 0, 100);
             Console.WriteLine("MoveL return:  " + error);
 
             error = robot.ArcWeldTraceReplayEnd();
@@ -730,17 +730,17 @@ namespace testFrRobot
 
             int error = robot.MoveJ(JP1, DP1, tool, user, vel, acc, ovl, epos, blend, offsetFlag, offset);
             error = robot.MoveJ(JP2, DP2, tool, user, vel, acc, ovl, epos, blend, offsetFlag, offset);
-            error = robot.MoveL(JP3, DP3, tool, user, vel, acc, ovl, blend, epos, 0, offsetFlag, offset, 0, 100);
+            error = robot.MoveL(JP3, DP3, tool, user, vel, acc, ovl, blend, 0, epos, 0, offsetFlag, offset, 0, 100);
             robot.SetOaccScale(100);
-            error = robot.MoveL(JP4, DP4, tool, user, vel, acc, ovl * 0.1f, blend, epos, 0, offsetFlag, offset, 0, 100);
+            error = robot.MoveL(JP4, DP4, tool, user, vel, acc, ovl * 0.1f, blend, 0, epos, 0, offsetFlag, offset, 0, 100);
             robot.AngularSpeedStart(50);
-            error = robot.MoveL(JP5, DP5, tool, user, vel, acc, ovl * 0.1f, blend, epos, 0, offsetFlag, offset, 0, 100);
+            error = robot.MoveL(JP5, DP5, tool, user, vel, acc, ovl * 0.1f, blend, 0, epos, 0, offsetFlag, offset, 0, 100);
             robot.AngularSpeedEnd();
-            error = robot.MoveL(JP6, DP6, tool, user, vel, acc, ovl * 0.1f, blend, epos, 0, offsetFlag, offset, 0, 100);
+            error = robot.MoveL(JP6, DP6, tool, user, vel, acc, ovl * 0.1f, blend, 0, epos, 0, offsetFlag, offset, 0, 100);
             robot.AngularSpeedStart(50);
-            error = robot.MoveL(JP7, DP7, tool, user, vel, acc, ovl * 0.1f, blend, epos, 0, offsetFlag, offset, 0, 100);
+            error = robot.MoveL(JP7, DP7, tool, user, vel, acc, ovl * 0.1f, blend, 0, epos, 0, offsetFlag, offset, 0, 100);
             robot.AngularSpeedEnd();
-            error = robot.MoveL(JP8, DP8, tool, user, vel, acc, ovl * 0.1f, blend, epos, 0, offsetFlag, offset, 0, 100);
+            error = robot.MoveL(JP8, DP8, tool, user, vel, acc, ovl * 0.1f, blend, 0, epos, 0, offsetFlag, offset, 0, 100);
         }
     }
 }

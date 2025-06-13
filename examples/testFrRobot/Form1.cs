@@ -31,240 +31,143 @@ namespace testFrRobot
             InitializeComponent();
             robot = new Robot();//实例化机器人对象
             string path = "D://log/";
-            robot.LoggerInit(FrLogType.BUFFER, FrLogLevel.INFO, path, 5, 5);
+            robot.LoggerInit(FrLogType.BUFFER, FrLogLevel.ERROR, path, 5, 5);
             robot.SetLoggerLevel(FrLogLevel.INFO);
-            robot.SetReconnectParam(true, 100, 100);//断线重连参数
-            rrpc =robot.RPC("192.168.58.2"); //与控制箱建立连接
-             //20004端口接收超时时间
-            //robot.SetReceivePortTimeout(40);
+            robot.SetReconnectParam(true, 100, 1000);//断线重连参数
+            rrpc = robot.RPC("192.168.58.2"); //与控制箱建立连接
+                                              //20004端口接收超时时间
+                                              //robot.SetReceivePortTimeout(40);
 
         }
 
         private void btnStandard_Click(object sender, EventArgs e)
         {
+
             string ip = "";
             string version = "";
             byte state = 0;
-            int num = 0;
 
-            //int rrpc=robot.RPC("192.168.58.2"); //与控制箱建立连接
-            num++;
             robot.GetSDKVersion(ref version);
-            Console.WriteLine($"rrpc : {rrpc}");
+            Console.WriteLine($"SDK version : {version}");
+            robot.GetControllerIP(ref ip);
+            Console.WriteLine($"controller ip : {ip}");
 
+            //robot.Mode(1);
+            //Thread.Sleep(1000);
+            //robot.DragTeachSwitch(1);
+            //int rtn = robot.IsInDragTeach(ref state);
+            //Console.WriteLine($"drag state : {state}");
+            //Thread.Sleep(3000);
+            //robot.DragTeachSwitch(0);
+            //Thread.Sleep(1000);
+            //robot.IsInDragTeach(ref state);
+            //Console.WriteLine($"drag state : {state}");
+            //Thread.Sleep(3000);
+            //robot.RobotEnable(0);
+            //Thread.Sleep(3000);
+            //robot.RobotEnable(1);
 
-            int rtn = robot.GetControllerIP(ref ip);
-            Console.WriteLine($"controller ip : {ip}  rtn  {rtn} num {num}");
+            //robot.Mode(0);
+            //Thread.Sleep(1000);
+            //robot.Mode(1);
+            //Thread.Sleep(2000);
+            robot.CloseRPC();
         }
 
         private void btnJOG_Click(object sender, EventArgs e)
         {
-            robot.SetSpeed(20);//设置全局速度，测试程序请勿将速度设置过大
+            for (int i = 0; i < 6; i++)
+            {
+                robot.StartJOG(0, i + 1, 0, 20.0f, 20.0f, 30.0f);
+                Thread.Sleep(1000);
+                robot.ImmStopJOG();
+                Thread.Sleep(1000);
+            }
 
-            robot.StartJOG(0, 1, 0, 15, 20.0f, 30.0f);   //单关节运动，StartJOG为非阻塞指令，运动状态下接收其他运动指令（包含StartJOG）会被丢弃
-            Thread.Sleep(1000);
-            robot.StopJOG(1);  //机器人单轴点动减速停止
-            //robot.ImmStopJOG();  //机器人单轴点动立即停止
-            robot.StartJOG(0, 2, 1, 15, 20.0f, 30.0f);
-            Thread.Sleep(1000);
-            robot.ImmStopJOG();
-            robot.StartJOG(0, 3, 1, 15, 20.0f, 30.0f);
-            Thread.Sleep(1000);
-            robot.ImmStopJOG();
-            robot.StartJOG(0, 4, 1, 15, 20.0f, 30.0f);
-            Thread.Sleep(1000);
-            robot.ImmStopJOG();
-            robot.StartJOG(0, 5, 1, 15, 20.0f, 30.0f);
-            Thread.Sleep(1000);
-            robot.ImmStopJOG();
-            robot.StartJOG(0, 6, 1, 15, 20.0f, 30.0f);
-            Thread.Sleep(1000);
-            robot.ImmStopJOG();
+            for (int i = 0; i < 6; i++)
+            {
+                robot.StartJOG(2, i + 1, 0, 20.0f, 20.0f, 30.0f);
+                Thread.Sleep(1000);
+                robot.ImmStopJOG();
+                Thread.Sleep(1000);
+            }
 
-            robot.StartJOG(2, 1, 0, 15, 20.0f, 30.0f);   //基坐标系下点动
-            Thread.Sleep(1000);
-            robot.StopJOG(3);  //机器人单轴点动减速停止
-            //robot.ImmStopJOG();  //机器人单轴点动立即停止
-            robot.StartJOG(2, 2, 1, 15, 20.0f, 30.0f);
-            Thread.Sleep(1000);
-            robot.ImmStopJOG();
-            robot.StartJOG(2, 3, 1, 15, 20.0f, 30.0f);
-            Thread.Sleep(1000);
-            robot.ImmStopJOG();
-            robot.StartJOG(2, 4, 1, 15, 20.0f, 30.0f);
-            Thread.Sleep(1000);
-            robot.ImmStopJOG();
-            robot.StartJOG(2, 5, 1, 15, 20.0f, 30.0f);
-            Thread.Sleep(1000);
-            robot.ImmStopJOG();
-            robot.StartJOG(2, 6, 1, 15, 20.0f, 30.0f);
-            Thread.Sleep(1000);
-            robot.ImmStopJOG();
+            for (int i = 0; i < 6; i++)
+            {
+                robot.StartJOG(4, i + 1, 0, 20.0f, 20.0f, 30.0f);
+                Thread.Sleep(1000);
+                robot.StopJOG(5);
+                Thread.Sleep(1000);
+            }
 
-            robot.StartJOG(4, 1, 0, 15, 20.0f, 30.0f);   //工具坐标系下点动
-            Thread.Sleep(1000);
-            robot.StopJOG(5);  //机器人单轴点动减速停止
-            //robot.ImmStopJOG();  //机器人单轴点动立即停止
-            robot.StartJOG(4, 2, 1, 15, 20.0f, 30.0f);
-            Thread.Sleep(1000);
-            robot.ImmStopJOG();
-            robot.StartJOG(4, 3, 1, 15, 20.0f, 30.0f);
-            Thread.Sleep(1000);
-            robot.ImmStopJOG();
-            robot.StartJOG(4, 4, 1, 15, 20.0f, 30.0f);
-            Thread.Sleep(1000);
-            robot.ImmStopJOG();
-            robot.StartJOG(4, 5, 1, 15, 20.0f, 30.0f);
-            Thread.Sleep(1000);
-            robot.ImmStopJOG();
-            robot.StartJOG(4, 6, 1, 15, 20.0f, 30.0f);
-            Thread.Sleep(1000);
-            robot.ImmStopJOG();
+            for (int i = 0; i < 6; i++)
+            {
+                robot.StartJOG(8, i + 1, 0, 20.0f, 20.0f, 30.0f);
+                Thread.Sleep(1000);
+                robot.StopJOG(9);
+                Thread.Sleep(1000);
+            }
 
-            robot.StartJOG(8, 1, 0, 15, 20.0f, 30.0f);   //工件坐标系下点动
-            Thread.Sleep(1000);
-            robot.StopJOG(9);  //机器人单轴点动减速停止
-            //robot.ImmStopJOG();  //机器人单轴点动立即停止
-            robot.StartJOG(8, 2, 1, 15, 20.0f, 30.0f);
-            Thread.Sleep(1000);
-            robot.ImmStopJOG();
-            robot.StartJOG(8, 3, 1, 15, 20.0f, 30.0f);
-            Thread.Sleep(1000);
-            robot.ImmStopJOG();
-            robot.StartJOG(8, 4, 1, 15, 20.0f, 30.0f);
-            Thread.Sleep(1000);
-            robot.ImmStopJOG();
-            robot.StartJOG(8, 5, 1, 15, 20.0f, 30.0f);
-            Thread.Sleep(1000);
-            robot.ImmStopJOG();
-            robot.StartJOG(8, 6, 1, 15, 20.0f, 30.0f);
-            Thread.Sleep(1000);
-            robot.ImmStopJOG();
         }
 
         private void btnMovetest_Click(object sender, EventArgs e)
         {
-            JointPos j1, j2, j3, j4;
-            DescPose desc_pos1, desc_pos2, desc_pos3, desc_pos4;
-            ExaxisPos ePos = new ExaxisPos(0, 0, 0, 0);
-            DescPose offset = new DescPose();
+            JointPos j1= new JointPos(-11.904, -99.669, 117.473, -108.616, -91.726, 74.256);
+            JointPos j2 = new JointPos(-45.615, -106.172, 124.296, -107.151, -91.282, 74.255);
+            JointPos j3 = new JointPos(-29.777, -84.536, 109.275, -114.075, -86.655, 74.257);
+            JointPos j4 = new JointPos(-31.154, -95.317, 94.276, -88.079, -89.740, 74.256);
+            DescPose desc_pos1 = new DescPose(-419.524, -13.000, 351.569, -178.118, 0.314, 3.833);
+            DescPose desc_pos2 = new DescPose(-321.222, 185.189, 335.520, -179.030, -1.284, -29.869);
+            DescPose desc_pos3 = new DescPose(-487.434, 154.362, 308.576, 176.600, 0.268, -14.061);
+            DescPose desc_pos4 = new DescPose(-443.165, 147.881, 480.951, 179.511, -0.775, -15.409);
+            DescPose offset_pos = new DescPose(0, 0, 0, 0, 0, 0);
+            ExaxisPos epos = new ExaxisPos(0, 0, 0, 0);
+
             int tool = 0;
             int user = 0;
             float vel = 100.0f;
             float acc = 100.0f;
             float ovl = 100.0f;
             float blendT = 0.0f;
+            float blendR = 0.0f;
             byte flag = 0;
-            int err = -1;
-            j1 = new JointPos(98.723, -109.612, 111.49, -95.395, -92.521, 17.914);
-            desc_pos1 = new DescPose(134.969, -236.086, 302.431, -175.878, -1.312, 170.685);
-            j2 = new JointPos(82.856, -109.612, 111.49, -95.395, -92.521, 17.914);
-            desc_pos2 = new DescPose(65.277, -263.993, 302.432, -175.878, -1.312, 154.818);
-            j3 = new JointPos(104.944, -109.613, 111.49, -95.395, -92.521, 17.914);
-            desc_pos3 = new DescPose(159.755, -220.07, 302.434, -175.877, -1.312, 176.906);
-            j4 = new JointPos(84.098, -109.613, 111.49, -95.395, -92.521, 17.914);
-            desc_pos4 = new DescPose(70.983, -262.514, 302.436, -175.877, -1.312, 156.059);
+            byte search = 0;
 
-            err = robot.MoveJ(j1, desc_pos1, tool, user, vel, acc, ovl, ePos, blendT, flag, offset);
-            Console.WriteLine($"movej errcode: {err}");
-            robot.SetSpeed(5);
-            err = robot.MoveJ(j2, desc_pos2, tool, user, vel, acc, ovl, ePos, blendT, flag, offset);
-            Console.WriteLine($"movej errcode: {err}");
-            robot.SetSpeed(80);
-            err = robot.MoveJ(j3, desc_pos3, tool, user, vel, acc, ovl, ePos, blendT, flag, offset);
-            Console.WriteLine($"movej errcode: {err}");
-            err = robot.MoveJ(j4, desc_pos4, tool, user, vel, acc, ovl, ePos, blendT, flag, offset);
-            Console.WriteLine($"movej errcode: {err}");
+            robot.SetSpeed(20);
+            int rtn;
+            rtn = robot.MoveJ(j1, desc_pos1, tool, user, vel, acc, ovl, epos, blendT, flag, offset_pos);
+            Console.WriteLine($"MoveJ errcode:{rtn}" );
 
+            rtn = robot.MoveL(j2, desc_pos2, tool, user, vel, acc, ovl, blendR,epos, search, flag, offset_pos);
+            Console.WriteLine($"MoveL errcode:{rtn}");
 
-            return;
+            rtn = robot.MoveC(j3, desc_pos3, tool, user, vel, acc, epos, flag, offset_pos, j4, desc_pos4, tool, user, vel, acc, epos, flag, offset_pos, ovl, blendR);
+            Console.WriteLine($"MoveC errcode:{rtn}");
 
-            //JointPos j1 = new JointPos(71.281,-82.932,101.278,-107.959,-90.538,-16.597);
-            //DescPose desc_pos1 = new DescPose(-74.190,-530.733,348.093,179.476,-0.405,177.882);
-            
-            //JointPos j2 = new JointPos(158.962,-88.107,101.278,-112.392,-90.523,-16.564);
-            //DescPose desc_pos2 = new DescPose(515.070,-90.877,403.468,-171.301,-3.113,-94.754);
-            
-            //JointPos j3 = new JointPos(158.966,-113.862,67.182,-118.804,-90.417,-16.462);
-            //DescPose desc_pos3 = new DescPose(242.179,14.300,899.116,-105.116,-16.026,-107.200);
-            
-            //JointPos j4 = new JointPos(48.312,-39.675,74.490,-113.718,-93.983,-16.460);
-            //DescPose desc_pos4 = new DescPose(-415.085,-607.501,80.414,168.235,-0.621,155.223);
+            rtn = robot.MoveJ(j2, desc_pos2, tool, user, vel, acc, ovl, epos, blendT, flag, offset_pos);
+            Console.WriteLine("MoveJ errcode:%d\n", rtn);
 
-            //ExaxisPos ePos = new ExaxisPos(0, 0, 0, 0);
-            //DescPose offset = new DescPose(0, 0, 0, 0, 0, 0);
+            rtn = robot.Circle(j3, desc_pos3, tool, user, vel, acc, epos, j1, desc_pos1, tool, user, vel, acc, epos, ovl, flag, offset_pos);
+            Console.WriteLine($"Circle errcode:{rtn}");
 
-            //int tool = 0;
-            //int user = 0;
-            //float vel = 100.0f;
-            //float acc = 100.0f;
-            //float ovl = 100.0f;
-            //float blendT = 0.0f;
-            //float blendR = 0.0f;
-            //byte flag = 0;
-            //byte search = 0;
+            rtn = robot.MoveCart(desc_pos4, tool, user, vel, acc, ovl, blendT, -1);
+            Console.WriteLine($"MoveCart errcode:{rtn}");
 
-            //robot.SetSpeed(5);
-            //int err;
-            //err = robot.MoveJ(j1, desc_pos1, tool, user, vel, acc, ovl, ePos, blendT, flag, offset);
-            
-            //err = robot.MoveJ(j2, desc_pos2, tool, user, vel, acc, ovl, ePos, blendT, flag, offset);
-            
-            //err = robot.MoveJ(j3, desc_pos3, tool, user, vel, acc, ovl, ePos, blendT, flag, offset);
-            
-            //err = robot.MoveJ(j4, desc_pos4, tool, user, vel, acc, ovl, ePos, blendT, flag, offset);
-            
-            //err = robot.MoveJ(j1, desc_pos1, tool, user, vel, acc, ovl, ePos, blendT, flag, offset);
-
-            //Console.WriteLine($"movej errcode:  {err}");
-
-            //Thread.Sleep(1000);
-
-            //err = robot.MoveL(j2, desc_pos2, tool, user, vel, acc, ovl, blendR, ePos, search, flag, offset, 2, 20);
-            //Console.WriteLine($"moveL errcode:  {err}");
-
-            //Thread.Sleep(1000);
-
-            //err = robot.MoveL(j1, desc_pos1, tool, user, vel, acc, ovl, blendR, ePos, search, flag, offset);
-            //Console.WriteLine($"moveL errcode:  {err}");
-
-            //Thread.Sleep(1000);
-
-            //err = robot.MoveC(j2, desc_pos2, tool, user, vel, acc, ePos, flag, offset, j3, desc_pos3, tool, user, vel, acc, ePos, flag, offset, ovl, blendR);
-            //Console.WriteLine($"moveC errcode:  {err}");
-
-            //Thread.Sleep(1000);
-
-            //err = robot.MoveJ(j1, desc_pos1, tool, user, vel, acc, ovl, ePos, blendT, flag, offset);
-            //Console.WriteLine($"movej errcode:  {err}");
-
-            //Thread.Sleep(1000);
-
-            //err = robot.Circle(j2, desc_pos2, tool, user, vel, acc, ePos, j3, desc_pos3, tool, user, vel, acc, ePos, ovl, flag, offset);
-            //Console.WriteLine($"circle errcode:  {err}");
         }
 
         private void btnDescSpiral_Click(object sender, EventArgs e)
         {
-            JointPos j;
-            DescPose desc_pos;
-            DescPose offset_pos1 = new DescPose(0, 0, 0, 0, 0, 0);
-            DescPose offset_pos2 = new DescPose(0, 0, 0, 0, 0, 0);
+            int rtn;
+            JointPos j = new JointPos(-11.904, -99.669, 117.473, -108.616, -91.726, 74.256);
+            DescPose desc_pos = new DescPose(-419.524, -13.000, 351.569, -178.118, 0.314, 3.833);
+            DescPose offset_pos1 = new DescPose(50, 0, 0, -30, 0, 0);
+            DescPose offset_pos2 = new DescPose(50, 0, 0, -5, 0, 0);
             ExaxisPos epos = new ExaxisPos(0, 0, 0, 0);
             SpiralParam sp;
-
-            j = new JointPos(-58.982, -90.717, 127.647, -129.041, -87.989, -0.062);
-            desc_pos = new DescPose(-437.039, 411.064, 426.189, -177.886, 2.007, 31.155);
-
-            offset_pos1.tran.x = 50.0;
-            offset_pos1.rpy.rx = -30.0;
-            offset_pos2.tran.x = 50.0;
-            offset_pos2.rpy.rx = -5.0;
-
             sp.circle_num = 5;
-            sp.circle_angle = 1.0f;
-            sp.rad_init = 10.0f;
-            sp.rad_add = 40.0f;
+            sp.circle_angle = 5.0f;
+            sp.rad_init = 50.0f;
+            sp.rad_add = 10.0f;
             sp.rotaxis_add = 10.0f;
             sp.rot_direction = 0;
 
@@ -278,20 +181,12 @@ namespace testFrRobot
 
             robot.SetSpeed(20);
 
-            int ret = robot.GetForwardKin(j, ref desc_pos);  //只有关节位置的情况下，可用正运动学接口求解笛卡尔空间坐标
-            if (ret == 0)
-            {
-                int err = -1;
-                err = robot.MoveJ(j, desc_pos, tool, user, vel, acc, ovl, epos, blendT, flag, offset_pos1);
-                Console.WriteLine($"movej errcode:  {err}");
+            rtn = robot.MoveJ(j, desc_pos, tool, user, vel, acc, ovl, epos, blendT, flag, offset_pos1);
+            Console.WriteLine($"MoveJ errcode:{rtn}");
 
-                err = robot.NewSpiral(j, desc_pos, tool, user, vel, acc, epos, ovl, flag, offset_pos2, sp);
-                Console.WriteLine($"newspiral errcode:  {err}");
-            }
-            else
-            {
-                Console.WriteLine($"GetForwardKin errcode: {ret}");
-            }
+            rtn = robot.NewSpiral(j, desc_pos, tool, user, vel, acc, epos, ovl, flag, offset_pos2, sp);
+            Console.WriteLine($"NewSpiral errcode:{rtn}");
+           
         }
 
         private void btnJointServoMove_Click(object sender, EventArgs e)
@@ -309,18 +204,15 @@ namespace testFrRobot
 
             int ret = robot.GetActualJointPosDegree(flag, ref j);
             ExaxisPos axis = new ExaxisPos(0, 0, 0, 0);
-            robot.ExtAxisMove(axis, 10);
 
             if (ret == 0)
             {
                 while (count > 0)
                 {
                     robot.ServoJ(j, axis, acc, vel, cmdT, filterT, gain);
-                    j.jPos[0] += dt;//0关节位置增加
-                    axis.ePos[0] += dt;
-                    axis.ePos[1] += dt * 1.1;
+                    j.jPos[0] += dt;
                     count -= 1;
-                    robot.WaitMs((int)(cmdT * 50));
+                    robot.WaitMs((int)(cmdT * 1000));
                 }
             }
             else
@@ -335,8 +227,8 @@ namespace testFrRobot
             DescPose desc_pos_dt = new DescPose(0, 0, 0, 0, 0, 0);
 
             desc_pos_dt.tran.z = -0.5;
-            double[] pos_gain = new double[6]{ 0.0, 0.0, 1.0, 0.0, 0.0, 0.0 };//仅z轴增加
-            int mode = 2;//工具坐标系下增量运动
+            double[] pos_gain = new double[6]{ 0.0, 0.0, 1.0, 0.0, 0.0, 0.0 };
+            int mode = 2;
             float vel = 0.0f;
             float acc = 0.0f;
             float cmdT = 0.008f;
@@ -379,23 +271,17 @@ namespace testFrRobot
 
         private void btnSplineMove_Click(object sender, EventArgs e)
         {
-            JointPos j1, j2, j3, j4;
-            DescPose desc_pos1, desc_pos2, desc_pos3, desc_pos4, offset_pos;
+
+            JointPos j1 = new JointPos(-11.904, -99.669, 117.473, -108.616, -91.726, 74.256);
+            JointPos j2 = new JointPos(-45.615, -106.172, 124.296, -107.151, -91.282, 74.255);
+            JointPos j3 = new JointPos(-61.954, -84.409, 108.153, -116.316, -91.283, 74.260);
+            JointPos j4 = new JointPos(-89.575, -80.276, 102.713, -116.302, -91.284, 74.267);
+            DescPose desc_pos1 = new DescPose(-419.524, -13.000, 351.569, -178.118, 0.314, 3.833);
+            DescPose desc_pos2 = new DescPose(-321.222, 185.189, 335.520, -179.030, -1.284, -29.869);
+            DescPose desc_pos3 = new DescPose(-327.622, 402.230, 320.402, -178.067, 2.127, -46.207);
+            DescPose desc_pos4 = new DescPose(-104.066, 544.321, 327.023, -177.715, 3.371, -73.818);
+            DescPose offset_pos = new DescPose(0, 0, 0, 0, 0, 0);
             ExaxisPos epos = new ExaxisPos(0, 0, 0, 0);
-
-            j1 = new JointPos(-58.982, -90.717, 127.647, -129.041, -87.989, -0.062);
-            desc_pos1 = new DescPose(-437.039, 411.064, 426.189, -177.886, 2.007, 31.155);
-
-            j2 = new JointPos(-58.978, -76.817, 112.494, -127.348, -89.145, -0.063);
-            desc_pos2 = new DescPose(-525.55, 562.3, 417.199, -178.325, 0.847, 31.109);
-
-            j3 = new JointPos(-49.129, -68.49, 103.297, -128.898, -91.478, -0.062);
-            desc_pos3 = new DescPose(-680.308, 547.378, 399.189, -175.909, -1.479, 40.827);
-
-            j4 = new JointPos(-56.126, -54.093, 80.686, -121.655, -91.428, -0.064);
-            desc_pos4 = new DescPose(-719.201, 790.816, 389.118, -174.939, -1.428, 33.809);
-
-            offset_pos = new DescPose(0, 0, 0, 0, 0, 0);
 
             int tool = 0;
             int user = 0;
@@ -425,11 +311,12 @@ namespace testFrRobot
             DescPose desc_pos1, desc_pos2, offset_pos, offset_pos1;
             ExaxisPos epos = new ExaxisPos(0, 0, 0, 0);
 
-            j1 = new JointPos(-58.982, -90.717, 127.647, -129.041, -87.989, -0.062);
-            desc_pos1 = new DescPose(-437.039, 411.064, 426.189, -177.886, 2.007, 31.155);
+            j1 = new JointPos(-11.904, -99.669, 117.473, -108.616, -91.726, 74.256);
+            desc_pos1 = new DescPose(-419.524, -13.000, 351.569, -178.118, 0.314, 3.833);
 
-            j2 = new JointPos(-58.978, -76.817, 112.494, -127.348, -89.145, -0.063);
-            desc_pos2 = new DescPose(-525.55, 562.3, 417.199, -178.325, 0.847, 31.109);
+            j2 = new JointPos(-45.615, -106.172, 124.296, -107.151, -91.282, 74.255);
+
+            desc_pos2 = new DescPose(-321.222, 185.189, 335.520, -179.030, -1.284, -29.869);
 
             offset_pos = new DescPose(0, 0, 0, 0, 0, 0);
             offset_pos1 = new DescPose(50.0, 50.0, 50.0, 5.0, 5.0, 5.0);
@@ -1145,7 +1032,7 @@ namespace testFrRobot
             int rtn = robot.FT_Control(flag, sensor_id, select, ft, ft_pid, adj_sign, ILC_sign, max_dis, max_ang);
             Console.WriteLine($"FT_Control start rtn {rtn}");
 
-            robot.MoveL(j2, desc_p2, 1, 0, 100.0f, 180.0f, 20.0f, -1.0f, epos, 0, 0, offset_pos);
+            robot.MoveL(j2, desc_p2, 1, 0, 100.0f, 180.0f, 20.0f, -1.0f, 0, epos, 0, 0, offset_pos);
             flag = 0;
             rtn = robot.FT_Control(flag, sensor_id, select, ft, ft_pid, adj_sign, ILC_sign, max_dis, max_ang);
             Console.WriteLine($"FT_Control end rtn {rtn}");
@@ -1203,8 +1090,8 @@ namespace testFrRobot
     int count = 15;
     while (count > 0)
     {
-        robot.MoveL(j1, desc_p1, 1, 0, 100.0f, 180.0f, 100.0f, -1.0f, epos, 0, 1, offset_pos);
-        robot.MoveL(j2, desc_p2, 1, 0, 100.0f, 180.0f, 100.0f, -1.0f, epos, 0, 0, offset_pos);
+        robot.MoveL(j1, desc_p1, 1, 0, 100.0f, 180.0f, 100.0f, -1.0f, 0, epos, 0, 1, offset_pos);
+        robot.MoveL(j2, desc_p2, 1, 0, 100.0f, 180.0f, 100.0f, -1.0f, 0, epos, 0, 0, offset_pos);
         count -= 1;
     }
     rtn = robot.FT_ComplianceStop();
@@ -1225,23 +1112,18 @@ namespace testFrRobot
 
         private void btnNewSpline_Click(object sender, EventArgs e)
         {
-            JointPos j1, j2, j3, j4;
-            DescPose desc_pos1, desc_pos2, desc_pos3, desc_pos4, offset_pos;
+            JointPos j1 = new JointPos(-11.904, -99.669, 117.473, -108.616, -91.726, 74.256);
+            JointPos j2 = new JointPos(-45.615, -106.172, 124.296, -107.151, -91.282, 74.255);
+            JointPos j3 = new JointPos(-61.954, -84.409, 108.153, -116.316, -91.283, 74.260);
+            JointPos j4 = new JointPos(-89.575, -80.276, 102.713, -116.302, -91.284, 74.267);
+            JointPos j5 = new JointPos(-95.228, -54.621, 73.691, -112.245, -91.280, 74.268);
+            DescPose desc_pos1 = new DescPose(-419.524, -13.000, 351.569, -178.118, 0.314, 3.833);
+            DescPose desc_pos2 = new DescPose(-321.222, 185.189, 335.520, -179.030, -1.284, -29.869);
+            DescPose desc_pos3 = new DescPose(-327.622, 402.230, 320.402, -178.067, 2.127, -46.207);
+            DescPose desc_pos4 = new DescPose(-104.066, 544.321, 327.023, -177.715, 3.371, -73.818);
+            DescPose desc_pos5 = new DescPose(-33.421, 732.572, 275.103, -177.907, 2.709, -79.482);
+            DescPose offset_pos = new DescPose(0, 0, 0, 0, 0, 0);
             ExaxisPos epos = new ExaxisPos(0, 0, 0, 0);
-
-            j1 = new JointPos(132.798, -102.124, -149.234, -19.045, 89.079, 28.175);
-            desc_pos1 = new DescPose(-186.195, 437.612, 202.384, -179.916, -0.999, 14.617);
-
-            j2 = new JointPos(124.429, -114.099, -132.867, -23.009, 88.98, 28.176);
-            desc_pos2 = new DescPose(-223.019, 609.898, 153.357, -179.497, -0.887, 6.239);
-
-            j3 = new JointPos(135.784, -119.961, -122.788, -30.427, 89.059, 28.177);
-            desc_pos3 = new DescPose(-408.156, 621.39, 153.357, 177.639, -2.325, 17.674);
-
-            j4 = new JointPos(136.943, -132.212, -100.855, -36.59, 89.055, 28.185);
-            desc_pos4 = new DescPose(-575.017, 757.257, 124.818, -179.244, -0.667, 18.752);
-
-            offset_pos = new DescPose(0, 0, 0, 0, 0, 0);
 
             int tool = 0;
             int user = 0;
@@ -1257,19 +1139,48 @@ namespace testFrRobot
             err = robot.MoveJ(j1, desc_pos1, tool, user, vel, acc, ovl, epos, blendT, flag, offset_pos);
             Console.WriteLine($"movej errcode:  {err}");
 
-            robot.NewSplineStart(0, 5000);
-            robot.NewSplinePoint(j1, desc_pos1, tool, user, vel, acc, ovl, 50, 0);
-            robot.NewSplinePoint(j2, desc_pos2, tool, user, vel, acc, ovl, 50, 0);
-            robot.NewSplinePoint(j3, desc_pos3, tool, user, vel, acc, ovl, 50, 0);
-            robot.NewSplinePoint(j4, desc_pos4, tool, user, vel, acc, ovl, 50, 1);
+            robot.NewSplineStart(1, 2000);
+            robot.NewSplinePoint(j1, desc_pos1, tool, user, vel, acc, ovl, -1, 0);
+            robot.NewSplinePoint(j2, desc_pos2, tool, user, vel, acc, ovl, -1, 0);
+            robot.NewSplinePoint(j3, desc_pos3, tool, user, vel, acc, ovl, -1, 0);
+            robot.NewSplinePoint(j4, desc_pos4, tool, user, vel, acc, ovl, -1, 0);
+            robot.NewSplinePoint(j5, desc_pos5, tool, user, vel, acc, ovl, -1, 0);
             robot.NewSplineEnd();
         }
 
         private void btnMotionPause_Click(object sender, EventArgs e)
         {
+            int rtn;
+            JointPos j1 = new JointPos(-11.904, -99.669, 117.473, -108.616, -91.726, 74.256);
+            JointPos j5 = new JointPos(-95.228, -54.621, 73.691, -112.245, -91.280, 74.268);
+            DescPose desc_pos1 = new DescPose(-419.524, -13.000, 351.569, -178.118, 0.314, 3.833);
+            DescPose desc_pos5 = new DescPose(-33.421, 732.572, 275.103, -177.907, 2.709, -79.482);
+            DescPose offset_pos = new DescPose(0, 0, 0, 0, 0, 0);
+            ExaxisPos epos = new ExaxisPos(0, 0, 0, 0);
+
+            int tool = 0;
+            int user = 0;
+            float vel = 100.0f;
+            float acc = 100.0f;
+            float ovl = 100.0f;
+            float blendT = -1.0f;
+            byte flag = 0;
+
+            robot.SetSpeed(20);
+
+            rtn = robot.MoveJ(j1, desc_pos1, tool, user, vel, acc, ovl, epos, blendT, flag, offset_pos);
+            rtn = robot.MoveJ(j5, desc_pos5, tool, user, vel, acc, ovl, epos, 1, flag, offset_pos);
+            Thread.Sleep(1000);
             robot.PauseMotion();
+
             Thread.Sleep(1000);
             robot.ResumeMotion();
+
+            Thread.Sleep(1000);
+            robot.StopMotion();
+
+            Thread.Sleep(1000);
+
         }
 
         private void btnStopMove_Click(object sender, EventArgs e)
@@ -1440,7 +1351,7 @@ namespace testFrRobot
 
         private void btnLoadDefaultLua_Click(object sender, EventArgs e)
         {
-            int rtn = robot.LoadDefaultProgConfig(1, "/fruser/testLoad.lua");
+            int rtn = robot.LoadDefaultProgConfig(1, "/fruser/Text1.lua");
             if (rtn != 0) 
             {
                 Console.WriteLine($"LoadDefaultProgConfig  fail");
@@ -1665,14 +1576,14 @@ namespace testFrRobot
             rtn = robot.ConveyorTrackStart(1);//跟踪开始
             Console.WriteLine("ConveyorTrackStart: rtn  " + rtn);
 
-            rtn = robot.ConveyorTrackMoveL("cvrCatchPoint", 1, 0, (float)100.0, (float)0.0, (float)100.0, (float)-1.0);
+            //rtn = robot.ConveyorTrackMoveL("cvrCatchPoint", 1, 0, (float)100.0, (float)0.0, (float)100.0, (float)-1.0);
             Console.WriteLine("ConveyorTrackMoveL: rtn  " + rtn);
 
             rtn = robot.MoveGripper(1, 60, 60, 30, 30000, 0, 0, 0, 50, 50);
             Console.WriteLine("ConveyorTrackMoveL: rtn  " + rtn);
          
 
-            rtn = robot.ConveyorTrackMoveL("cvrRaisePoint", 1, 0, (float)100.0, (float)0.0, (float)100.0, (float)-1.0);
+            //rtn = robot.ConveyorTrackMoveL("cvrRaisePoint", 1, 0, (float)100.0, (float)0.0, (float)100.0, (float)-1.0);
             Console.WriteLine("ConveyorTrackMoveL: rtn   " + rtn);
 
             rtn = robot.ConveyorTrackEnd();//传送带跟踪停止
@@ -1807,9 +1718,9 @@ namespace testFrRobot
 
         private void btnUpload_Click(object sender, EventArgs e)
         {
-            txtLog.Text = "NULL";
-            int rtn = robot.PointTableUpLoad(txtSavePath.Text);
-            txtLog.Text = rtn.ToString();
+            string txtLog = "D://zUP/test_point_A.db";
+            int rtn = robot.PointTableUpLoad(txtLog);
+            Console.WriteLine($"PointTableUpLoad rtn :{rtn} ");
         }
 
         private void btnUpdateLua_Click(object sender, EventArgs e)
@@ -1996,7 +1907,8 @@ namespace testFrRobot
 
         private void btnDownLoadLua_Click(object sender, EventArgs e)
         {
-            int rtn = robot.LuaDownLoad(txtDownLoadLuaName.Text, "D://zDOWN/");
+
+            int rtn = robot.LuaDownLoad("airlab.lua", "D://zDOWN/");
             Console.WriteLine(rtn);
         }
 
@@ -2064,10 +1976,10 @@ namespace testFrRobot
             //robot.MoveL(startjointPos, startdescPose, 1, 1, 100, 100, 100, 0, exaxisPos, 0, 0, offdese);
             while(true)
             {
-                robot.MoveL(startJP, startdescPose, 1, 0, 100, 100, 100, -1, exaxisPos, 0, 0, offdese, 1, 1);
+                robot.MoveL(startJP, startdescPose, 1, 0, 100, 100, 100, -1, 0, exaxisPos, 0, 0, offdese, 1, 1);
                 robot.GetForwardKin(endjointPos, ref enddescPose);
 
-                robot.MoveL(endjointPos, enddescPose, 1, 0, 100, 100, 100, -1, exaxisPos, 0, 0, offdese, 1, 1);
+                robot.MoveL(endjointPos, enddescPose, 1, 0, 100, 100, 100, -1, 0, exaxisPos, 0, 0, offdese, 1, 1);
             }
            
         }
@@ -2113,6 +2025,38 @@ namespace testFrRobot
         {
             Test testInterface = new Test(robot);
             testInterface.ShowDialog();
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            JointPos j1 = new JointPos(-11.904, -99.669, 117.473, -108.616, -91.726, 74.256);
+            JointPos j2 = new JointPos(-45.615, -106.172, 124.296, -107.151, -91.282, 74.255);
+            DescPose desc_pos1 = new DescPose(-419.524, -13.000, 351.569, -178.118, 0.314, 3.833);
+            DescPose desc_pos2 = new DescPose(-321.222, 185.189, 335.520, -179.030, -1.284, -29.869);
+            DescPose offset_pos = new DescPose(0, 0, 0, 0, 0, 0);
+            ExaxisPos epos = new ExaxisPos(0, 0, 0, 0);
+
+            int tool = 0;
+            int user = 0;
+            float vel = 100.0f;
+            float acc = 100.0f;
+            float ovl = 100.0f;
+            float blendT = 0.0f;
+            float blendR = 0.0f;
+            byte flag = 0;
+            byte search = 0;
+
+            robot.SetSpeed(5);
+
+            robot.MoveAOStart(0,100,100,20);
+            robot.MoveJ(j1, desc_pos1, tool, user, vel, acc, ovl, epos, blendT, flag, offset_pos);
+            robot.MoveJ(j2, desc_pos2, tool, user, vel, acc, ovl, epos, blendT, flag, offset_pos);
+            robot.MoveAOStop();
+
+            robot.MoveToolAOStart(0, 100, 100, 20);
+            robot.MoveJ(j1, desc_pos1, tool, user, vel, acc, ovl, epos, blendT, flag, offset_pos);
+            robot.MoveJ(j2, desc_pos2, tool, user, vel, acc, ovl, epos, blendT, flag, offset_pos);
+            robot.MoveToolAOStop();
         }
     }
 }
