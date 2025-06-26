@@ -203,7 +203,8 @@ namespace fairino
         * @return  错误码
         */
         [XmlRpcMethod("Circle")]
-        int Circle(double[] joint_pos_p, double[] desc_pos_p, double[] controlP, double[] epos_p, double[] joint_pos_t, double[] desc_pos_t, double[] controlT, double[] epos_t, double ovl, int offset_flag, double[] offset_pos);
+
+        int Circle(double[] jointP, double[] descP, double[] controlP, double[] exteraxisP, double[] jointT, double[] descT, double[] controlT, double[] exteraxisT, double[] ovl, double[] offect, double[] oacc);
         /**
         * @brief  笛卡尔空间螺旋线运动
         * @param  [in] joint_pos  目标关节位置,单位deg
@@ -247,7 +248,7 @@ namespace fairino
         * @return  错误码
         */
         [XmlRpcMethod("ServoJ")]
-        int ServoJ(double[] joint_pos, double[] axisPos, double acc, double vel, double cmdT, double filterT, double gain);
+        int ServoJ(double[] joint_pos, double[] axisPos, double acc, double vel, double cmdT, double filterT, double gain, int id);
 
         /**
         * @brief  笛卡尔空间伺服模式运动
@@ -1958,6 +1959,15 @@ namespace fairino
         [XmlRpcMethod("FT_SpiralSearch")]
         int FT_SpiralSearch(int rcs, float dr, float ft, float max_t_ms, float max_vel);
 
+        [XmlRpcMethod("EndForceDragControl")]
+        int EndForceDragControl(int status, int asaptiveFlag, int interfereDragFlag, int ingularityConstraintsFlag, int forceCollisionFlag, double[] M, double[] B, double[] K, double[] F, double Fmax, double Vmax);
+
+
+        [XmlRpcMethod("SetWideBoxTempFanMonitorParam")]
+        int SetWideBoxTempFanMonitorParam(int enable, int period);
+
+        [XmlRpcMethod("GetWideBoxTempFanMonitorParam")]
+        object[] GetWideBoxTempFanMonitorParam();
     }
     internal class RPCHandle
     {

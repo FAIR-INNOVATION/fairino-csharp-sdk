@@ -44,6 +44,11 @@
             this.button11 = new System.Windows.Forms.Button();
             this.button12 = new System.Windows.Forms.Button();
             this.button13 = new System.Windows.Forms.Button();
+            this.button75 = new System.Windows.Forms.Button();
+            this.button76 = new System.Windows.Forms.Button();
+            this.button77 = new System.Windows.Forms.Button();
+            this.button78 = new System.Windows.Forms.Button();
+            this.button79 = new System.Windows.Forms.Button();
             this.flowLayoutPanel3 = new System.Windows.Forms.FlowLayoutPanel();
             this.button14 = new System.Windows.Forms.Button();
             this.button15 = new System.Windows.Forms.Button();
@@ -98,10 +103,10 @@
             this.button62 = new System.Windows.Forms.Button();
             this.button63 = new System.Windows.Forms.Button();
             this.flowLayoutPanel6 = new System.Windows.Forms.FlowLayoutPanel();
+            this.button64 = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.flowLayoutPanel7 = new System.Windows.Forms.FlowLayoutPanel();
-            this.button64 = new System.Windows.Forms.Button();
             this.button65 = new System.Windows.Forms.Button();
             this.button66 = new System.Windows.Forms.Button();
             this.button67 = new System.Windows.Forms.Button();
@@ -241,9 +246,14 @@
             this.flowLayoutPanel2.Controls.Add(this.button11);
             this.flowLayoutPanel2.Controls.Add(this.button12);
             this.flowLayoutPanel2.Controls.Add(this.button13);
+            this.flowLayoutPanel2.Controls.Add(this.button75);
+            this.flowLayoutPanel2.Controls.Add(this.button76);
+            this.flowLayoutPanel2.Controls.Add(this.button77);
+            this.flowLayoutPanel2.Controls.Add(this.button78);
+            this.flowLayoutPanel2.Controls.Add(this.button79);
             this.flowLayoutPanel2.Location = new System.Drawing.Point(218, 12);
             this.flowLayoutPanel2.Name = "flowLayoutPanel2";
-            this.flowLayoutPanel2.Size = new System.Drawing.Size(140, 396);
+            this.flowLayoutPanel2.Size = new System.Drawing.Size(140, 507);
             this.flowLayoutPanel2.TabIndex = 4;
             // 
             // button10
@@ -285,6 +295,56 @@
             this.button13.Text = "MoveL";
             this.button13.UseVisualStyleBackColor = true;
             this.button13.Click += new System.EventHandler(this.button13_Click);
+            // 
+            // button75
+            // 
+            this.button75.Location = new System.Drawing.Point(3, 163);
+            this.button75.Name = "button75";
+            this.button75.Size = new System.Drawing.Size(136, 34);
+            this.button75.TabIndex = 15;
+            this.button75.Text = "Circle";
+            this.button75.UseVisualStyleBackColor = true;
+            this.button75.Click += new System.EventHandler(this.button75_Click);
+            // 
+            // button76
+            // 
+            this.button76.Location = new System.Drawing.Point(3, 203);
+            this.button76.Name = "button76";
+            this.button76.Size = new System.Drawing.Size(136, 34);
+            this.button76.TabIndex = 16;
+            this.button76.Text = "力传感器辅助";
+            this.button76.UseVisualStyleBackColor = true;
+            this.button76.Click += new System.EventHandler(this.button76_Click);
+            // 
+            // button77
+            // 
+            this.button77.Location = new System.Drawing.Point(3, 243);
+            this.button77.Name = "button77";
+            this.button77.Size = new System.Drawing.Size(136, 34);
+            this.button77.TabIndex = 17;
+            this.button77.Text = "Circle";
+            this.button77.UseVisualStyleBackColor = true;
+            this.button77.Click += new System.EventHandler(this.button77_Click);
+            // 
+            // button78
+            // 
+            this.button78.Location = new System.Drawing.Point(3, 283);
+            this.button78.Name = "button78";
+            this.button78.Size = new System.Drawing.Size(136, 34);
+            this.button78.TabIndex = 18;
+            this.button78.Text = "風扇監控參數";
+            this.button78.UseVisualStyleBackColor = true;
+            this.button78.Click += new System.EventHandler(this.button78_Click);
+            // 
+            // button79
+            // 
+            this.button79.Location = new System.Drawing.Point(3, 323);
+            this.button79.Name = "button79";
+            this.button79.Size = new System.Drawing.Size(136, 34);
+            this.button79.TabIndex = 19;
+            this.button79.Text = "風扇監控參數";
+            this.button79.UseVisualStyleBackColor = true;
+            this.button79.Click += new System.EventHandler(this.button79_Click);
             // 
             // flowLayoutPanel3
             // 
@@ -865,6 +925,17 @@
             this.flowLayoutPanel6.Size = new System.Drawing.Size(144, 78);
             this.flowLayoutPanel6.TabIndex = 46;
             // 
+            // button64
+            // 
+            this.button64.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.button64.Location = new System.Drawing.Point(3, 3);
+            this.button64.Name = "button64";
+            this.button64.Size = new System.Drawing.Size(136, 34);
+            this.button64.TabIndex = 50;
+            this.button64.Text = "Test485Auxservo";
+            this.button64.UseVisualStyleBackColor = true;
+            this.button64.Click += new System.EventHandler(this.button64_Click);
+            // 
             // label1
             // 
             this.label1.AutoSize = true;
@@ -900,17 +971,6 @@
             this.flowLayoutPanel7.Name = "flowLayoutPanel7";
             this.flowLayoutPanel7.Size = new System.Drawing.Size(144, 513);
             this.flowLayoutPanel7.TabIndex = 48;
-            // 
-            // button64
-            // 
-            this.button64.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
-            this.button64.Location = new System.Drawing.Point(3, 3);
-            this.button64.Name = "button64";
-            this.button64.Size = new System.Drawing.Size(136, 34);
-            this.button64.TabIndex = 50;
-            this.button64.Text = "Test485Auxservo";
-            this.button64.UseVisualStyleBackColor = true;
-            this.button64.Click += new System.EventHandler(this.button64_Click);
             // 
             // button65
             // 
@@ -1138,5 +1198,10 @@
         private System.Windows.Forms.Button button72;
         private System.Windows.Forms.Button button73;
         private System.Windows.Forms.Button button74;
+        private System.Windows.Forms.Button button75;
+        private System.Windows.Forms.Button button76;
+        private System.Windows.Forms.Button button77;
+        private System.Windows.Forms.Button button78;
+        private System.Windows.Forms.Button button79;
     }
 }
