@@ -335,6 +335,9 @@ namespace fairino
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 6)]
         public double[] jt_tgt_tor;//关节指令力矩
         public int smartToolState; //SmartTool手柄按钮状态
+
+        public float wideVoltageCtrlBoxTemp;        //宽电压控制箱温度
+        public UInt16 wideVoltageCtrlBoxFanVel;   //宽电压控制箱风扇电流（mA）
         public UInt16 check_sum;         /* 和校验 */                 
     }
 

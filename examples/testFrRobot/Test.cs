@@ -275,16 +275,16 @@ namespace testFrRobot
             ExaxisPos exaxisPos = new ExaxisPos(0, 0, 0, 0);
             DescPose offdese = new DescPose(0, 0, 0, 0, 0, 0);
             robot.WeaveSetPara(0, 3, 2.000000, 0, 10.000000, 0.000000, 0.000000, 0, 0, 0, 0, 0, 0, 0);
-            //robot.MoveL(startjointPos, startdescPose, 2, 0, 100, 100, 100, -1, exaxisPos, 0, 0, offdese);
-            //robot.WeaveStart(0);
-            //robot.MoveL(endjointPos, enddescPose, 2, 0, 100, 100, 100, -1, exaxisPos, 0, 0, offdese);
-            //robot.WeaveEnd(0);
+            robot.MoveL(startjointPos, startdescPose, 2, 0, 100, 100, 100, -1, exaxisPos, 0, 0, offdese);
+            robot.WeaveStart(0);
+            robot.MoveL(endjointPos, enddescPose, 2, 0, 100, 100, 100, -1, exaxisPos, 0, 0, offdese);
+            robot.WeaveEnd(0);
 
-            //robot.WeaveSetPara(0, 3, 2.000000, 0, 10.000000, 0.000000, 0.000000, 0, 0, 0, 0, 0, 0, 30);
-            //robot.MoveL(startjointPos, startdescPose, 2, 0, 100, 100, 100, -1, exaxisPos, 0, 0, offdese);
-            //robot.WeaveStart(0);
-            //robot.MoveL(endjointPos, enddescPose, 2, 0, 100, 100, 100, -1, exaxisPos, 0, 0, offdese);
-            //robot.WeaveEnd(0);
+            robot.WeaveSetPara(0, 3, 2.000000, 0, 10.000000, 0.000000, 0.000000, 0, 0, 0, 0, 0, 0, 30);
+            robot.MoveL(startjointPos, startdescPose, 2, 0, 100, 100, 100, -1, exaxisPos, 0, 0, offdese);
+            robot.WeaveStart(0);
+            robot.MoveL(endjointPos, enddescPose, 2, 0, 100, 100, 100, -1, exaxisPos, 0, 0, offdese);
+            robot.WeaveEnd(0);
 
         }
 
@@ -2829,6 +2829,375 @@ namespace testFrRobot
             DescTran load_pos = new DescTran(0, 0, 0);
             retval = robot.LoadIdentifyGetResult(gain, ref weight, ref load_pos);
             Console.WriteLine("LoadIdentifyGetResult retval is: {0}; weight is {1} cog is {2} {3} {4}", retval, weight, load_pos.x, load_pos.y, load_pos.z);
+        }
+
+        private void button75_Click(object sender, EventArgs e)
+        {
+            int rtn = 0;
+            DescPose middescPoseCir1 = new DescPose(-435.414, -342.926, 309.205, -171.382, -4.513, 171.520);
+            JointPos midjointPosCir1 = new JointPos(26.804, -79.866, 106.642, -125.433, -85.562, -54.721);
+            DescPose enddescPoseCir1 = new DescPose(-524.862, -217.402, 308.459, -171.425, -4.810, 156.088);
+            JointPos endjointPosCir1 = new JointPos(11.399, -78.055, 104.603, -125.421, -85.770, -54.721);
+
+            DescPose middescPoseCir2 = new DescPose(-482.691, -587.899, 318.594, -171.001, -4.999, -172.996);
+            JointPos midjointPosCir2 = new JointPos(42.314, -53.600, 67.296, -112.969, -85.533, -54.721);
+            DescPose enddescPoseCir2 = new DescPose(-403.942, -489.061, 317.038, -163.189, -10.425, -175.627);
+            JointPos endjointPosCir2 = new JointPos(39.959, -70.616, 96.679, -134.243, -82.276, -54.721);
+
+            DescPose middescPoseMoveC = new DescPose(-435.414, -342.926, 309.205, -171.382, -4.513, 171.520);
+            JointPos midjointPosMoveC = new JointPos(26.804, -79.866, 106.642, -125.433, -85.562, -54.721);
+            DescPose enddescPoseMoveC = new DescPose(-524.862, -217.402, 308.459, -171.425, -4.810, 156.088);
+            JointPos endjointPosmoveC = new JointPos(11.399, -78.055, 104.603, -125.421, -85.770, -54.721);
+
+            DescPose middescPoseCir3 = new DescPose(-435.414, -342.926, 309.205, -171.382, -4.513, 171.520);
+            JointPos midjointPosCir3 = new JointPos(26.804, -79.866, 106.642, -125.433, -85.562, -54.721);
+            DescPose enddescPoseCir3 = new DescPose(-569.505, -405.378, 357.596, -172.862, -10.939, 171.108);
+            JointPos endjointPosCir3 = new JointPos(27.138, -63.750, 78.586, -117.861, -90.588, -54.721);
+
+            DescPose middescPoseCir4 = new DescPose(-482.691, -587.899, 318.594, -171.001, -4.999, -172.996);
+            JointPos midjointPosCir4 = new JointPos(42.314, -53.600, 67.296, -112.969, -85.533, -54.721);
+            DescPose enddescPoseCir4 = new DescPose(-569.505, -405.378, 357.596, -172.862, -10.939, 171.108);
+            JointPos endjointPosCir4 = new JointPos(27.138, -63.750, 78.586, -117.861, -90.588, -54.721);
+
+            DescPose startdescPose = new DescPose(-569.505, -405.378, 357.596, -172.862, -10.939, 171.108);
+            JointPos startjointPos = new JointPos(27.138, -63.750, 78.586, -117.861, -90.588, -54.721);
+
+            DescPose linedescPose = new DescPose(-403.942, -489.061, 317.038, -163.189, -10.425, -175.627);
+            JointPos linejointPos = new JointPos(39.959, -70.616, 96.679, -134.243, -82.276, -54.721);
+
+
+            ExaxisPos exaxisPos = new ExaxisPos(0, 0, 0, 0);
+            DescPose offdese = new DescPose(0, 0, 0, 0, 0, 0);
+
+
+            robot.MoveJ(startjointPos, startdescPose, 3, 0, 100, 100, 100, exaxisPos, -1, 0, offdese);
+            rtn = robot.Circle(midjointPosCir1, middescPoseCir1, 3, 0, 100, 100, exaxisPos, endjointPosCir1, enddescPoseCir1, 3, 0, 100, 100, exaxisPos, 100, -1, offdese, 100, 20);
+            Console.WriteLine("Circle1" + rtn);
+
+
+
+            rtn = robot.Circle(midjointPosCir2, middescPoseCir2, 3, 0, 100, 100, exaxisPos, endjointPosCir2, enddescPoseCir2, 3, 0, 100, 100, exaxisPos, 100, -1, offdese, 100, 20);
+            Console.WriteLine("Circle2" + rtn);
+
+            robot.MoveC(midjointPosMoveC, middescPoseMoveC, 3, 0, 100, 100, exaxisPos, 0, offdese, endjointPosmoveC, enddescPoseMoveC, 3, 0, 100, 100, exaxisPos, 0, offdese, 100, 20);
+            rtn = robot.Circle(midjointPosCir3, middescPoseCir3, 3, 0, 100, 100, exaxisPos, endjointPosCir3, enddescPoseCir3, 3, 0, 100, 100, exaxisPos, 100, -1, offdese, 100, 20);
+            Console.WriteLine("Circle3" + rtn);
+            rtn = robot.MoveL(linejointPos, linedescPose, 3, 0, 100, 100, 100, -1, 0, exaxisPos, 0, 0, offdese);
+            Console.WriteLine("MoveL " + rtn);
+            rtn = robot.Circle(midjointPosCir4, middescPoseCir4, 3, 0, 100, 100, exaxisPos, endjointPosCir4, enddescPoseCir4, 3, 0, 100, 100, exaxisPos, 100, -1, offdese, 100, 20);
+            Console.WriteLine("Circle4" + rtn);
+        }
+
+        private void button76_Click(object sender, EventArgs e)
+        {
+            double[] M = { 15.0, 15.0, 15.0, 0.5, 0.5, 0.1 };
+            double[] B = { 150.0, 150.0, 150.0, 5.0, 5.0, 1.0 };
+            double[] K = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+            double[] F = { 10.0, 10.0, 10.0, 1.0, 1.0, 1.0 };
+            int rtn = robot.EndForceDragControl(1, 0, 0, 0, 1, M, B, K, F, 50, 100);
+            Console.WriteLine("force drag control start rtn is{rtn}");
+            Thread.Sleep(5000);
+
+            rtn = robot.EndForceDragControl(0, 0, 0, 0, 1, M, B, K, F, 50, 100);
+            Console.WriteLine($"force drag control end rtn is{rtn}");
+
+            rtn = robot.ResetAllError();
+            Console.WriteLine($"ResetAllError rtn is{rtn}");
+
+            robot.EndForceDragControl(1, 0, 0, 0, 1, M, B, K, F, 50, 100);
+            Console.WriteLine($"force drag control start again rtn is{rtn}");
+            Thread.Sleep(5000);
+
+            rtn = robot.EndForceDragControl(0, 0, 0, 0, 1, M, B, K, F, 50, 100);
+            Console.WriteLine($"force drag control end again rtn is {rtn}");
+        }
+
+        private void button77_Click(object sender, EventArgs e)
+        {
+            ExaxisPos exaxisPos = new ExaxisPos(0, 0, 0, 0);
+            DescPose offdese = new DescPose(0, 0, 0, 0, 0, 0);
+            // First set of positions
+            JointPos JP1 = new JointPos(55.203, -69.138, 75.617, -103.969, -83.549, -0.001);
+            DescPose DP1 = new DescPose(0, 0, 0, 0, 0, 0);
+            JointPos JP2 = new JointPos(57.646, -61.846, 59.286, -69.645, -99.735, 3.824);
+            DescPose DP2 = new DescPose(0, 0, 0, 0, 0, 0);
+            JointPos JP3 = new JointPos(57.304, -61.380, 58.260, -67.641, -97.447, 2.685);
+            DescPose DP3 = new DescPose(0, 0, 0, 0, 0, 0);
+            JointPos JP4 = new JointPos(57.297, -61.373, 58.250, -67.637, -97.448, 2.677);
+            DescPose DP4 = new DescPose(0, 0, 0, 0, 0, 0);
+            JointPos JP5 = new JointPos(23.845, -108.202, 111.300, -80.971, -106.753, -30.246);
+            DescPose DP5 = new DescPose(0, 0, 0, 0, 0, 0);
+            JointPos JP6 = new JointPos(23.845, -108.202, 111.300, -80.971, -106.753, -30.246);
+            DescPose DP6 = new DescPose(0, 0, 0, 0, 0, 0);
+
+            robot.GetForwardKin(JP1, ref DP1);
+            robot.GetForwardKin(JP2, ref DP2);
+            robot.GetForwardKin(JP3, ref DP3);
+            robot.GetForwardKin(JP4, ref DP4);
+            robot.GetForwardKin(JP5, ref DP5);
+            robot.GetForwardKin(JP6, ref DP6);
+
+            robot.MoveJ(JP1, DP1, 0, 0, 100, 100, 100, exaxisPos, -1, 0, offdese);
+            robot.MoveJ(JP2, DP2, 0, 0, 100, 100, 100, exaxisPos, 200, 0, offdese);
+            robot.MoveJ(JP3, DP3, 0, 0, 100, 100, 100, exaxisPos, 200, 0, offdese);
+            robot.MoveJ(JP4, DP4, 0, 0, 100, 100, 100, exaxisPos, 200, 0, offdese);
+            robot.MoveJ(JP5, DP5, 0, 0, 100, 100, 100, exaxisPos, 200, 0, offdese);
+            robot.MoveJ(JP6, DP6, 0, 0, 100, 100, 100, exaxisPos, 200, 0, offdese);
+
+            // Second set of positions
+            JointPos JP7 = new JointPos(-10.503, -93.654, 111.333, -84.702, -103.479, -30.179);
+            DescPose DP7 = new DescPose(0, 0, 0, 0, 0, 0);
+            JointPos JP8 = new JointPos(-10.503, -93.654, 111.333, -84.702, -103.479, -30.179);
+            DescPose DP8 = new DescPose(0, 0, 0, 0, 0, 0);
+            JointPos JP9 = new JointPos(-10.503, -93.654, 111.333, -84.702, -103.479, -30.179);
+            DescPose DP9 = new DescPose(0, 0, 0, 0, 0, 0);
+            JointPos JP10 = new JointPos(-30.623, -74.158, 89.844, -91.942, -97.060, -30.180);
+            DescPose DP10 = new DescPose(0, 0, 0, 0, 0, 0);
+            JointPos JP11 = new JointPos(-34.797, -72.641, 93.917, -104.961, -84.449, -30.287);
+            DescPose DP11 = new DescPose(0, 0, 0, 0, 0, 0);
+            JointPos JP12 = new JointPos(-17.454, -58.309, 82.054, -111.034, -109.900, -30.241);
+            DescPose DP12 = new DescPose(0, 0, 0, 0, 0, 0);
+            JointPos JP13 = new JointPos(-4.930, -72.469, 100.631, -109.906, -76.760, -10.947);
+            DescPose DP13 = new DescPose(0, 0, 0, 0, 0, 0);
+
+            robot.GetForwardKin(JP7, ref DP7);
+            robot.GetForwardKin(JP8, ref DP8);
+            robot.GetForwardKin(JP9, ref DP9);
+            robot.GetForwardKin(JP10, ref DP10);
+            robot.GetForwardKin(JP11, ref DP11);
+            robot.GetForwardKin(JP12, ref DP12);
+            robot.GetForwardKin(JP13, ref DP13);
+
+            robot.MoveJ(JP7, DP7, 0, 0, 100, 100, 100, exaxisPos, 200, 0, offdese);
+            robot.MoveL(JP8, DP8, 0, 0, 100, 100, 100, 20, 0, exaxisPos, 0, 0, offdese);
+            robot.MoveJ(JP9, DP9, 0, 0, 100, 100, 100, exaxisPos, 200, 0, offdese);
+            robot.MoveL(JP10, DP10, 0, 0, 100, 100, 100, 20, 0, exaxisPos, 0, 0, offdese);
+            robot.MoveJ(JP11, DP11, 0, 0, 100, 100, 100, exaxisPos, 200, 0, offdese);
+            robot.MoveC(JP12, DP12, 0, 0, 100, 100, exaxisPos, 0, offdese, JP13, DP13, 0, 0, 100, 100, exaxisPos, 0, offdese, 100, 20);
+
+            // Third set of positions
+            JointPos JP14 = new JointPos(9.586, -66.925, 85.589, -99.109, -103.403, -30.280);
+            DescPose DP14 = new DescPose(0, 0, 0, 0, 0, 0);
+            JointPos JP15 = new JointPos(23.056, -59.187, 76.487, -102.155, -77.560, -30.250);
+            DescPose DP15 = new DescPose(0, 0, 0, 0, 0, 0);
+            JointPos JP16 = new JointPos(28.028, -71.754, 91.463, -102.182, -102.361, -30.253);
+            DescPose DP16 = new DescPose(0, 0, 0, 0, 0, 0);
+            JointPos JP17 = new JointPos(38.974, -62.622, 79.068, -102.543, -101.630, -30.253);
+            DescPose DP17 = new DescPose(0, 0, 0, 0, 0, 0);
+            JointPos JP18 = new JointPos(-34.797, -72.641, 93.917, -104.961, -84.449, -30.287);
+            DescPose DP18 = new DescPose(0, 0, 0, 0, 0, 0);
+            JointPos JP19 = new JointPos(-17.454, -58.309, 82.054, -111.034, -109.900, -30.241);
+            DescPose DP19 = new DescPose(0, 0, 0, 0, 0, 0);
+            JointPos JP20 = new JointPos(-4.930, -72.469, 100.631, -109.906, -76.760, -10.947);
+            DescPose DP20 = new DescPose(0, 0, 0, 0, 0, 0);
+            JointPos JP21 = new JointPos(3.021, -76.365, 81.332, -98.130, -68.530, -30.284);
+            DescPose DP21 = new DescPose(0, 0, 0, 0, 0, 0);
+            JointPos JP22 = new JointPos(12.532, -94.241, 106.254, -87.131, -102.719, -30.227);
+            DescPose DP22 = new DescPose(0, 0, 0, 0, 0, 0);
+
+            robot.GetForwardKin(JP14, ref DP14);
+            robot.GetForwardKin(JP15, ref DP15);
+            robot.GetForwardKin(JP16, ref DP16);
+            robot.GetForwardKin(JP17, ref DP17);
+            robot.GetForwardKin(JP18, ref DP18);
+            robot.GetForwardKin(JP19, ref DP19);
+            robot.GetForwardKin(JP20, ref DP20);
+            robot.GetForwardKin(JP21, ref DP21);
+            robot.GetForwardKin(JP22, ref DP22);
+
+            robot.MoveJ(JP14, DP14, 0, 0, 100, 100, 100, exaxisPos, 200, 0, offdese);
+            robot.Circle(JP15, DP15, 0, 0, 100, 100, exaxisPos, JP16, DP16, 0, 0, 100, 100, exaxisPos, 100, 0, offdese, 100, 20);
+            robot.MoveJ(JP17, DP17, 0, 0, 100, 100, 100, exaxisPos, 200, 0, offdese);
+            robot.MoveL(JP18, DP18, 0, 0, 100, 100, 100, 100, 0, exaxisPos, 0, 0, offdese);
+            robot.MoveC(JP19, DP19, 0, 0, 100, 100, exaxisPos, 0, offdese, JP20, DP20, 0, 0, 100, 100, exaxisPos, 0, offdese, 100, 20);
+            robot.MoveC(JP21, DP21, 0, 0, 100, 100, exaxisPos, 0, offdese, JP22, DP22, 0, 0, 100, 100, exaxisPos, 0, offdese, 100, 20);
+
+            // Fourth set of positions
+            JointPos JP23 = new JointPos(9.586, -66.925, 85.589, -99.109, -103.403, -30.280);
+            DescPose DP23 = new DescPose(0, 0, 0, 0, 0, 0);
+            JointPos JP24 = new JointPos(23.056, -59.187, 76.487, -102.155, -77.560, -30.250);
+            DescPose DP24 = new DescPose(0, 0, 0, 0, 0, 0);
+            JointPos JP25 = new JointPos(28.028, -71.754, 91.463, -102.182, -102.361, -30.253);
+            DescPose DP25 = new DescPose(0, 0, 0, 0, 0, 0);
+            JointPos JP26 = new JointPos(-11.207, -81.555, 110.050, -108.983, -74.292, -30.249);
+            DescPose DP26 = new DescPose(0, 0, 0, 0, 0, 0);
+            JointPos JP27 = new JointPos(18.930, -70.987, 100.659, -115.974, -115.465, -30.231);
+            DescPose DP27 = new DescPose(0, 0, 0, 0, 0, 0);
+            JointPos JP28 = new JointPos(32.493, -65.561, 86.053, -109.669, -103.427, -30.267);
+            DescPose DP28 = new DescPose(0, 0, 0, 0, 0, 0);
+            JointPos JP29 = new JointPos(21.954, -87.113, 123.299, -109.730, -72.157, -9.013);
+            DescPose DP29 = new DescPose(0, 0, 0, 0, 0, 0);
+            JointPos JP30 = new JointPos(19.084, -69.127, 104.304, -109.629, -106.997, -9.011);
+            DescPose DP30 = new DescPose(0, 0, 0, 0, 0, 0);
+            JointPos JP31 = new JointPos(38.654, -60.146, 93.485, -109.637, -87.023, -8.989);
+            DescPose DP31 = new DescPose(0, 0, 0, 0, 0, 0);
+
+            robot.GetForwardKin(JP23, ref DP23);
+            robot.GetForwardKin(JP24, ref DP24);
+            robot.GetForwardKin(JP25, ref DP25);
+            robot.GetForwardKin(JP26, ref DP26);
+            robot.GetForwardKin(JP27, ref DP27);
+            robot.GetForwardKin(JP28, ref DP28);
+            robot.GetForwardKin(JP29, ref DP29);
+            robot.GetForwardKin(JP30, ref DP30);
+            robot.GetForwardKin(JP31, ref DP31);
+
+            robot.MoveL(JP23, DP23, 0, 0, 100, 100, 100, 20, 1, exaxisPos, 0, 0, offdese);
+            robot.Circle(JP24, DP24, 0, 0, 100, 100, exaxisPos, JP25, DP25, 0, 0, 100, 100, exaxisPos, 100, 0, offdese, 100, 20);
+            robot.Circle(JP26, DP26, 0, 0, 100, 100, exaxisPos, JP27, DP27, 0, 0, 100, 100, exaxisPos, 100, 0, offdese, 100, 20);
+            robot.MoveC(JP28, DP28, 0, 0, 100, 100, exaxisPos, 0, offdese, JP29, DP29, 0, 0, 100, 100, exaxisPos, 0, offdese, 100, 20);
+            robot.Circle(JP30, DP30, 0, 0, 100, 100, exaxisPos, JP31, DP31, 0, 0, 100, 100, exaxisPos, 100, 0, offdese, 100, 20);
+
+            // Fifth set of positions
+            JointPos JP32 = new JointPos(38.654, -60.146, 93.485, -109.637, -87.023, -8.989);
+            DescPose DP32 = new DescPose(0, 0, 0, 0, 0, 0);
+            JointPos JP33 = new JointPos(55.203, -69.138, 75.617, -103.969, -83.549, -0.001);
+            DescPose DP33 = new DescPose(0, 0, 0, 0, 0, 0);
+            JointPos JP34 = new JointPos(57.646, -61.846, 59.286, -69.645, -99.735, 3.824);
+            DescPose DP34 = new DescPose(0, 0, 0, 0, 0, 0);
+            JointPos JP35 = new JointPos(57.304, -61.380, 58.260, -67.641, -97.447, 2.685);
+            DescPose DP35 = new DescPose(0, 0, 0, 0, 0, 0);
+            JointPos JP36 = new JointPos(57.297, -61.373, 58.250, -67.637, -97.448, 2.677);
+            DescPose DP36 = new DescPose(0, 0, 0, 0, 0, 0);
+            JointPos JP37 = new JointPos(23.845, -108.202, 111.300, -80.971, -106.753, -30.246);
+            DescPose DP37 = new DescPose(0, 0, 0, 0, 0, 0);
+            JointPos JP38 = new JointPos(23.845, -108.202, 111.300, -80.971, -106.753, -30.246);
+            DescPose DP38 = new DescPose(0, 0, 0, 0, 0, 0);
+            JointPos JP39 = new JointPos(-10.503, -93.654, 111.333, -84.702, -103.479, -30.179);
+            DescPose DP39 = new DescPose(0, 0, 0, 0, 0, 0);
+            JointPos JP40 = new JointPos(-30.623, -74.158, 89.844, -91.942, -97.060, -30.180);
+            DescPose DP40 = new DescPose(0, 0, 0, 0, 0, 0);
+
+            robot.GetForwardKin(JP32, ref DP32);
+            robot.GetForwardKin(JP33, ref DP33);
+            robot.GetForwardKin(JP34, ref DP34);
+            robot.GetForwardKin(JP35, ref DP35);
+            robot.GetForwardKin(JP36, ref DP36);
+            robot.GetForwardKin(JP37, ref DP37);
+            robot.GetForwardKin(JP38, ref DP38);
+            robot.GetForwardKin(JP39, ref DP39);
+            robot.GetForwardKin(JP40, ref DP40);
+
+            robot.MoveL(JP32, DP32, 0, 0, 100, 100, 100, 20, 1, exaxisPos, 0, 0, offdese);
+            robot.MoveJ(JP33, DP33, 0, 0, 100, 100, 100, exaxisPos, -1, 0, offdese);
+            robot.MoveL(JP34, DP34, 0, 0, 100, 100, 100, 20, 0, exaxisPos, 0, 0, offdese);
+            robot.MoveL(JP35, DP35, 0, 0, 100, 100, 100, 20, 0, exaxisPos, 0, 0, offdese);
+            robot.MoveL(JP36, DP36, 0, 0, 100, 100, 100, 20, 0, exaxisPos, 0, 0, offdese);
+            robot.MoveL(JP37, DP37, 0, 0, 100, 100, 100, 20, 0, exaxisPos, 0, 0, offdese);
+            robot.MoveL(JP38, DP38, 0, 0, 100, 100, 100, 20, 0, exaxisPos, 0, 0, offdese);
+            robot.MoveL(JP39, DP39, 0, 0, 100, 100, 100, 20, 0, exaxisPos, 0, 0, offdese);
+            robot.MoveJ(JP40, DP40, 0, 0, 100, 100, 100, exaxisPos, 20, 0, offdese);
+
+            // Sixth set of positions
+            JointPos JP50 = new JointPos(-34.797, -72.641, 93.917, -104.961, -84.449, -30.287);
+            DescPose DP50 = new DescPose(0, 0, 0, 0, 0, 0);
+            JointPos JP41 = new JointPos(-17.454, -58.309, 82.054, -111.034, -109.900, -30.241);
+            DescPose DP41 = new DescPose(0, 0, 0, 0, 0, 0);
+            JointPos JP42 = new JointPos(-4.930, -72.469, 100.631, -109.906, -76.760, -10.947);
+            DescPose DP42 = new DescPose(0, 0, 0, 0, 0, 0);
+            JointPos JP43 = new JointPos(9.586, -66.925, 85.589, -99.109, -103.403, -30.280);
+            DescPose DP43 = new DescPose(0, 0, 0, 0, 0, 0);
+            JointPos JP44 = new JointPos(23.056, -59.187, 76.487, -102.155, -77.560, -30.250);
+            DescPose DP44 = new DescPose(0, 0, 0, 0, 0, 0);
+            JointPos JP45 = new JointPos(28.028, -71.754, 91.463, -102.182, -102.361, -30.253);
+            DescPose DP45 = new DescPose(0, 0, 0, 0, 0, 0);
+            JointPos JP46 = new JointPos(38.974, -62.622, 79.068, -102.543, -101.630, -30.253);
+            DescPose DP46 = new DescPose(0, 0, 0, 0, 0, 0);
+
+            robot.GetForwardKin(JP50, ref DP50);
+            robot.GetForwardKin(JP41, ref DP41);
+            robot.GetForwardKin(JP42, ref DP42);
+            robot.GetForwardKin(JP43, ref DP43);
+            robot.GetForwardKin(JP44, ref DP44);
+            robot.GetForwardKin(JP45, ref DP45);
+            robot.GetForwardKin(JP46, ref DP46);
+
+            robot.MoveL(JP50, DP50, 0, 0, 100, 100, 100, 20, 0, exaxisPos, 0, 0, offdese);
+            robot.MoveC(JP41, DP41, 0, 0, 100, 100, exaxisPos, 0, offdese, JP42, DP42, 0, 0, 100, 100, exaxisPos, 0, offdese, 100, 20);
+            robot.MoveL(JP43, DP43, 0, 0, 100, 100, 100, 20, 0, exaxisPos, 0, 0, offdese);
+            robot.Circle(JP44, DP44, 0, 0, 100, 100, exaxisPos, JP45, DP45, 0, 0, 100, 100, exaxisPos, 100, 0, offdese, 100, 20);
+            robot.MoveL(JP46, DP46, 0, 0, 100, 100, 100, 20, 0, exaxisPos, 0, 0, offdese);
+
+
+        }
+
+        private void button78_Click(object sender, EventArgs e)
+        {
+            var pkg = new ROBOT_STATE_PKG(); 
+            robot.SetWideBoxTempFanMonitorParam(1, 2);    
+            int enable = 0;
+            int period = 0;
+            robot.GetWideBoxTempFanMonitorParam(ref enable, ref period);
+            Console.WriteLine($"GetWideBoxTempFanMonitorParam enable is {enable}   period is {period}");  
+            for (int i = 0; i < 100; i++)
+            {
+                robot.GetRobotRealTimeState(ref pkg);
+                Console.WriteLine($"robot ctrl box temp is {pkg.wideVoltageCtrlBoxTemp}, fan current is {pkg.wideVoltageCtrlBoxFanVel}");
+                Thread.Sleep(100);
+            }       
+            int rtn = robot.SetWideBoxTempFanMonitorParam(0, 2);
+            Console.WriteLine($"SetWideBoxTempFanMonitorParam rtn is {rtn}");       
+            enable = 0;
+            period = 0;
+            robot.GetWideBoxTempFanMonitorParam(ref enable, ref period);
+            Console.WriteLine($"GetWideBoxTempFanMonitorParam enable is {enable}   period is {period}");  
+            for (int i = 0; i < 100; i++)
+            {
+                robot.GetRobotRealTimeState(ref pkg);
+                Console.WriteLine($" robot ctrl box temp is {pkg.wideVoltageCtrlBoxTemp}, fan current is {pkg.wideVoltageCtrlBoxFanVel}");
+                Thread.Sleep(100);
+            }
+
+
+
+            
+        }
+
+        private void button79_Click(object sender, EventArgs e)
+        {
+            JointPos j = new JointPos(0, 0, 0, 0, 0, 0);
+            ExaxisPos epos = new ExaxisPos(0, 0, 0, 0);
+
+            float vel = 0.0f;
+            float acc = 0.0f;
+            float cmdT = 0.008f;
+            float filterT = 0.0f;
+            float gain = 0.0f;
+            byte flag = 0;
+            int count = 500;
+            float dt = 0.1f;
+            int cmdID = 0;
+            int ret = robot.GetActualJointPosDegree(flag, ref j);
+            if (ret == 0)
+            {
+                robot.ServoMoveStart();
+
+                try
+                {
+                    while (count > 0)
+                    {
+
+                        robot.ServoJ(j, epos, acc, vel, cmdT, filterT, gain, cmdID);
+
+
+                        j.jPos[0] += dt;
+                        count--;
+
+
+                        robot.WaitMs((int)(cmdT * 1000));
+                    }
+                }
+                finally
+                {
+
+                    robot.ServoMoveEnd();
+                }
+            }
+            else
+            {
+                Console.WriteLine($"GetActualJointPosDegree error code: {ret}");
+
+            }
         }
     }
 

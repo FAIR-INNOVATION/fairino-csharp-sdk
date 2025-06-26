@@ -41,7 +41,7 @@ namespace fairino
     {
         ICallSupervisor proxy = null;
 
-        const string SDK_VERSION = "C#SDK V1.1.3";
+        const string SDK_VERSION = " C#SDK-V1.1.4  Web-3.8.3";
 
         private string robot_ip = "192.168.58.2";//机器人ip
         private int g_sock_com_err = (int)RobotError.ERR_SUCCESS;
@@ -166,150 +166,23 @@ namespace fairino
                         BitConverter.GetBytes(keepAliveTime).CopyTo(keepAliveConfig, 4);
                         BitConverter.GetBytes(keepAliveInterval).CopyTo(keepAliveConfig, 8);
                         sock_cli_state.mSocket.IOControl(IOControlCode.KeepAliveValues, keepAliveConfig, null);
-
-                        // 接收数据
-                        recvbyte = sock_cli_state.mSocket.Receive(recvbuf);
-
-                        //DateTime dateTimeE = DateTime.Now;
-                        //long end = (long)(dateTimeE.ToUniversalTime() - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalMilliseconds;
-                        //Console.WriteLine($"the recv state is {recvbyte}  recv time is {end - start}");
-
-                        if (recvbyte < 0)
+                        // Console.WriteLine("start recv a pkg...");
+                        int recvRtn = sock_cli_state.RecvPkg(state_pkg, Marshal.SizeOf(robot_state_pkg));
+                        if (recvRtn != 0)
                         {
-                            sock_cli_state.Close();
                             g_sock_com_err = (int)RobotError.ERR_SOCKET_COM_FAILED;
-                            if (log != null)
-                            {
-                                Task.Run(() => log.LogError("receive robot state byte -1")); // 异步日志
-                            }
-                            throw new IOException("Remote host closed the connection.");
+                            return;
                         }
                         else
                         {
-                            /* 判断是否有上一次数据残留 */
-                            if (tmp_len > 0)
-                            {
-                                if ((tmp_len + recvbyte) <= BUFFER_SIZE)
-                                {
-                                    tmp_recvbuf = tmp_recvbuf.Concat(recvbuf).ToArray();
-                                    Array.Clear(recvbuf, 0, recvbuf.Length);
-                                    recvbuf = tmp_recvbuf;
-                                    recvbyte += tmp_len; // 加上之前遗留的数据
-                                    tmp_len = 0;
-                                    Array.Clear(tmp_recvbuf, 0, tmp_recvbuf.Length); // 每次拼接后都将之前的 temp 内容删除
-                                }
-                                else
-                                {
-                                    /* 清除上一次数据残留 */
-                                    tmp_len = 0;
-                                    Array.Clear(tmp_recvbuf, 0, tmp_recvbuf.Length);
-                                }
-                            }
-                            else
-                            {
-                                tmp_len = 0;
-                                Array.Clear(tmp_recvbuf, 0, tmp_recvbuf.Length);
-                            }
+                            IntPtr structPtr = Marshal.AllocHGlobal(Marshal.SizeOf(robot_state_pkg));
+                            Marshal.Copy(state_pkg, 0, structPtr, Marshal.SizeOf(robot_state_pkg));
 
-                            for (i = 0; i < recvbyte; i++)
-                            {
-                                /* 找帧头1 */
-                                if (recvbuf[i] == 0x5A && find_head_flag == 0)
-                                {
-                                    /* 判断帧头+CNT+LEN数据长度能否满足解析要求 */
-                                    if ((i + 4) < recvbyte)
-                                    {
-                                        /* 找帧头2 */
-                                        if (recvbuf[i + 1] == 0x5A)
-                                        {
-                                            find_head_flag = 1;
-                                            state_pkg[0] = recvbuf[i];
-                                            index++;
-                                            len = (UInt16)(len | recvbuf[i + 4]);
-                                            len = (UInt16)(len << 8);
-                                            len = (UInt16)(len | recvbuf[i + 3]);
-                                        }
-                                        else
-                                        {
-                                            continue;
-                                        }
-                                    }
-                                    else
-                                    {
-                                        /* 剩余数据存入临时变量 */
-                                        tmp_recvbuf = tmp_recvbuf.Concat(recvbuf.Skip(i).ToArray()).ToArray();
-                                        tmp_len = (UInt16)(recvbyte - i);
-                                        break;
-                                    }
-                                }
-                                /* 写入数据 */
-                                else if (find_head_flag == 1 && index < len + 5)
-                                {
-                                    state_pkg[index] = recvbuf[i];
-                                    index++;
-                                }
-                                /* 数据校验 */
-                                else if (find_head_flag == 1 && index >= len + 5)
-                                {
-                                    if ((i + 1) < recvbyte)
-                                    {
-                                        UInt16 checksum = 0;
-                                        UInt16 checkdata = 0;
+                            robot_state_pkg = (ROBOT_STATE_PKG)Marshal.PtrToStructure(structPtr, typeof(ROBOT_STATE_PKG));
+                            Marshal.FreeHGlobal(structPtr);
+                            Array.Clear(state_pkg, 0, state_pkg.Length);
 
-                                        checkdata = (UInt16)(checkdata | recvbuf[i + 1]);
-                                        checkdata = (UInt16)(checkdata << 8);
-                                        checkdata = (UInt16)(checkdata | recvbuf[i]);
-
-                                        for (int j = 0; j < index; j++)
-                                        {
-                                            checksum += state_pkg[j];
-                                        }
-
-                                        if (checksum == checkdata)
-                                        {
-                                            int size = Marshal.SizeOf(robot_state_pkg);
-
-                                            if (size > state_pkg.Length)
-                                            {
-                                                if (log != null)
-                                                {
-                                                    Task.Run(() => log.LogError("robot state pkg too small")); // 异步日志
-                                                }
-                                                return;
-                                            }
-
-                                            IntPtr structPtr = Marshal.AllocHGlobal(size);
-                                            Marshal.Copy(state_pkg, 0, structPtr, size);
-                                            robot_state_pkg = (ROBOT_STATE_PKG)Marshal.PtrToStructure(structPtr, typeof(ROBOT_STATE_PKG));
-
-                                            Marshal.FreeHGlobal(structPtr);
-                                            Array.Clear(state_pkg, 0, state_pkg.Length);
-                                            find_head_flag = 0; // 只有校验通过才将相关标志位复位
-                                            index = 0;
-                                            len = 0;
-                                            i++;
-                                        }
-                                        else
-                                        {
-                                            find_head_flag = 0;
-                                            index = 0;
-                                            len = 0;
-                                            i++;
-                                        }
-                                    }
-                                    else
-                                    {
-                                        /* 剩余数据存入临时变量 */
-                                        tmp_recvbuf = tmp_recvbuf.Concat(recvbuf.Skip(i).ToArray()).ToArray();
-                                        tmp_len = (UInt16)(recvbyte - i);
-                                        break;
-                                    }
-                                }
-                                else
-                                {
-                                    continue;
-                                }
-                            }
+                            // Console.WriteLine("has a pkg...");
                         }
                     }
                     catch (SocketException ex) when (ex.SocketErrorCode == SocketError.TimedOut)
@@ -1384,75 +1257,75 @@ namespace fairino
             }
         }
 
-        /**
-         * @brief  笛卡尔空间整圆运动
-         * @param  [in] joint_pos_p  路径点1关节位置,单位deg
-         * @param  [in] desc_pos_p   路径点1笛卡尔位姿
-         * @param  [in] ptool  工具坐标号，范围[0~14]
-         * @param  [in] puser  工件坐标号，范围[0~14]
-         * @param  [in] pvel  速度百分比，范围[0~100]
-         * @param  [in] pacc  加速度百分比，范围[0~100],暂不开放
-         * @param  [in] epos_p  扩展轴位置，单位mm
-         * @param  [in] joint_pos_t  路径点2关节位置,单位deg
-         * @param  [in] desc_pos_t   路径点2笛卡尔位姿
-         * @param  [in] ttool  工具坐标号，范围[0~14]
-         * @param  [in] tuser  工件坐标号，范围[0~14]
-         * @param  [in] tvel  速度百分比，范围[0~100]
-         * @param  [in] tacc  加速度百分比，范围[0~100],暂不开放
-         * @param  [in] epos_t  扩展轴位置，单位mm
-         * @param  [in] ovl  速度缩放因子，范围[0~100]	
-         * @param  [in] offset_flag  0-不偏移，1-基坐标系/工件坐标系下偏移，2-工具坐标系下偏移
-         * @param  [in] offset_pos  位姿偏移量	 	 
-         * @return  错误码
-         */
-        public int Circle(JointPos joint_pos_p, DescPose desc_pos_p, int ptool, int puser, float pvel, float pacc, ExaxisPos epos_p, JointPos joint_pos_t, DescPose desc_pos_t, int ttool, int tuser, float tvel, float tacc, ExaxisPos epos_t, float ovl, byte offset_flag, DescPose offset_pos)
-        {
-            if (IsSockComError())
-            {
-                return g_sock_com_err;
-            }
-            if (GetSafetyCode() != 0)
-            {
+        ///**
+        // * @brief  笛卡尔空间整圆运动
+        // * @param  [in] joint_pos_p  路径点1关节位置,单位deg
+        // * @param  [in] desc_pos_p   路径点1笛卡尔位姿
+        // * @param  [in] ptool  工具坐标号，范围[0~14]
+        // * @param  [in] puser  工件坐标号，范围[0~14]
+        // * @param  [in] pvel  速度百分比，范围[0~100]
+        // * @param  [in] pacc  加速度百分比，范围[0~100],暂不开放
+        // * @param  [in] epos_p  扩展轴位置，单位mm
+        // * @param  [in] joint_pos_t  路径点2关节位置,单位deg
+        // * @param  [in] desc_pos_t   路径点2笛卡尔位姿
+        // * @param  [in] ttool  工具坐标号，范围[0~14]
+        // * @param  [in] tuser  工件坐标号，范围[0~14]
+        // * @param  [in] tvel  速度百分比，范围[0~100]
+        // * @param  [in] tacc  加速度百分比，范围[0~100],暂不开放
+        // * @param  [in] epos_t  扩展轴位置，单位mm
+        // * @param  [in] ovl  速度缩放因子，范围[0~100]	
+        // * @param  [in] offset_flag  0-不偏移，1-基坐标系/工件坐标系下偏移，2-工具坐标系下偏移
+        // * @param  [in] offset_pos  位姿偏移量	 	 
+        // * @return  错误码
+        // */
+        //public int Circle(JointPos joint_pos_p, DescPose desc_pos_p, int ptool, int puser, float pvel, float pacc, ExaxisPos epos_p, JointPos joint_pos_t, DescPose desc_pos_t, int ttool, int tuser, float tvel, float tacc, ExaxisPos epos_t, float ovl, byte offset_flag, DescPose offset_pos)
+        //{
+        //    if (IsSockComError())
+        //    {
+        //        return g_sock_com_err;
+        //    }
+        //    if (GetSafetyCode() != 0)
+        //    {
 
-                return GetSafetyCode();
-            }
-            try
-            {
-                double[] jointP = joint_pos_p.jPos;
-                double[] descP = new double[6] { desc_pos_p.tran.x, desc_pos_p.tran.y, desc_pos_p.tran.z, desc_pos_p.rpy.rx, desc_pos_p.rpy.ry, desc_pos_p.rpy.rz };
-                double[] exteraxisP = epos_p.ePos;
-                double[] offect = new double[6] { offset_pos.tran.x, offset_pos.tran.y, offset_pos.tran.z, offset_pos.rpy.rx, offset_pos.rpy.ry, offset_pos.rpy.rz };
-                double[] controlP = new double[4] { ptool, puser, pvel, pacc };
-                double[] jointT = joint_pos_t.jPos;
-                double[] descT = new double[6] { desc_pos_t.tran.x, desc_pos_t.tran.y, desc_pos_t.tran.z, desc_pos_t.rpy.rx, desc_pos_t.rpy.ry, desc_pos_t.rpy.rz };
-                double[] exteraxisT = epos_t.ePos;
-                double[] controlT = new double[4] { ttool, tuser, tvel, tacc };
-                int rtn = proxy.Circle(jointP, descP, controlP, exteraxisP, jointT, descT, controlT, exteraxisT, ovl, offset_flag, offect);
-                if (log != null)
-                {
-                    log.LogInfo($"Circle({jointP[0]},{jointP[1]},{jointP[2]},{jointP[3]},{jointP[4]},{jointP[5]},{descP[0]},{descP[1]},{descP[2]},{descP[3]},{descP[4]},{descP[5]},{ptool},{puser},{pvel},{pacc}," +
-                        $"{epos_p.ePos[0]},{epos_p.ePos[1]},{epos_p.ePos[2]},{epos_p.ePos[3]},) " +
-                        $"{jointT[0]},{jointT[1]},{jointT[2]},{jointT[3]},{jointT[4]},{jointT[5]},{descT[0]},{descT[1]},{descT[2]},{descT[3]},{descT[4]},{descT[5]},{ttool},{tuser},{tvel},{tacc}," +
-                        $"{epos_t.ePos[0]},{epos_t.ePos[1]},{epos_t.ePos[2]},{epos_t.ePos[3]},{ovl},{offset_flag},{offect[0]},{offect[1]},{offect[2]},{offect[3]},{offect[4]},{offect[5]} : {rtn}");
-                }
-                return rtn;
-            }
-            catch
-            {
-                if (IsSockComError())
-                {
-                    if (log != null)
-                    {
-                        log.LogError($"RPC exception");
-                    }
-                    return g_sock_com_err;
-                }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
-            }
-        }
+        //        return GetSafetyCode();
+        //    }
+        //    try
+        //    {
+        //        double[] jointP = joint_pos_p.jPos;
+        //        double[] descP = new double[6] { desc_pos_p.tran.x, desc_pos_p.tran.y, desc_pos_p.tran.z, desc_pos_p.rpy.rx, desc_pos_p.rpy.ry, desc_pos_p.rpy.rz };
+        //        double[] exteraxisP = epos_p.ePos;
+        //        double[] offect = new double[6] { offset_pos.tran.x, offset_pos.tran.y, offset_pos.tran.z, offset_pos.rpy.rx, offset_pos.rpy.ry, offset_pos.rpy.rz };
+        //        double[] controlP = new double[4] { ptool, puser, pvel, pacc };
+        //        double[] jointT = joint_pos_t.jPos;
+        //        double[] descT = new double[6] { desc_pos_t.tran.x, desc_pos_t.tran.y, desc_pos_t.tran.z, desc_pos_t.rpy.rx, desc_pos_t.rpy.ry, desc_pos_t.rpy.rz };
+        //        double[] exteraxisT = epos_t.ePos;
+        //        double[] controlT = new double[4] { ttool, tuser, tvel, tacc };
+        //        int rtn = proxy.Circle(jointP, descP, controlP, exteraxisP, jointT, descT, controlT, exteraxisT, ovl, offset_flag, offect);
+        //        if (log != null)
+        //        {
+        //            log.LogInfo($"Circle({jointP[0]},{jointP[1]},{jointP[2]},{jointP[3]},{jointP[4]},{jointP[5]},{descP[0]},{descP[1]},{descP[2]},{descP[3]},{descP[4]},{descP[5]},{ptool},{puser},{pvel},{pacc}," +
+        //                $"{epos_p.ePos[0]},{epos_p.ePos[1]},{epos_p.ePos[2]},{epos_p.ePos[3]},) " +
+        //                $"{jointT[0]},{jointT[1]},{jointT[2]},{jointT[3]},{jointT[4]},{jointT[5]},{descT[0]},{descT[1]},{descT[2]},{descT[3]},{descT[4]},{descT[5]},{ttool},{tuser},{tvel},{tacc}," +
+        //                $"{epos_t.ePos[0]},{epos_t.ePos[1]},{epos_t.ePos[2]},{epos_t.ePos[3]},{ovl},{offset_flag},{offect[0]},{offect[1]},{offect[2]},{offect[3]},{offect[4]},{offect[5]} : {rtn}");
+        //        }
+        //        return rtn;
+        //    }
+        //    catch
+        //    {
+        //        if (IsSockComError())
+        //        {
+        //            if (log != null)
+        //            {
+        //                log.LogError($"RPC exception");
+        //            }
+        //            return g_sock_com_err;
+        //        }
+        //        else
+        //        {
+        //            return (int)RobotError.ERR_SUCCESS;
+        //        }
+        //    }
+        //}
 
         /**
          * @brief  笛卡尔空间螺旋线运动
@@ -1602,9 +1475,10 @@ namespace fairino
          * @param  [in] cmdT  指令下发周期，单位s，建议范围[0.001~0.0016]
          * @param  [in] filterT 滤波时间，单位s，暂不开放，默认为0
          * @param  [in] gain  目标位置的比例放大器，暂不开放，默认为0
+         * @param  [in] id servoJ指令ID,默认为0
          * @return  错误码
          */
-        public int ServoJ(JointPos joint_pos, ExaxisPos axisPos, float acc, float vel, float cmdT, float filterT, float gain)
+        public int ServoJ(JointPos joint_pos, ExaxisPos axisPos, float acc, float vel, float cmdT, float filterT, float gain,int id=0)
         {
             if (IsSockComError())
             {
@@ -1619,7 +1493,7 @@ namespace fairino
             {
                 double[] jointPos = joint_pos.jPos;
                 double[] axis = axisPos.ePos;
-                int rtn = proxy.ServoJ(jointPos, axis, acc, vel, cmdT, filterT, gain);
+                int rtn = proxy.ServoJ(jointPos, axis, acc, vel, cmdT, filterT, gain, id);
                 if (log != null)
                 {
                     log.LogInfo($"ServoJ({jointPos[0]},{jointPos[1]},{jointPos[2]},{jointPos[3]},{jointPos[4]},{jointPos[5]},  {axis[0]},{axis[1]},{axis[2]},{axis[3]},   {acc},{vel},{cmdT},{filterT},{gain}): {rtn}");
@@ -13555,7 +13429,7 @@ namespace fairino
             }
             try
             {
-                int rtn = proxy.EndForceDragControl(status, asaptiveFlag, interfereDragFlag, ingularityConstraintsFlag,M, B, K, F, Fmax, Vmax);
+                int rtn = proxy.EndForceDragControl(status, asaptiveFlag, interfereDragFlag, ingularityConstraintsFlag,1 , M, B, K, F, Fmax, Vmax);
                 if (log != null)
                 {
                     log.LogInfo($"EndForceDragControl({status}, {asaptiveFlag}, {interfereDragFlag},{ingularityConstraintsFlag}, {M}, {B}, {K}, {F}, {Fmax}, {Vmax}) : {rtn}");
@@ -18377,7 +18251,243 @@ namespace fairino
         }
 
 
+        /**
+       *@brief  笛卡尔空间整圆运动
+       *@param  [in] joint_pos_p  路径点1关节位置,单位deg
+       *@param  [in] desc_pos_p   路径点1笛卡尔位姿
+       *@param  [in] ptool  工具坐标号，范围[1~15]
+       *@param  [in] puser  工件坐标号，范围[1~15]
+       *@param  [in] pvel  速度百分比，范围[0~100]
+       *@param  [in] pacc  加速度百分比，范围[0~100],暂不开放
+       *@param  [in] epos_p  扩展轴位置，单位mm
+       *@param  [in] joint_pos_t  路径点2关节位置,单位deg
+       *@param  [in] desc_pos_t   路径点2笛卡尔位姿
+       *@param  [in] ttool  工具坐标号，范围[1~15]
+       *@param  [in] tuser  工件坐标号，范围[1~15]
+       *@param  [in] tvel  速度百分比，范围[0~100]
+       *@param  [in] tacc  加速度百分比，范围[0~100],暂不开放
+       *@param  [in] epos_t  扩展轴位置，单位mm
+       *@param  [in] ovl  速度缩放因子，范围[0~100]
+       *@param  [in] offset_flag  0-不偏移，1-基坐标系/工件坐标系下偏移，2-工具坐标系下偏移
+       *@param  [in] offset_pos  位姿偏移量
+       *@param  [in] oacc 加速度百分比
+       *@param  [in] blendR -1：阻塞；0~1000：平滑半径
+       *@return  错误码
+       */
 
+        public int Circle(JointPos joint_pos_p, DescPose desc_pos_p, int ptool, int puser, float pvel, float pacc, ExaxisPos epos_p, JointPos joint_pos_t, DescPose desc_pos_t, int ttool, int tuser, float tvel, float tacc, ExaxisPos epos_t, float ovl, int offset_flag, DescPose offset_pos, double oacc=100, double blendR=-1)
+        {
+            {
+                if (IsSockComError())
+                {
+                    return g_sock_com_err;
+                }
+
+                if (GetSafetyCode() != 0)
+                {
+                    return GetSafetyCode();
+                }
+
+                try
+                {
+                    double[] jointP = joint_pos_p.jPos;
+                    double[] descP = new double[6] { desc_pos_p.tran.x, desc_pos_p.tran.y, desc_pos_p.tran.z, desc_pos_p.rpy.rx, desc_pos_p.rpy.ry, desc_pos_p.rpy.rz };
+
+                    double[] controlP = new double[4] { ptool, puser, pvel, pacc };
+
+
+
+                    double[] exteraxisP = epos_p.ePos;
+
+                    double[] jointT = joint_pos_t.jPos;
+                    double[] descT = new double[6] { desc_pos_t.tran.x, desc_pos_t.tran.y, desc_pos_t.tran.z, desc_pos_t.rpy.rx, desc_pos_t.rpy.ry, desc_pos_t.rpy.rz };
+                    double[] controlT = new double[4] { ttool, tuser, tvel, tacc };
+                    double[] exteraxisT = epos_t.ePos;
+
+
+                    double[] offect = new double[6] { offset_pos.tran.x, offset_pos.tran.y, offset_pos.tran.z, offset_pos.rpy.rx, offset_pos.rpy.ry, offset_pos.rpy.rz };
+
+                    double[] ooacc = new double[2] { oacc, blendR };
+
+                    double[] oovl = new double[2] { ovl, offset_flag };
+
+
+                    int rtn = proxy.Circle(jointP, descP, controlP, exteraxisP, jointT, descT, controlT, exteraxisT, oovl, offect, ooacc);
+                    if (log != null)
+                    {
+                        log.LogInfo($"Circle({jointP[0]},{jointP[1]},{jointP[2]},{jointP[3]},{jointP[4]},{jointP[5]},{descP[0]},{descP[1]},{descP[2]},{descP[3]},{descP[4]},{descP[5]},{ptool},{puser},{pvel},{pacc}," +
+                            $"{epos_p.ePos[0]},{epos_p.ePos[1]},{epos_p.ePos[2]},{epos_p.ePos[3]},) " +
+                            $"{jointT[0]},{jointT[1]},{jointT[2]},{jointT[3]},{jointT[4]},{jointT[5]},{descT[0]},{descT[1]},{descT[2]},{descT[3]},{descT[4]},{descT[5]},{ttool},{tuser},{tvel},{tacc}," +
+                            $"{epos_t.ePos[0]},{epos_t.ePos[1]},{epos_t.ePos[2]},{epos_t.ePos[3]},{ovl},{offset_flag},{offect[0]},{offect[1]},{offect[2]},{offect[3]},{offect[4]},{offect[5]} : {rtn}");
+                    }
+                    return rtn;
+                }
+                catch
+                {
+                    if (IsSockComError())
+                    {
+                        if (log != null)
+                        {
+                            log.LogError($"RPC exception");
+                        }
+                        return g_sock_com_err;
+                    }
+                    else
+                    {
+                        return (int)RobotError.ERR_SUCCESS;
+                    }
+                }
+            }
+
+        }
+        /**
+        * @brief  力传感器辅助拖动
+        * @param  [in] status 控制状态，0-关闭；1-开启
+        * @param  [in] asaptiveFlag 自适应开启标志，0-关闭；1-开启
+        * @param  [in] interfereDragFlag 干涉区拖动标志，0-关闭；1-开启
+        * @param  [in] ingularityConstraintsFlag 奇异点策略，0-规避；1-穿越
+        * @param  [in] forceCollisionFlag 辅助拖动时机器人碰撞检测标志；0-关闭；1-开启
+        * @param  [in] M 惯性系数
+        * @param  [in] B 阻尼系数
+        * @param  [in] K 刚度系数
+        * @param  [in] F 拖动六维力阈值
+        * @param  [in] Fmax 最大拖动力限制
+        * @param  [in] Vmax 最大关节速度限制
+        * @return  错误码
+        */
+        public int EndForceDragControl(int status, int asaptiveFlag, int interfereDragFlag, int ingularityConstraintsFlag, int forceCollisionFlag, double[] M, double[] B, double[] K, double[] F, double Fmax, double Vmax)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            if (GetSafetyCode() != 0)
+            {
+                return GetSafetyCode();
+            }
+
+
+            try
+            {
+                int rtn = proxy.EndForceDragControl(status, asaptiveFlag, interfereDragFlag, ingularityConstraintsFlag, forceCollisionFlag, M, B, K, F, Fmax, Vmax);
+                if (log != null)
+                {
+                    log.LogInfo($"EndForceDragControl({status}, {asaptiveFlag}, {interfereDragFlag}, {M}, {B}, {K}, {F}, {Fmax}, {Vmax}) : {rtn}");
+                }
+                return rtn;
+            }
+            catch
+            {
+                if (IsSockComError())
+                {
+                    if (log != null)
+                    {
+                        log.LogError($"RPC exception");
+                    }
+                    return g_sock_com_err;
+                }
+                else
+                {
+                    return (int)RobotError.ERR_RPC_ERROR;
+                }
+            }
+
+
+        }
+
+        /**
+        * @brief 设置宽电压控制箱温度及风扇转速监控参数
+        * @param [in] enable 0-不使能监测；1-使能监测
+        * @param [in] period 监测周期(s),范围1-100
+        * @return 错误码
+        */
+        public int SetWideBoxTempFanMonitorParam(int enable, int period)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            if (GetSafetyCode() != 0)
+            {
+                return GetSafetyCode();
+            }
+
+
+            try
+            {
+                int rtn = proxy.SetWideBoxTempFanMonitorParam(enable, period);
+                if (log != null)
+                {
+                    log.LogInfo($"SetWideBoxTempFanMonitorParam({enable}, {period} : {rtn}");
+                }
+                return rtn;
+            }
+            catch
+            {
+                if (IsSockComError())
+                {
+                    if (log != null)
+                    {
+                        log.LogError($"RPC exception");
+                    }
+                    return g_sock_com_err;
+                }
+                else
+                {
+                    return (int)RobotError.ERR_RPC_ERROR;
+                }
+            }
+        }
+
+        /**
+         * @brief 获取宽电压控制箱温度及风扇转速监控参数
+         * @param [out] enable 0-不使能监测；1-使能监测
+         * @param [out] period 监测周期(s),范围1-100
+         * @return 错误码
+         */
+        public int GetWideBoxTempFanMonitorParam(ref int enable, ref int period)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            if (GetSafetyCode() != 0)
+            {
+                return GetSafetyCode();
+            }
+            try
+            {
+                object[] result = proxy.GetWideBoxTempFanMonitorParam();
+                if ((int)result[0] == 0)
+                {
+                    enable = (int)result[1];
+                    period = (int)result[2];
+                }
+                if (log != null)
+                {
+                    log.LogInfo($"GetWideBoxTempFanMonitorParam(ref {enable},ref {period}) : {(int)result[0]}");
+                }
+                return (int)result[0];
+            }
+            catch
+            {
+                if (IsSockComError())
+                {
+                    if (log != null)
+                    {
+                        log.LogError($"RPC exception");
+                    }
+                    return g_sock_com_err;
+                }
+                else
+                {
+                    return (int)RobotError.ERR_SUCCESS;
+                }
+            }
+        }
         //        /**
         //        * @brief  螺旋线探索
         //        * @param  [in] rcs 参考坐标系，0-工具坐标系，1-基坐标系

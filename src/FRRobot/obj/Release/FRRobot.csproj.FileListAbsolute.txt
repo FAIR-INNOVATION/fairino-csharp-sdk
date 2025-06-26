@@ -116,3 +116,11 @@ E:\项目\sdk\fairino-csharp_-sdk-3.8.2\src\FRRobot\obj\Release\FRRobot.csproj.C
 E:\项目\sdk\fairino-csharp_-sdk-3.8.2\src\FRRobot\obj\Release\FRRobot.csproj.Up2Date
 E:\项目\sdk\fairino-csharp_-sdk-3.8.2\src\FRRobot\obj\Release\libfairino.dll
 E:\项目\sdk\fairino-csharp_-sdk-3.8.2\src\FRRobot\obj\Release\libfairino.pdb
+E:\项目\sdk\fairino-csharp_-sdk-3.8.3.1\src\FRRobot\bin\Release\libfairino.dll
+E:\项目\sdk\fairino-csharp_-sdk-3.8.3.1\src\FRRobot\bin\Release\libfairino.pdb
+E:\项目\sdk\fairino-csharp_-sdk-3.8.3.1\src\FRRobot\bin\Release\CookComputing.XmlRpcV2.dll
+E:\项目\sdk\fairino-csharp_-sdk-3.8.3.1\src\FRRobot\obj\Release\FRRobot.csproj.AssemblyReference.cache
+E:\项目\sdk\fairino-csharp_-sdk-3.8.3.1\src\FRRobot\obj\Release\FRRobot.csproj.CoreCompileInputs.cache
+E:\项目\sdk\fairino-csharp_-sdk-3.8.3.1\src\FRRobot\obj\Release\FRRobot.csproj.Up2Date
+E:\项目\sdk\fairino-csharp_-sdk-3.8.3.1\src\FRRobot\obj\Release\libfairino.dll
+E:\项目\sdk\fairino-csharp_-sdk-3.8.3.1\src\FRRobot\obj\Release\libfairino.pdb

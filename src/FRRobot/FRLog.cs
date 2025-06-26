@@ -195,9 +195,9 @@ namespace fairino
                     logFileCount++;
                 }
             }
-            if(logFileCount > logSaveFileNum)
+            if (logFileCount > logSaveFileNum)
             {
-                DateTime curTime = DateTime.Now.AddDays((-1) * logSaveDays);  
+                DateTime curTime = DateTime.Now.AddDays((-1) * logSaveDays);
                 foreach (string fileName in files)
                 {
                     string[] sArray = fileName.Split(new string[] { "FrLog_", ".log" }, StringSplitOptions.RemoveEmptyEntries);
@@ -209,7 +209,6 @@ namespace fairino
                     }
                 }
             }
-            
 
             return logFilePath + "\\FrLog_" + System.DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss") + ".log";
         }
