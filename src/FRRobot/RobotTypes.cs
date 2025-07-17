@@ -140,16 +140,8 @@ namespace fairino
     }
 
     /**
-* @brief 力传感器的受力分量和力矩分量
-* 
-* 	     * @param [out] baudRate 
-	     * @param [out] dataBit 
-	     * @param [out] stopBit
-	     * @param [out] verify
-	     * @param [out] timeout
-	     * @param [out] timeoutTimes
-	     * @param [out] period
-*/
+    * @brief 末端通讯参数
+    */
     [StructLayout(LayoutKind.Sequential)]
     public struct AxleComParam
     {
