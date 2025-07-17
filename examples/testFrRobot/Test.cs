@@ -3199,6 +3199,306 @@ namespace testFrRobot
 
             }
         }
+
+        private void button80_Click(object sender, EventArgs e)
+        {
+            ExaxisPos exaxisPos = new ExaxisPos(0, 0, 0, 0);
+            DescPose offdese = new DescPose(0, 0, 0, 0, 0, 0);
+            JointPos JP1 = new JointPos(43.849, -71.535, 109.564, -135.187, -89.016, 18.225);
+            DescPose DP1 = new DescPose(-331.581, -462.334, 225.274, -173.501, 3.161, 115.864);
+            JointPos JP2 = new JointPos(67.950, -31.106, 58.618, -135.151, -89.017, 18.226);
+            DescPose DP2 = new DescPose(-219.871, -819.093, 124.722, -163.475, 6.333, 140.797);
+            JointPos JP3 = new JointPos(97.159, -26.141, 53.021, -120.936, -103.329, 18.230);
+            DescPose DP3 = new DescPose(183.319, -826.070, 70.807, -171.844, -11.320, 167.645);
+
+            JointPos JP4 = new JointPos(43.849, -71.535, 109.564, -135.187, -89.016, 18.225);
+            DescPose DP4 = new DescPose(-331.581, -462.334, 225.274, -173.501, 3.161, 115.864);
+
+            JointPos JP5 = new JointPos(67.950, -31.106, 58.618, -135.151, -89.017, 18.226);
+            DescPose DP5 = new DescPose(-219.871, -819.093, 124.722, -163.475, 6.333, 140.797);
+
+            JointPos JP6 = new JointPos(105.694, -125.732, 124.263, -105.860, -90.554, 18.230);
+            DescPose DP6 = new DescPose(171.338, -236.287, 442.053, -163.332, 4.843, 178.090);
+            robot.LinArcFIRPlanningStart(2000, 10000, 720, 1440);
+
+            robot.MoveL(JP1, DP1, 0, 0, 100, 100, 100, 20, -1, exaxisPos, 0, 0, offdese);
+
+            robot.MoveL(JP2, DP2, 0, 0, 100, 100, 100, 20, 100, exaxisPos, 0, 0, offdese);
+            robot.MoveL(JP3, DP3, 0, 0, 100, 100, 100, 20, 100, exaxisPos, 0, 0, offdese);
+
+
+
+            robot.LinArcFIRPlanningEnd();
+
+            robot.PtpFIRPlanningStart(240, 1200);
+
+            robot.MoveJ(JP4, DP4, 0, 0, 100, 100, 100, exaxisPos, -1, 0, offdese);
+            robot.MoveJ(JP5, DP5, 0, 0, 100, 100, 100, exaxisPos, 200, 0, offdese);
+            robot.MoveJ(JP6, DP6, 0, 0, 100, 100, 100, exaxisPos, 200, 0, offdese);
+
+            robot.PtpFIRPlanningEnd();
+
+            JointPos JP7 = new JointPos(138.430, -103.926, 135.390, -120.507, -116.912, 18.198);
+            DescPose DP7 = new DescPose(288.379, -179.924, 267.471, -171.989, -25.794, -151.376);
+
+            JointPos JP8 = new JointPos(122.158, -69.748, 92.480, -120.510, -116.988, 18.175);
+            DescPose DP8 = new DescPose(380.357, -498.600, 323.600, -163.066, -22.643, -171.300);
+            JointPos JP88 = new JointPos(70.960, -53.189, 85.689, -123.253, -116.780, 18.175);
+            DescPose DP88 = new DescPose(-171.581, -671.727, 192.097, -170.274, -25.085, 140.438);
+
+            robot.LinArcFIRPlanningStart(2000, 10000, 720, 1440);
+            robot.MoveL(JP7, DP7, 0, 0, 100, 100, 100, 20, 50, exaxisPos, 0, 0, offdese);
+            robot.MoveC(JP8, DP8, 0, 0, 100, 100, exaxisPos, 0, offdese, JP88, DP88, 0, 0, 100, 100, exaxisPos, 0, offdese, 100, -1);
+            robot.LinArcFIRPlanningEnd();
+            JointPos JP9 = new JointPos(138.430, -103.926, 135.390, -120.507, -116.912, 18.198);
+            DescPose DP9 = new DescPose(288.379, -179.924, 267.471, -171.989, -25.794, -151.376);
+            JointPos JP10 = new JointPos(122.158, -69.748, 92.480, -120.510, -116.988, 18.175);
+            DescPose DP10 = new DescPose(380.357, -498.600, 323.600, -163.066, -22.643, -171.300);
+
+            JointPos JP10_ = new JointPos(70.960, -53.189, 85.689, -123.253, -116.780, 18.175);
+            DescPose DP10_ = new DescPose(-171.581, -671.727, 192.097, -170.274, -25.085, 140.438);
+
+            JointPos JP11 = new JointPos(38.619, -93.376, 100.695, -79.572, -116.773, 18.172);
+            DescPose DP11 = new DescPose(-305.647, -317.052, 409.820, 169.616, -30.178, 117.509);
+            JointPos JP11_ = new JointPos(110.873, -113.738, 126.180, -79.561, -116.964, 18.173);
+            DescPose DP11_ = new DescPose(150.549, -235.789, 334.164, 163.763, -31.210, -167.182);
+            robot.LinArcFIRPlanningStart(2000, 10000, 720, 1440);
+            robot.MoveL(JP9, DP9, 0, 0, 100, 100, 100, 20, -1, exaxisPos, 0, 0, offdese);
+            robot.MoveC(JP10, DP10, 0, 0, 100, 100, exaxisPos, 0, offdese, JP10_, DP10_, 0, 0, 100, 100, exaxisPos, 0, offdese, 100, 120);
+            robot.MoveC(JP11, DP11, 0, 0, 100, 100, exaxisPos, 0, offdese, JP11_, DP11_, 0, 0, 100, 100, exaxisPos, 0, offdese, 100, -1);
+
+            robot.LinArcFIRPlanningEnd(); ;
+            JointPos JP12 = new JointPos(138.430, -103.926, 135.390, -120.507, -116.912, 18.198);
+            DescPose DP12 = new DescPose(288.379, -179.924, 267.471, -171.989, -25.794, -151.376);
+            JointPos JP13 = new JointPos(122.158, -69.748, 92.480, -120.510, -116.988, 18.175);
+            DescPose DP13 = new DescPose(380.357, -498.600, 323.600, -163.066, -22.643, -171.300);
+
+            JointPos JP13_ = new JointPos(70.960, -53.189, 85.689, -123.253, -116.780, 18.175);
+            DescPose DP13_ = new DescPose(-171.581, -671.727, 192.097, -170.274, -25.085, 140.438);
+            JointPos JP14 = new JointPos(38.619, -93.376, 100.695, -79.572, -116.773, 18.172);
+            DescPose DP14 = new DescPose(-305.647, -317.052, 409.820, 169.616, -30.178, 117.509);
+            robot.LinArcFIRPlanningStart(2000, 10000, 720, 1440);
+            robot.MoveL(JP12, DP12, 0, 0, 100, 100, 100, 20, -1, exaxisPos, 0, 0, offdese);
+            robot.MoveC(JP13, DP13, 0, 0, 100, 100, exaxisPos, 0, offdese, JP13_, DP13_, 0, 0, 100, 100, exaxisPos, 0, offdese, 100, -1);
+
+
+            robot.MoveL(JP14, DP14, 0, 0, 100, 100, 100, 20, -1, exaxisPos, 0, 0, offdese);
+            robot.LinArcFIRPlanningEnd();
+        }
+
+        private void button81_Click(object sender, EventArgs e)
+        {
+            DescPose p1Desc=new DescPose(186.331, 487.913, 209.850, 149.030, 0.688, -114.347);
+            JointPos p1Joint = new JointPos(-127.876, -75.341, 115.417, -122.741, -59.820, 74.300);
+
+            DescPose p2Desc = new DescPose(69.721, 535.073, 202.882, -144.406, -14.775, -89.012);
+            JointPos p2Joint = new JointPos(-101.780, -69.828, 110.917, -125.740, -127.841, 74.300);
+
+            DescPose p3Desc = new DescPose(146.861, 578.426, 205.598, 175.997, -36.178, -93.437);
+            JointPos p3Joint = new JointPos(-112.851, -60.191, 86.566, -80.676, -97.463, 74.300);
+
+            DescPose p4Desc = new DescPose(136.284, 509.876, 225.613, 178.987, 1.372, -100.696);
+            JointPos p4Joint = new JointPos(-116.397, -76.281, 113.845, -128.611, -88.654, 74.299);
+
+            DescPose p5Desc = new DescPose(138.395, 505.972, 298.016, 179.134, 2.147, -101.110);
+            JointPos p5Joint = new JointPos(-116.814, -82.333, 109.162, -118.662, -88.585, 74.302);
+
+            DescPose p6Desc = new DescPose(105.553, 454.325, 232.017, -179.426, 0.444, -99.952);
+            JointPos p6Joint = new JointPos(-115.649, -84.367, 122.447, -128.663, -90.432, 74.303);
+
+            ExaxisPos exaxisPos = new ExaxisPos(0, 0, 0, 0);
+            DescPose offdese = new DescPose(0, 0, 100, 0, 0, 0);
+
+            robot.GetForwardKin(p1Joint,ref p1Desc);
+            robot.GetForwardKin(p2Joint, ref p2Desc);
+            robot.GetForwardKin(p3Joint, ref p3Desc);
+            robot.GetForwardKin(p4Joint, ref p4Desc);
+            robot.GetForwardKin(p5Joint, ref p5Desc);
+            robot.GetForwardKin(p6Joint, ref p6Desc);
+
+            robot.MoveJ(p1Joint, p1Desc, 0, 0, 100, 100, 100, exaxisPos, -1, 0, offdese);
+            robot.SetTcp4RefPoint(1);
+            robot.MoveJ(p2Joint, p2Desc, 0, 0, 100, 100, 100, exaxisPos, -1, 0, offdese);
+            robot.SetTcp4RefPoint(2);
+            robot.MoveJ(p3Joint, p3Desc, 0, 0, 100, 100, 100, exaxisPos, -1, 0, offdese);
+            robot.SetTcp4RefPoint(3);
+            robot.MoveJ(p4Joint, p4Desc, 0, 0, 100, 100, 100, exaxisPos, -1, 0, offdese);
+            robot.SetTcp4RefPoint(4);
+
+            DescPose coordRtn = new DescPose(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+            int rtn = robot.ComputeTcp4(ref coordRtn);
+             Console.WriteLine($"4 Point ComputeTool      {rtn} coord is {coordRtn.tran.x} ,{coordRtn.tran.y} ,{coordRtn.tran.z} ,{coordRtn.rpy.rx} ,{coordRtn.rpy.ry} ,{coordRtn.rpy.rz} ");
+
+            robot.SetToolCoord(1, coordRtn, 0, 0, 1, 0);
+
+            robot.GetForwardKin(p1Joint, ref p1Desc);
+            robot.GetForwardKin(p2Joint, ref p2Desc);
+            robot.GetForwardKin(p3Joint, ref p3Desc);
+
+            robot.SetFocusCalibPoint(1, p1Desc);
+            robot.SetFocusCalibPoint(2, p2Desc);
+            robot.SetFocusCalibPoint(3, p3Desc);
+
+            DescTran resultPos = new DescTran(0.0, 0.0, 0.0);
+            double accuracy = 0.0;
+            rtn = robot.ComputeFocusCalib(3, ref resultPos, ref accuracy);
+            Console.WriteLine($"ComputeFocusCalib coord is  {rtn},{ resultPos.x} ,{ resultPos.y}, { resultPos.z}, accuracy is {accuracy} ");
+            rtn = robot.SetFocusPosition(resultPos);
+
+            robot.GetForwardKin(p5Joint, ref p5Desc);
+            robot.GetForwardKin(p6Joint, ref p6Desc);
+
+            robot.MoveL(p5Joint, p5Desc, 1, 0, 10, 100, 100, -1, 0, exaxisPos, 0, 1, offdese);
+            robot.MoveL(p6Joint, p6Desc, 1, 0, 10, 100, 100, -1, 0, exaxisPos, 0, 1, offdese);
+
+            robot.FocusStart(50, 19, 710, 90, 0);
+            robot.MoveL(p5Joint, p5Desc, 1, 0, 10, 100, 100, -1, 0, exaxisPos, 0, 1, offdese);
+            robot.MoveL(p6Joint, p6Desc, 1, 0, 10, 100, 100, -1, 0, exaxisPos, 0, 1, offdese);
+            robot.FocusEnd();
+        }
+
+        private void button82_Click(object sender, EventArgs e)
+        {
+            ROBOT_STATE_PKG pkg = new ROBOT_STATE_PKG();
+
+            int rtn;
+            robot.SetSysServoBootMode();
+            //robot.RobotEnable(0);
+            Thread.Sleep(200);
+            // rtn = robot.SetCtrlFirmwareUpgrade(1, "D://zUP/FR_CTRL_PRIMCU_FV201010_MAIN_U4_T01_20240529.bin");
+            //rtn = robot.SetCtrlFirmwareUpgrade(1, "D://zUP/FR_CTRL_PRIMCU_FV201011_MAIN_U4_T01_20250208.bin");
+
+
+            //Console.WriteLine($"robot SetCtrlFirmwareUpgrade rtn is{rtn}");
+            //rtn = robot.SetEndFirmwareUpgrade(1, "D://zUP/FR_END_FV201008_MAIN_U01_T01_20250416.bin");
+            //Console.WriteLine($"robot SetEndFirmwareUpgrade rtn is {rtn}");
+            //rtn = robot.SetJointFirmwareUpgrade(1, "D://zUP/FR_SERVO_FV502211_MAIN_U7_T07_20250217.bin");
+            //Console.WriteLine($"robot SetJointFirmwareUpgrade rtn is{rtn}");
+
+
+            rtn = robot.SetCtrlFirmwareUpgrade(2, "D://zUP/2025_07_09_FAIR_Cobot_Axle_Asix_V2.4/FAIR_Cobot_Cbd_Asix_V2.0.bin");
+
+
+            Console.WriteLine($"robot SetCtrlFirmwareUpgrade rtn is{rtn}");
+            rtn = robot.SetEndFirmwareUpgrade(2, "D://zUP/2025_07_09_FAIR_Cobot_Axle_Asix_V2.4/FAIR_Cobot_Axle_Asix_V2.4.bin");
+            Console.WriteLine($"robot SetEndFirmwareUpgrade rtn is {rtn}");
+
+            //rtn = robot.JointAllParamUpgrade("D://zUP/11/jointallparameters.db");
+            //Console.WriteLine($"robot JointAllParamUpgrade rtn is{rtn}");
+
+            robot.CloseRPC();
+
+        }
+
+        private void button83_Click(object sender, EventArgs e)
+        {
+            robot.RobotEnable(0);
+            Thread.Sleep(200);
+            int rtn = robot.JointAllParamUpgrade("D://zUP/upgrade/jointallparameters.db");
+            Console.WriteLine($"robot JointAllParamUpgrade rtn is{rtn}");
+
+            rtn = robot.SetCtrlFirmwareUpgrade(2, "D://zUP/upgrade/FAIR_Cobot_Cbd_Asix_V2.0.bin");
+            Console.WriteLine($"robot SetCtrlFirmwareUpgrade rtn is{rtn}");
+
+            rtn = robot.SetEndFirmwareUpgrade(2, "D://zUP/upgrade/FAIR_Cobot_Axle_Asix_V2.4.bin");
+            Console.WriteLine($"robot SetEndFirmwareUpgrade rtn is {rtn}");
+
+            robot.SetSysServoBootMode();
+            rtn = robot.SetCtrlFirmwareUpgrade(1, "D://zUP/upgrade/FR_CTRL_PRIMCU_FV201212_MAIN_U4_T01_20250428(MT).bin");
+            Console.WriteLine($"robot SetCtrlFirmwareUpgrade rtn is{rtn}");
+
+            rtn = robot.SetEndFirmwareUpgrade(1, "D://zUP/upgrade/FR_END_FV201009_MAIN_U1_T01_20250428.bin");
+            Console.WriteLine($"robot SetEndFirmwareUpgrade rtn is {rtn}");
+
+            rtn = robot.SetJointFirmwareUpgrade(1, "D://zUP/upgrade/FR_SERVO_FV504214_MAIN_U7_T07_20250519.bin");
+            Console.WriteLine($"robot SetJointFirmwareUpgrade rtn is{rtn}");
+
+        }
+
+        private void button84_Click(object sender, EventArgs e)
+        {
+            int rtn;
+            JointPos joint_pos1 = new JointPos(-68.732, -99.773, -77.729, -77.167, 100.772, -13.317);
+            JointPos joint_pos2 = new JointPos(-101.678, -102.823, -77.512, -77.185, 88.388, -13.317 );
+            JointPos joint_pos3 = new JointPos(-129.905, -99.715, -71.965, -77.209, 81.678, -13.317 );
+            DescPose desc_pos1 =new DescPose(103.887, -434.739, 244.938, -162.495, 6.575, -142.948 );
+            DescPose desc_pos2 = new DescPose(-196.883, -418.054, 218.942, -168.196, -4.388, -178.991);
+            DescPose desc_pos3 = new DescPose(-396.665, -265.695, 284.380, -160.913, -12.378, 149.770 );
+
+            ExaxisPos epos1 = new ExaxisPos(0.000, 6.996, 0.000, 0.000 );
+            ExaxisPos epos2 = new ExaxisPos(0.000, 20.987, 0.000, 0.000 );
+            ExaxisPos epos3 = new ExaxisPos(-0.000, 30.982, 0.000, 0.000 );
+
+            DescPose offset_pos = new DescPose(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+
+
+            rtn = robot.AccSmoothStart(false);
+            Console.WriteLine($"AccSmoothStart rtn is {rtn}");
+            Thread.Sleep(1000);
+            rtn = robot.ExtAxisSyncMoveL(joint_pos1, desc_pos1, 1, 0, 100, 100, 100, 100, epos1, 0, offset_pos);
+            Console.WriteLine($"ExtAxisSyncMoveL 1 rtn is  {rtn}");
+            rtn = robot.ExtAxisSyncMoveL(joint_pos2, desc_pos2, 1, 0, 100, 100, 100, 200, epos2, 0, offset_pos);
+            Console.WriteLine($"ExtAxisSyncMoveL 2 rtn is {rtn}");
+            rtn = robot.ExtAxisSyncMoveL(joint_pos3, desc_pos3, 1, 0, 100, 100, 100, 300, epos3, 0, offset_pos);
+            Console.WriteLine($"ExtAxisSyncMoveL 3 rtn is  {rtn}");
+            Thread.Sleep(8000);
+            rtn = robot.AccSmoothEnd(false);
+            Console.WriteLine($"AccSmoothEnd rtn is %d\n", rtn);
+
+
+            return;
+        }
+
+        private void button85_Click(object sender, EventArgs e)
+        {
+            robot.RobotEnable(0);
+            Thread.Sleep(200);
+            int rtn = robot.JointAllParamUpgrade("D://zUP/standardQX/jointallparametersFR56.0.db");
+            Console.WriteLine($"robot JointAllParamUpgrade rtn is{rtn}");
+
+            rtn = robot.SetCtrlFirmwareUpgrade(2, "D://zUP/upgrade/FAIR_Cobot_Cbd_Asix_V2.0.bin");
+            Console.WriteLine($"robot SetCtrlFirmwareUpgrade rtn is{rtn}");
+
+
+            rtn = robot.SetEndFirmwareUpgrade(2, "D://zUP/upgrade/FAIR_Cobot_Axle_Asix_V2.4.bin");
+            Console.WriteLine($"robot SetEndFirmwareUpgrade rtn is {rtn}");
+
+            robot.SetSysServoBootMode();
+            rtn = robot.SetCtrlFirmwareUpgrade(1, "D://zUP/standardQX/FR_CTRL_PRIMCU_FV201010_MAIN_U4_T01_20240529.bin");
+            Console.WriteLine($"robot SetCtrlFirmwareUpgrade rtn is{rtn}");
+
+            rtn = robot.SetEndFirmwareUpgrade(1, "D://zUP/standardQX/FR_END_FV201010_MAIN_U01_T01_20250522.bin");
+            Console.WriteLine($"robot SetEndFirmwareUpgrade rtn is {rtn}");
+
+            rtn = robot.SetJointFirmwareUpgrade(1, "D://zUP/standardQX/FR_SERVO_FV502211_MAIN_U7_T07_20250217.bin");
+            Console.WriteLine($"robot SetJointFirmwareUpgrade rtn is{rtn}");
+
+        }
+
+        private void button86_Click(object sender, EventArgs e)
+        {
+            robot.RobotEnable(0);
+            Thread.Sleep(200);
+            int rtn = robot.JointAllParamUpgrade("D://zUP/standardQX/jointallparametersFR56.0.db");
+            Console.WriteLine($"robot JointAllParamUpgrade rtn is{rtn}");
+
+            rtn = robot.SetCtrlFirmwareUpgrade(2, "D://zUP/upgrade/FAIR_Cobot_Cbd_Asix_V2.0.bin");
+            Console.WriteLine($"robot SetCtrlFirmwareUpgrade rtn is{rtn}");
+
+
+            rtn = robot.SetEndFirmwareUpgrade(2, "D://zUP/upgrade/FAIR_Cobot_Axle_Asix_V2.4.bin");
+            Console.WriteLine($"robot SetEndFirmwareUpgrade rtn is {rtn}");
+
+            robot.SetSysServoBootMode();
+            rtn = robot.SetCtrlFirmwareUpgrade(1, "D://zUP/standardQX/FR_CTRL_PRIMCU_FV201011_MAIN_U4_T01_20250208.bin");
+            Console.WriteLine($"robot SetCtrlFirmwareUpgrade rtn is{rtn}");
+
+            rtn = robot.SetEndFirmwareUpgrade(1, "D://zUP/standardQX/FR_END_FV201008_MAIN_U01_T01_20250416.bin");
+            Console.WriteLine($"robot SetEndFirmwareUpgrade rtn is {rtn}");
+
+            rtn = robot.SetJointFirmwareUpgrade(1, "D://zUP/standardQX/FR_SERVO_FV502211_MAIN_U7_T07_20250217.bin");
+            Console.WriteLine($"robot SetJointFirmwareUpgrade rtn is{rtn}");
+        }
     }
 
 }

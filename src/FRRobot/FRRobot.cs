@@ -41,7 +41,7 @@ namespace fairino
     {
         ICallSupervisor proxy = null;
 
-        const string SDK_VERSION = " C#SDK-V1.1.4  Web-3.8.3";
+        const string SDK_VERSION = " C#SDK-V1.1.5  Web-3.8.4";
 
         private string robot_ip = "192.168.58.2";//机器人ip
         private int g_sock_com_err = (int)RobotError.ERR_SUCCESS;
@@ -5136,7 +5136,7 @@ namespace fairino
 
 
         /**
-         * @brief  设置轨迹记录参数
+         * @brief  设置TPD轨迹记录参数
          * @param  [in] type  记录数据类型，1-关节位置
          * @param  [in] name  轨迹文件名
          * @param  [in] period_ms  数据采样周期，固定值2ms或4ms或8ms
@@ -5179,7 +5179,7 @@ namespace fairino
         }
 
         /**
-         * @brief  开始轨迹记录
+         * @brief  开始TPD轨迹记录
          * @param  [in] type  记录数据类型，1-关节位置
          * @param  [in] name  轨迹文件名
          * @param  [in] period_ms  数据采样周期，固定值2ms或4ms或8ms
@@ -5221,7 +5221,7 @@ namespace fairino
         }
 
         /**
-         * @brief  停止轨迹记录
+         * @brief  停止TPD轨迹记录
          * @return  错误码
          */
         public int SetWebTPDStop()
@@ -5258,7 +5258,7 @@ namespace fairino
         }
 
         /**
-         * @brief  删除轨迹记录
+         * @brief  删除TPD轨迹记录
          * @param  [in] name  轨迹文件名
          * @return  错误码
          */
@@ -5297,7 +5297,7 @@ namespace fairino
         }
 
         /**
-         * @brief  轨迹预加载
+         * @brief  TPD轨迹预加载
          * @param  [in] name  轨迹文件名
          * @return  错误码
          */
@@ -5336,7 +5336,7 @@ namespace fairino
         }
 
         /**
-         * @brief  获取轨迹起始位姿
+         * @brief  获取TPD轨迹起始位姿
          * @param  [in] name 轨迹文件名,不需要文件后缀
          * @return  错误码
          */
@@ -5384,7 +5384,7 @@ namespace fairino
         }
 
         /**
-         * @brief  轨迹复现
+         * @brief  TPD轨迹复现
          * @param  [in] name  轨迹文件名
          * @param  [in] blend 0-不平滑，1-平滑
          * @param  [in] ovl  速度缩放百分比，范围[0~100]
@@ -11966,12 +11966,13 @@ namespace fairino
         }
 
         /**
-         * @brief UDP扩展轴运动
-         * @param [in] pos 目标位置
-         * @param [in] ovl 速度百分比
-         * @return 错误码
-         */
-        public int ExtAxisMove(ExaxisPos pos, double ovl)
+        * @brief UDP扩展轴运动
+        * @param [in] pos 目标位置
+        * @param [in] ovl 速度百分比
+        * @param [in] blend 平滑参数(mm或ms)
+        * @return 错误码
+        */
+        public int ExtAxisMove(ExaxisPos pos, double ovl, double blend=-1)
         {
             if (IsSockComError())
             {
@@ -11985,10 +11986,10 @@ namespace fairino
             try
             {
                 //单独调用时，默认异步运动
-                int rtn = proxy.ExtAxisMoveJ(0, pos.ePos[0], pos.ePos[1], pos.ePos[2], pos.ePos[3], ovl);
+                int rtn = proxy.ExtAxisMoveJ(0, pos.ePos[0], pos.ePos[1], pos.ePos[2], pos.ePos[3], ovl, (float)blend);
                 if (log != null)
                 {
-                    log.LogInfo($"ExtAxisMove({pos.ePos[0]}, {pos.ePos[1]}, {pos.ePos[2]}, {pos.ePos[3]}) : {rtn}");
+                    log.LogInfo($"ExtAxisMoveJ({pos.ePos[0]}, {pos.ePos[1]}, {pos.ePos[2]}, {pos.ePos[3]}) : {rtn}");
                 }
                 return rtn;
             }
@@ -12904,7 +12905,7 @@ namespace fairino
                 double[] desc = new double[6] { desc_pos.tran.x, desc_pos.tran.y, desc_pos.tran.z, desc_pos.rpy.rx, desc_pos.rpy.ry, desc_pos.rpy.rz };
                 double[] offect = new double[6] { offset_pos.tran.x, offset_pos.tran.y, offset_pos.tran.z, offset_pos.rpy.rx, offset_pos.rpy.ry, offset_pos.rpy.rz };
                 int rtn = 0;
-                rtn = proxy.ExtAxisMoveJ(1, epos.ePos[0], epos.ePos[1], epos.ePos[2], epos.ePos[3], ovl);
+                rtn = proxy.ExtAxisMoveJ(1, epos.ePos[0], epos.ePos[1], epos.ePos[2], epos.ePos[3], ovl, blendT);
                 if (rtn != 0)
                 {
                     if (log != null)
@@ -12955,7 +12956,7 @@ namespace fairino
          * @param  [in] offset_pos  位姿偏移量
          * @return  错误码
          */
-        public int ExtAxisSyncMoveL(JointPos joint_pos, DescPose desc_pos, int tool, int user, float vel, float acc, float ovl, float blendR, ExaxisPos epos, int offset_flag, DescPose offset_pos)
+        public int ExtAxisSyncMoveL(JointPos joint_pos, DescPose desc_pos, int tool, int user, float vel, float acc, float ovl, double blendR, ExaxisPos epos, int offset_flag, DescPose offset_pos)
         {
             if (IsSockComError())
             {
@@ -12974,7 +12975,7 @@ namespace fairino
                 double[] desc = new double[6] { desc_pos.tran.x, desc_pos.tran.y, desc_pos.tran.z, desc_pos.rpy.rx, desc_pos.rpy.ry, desc_pos.rpy.rz };
                 double[] offect = new double[6] { offset_pos.tran.x, offset_pos.tran.y, offset_pos.tran.z, offset_pos.rpy.rx, offset_pos.rpy.ry, offset_pos.rpy.rz };
 
-                rtn = proxy.ExtAxisMoveJ(1, epos.ePos[0], epos.ePos[1], epos.ePos[2], epos.ePos[3], ovl);
+                rtn = proxy.ExtAxisMoveJ(1, epos.ePos[0], epos.ePos[1], epos.ePos[2], epos.ePos[3], ovl, blendR);
                 if (rtn != 0)
                 {
                     if (log != null)
@@ -12983,7 +12984,7 @@ namespace fairino
                     }
                     return rtn;
                 }
-                rtn = proxy.MoveL(joint, desc, tool, user, vel, acc, ovl, blendR, epos.ePos, search, offset_flag, offect);
+                rtn = proxy.MoveL(joint, desc, tool, user, vel, acc, ovl, blendR, 0,epos.ePos, search, offset_flag, offect);
                 if (log != null)
                 {
                     log.LogInfo($"MoveL({joint[0]},{joint[1]},{joint[2]},{joint[3]},{joint[4]},{joint[5]},{desc[0]},{desc[1]},{desc[2]},{desc[3]},{desc[4]},{desc[5]},{tool},{user},{vel},{acc},{ovl},{blendR}" +
@@ -13057,7 +13058,7 @@ namespace fairino
                 double[] offectT = new double[6] { offset_pos_t.tran.x, offset_pos_t.tran.y, offset_pos_t.tran.z, offset_pos_t.rpy.rx, offset_pos_t.rpy.ry, offset_pos_t.rpy.rz };
                 double[] controlT = new double[4] { ttool, tuser, tvel, tacc };
 
-                rtn = proxy.ExtAxisMoveJ(1, epos_t.ePos[0], epos_t.ePos[1], epos_t.ePos[2], epos_t.ePos[3], ovl);
+                rtn = proxy.ExtAxisMoveJ(1, epos_t.ePos[0], epos_t.ePos[1], epos_t.ePos[2], epos_t.ePos[3], ovl, blendR);
                 if (rtn != 0)
                 {
                     if (log != null)
@@ -15749,16 +15750,10 @@ namespace fairino
         }
 
         /**
-	     * @brief 获取末端通讯参数
-	     * @param [out] baudRate 
-	     * @param [out] dataBit 
-	     * @param [out] stopBit
-	     * @param [out] verify
-	     * @param [out] timeout
-	     * @param [out] timeoutTimes
-	     * @param [out] period
-	     * @return  错误码
-	     */
+        * @brief 获取末端通讯参数
+        * @param param 末端通讯参数
+        * @return  错误码
+        */
         public int GetAxleCommunicationParam(ref AxleComParam getParam)
         {
             if (IsSockComError())
@@ -15803,16 +15798,10 @@ namespace fairino
         }
 
         /**
-         * @brief 设置末端通讯参数
-         * @param [in] baudRate 
-         * @param [in] dataBit 
-         * @param [in] stopBit
-         * @param [in] verify
-         * @param [in] timeout
-         * @param [in] timeoutTimes
-         * @param [in] period
-         * @return  错误码
-         */
+        * @brief 设置末端通讯参数
+        * @param param  末端通讯参数
+        * @return  错误码
+        */
         public int SetAxleCommunicationParam(AxleComParam param)
         {
             if (IsSockComError())
@@ -17501,8 +17490,9 @@ namespace fairino
             try
             {
                 int param = saveFlag ? 1 : 0;
+                //Console.WriteLine($"AccSmoothStart 1");
                 int result = proxy.AccSmoothStart(param);
-
+                //Console.WriteLine($"AccSmoothStart 2:({result}");
                 if (log != null)
                 {
                     log.LogInfo($"AccSmoothStart:({result}");
@@ -18488,258 +18478,396 @@ namespace fairino
                 }
             }
         }
-        //        /**
-        //        * @brief  螺旋线探索
-        //        * @param  [in] rcs 参考坐标系，0-工具坐标系，1-基坐标系
-        //        * @param  [in] dr 每圈半径进给量
-        //        * @param  [in] ft 力/扭矩阈值，fx,fy,fz,tx,ty,tz，范围[0~100]
-        //        * @param  [in] max_t_ms 最大探索时间，单位ms
-        //        * @param  [in] max_vel 最大线速度，单位mm/s
-        //        * @return  错误码
-        //        */
-        //        public int FT_SpiralSearch(int rcs, float dr, float ft, float max_t_ms, float max_vel)
-        //        {
-        //            if (IsSockComError())
-        //            {
-        //                return g_sock_com_err;
-        //            }
-        //            int errcode = 0;
-        //            try
-        //            {
-        //                errcode = proxy.FT_SpiralSearch(rcs,  dr,  ft,  max_t_ms,  max_vel);
+        /**
+      * @brief 设置焦点标定点
+      * @param [in] pointNum 焦点标定点编号 1-8
+      * @param [in] point 标定点坐标
+      * @return 错误码
+      */
+        public int SetFocusCalibPoint(int pointNum, DescPose point)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+                double[] desc = new double[6] { point.tran.x, point.tran.y, point.tran.z, point.rpy.rx, point.rpy.ry, point.rpy.rz };
+                int rtn = proxy.SetFocusCalibPoint(pointNum, desc);
+                if (log != null)
+                {
+                    log.LogInfo($"SetFocusCalibPoint({pointNum}, {point.tran.x}, {point.tran.y}, {point.tran.z}, {point.rpy.rx}, {point.rpy.ry}, {point.rpy.rz} : {rtn}");
+                }
+                return rtn;
+            }
+            catch
+            {
+                if (IsSockComError())
+                {
+                    if (log != null)
+                    {
+                        log.LogError($"RPC exception");
+                    }
+                    return g_sock_com_err;
+                }
+                else
+                {
+                    return (int)RobotError.ERR_RPC_ERROR;
+                }
+            }
+        }
 
-        //                if (log != null)
-        //                {
-        //                    log.LogInfo($"FT_SpiralSearch(ref {rcs},ref {dr},ref {ft},ref {max_t_ms},ref {max_vel}: {errcode}");
-        //                }
-        //                return errcode;
-        //            }
-        //            catch
-        //            {
-        //                if (IsSockComError())
-        //                {
-        //                    if (log != null)
-        //                    {
-        //                        log.LogError($"RPC exception");
-        //                    }
-        //                    return g_sock_com_err;
-        //                }
-        //                else
-        //                {
-        //                    return (int)RobotError.ERR_RPC_ERROR;
-        //                }
-        //            }
-        //        }
-        //        /**
-        //        * @brief  旋转插入
-        //        * @param  [in] rcs 参考坐标系，0-工具坐标系，1-基坐标系
-        //        * @param  [in] angVelRot 旋转角速度，单位deg/s
-        //        * @param  [in] ft  力/扭矩阈值，fx,fy,fz,tx,ty,tz，范围[0~100]
-        //        * @param  [in] max_angle 最大旋转角度，单位deg
-        //        * @param  [in] orn 力/扭矩方向，1-沿z轴方向，2-绕z轴方向
-        //        * @param  [in] max_angAcc 最大旋转加速度，单位deg/s^2，暂不使用，默认为0
-        //        * @param  [in] rotorn  旋转方向，1-顺时针，2-逆时针
-        //        * @return  错误码
-        //*/
-        //        public int FT_RotInsertion(int rcs, float angVelRot, float ft, float max_angle, uint8_t orn, float max_angAcc, uint8_t rotorn)
-        //        {
-        //            if (IsSockComError())
-        //            {
-        //                return g_sock_com_err;
-        //            }
-        //            int errcode = 0;
-        //            try
-        //            {
-        //                errcode = proxy.FT_SpiralSearch(rcs, dr, ft, max_t_ms, max_vel);
+        /**
+         * @brief 计算焦点标定结果
+         * @param [in] pointNum 标定点个数
+         * @param [out] resultPos 标定结果XYZ
+         * @param [out] accuracy 标定精度误差
+         * @return 错误码
+         */
+        public int ComputeFocusCalib(int pointNum, ref DescTran resultPos, ref double accuracy)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+                object[] result = proxy.ComputeFocusCalib(pointNum);
+                int rtn = (int)result[0];
+                if (rtn == 0)
+                {
+                    resultPos.x = (double)result[1];
+                    resultPos.y = (double)result[2];
+                    resultPos.z = (double)result[3];
+                    accuracy = (double)result[4];
+ 
+                }
+                if (log != null)
+                {
+                    log.LogInfo($"ComputeFocusCalib( {resultPos.x}, {resultPos.y} , {resultPos.z}, {accuracy}: {rtn}");
+                }
+                return rtn;
+            }
+            catch
+            {
+                if (IsSockComError())
+                {
+                    if (log != null)
+                    {
+                        log.LogError($"RPC exception");
+                    }
+                    return g_sock_com_err;
+                }
+                else
+                {
+                    return (int)RobotError.ERR_RPC_ERROR;
+                }
+            }
+        }
 
-        //                if (log != null)
-        //                {
-        //                    log.LogInfo($"FT_SpiralSearch(ref {rcs},ref {dr},ref {ft},ref {max_t_ms},ref {max_vel}: {errcode}");
-        //                }
-        //                return errcode;
-        //            }
-        //            catch
-        //            {
-        //                if (IsSockComError())
-        //                {
-        //                    if (log != null)
-        //                    {
-        //                        log.LogError($"RPC exception");
-        //                    }
-        //                    return g_sock_com_err;
-        //                }
-        //                else
-        //                {
-        //                    return (int)RobotError.ERR_RPC_ERROR;
-        //                }
-        //            }
-        //        }
-        //        /**
-        //        * @brief  直线插入
-        //        * @param  [in] rcs 参考坐标系，0-工具坐标系，1-基坐标系
-        //        * @param  [in] ft  力/扭矩阈值，fx,fy,fz,tx,ty,tz，范围[0~100]
-        //        * @param  [in] lin_v 直线速度，单位mm/s
-        //        * @param  [in] lin_a 直线加速度，单位mm/s^2，暂不使用
-        //        * @param  [in] max_dis 最大插入距离，单位mm
-        //        * @param  [in] linorn  插入方向，0-负方向，1-正方向
-        //        * @return  错误码
-        //        */
-        //        public int FT_LinInsertion(int rcs, float ft, float lin_v, float lin_a, float max_dis, uint8_t linorn)
-        //        {
-        //            if (IsSockComError())
-        //            {
-        //                return g_sock_com_err;
-        //            }
-        //            int errcode = 0;
-        //            try
-        //            {
-        //                errcode = proxy.FT_SpiralSearch(rcs, dr, ft, max_t_ms, max_vel);
+        /**
+         * @brief 开启焦点跟随
+         * @param [in] kp 比例参数，默认50.0
+         * @param [in] kpredict 前馈参数，默认19.0
+         * @param [in] aMax 最大角加速度限制，默认1440°/s^2
+         * @param [in] vMax 最大角速度限制，默认180°/s
+         * @param [in] type 锁定X轴指向(0-参考输入矢量；1-水平；2-垂直)
+         * @return 错误码
+         */
+        public int FocusStart(double kp, double kpredict, double aMax, double vMax, int type)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+      
+                int rtn = proxy.FocusStart(kp, kpredict, aMax, vMax, type);
+                if (log != null)
+                {
+                    log.LogInfo($"FocusStart({kp}, {kpredict}, {aMax} , {vMax} , {type}  : {rtn}");
+                }
+                return rtn;
+            }
+            catch
+            {
+                if (IsSockComError())
+                {
+                    if (log != null)
+                    {
+                        log.LogError($"RPC exception");
+                    }
+                    return g_sock_com_err;
+                }
+                else
+                {
+                    return (int)RobotError.ERR_RPC_ERROR;
+                }
+            }
+        }
 
-        //                if (log != null)
-        //                {
-        //                    log.LogInfo($"FT_SpiralSearch(ref {rcs},ref {dr},ref {ft},ref {max_t_ms},ref {max_vel}: {errcode}");
-        //                }
-        //                return errcode;
-        //            }
-        //            catch
-        //            {
-        //                if (IsSockComError())
-        //                {
-        //                    if (log != null)
-        //                    {
-        //                        log.LogError($"RPC exception");
-        //                    }
-        //                    return g_sock_com_err;
-        //                }
-        //                else
-        //                {
-        //                    return (int)RobotError.ERR_RPC_ERROR;
-        //                }
-        //            }
-        //        }
+        /**
+         * @brief 停止焦点跟随
+         * @return 错误码
+         */
+        public int FocusEnd()
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+
+                int rtn = proxy.FocusEnd();
+                if (log != null)
+                {
+                    log.LogInfo($"FocusEnd({rtn}");
+                }
+                return rtn;
+            }
+            catch
+            {
+                if (IsSockComError())
+                {
+                    if (log != null)
+                    {
+                        log.LogError($"RPC exception");
+                    }
+                    return g_sock_com_err;
+                }
+                else
+                {
+                    return (int)RobotError.ERR_RPC_ERROR;
+                }
+            }
+        }
+
+        /**
+         * @brief 设置焦点坐标
+         * @param [in] pos 焦点坐标XYZ
+         * @return 错误码
+         */
+        public int SetFocusPosition(DescTran pos)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+
+                int rtn = proxy.SetFocusPosition(pos.x, pos.y, pos.z);
+                if (log != null)
+                {
+                    log.LogInfo($"FocusEnd({rtn}");
+                }
+                return rtn;
+            }
+            catch
+            {
+                if (IsSockComError())
+                {
+                    if (log != null)
+                    {
+                        log.LogError($"RPC exception");
+                    }
+                    return g_sock_com_err;
+                }
+                else
+                {
+                    return (int)RobotError.ERR_RPC_ERROR;
+                }
+            }
+
+        }
+
+        /**
+        * @brief 设置编码器升级
+        * @param [in] path 本地升级包全路径(D://zUP/XXXXX.bin)
+        * @return 错误码
+        */
+        public int SetEncoderUpgrade(string path)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+
+                int rtn = proxy.SetEncoderUpgrade(path);
+                if (log != null)
+                {
+                    log.LogInfo($"FocusEnd({rtn}");
+                }
+                return rtn;
+            }
+            catch
+            {
+                if (IsSockComError())
+                {
+                    if (log != null)
+                    {
+                        log.LogError($"RPC exception");
+                    }
+                    return g_sock_com_err;
+                }
+                else
+                {
+                    return (int)RobotError.ERR_RPC_ERROR;
+                }
+            }
+        }
+
+        /**
+         * @brief 设置关节固件升级
+         * @param [in] type 升级文件类型；1-升级固件；2-升级从站配置文件
+         * @param [in] path 本地升级包全路径(D://zUP/XXXXX.bin)
+         * @return 错误码
+         */
+        public int SetJointFirmwareUpgrade(int type, string path)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            int errcode = FileUpLoad(2, path);
+            if (errcode == 0)
+            {
+                log.LogInfo("JointFirmware Upload success!");
+
+                string fileName = System.IO.Path.GetFileName(path);
+                string pathInRobot = "/tmp/" + fileName;
+
+                for (int i = 1; i < 7; i++)
+                {
+                    errcode = SlaveFileWrite(1, i, pathInRobot);
+                    if (errcode != 0)
+                    {
+                        return errcode;
+                    }
+                }
+            }
+            else
+            {
+                log.LogError($"JointFirmware Upgrade fail. errcode is: {errcode}.");
+            }
+            return errcode;
+        }
+
+        /**
+         * @brief 设置控制箱固件升级
+         * @param [in] type 升级文件类型；1-升级固件；2-升级从站配置文件
+         * @param [in] path 本地升级包全路径(D://zUP/XXXXX.bin)
+         * @return 错误码
+         */
+        public int SetCtrlFirmwareUpgrade(int type, string path)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
 
 
-        //        /**
-        //        * @brief  表面定位
-        //        * @param  [in] rcs 参考坐标系，0-工具坐标系，1-基坐标系
-        //        * @param  [in] dir  移动方向，1-正方向，2-负方向
-        //        * @param  [in] axis 移动轴，1-x轴，2-y轴，3-z轴
-        //        * @param  [in] lin_v 探索直线速度，单位mm/s
-        //        * @param  [in] lin_a 探索直线加速度，单位mm/s^2，暂不使用，默认为0
-        //        * @param  [in] max_dis 最大探索距离，单位mm
-        //        * @param  [in] ft  动作终止力/扭矩阈值，fx,fy,fz,tx,ty,tz
-        //        * @return  错误码
-        //*/
-        //        public int FT_FindSurface(int rcs, uint8_t dir, uint8_t axis, float lin_v, float lin_a, float max_dis, float ft)
-        //        {
-        //            if (IsSockComError())
-        //            {
-        //                return g_sock_com_err;
-        //            }
-        //            int errcode = 0;
-        //            try
-        //            {
-        //                errcode = proxy.FT_SpiralSearch(rcs, dr, ft, max_t_ms, max_vel);
+            int errcode = FileUpLoad(2, path);
+            if (errcode == 0)
+            {
+                log.LogInfo("CtrlFirmware Upload success!");
 
-        //                if (log != null)
-        //                {
-        //                    log.LogInfo($"FT_SpiralSearch(ref {rcs},ref {dr},ref {ft},ref {max_t_ms},ref {max_vel}: {errcode}");
-        //                }
-        //                return errcode;
-        //            }
-        //            catch
-        //            {
-        //                if (IsSockComError())
-        //                {
-        //                    if (log != null)
-        //                    {
-        //                        log.LogError($"RPC exception");
-        //                    }
-        //                    return g_sock_com_err;
-        //                }
-        //                else
-        //                {
-        //                    return (int)RobotError.ERR_RPC_ERROR;
-        //                }
-        //            }
-        //        }
+                string fileName = Path.GetFileName(path);
+                string pathInRobot = "/tmp/" + fileName;
+                errcode = SlaveFileWrite(type, 0, pathInRobot);
+            }
+            else
+            {
+                log.LogError(string.Format("CtrlFirmware Upgrade fail. errcode is: {0}.", errcode));
+            }
+
+            return errcode;
+        }
+
+        /**
+         * @brief 设置末端固件升级
+         * @param [in] type 升级文件类型；1-升级固件；2-升级从站配置文件
+         * @param [in] path 本地升级包全路径(D://zUP/XXXXX.bin)
+         * @return 错误码
+         */
+        public int SetEndFirmwareUpgrade(int type, string path)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
 
 
-        //        /**
-        //        * @brief  计算中间平面位置开始
-        //        * @return  错误码
-        //        */
-        //        public int FT_CalCenterStart()
-        //        {
-        //            if (IsSockComError())
-        //            {
-        //                return g_sock_com_err;
-        //            }
-        //            int errcode = 0;
-        //            try
-        //            {
-        //                errcode = proxy.FT_SpiralSearch(rcs, dr, ft, max_t_ms, max_vel);
+            int errcode = FileUpLoad(2, path);
+            if (errcode == 0)
+            {
+                log.LogInfo("EndFirmware Upload success!");
 
-        //                if (log != null)
-        //                {
-        //                    log.LogInfo($"FT_SpiralSearch(ref {rcs},ref {dr},ref {ft},ref {max_t_ms},ref {max_vel}: {errcode}");
-        //                }
-        //                return errcode;
-        //            }
-        //            catch
-        //            {
-        //                if (IsSockComError())
-        //                {
-        //                    if (log != null)
-        //                    {
-        //                        log.LogError($"RPC exception");
-        //                    }
-        //                    return g_sock_com_err;
-        //                }
-        //                else
-        //                {
-        //                    return (int)RobotError.ERR_RPC_ERROR;
-        //                }
-        //            }
-        //        }
-        //        /**
-        //        * @brief  计算中间平面位置结束
-        //        * @param  [out] pos 中间平面位姿
-        //        * @return  错误码
-        //        */
-        //        public int FT_CalCenterEnd(DescPose* pos)
-        //        {
-        //            if (IsSockComError())
-        //            {
-        //                return g_sock_com_err;
-        //            }
-        //            int errcode = 0;
-        //            try
-        //            {
-        //                errcode = proxy.FT_SpiralSearch(rcs, dr, ft, max_t_ms, max_vel);
+                string fileName = Path.GetFileName(path);
+                string pathInRobot = "/tmp/" + fileName;
+                errcode = SlaveFileWrite(type, 7, pathInRobot);
+            }
+            else
+            {
+                log.LogError(string.Format("EndFirmware Upgrade fail. errcode is: {0}.", errcode));
+            }
 
-        //                if (log != null)
-        //                {
-        //                    log.LogInfo($"FT_SpiralSearch(ref {rcs},ref {dr},ref {ft},ref {max_t_ms},ref {max_vel}: {errcode}");
-        //                }
-        //                return errcode;
-        //            }
-        //            catch
-        //            {
-        //                if (IsSockComError())
-        //                {
-        //                    if (log != null)
-        //                    {
-        //                        log.LogError($"RPC exception");
-        //                    }
-        //                    return g_sock_com_err;
-        //                }
-        //                else
-        //                {
-        //                    return (int)RobotError.ERR_RPC_ERROR;
-        //                }
-        //            }
-        //        }
+            return errcode;
+        }
+
+        /**
+         * @brief 关节全参数配置文件升级
+         * @param [in] path 本地升级包全路径(D://zUP/XXXXX.bin)
+         * @return 错误码
+         */
+        public int JointAllParamUpgrade(string path)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            int errcode = FileUpLoad(5, path);
+            if (0 == errcode)
+            {
+                try
+                {
+
+                    int rtn = proxy.JointAllParamUpgrade();
+                    if (log != null)
+                    {
+                        log.LogInfo($"JointAllParamUpgrade{rtn}");
+                    }
+                    return rtn;
+                }
+                catch
+                {
+                    if (IsSockComError())
+                    {
+                        if (log != null)
+                        {
+                            log.LogError($"RPC exception");
+                        }
+                        return g_sock_com_err;
+                    }
+                    else
+                    {
+                        return (int)RobotError.ERR_RPC_ERROR;
+                    }
+                }
+            }
+            else
+            {
+                log.LogError(string.Format("JointAllParam Upgrade fail. errcode is: {0}.", errcode));
+            }
+
+            return errcode;
+        }
     }
 }
 

@@ -31,7 +31,7 @@ namespace testFrRobot
             InitializeComponent();
             robot = new Robot();//实例化机器人对象
             string path = "D://log/";
-            robot.LoggerInit(FrLogType.BUFFER, FrLogLevel.ERROR, path, 5, 5);
+            robot.LoggerInit(FrLogType.BUFFER, FrLogLevel.INFO, path, 5, 5);
             robot.SetLoggerLevel(FrLogLevel.INFO);
             robot.SetReconnectParam(true, 100, 1000);//断线重连参数
             rrpc = robot.RPC("192.168.58.2"); //与控制箱建立连接

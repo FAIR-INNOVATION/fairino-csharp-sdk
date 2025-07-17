@@ -126,26 +126,6 @@ namespace fairino
         [XmlRpcMethod("MoveJ")]
         int MoveJ(double[] joint_pos, double[] desc_pos, int tool, int user, double vel, double acc, double ovl, double[] epos, double blendT, int offset_flag, double[] offset_pos);
 
-
-        /**
-        * @brief  笛卡尔空间直线运动
-        * @param  [in] joint_pos  目标关节位置,单位deg
-        * @param  [in] desc_pos   目标笛卡尔位姿
-        * @param  [in] tool  工具坐标号，范围[1~15]
-        * @param  [in] user  工件坐标号，范围[1~15]
-        * @param  [in] vel  速度百分比，范围[0~100]
-        * @param  [in] acc  加速度百分比，范围[0~100],暂不开放
-        * @param  [in] ovl  速度缩放因子，范围[0~100]
-        * @param  [in] blendR [-1.0]-运动到位(阻塞)，[0~1000.0]-平滑半径(非阻塞)，单位mm
-        * @param  [in] epos  扩展轴位置，单位mm
-        * @param  [in] search  0-不焊丝寻位，1-焊丝寻位
-        * @param  [in] offset_flag  0-不偏移，1-基坐标系/工件坐标系下偏移，2-工具坐标系下偏移
-        * @param  [in] offset_pos  位姿偏移量
-        * @return  错误码
-        */
-        [XmlRpcMethod("MoveL")]
-        int MoveL(double[] joint_pos, double[] desc_pos, int tool, int user, double vel, double acc, double ovl, double blendR, double[] epos, int search, int offset_flag, double[] offset_pos);
-
         /**
         * @brief  笛卡尔空间直线运动
         * @param  [in] joint_pos  目标关节位置,单位deg
@@ -1551,7 +1531,7 @@ namespace fairino
         int SetWeldMachineCtrlMode(int mode);
 
         [XmlRpcMethod("ExtAxisMoveJ")]
-        int ExtAxisMoveJ(int syncFlag, double pos1, double pos2, double pos3, double pos4, double ovl);
+        int ExtAxisMoveJ(int syncFlag, double pos1, double pos2, double pos3, double pos4, double ovl, double blendT);
 
         [XmlRpcMethod("SetAuxDO")]
         int SetAuxDO(int DONum, int bOpen, int smooth, int isNoblock);
@@ -1968,6 +1948,35 @@ namespace fairino
 
         [XmlRpcMethod("GetWideBoxTempFanMonitorParam")]
         object[] GetWideBoxTempFanMonitorParam();
+
+
+        [XmlRpcMethod("SetFocusCalibPoint")]
+        int SetFocusCalibPoint(int pointNum, double[] desc);
+
+
+        [XmlRpcMethod("ComputeFocusCalib")]
+        object[] ComputeFocusCalib(int pointNum, ref DescTran resultPos, ref double accuracy);
+
+
+        [XmlRpcMethod("ComputeFocusCalib")]
+        object[] ComputeFocusCalib(int pointNum);
+
+        [XmlRpcMethod("FocusStart")]
+        int FocusStart(double kp, double kpredict, double aMax, double vMax, int type);
+
+
+        [XmlRpcMethod("FocusEnd")]
+        int FocusEnd();
+
+
+        [XmlRpcMethod("SetFocusPosition")]
+        int SetFocusPosition(double x, double y, double z);
+
+        [XmlRpcMethod("SetEncoderUpgrade")]
+        int SetEncoderUpgrade(string path);
+
+        [XmlRpcMethod("JointAllParamUpgrade")]
+        int JointAllParamUpgrade();
     }
     internal class RPCHandle
     {
