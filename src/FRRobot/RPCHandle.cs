@@ -144,7 +144,7 @@ namespace fairino
         * @return  错误码
         */
         [XmlRpcMethod("MoveL")]
-        int MoveL(double[] joint_pos, double[] desc_pos, int tool, int user, double vel, double acc, double ovl, double blendR, int blendMode, double[] epos, int search, int offset_flag, double[] offset_pos);
+        int MoveL(object[] moveLParams);
 
         /**
         * @brief  笛卡尔空间圆弧运动
@@ -165,7 +165,7 @@ namespace fairino
         * @return  错误码
         */
         [XmlRpcMethod("MoveC")]
-        int MoveC(double[] joint_pos_p, double[] desc_pos_p, double[] controlP, double[] epos_p, int poffset_flag, double[] offset_pos_p, double[] joint_pos_t, double[] desc_pos_t, double[] controlT, double[] epos_t, int toffset_flag, double[] offset_pos_t, double ovl, double blendR);
+        int MoveC(object[] moveCParams);
 
         /**
         * @brief  笛卡尔空间整圆运动
@@ -184,7 +184,7 @@ namespace fairino
         */
         [XmlRpcMethod("Circle")]
 
-        int Circle(double[] jointP, double[] descP, double[] controlP, double[] exteraxisP, double[] jointT, double[] descT, double[] controlT, double[] exteraxisT, double[] ovl, double[] offect, double[] oacc);
+        int Circle(object[] circleParams);
         /**
         * @brief  笛卡尔空间螺旋线运动
         * @param  [in] joint_pos  目标关节位置,单位deg
@@ -1868,7 +1868,7 @@ namespace fairino
         int WeaveChangeEnd();
 
         [XmlRpcMethod("LoadTrajectoryLA")]
-        int LoadTrajectoryLA(string name, int mode, double errorLim, int type, double precision, double vamx, double amax, double jmax);
+        int LoadTrajectoryLA(string name, int mode, double errorLim, int type, double precision, double vamx, double amax, double jmax, int flag);
 
         [XmlRpcMethod("MoveTrajectoryLA")]
         int MoveTrajectoryLA();
@@ -1977,6 +1977,59 @@ namespace fairino
 
         [XmlRpcMethod("JointAllParamUpgrade")]
         int JointAllParamUpgrade();
+
+
+        [XmlRpcMethod("LaserRecordPoint")]
+        object[] LaserRecordPoint(int coordID, int x, int y);
+
+        [XmlRpcMethod("LaserTrackingSearchStart")]
+        int LaserTrackingSearchStart(int direction, double x, double y, double z, int vel, int distance, int timeout, int posSensorNum);
+
+        [XmlRpcMethod("LaserTrackingSearchStop")]
+        int LaserTrackingSearchStop();
+
+
+        [XmlRpcMethod("SetExAxisRobotPlan")]
+        int SetExAxisRobotPlan(int strategy);
+
+
+        [XmlRpcMethod("GetFieldBusConfig")]
+        object[] GetFieldBusConfig();
+
+        [XmlRpcMethod("FieldBusSlaveWriteDO")]
+        int FieldBusSlaveWriteDO(int DOIndex, int wirteNum, int[] status);
+
+
+        [XmlRpcMethod("FieldBusSlaveWriteAO")]
+        int FieldBusSlaveWriteAO(int AOIndex, int wirteNum, int[] status);
+
+        [XmlRpcMethod("FieldBusSlaveReadDI")]
+        object[] FieldBusSlaveReadDI(int DOIndex, int readNum);
+
+        [XmlRpcMethod("FieldBusSlaveReadAI")]
+        object[] FieldBusSlaveReadAI(int AIIndex, int readNum);
+
+
+
+
+        [XmlRpcMethod("FieldBusSlaveWaitDI")]
+        int FieldBusSlaveWaitDI(int DIIndex, int status, int waitMs);
+
+        [XmlRpcMethod("FieldBusSlaveWaitAI")]
+        int FieldBusSlaveWaitAI(int AIIndex, int waitType, double value, int waitMs);
+
+        [XmlRpcMethod("SetSuckerCtrl")]
+        int SetSuckerCtrl(int slaveID, int len, int[] ctrlValue);
+
+
+        [XmlRpcMethod("GetSuckerState")]
+        object[] GetSuckerState(int slaveID);
+
+        [XmlRpcMethod("WaitSuckerState")]
+        int WaitSuckerState(int slaveID, int state, int ms);
+
+        [XmlRpcMethod("CtrlOpenLuaUpLoadCheck")]
+        object[] CtrlOpenLuaUpLoadCheck(string filePath);
     }
     internal class RPCHandle
     {

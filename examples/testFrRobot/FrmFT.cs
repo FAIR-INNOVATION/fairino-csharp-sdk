@@ -385,7 +385,9 @@ namespace testFrRobot
 
             robot.MoveL(startjointPos, startdescPose, 0, 0, 30, 100, 100, -1, 0, exaxisPos, 0, 0, offdese, 1, 1);
             robot.SingularAvoidStart(2, 10, 5, 5);
-            robot.MoveC(midjointPos, middescPose, 0, 0, 30, 100, exaxisPos, 0, offdese, endjointPos, enddescPose, 0, 0, 30, 100, exaxisPos, 0, offdese, 100, -1);
+
+        
+                robot.MoveC(midjointPos, middescPose, 0, 0, 30, 100, exaxisPos, 0, offdese, endjointPos, enddescPose, 0, 0, 30, 100, exaxisPos, 0, offdese, 100, -1,0);
             robot.SingularAvoidEnd();
 
         }
@@ -403,18 +405,18 @@ namespace testFrRobot
             ExaxisPos exaxisPos = new ExaxisPos(0, 0, 0, 0);
             DescPose offdese = new DescPose(0, 0, 0, 0, 0, 0);
 
-            if (enable)
-            {
-                robot.LinArcFIRPlanningStart(1000, 1000, 1000, 1000);
-                robot.MoveL(startjointPos, startdescPose, 0, 0, 100, 100, 100, -1, 0, exaxisPos, 0, 0, offdese, 1, 1);
-                robot.MoveC(midjointPos, middescPose, 0, 0, 100, 100, exaxisPos, 0, offdese, endjointPos, enddescPose, 0, 0, 100, 100, exaxisPos, 0, offdese, 100, -1);
-                robot.LinArcFIRPlanningEnd();
-            }
-            else
-            {
-                robot.MoveL(startjointPos, startdescPose, 0, 0, 100, 100, 100, -1, 0, exaxisPos, 0, 0, offdese, 1, 1);
-                robot.MoveC(midjointPos, middescPose, 0, 0, 100, 100, exaxisPos, 0, offdese, endjointPos, enddescPose, 0, 0, 100, 100, exaxisPos, 0, offdese, 100, -1);
-            }
+            //if (enable)
+            //{
+            //    robot.LinArcFIRPlanningStart(1000, 1000, 1000, 1000);
+            //    robot.MoveL(startjointPos, startdescPose, 0, 0, 100, 100, 100, -1, 0, exaxisPos, 0, 0, offdese, 1, 1);
+            //    robot.MoveC(midjointPos, middescPose, 0, 0, 100, 100, exaxisPos, 0, offdese, endjointPos, enddescPose, 0, 0, 100, 100, exaxisPos, 0, offdese, 100, -1);
+            //    robot.LinArcFIRPlanningEnd();
+            //}
+            //else
+            //{
+            //    robot.MoveL(startjointPos, startdescPose, 0, 0, 100, 100, 100, -1, 0, exaxisPos, 0, 0, offdese, 1, 1);
+            //    robot.MoveC(midjointPos, middescPose, 0, 0, 100, 100, exaxisPos, 0, offdese, endjointPos, enddescPose, 0, 0, 100, 100, exaxisPos, 0, offdese, 100, -1);
+            //}
         }
         void FIRLin(bool enable)
         {
