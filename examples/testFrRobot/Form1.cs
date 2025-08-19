@@ -112,46 +112,46 @@ namespace testFrRobot
 
         private void btnMovetest_Click(object sender, EventArgs e)
         {
-            JointPos j1= new JointPos(-11.904, -99.669, 117.473, -108.616, -91.726, 74.256);
-            JointPos j2 = new JointPos(-45.615, -106.172, 124.296, -107.151, -91.282, 74.255);
-            JointPos j3 = new JointPos(-29.777, -84.536, 109.275, -114.075, -86.655, 74.257);
-            JointPos j4 = new JointPos(-31.154, -95.317, 94.276, -88.079, -89.740, 74.256);
-            DescPose desc_pos1 = new DescPose(-419.524, -13.000, 351.569, -178.118, 0.314, 3.833);
-            DescPose desc_pos2 = new DescPose(-321.222, 185.189, 335.520, -179.030, -1.284, -29.869);
-            DescPose desc_pos3 = new DescPose(-487.434, 154.362, 308.576, 176.600, 0.268, -14.061);
-            DescPose desc_pos4 = new DescPose(-443.165, 147.881, 480.951, 179.511, -0.775, -15.409);
-            DescPose offset_pos = new DescPose(0, 0, 0, 0, 0, 0);
-            ExaxisPos epos = new ExaxisPos(0, 0, 0, 0);
+            //JointPos j1= new JointPos(-11.904, -99.669, 117.473, -108.616, -91.726, 74.256);
+            //JointPos j2 = new JointPos(-45.615, -106.172, 124.296, -107.151, -91.282, 74.255);
+            //JointPos j3 = new JointPos(-29.777, -84.536, 109.275, -114.075, -86.655, 74.257);
+            //JointPos j4 = new JointPos(-31.154, -95.317, 94.276, -88.079, -89.740, 74.256);
+            //DescPose desc_pos1 = new DescPose(-419.524, -13.000, 351.569, -178.118, 0.314, 3.833);
+            //DescPose desc_pos2 = new DescPose(-321.222, 185.189, 335.520, -179.030, -1.284, -29.869);
+            //DescPose desc_pos3 = new DescPose(-487.434, 154.362, 308.576, 176.600, 0.268, -14.061);
+            //DescPose desc_pos4 = new DescPose(-443.165, 147.881, 480.951, 179.511, -0.775, -15.409);
+            //DescPose offset_pos = new DescPose(0, 0, 0, 0, 0, 0);
+            //ExaxisPos epos = new ExaxisPos(0, 0, 0, 0);
 
-            int tool = 0;
-            int user = 0;
-            float vel = 100.0f;
-            float acc = 100.0f;
-            float ovl = 100.0f;
-            float blendT = 0.0f;
-            float blendR = 0.0f;
-            byte flag = 0;
-            byte search = 0;
+            //int tool = 0;
+            //int user = 0;
+            //float vel = 100.0f;
+            //float acc = 100.0f;
+            //float ovl = 100.0f;
+            //float blendT = 0.0f;
+            //float blendR = 0.0f;
+            //byte flag = 0;
+            //byte search = 0;
 
-            robot.SetSpeed(20);
-            int rtn;
-            rtn = robot.MoveJ(j1, desc_pos1, tool, user, vel, acc, ovl, epos, blendT, flag, offset_pos);
-            Console.WriteLine($"MoveJ errcode:{rtn}" );
+            //robot.SetSpeed(20);
+            //int rtn;
+            //rtn = robot.MoveJ(j1, desc_pos1, tool, user, vel, acc, ovl, epos, blendT, flag, offset_pos);
+            //Console.WriteLine($"MoveJ errcode:{rtn}" );
 
-            rtn = robot.MoveL(j2, desc_pos2, tool, user, vel, acc, ovl, blendR,epos, search, flag, offset_pos);
-            Console.WriteLine($"MoveL errcode:{rtn}");
+            //rtn = robot.MoveL(j2, desc_pos2, tool, user, vel, acc, ovl, blendR,epos, search, flag, offset_pos);
+            //Console.WriteLine($"MoveL errcode:{rtn}");
 
-            rtn = robot.MoveC(j3, desc_pos3, tool, user, vel, acc, epos, flag, offset_pos, j4, desc_pos4, tool, user, vel, acc, epos, flag, offset_pos, ovl, blendR);
-            Console.WriteLine($"MoveC errcode:{rtn}");
+            //rtn = robot.MoveC(j3, desc_pos3, tool, user, vel, acc, epos, flag, offset_pos, j4, desc_pos4, tool, user, vel, acc, epos, flag, offset_pos, ovl, blendR,0);
+            //Console.WriteLine($"MoveC errcode:{rtn}");
 
-            rtn = robot.MoveJ(j2, desc_pos2, tool, user, vel, acc, ovl, epos, blendT, flag, offset_pos);
-            Console.WriteLine("MoveJ errcode:%d\n", rtn);
+            //rtn = robot.MoveJ(j2, desc_pos2, tool, user, vel, acc, ovl, epos, blendT, flag, offset_pos);
+            //Console.WriteLine("MoveJ errcode:%d\n", rtn);
 
-            rtn = robot.Circle(j3, desc_pos3, tool, user, vel, acc, epos, j1, desc_pos1, tool, user, vel, acc, epos, ovl, flag, offset_pos);
-            Console.WriteLine($"Circle errcode:{rtn}");
+            //rtn = robot.Circle(j3, desc_pos3, tool, user, vel, acc, epos, j1, desc_pos1, tool, user, vel, acc, epos, ovl, flag, offset_pos,0,0,0);
+            //Console.WriteLine($"Circle errcode:{rtn}");
 
-            rtn = robot.MoveCart(desc_pos4, tool, user, vel, acc, ovl, blendT, -1);
-            Console.WriteLine($"MoveCart errcode:{rtn}");
+            //rtn = robot.MoveCart(desc_pos4, tool, user, vel, acc, ovl, blendT, -1);
+            //Console.WriteLine($"MoveCart errcode:{rtn}");
 
         }
 

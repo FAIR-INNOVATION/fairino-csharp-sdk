@@ -41,9 +41,9 @@ namespace fairino
     {
         ICallSupervisor proxy = null;
 
-        const string SDK_VERSION = " C#SDK-V1.1.5  Web-3.8.4";
+        const string SDK_VERSION = " C#SDK-V1.1.7  Web-3.8.5";
 
-        private string robot_ip = "192.168.58.2";//机器人ip
+        private string robot_ip = "192.168.57.2";//机器人ip
         private int g_sock_com_err = (int)RobotError.ERR_SUCCESS;
         const int ROBOT_REALTIME_PORT = 20004;
         const int ROBOT_CMD_PORT = 8080;
@@ -939,22 +939,21 @@ namespace fairino
                 }
             }
         }
-
         /**
-         * @brief  关节空间运动
-         * @param  [in] jopublic int_pos  目标关节位置,单位deg
-         * @param  [in] desc_pos   目标笛卡尔位姿
-         * @param  [in] tool  工具坐标号，范围[0~14]
-         * @param  [in] user  工件坐标号，范围[0~14]
-         * @param  [in] vel  速度百分比，范围[0~100]
-         * @param  [in] acc  加速度百分比，范围[0~100],暂不开放
-         * @param  [in] ovl  速度缩放因子，范围[0~100]
-         * @param  [in] epos  扩展轴位置，单位mm
-         * @param  [in] blendT [-1.0]-运动到位(阻塞)，[0~500.0]-平滑时间(非阻塞)，单位ms
-         * @param  [in] offset_flag  0-不偏移，1-基坐标系/工件坐标系下偏移，2-工具坐标系下偏移
-         * @param  [in] offset_pos  位姿偏移量
-         * @return  错误码
-         */
+        * @brief  关节空间运动
+        * @param  [in] jopublic int_pos  目标关节位置,单位deg
+        * @param  [in] desc_pos   目标笛卡尔位姿
+        * @param  [in] tool  工具坐标号，范围[0~14]
+        * @param  [in] user  工件坐标号，范围[0~14]
+        * @param  [in] vel  速度百分比，范围[0~100]
+        * @param  [in] acc  加速度百分比，范围[0~100],暂不开放
+        * @param  [in] ovl  速度缩放因子，范围[0~100]
+        * @param  [in] epos  扩展轴位置，单位mm
+        * @param  [in] blendT [-1.0]-运动到位(阻塞)，[0~500.0]-平滑时间(非阻塞)，单位ms
+        * @param  [in] offset_flag  0-不偏移，1-基坐标系/工件坐标系下偏移，2-工具坐标系下偏移
+        * @param  [in] offset_pos  位姿偏移量
+        * @return  错误码
+        */
         public int MoveJ(JointPos joint_pos, DescPose desc_pos, int tool, int user, float vel, float acc, float ovl, ExaxisPos epos, float blendT, byte offset_flag, DescPose offset_pos)
         {
             int rtn;
@@ -998,103 +997,14 @@ namespace fairino
 
             }
         }
+
+
         /**
-       * @brief  笛卡尔空间直线运动
-       * @param  [in] joint_pos  目标关节位置,单位deg
-       * @param  [in] desc_pos   目标笛卡尔位姿
-       * @param  [in] tool  工具坐标号，范围[0~14]
-       * @param  [in] user  工件坐标号，范围[0~14]
-       * @param  [in] vel  速度百分比，范围[0~100]
-       * @param  [in] acc  加速度百分比，范围[0~100],暂不开放
-       * @param  [in] ovl  速度缩放因子，范围[0~100]
-       * @param  [in] blendR [-1.0]-运动到位(阻塞)，[0~1000.0]-平滑半径(非阻塞)，单位mm
-       * @param  [in] epos  扩展轴位置，单位mm
-       * @param  [in] search  0-不焊丝寻位，1-焊丝寻位
-       * @param  [in] offset_flag  0-不偏移，1-基坐标系/工件坐标系下偏移，2-工具坐标系下偏移
-       * @param  [in] offset_pos  位姿偏移量
-       * @param  [in] overSpeedStrategy  超速处理策略，1-标准；2-超速时报错停止；3-自适应降速，默认为0
-       * @param  [in] speedPercent  允许降速阈值百分比[0-100]，默认10%
-       * @return  错误码
-       */
-        public int MoveL(JointPos joint_pos, DescPose desc_pos, int tool, int user, float vel, float acc, float ovl, float blendR, ExaxisPos epos, byte search, byte offset_flag, DescPose offset_pos, int overSpeedStrategy = 0, int speedPercent = 10)
-        {
-            if (IsSockComError())
-            {
-                return g_sock_com_err;
-            }
-            if (GetSafetyCode() != 0)
-            {
-
-                return GetSafetyCode();
-            }
-            try
-            {
-                int rtn = -1;
-                if (overSpeedStrategy > 1)
-                {
-                    rtn = proxy.JointOverSpeedProtectStart(overSpeedStrategy, speedPercent);
-                    if (log != null)
-                    {
-                        log.LogInfo($"JointOverSpeedProtectStart({overSpeedStrategy},{speedPercent}) : {rtn}");
-                    }
-                    if (rtn != 0)
-                    {
-                        return rtn;
-                    }
-                }
-
-                double[] joint = joint_pos.jPos;
-                double[] desc = new double[6] { desc_pos.tran.x, desc_pos.tran.y, desc_pos.tran.z, desc_pos.rpy.rx, desc_pos.rpy.ry, desc_pos.rpy.rz };
-                double[] exteraxis = epos.ePos;
-                double[] offect = new double[6] { offset_pos.tran.x, offset_pos.tran.y, offset_pos.tran.z, offset_pos.rpy.rx, offset_pos.rpy.ry, offset_pos.rpy.rz };
-                rtn = proxy.MoveL(joint, desc, tool, user, vel, acc, ovl, blendR, 0,exteraxis, search, offset_flag, offect);
-                if (log != null)
-                {
-                    log.LogInfo($"MoveL({joint[0]},{joint[1]},{joint[2]},{joint[3]},{joint[4]},{joint[5]},{desc[0]},{desc[1]},{desc[2]},{desc[3]},{desc[4]},{desc[5]},{tool},{user},{vel},{acc},{ovl},{blendR}" +
-                        $"{epos.ePos[0]},{epos.ePos[1]},{epos.ePos[2]},{epos.ePos[3]},{search},{offset_flag},{offect[0]},{offect[1]},{offect[2]},{offect[3]},{offect[4]},{offect[5]}) : {rtn}");
-                }
-
-                if (overSpeedStrategy > 1)
-                {
-                    rtn = proxy.JointOverSpeedProtectEnd();
-                    if (log != null)
-                    {
-                        log.LogInfo($"JointOverSpeedProtectEnd() : {rtn}");
-                    }
-                    if (rtn != 0)
-                    {
-                        return rtn;
-                    }
-                }
-                if ((robot_state_pkg.main_code != 0 || robot_state_pkg.sub_code != 0) && rtn == 0)
-                {
-                    rtn = 14;
-                }
-                return rtn;
-            }
-            catch
-            {
-                if (IsSockComError())
-                {
-                    if (log != null)
-                    {
-                        log.LogError($"RPC exception");
-                    }
-                    return g_sock_com_err;
-
-                }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
-            }
-        }
-        /**
-         * @brief  笛卡尔空间直线运动
+         * @brief  笛卡尔空间直线运动(重载函数1 增加blendMode)
          * @param  [in] joint_pos  目标关节位置,单位deg
          * @param  [in] desc_pos   目标笛卡尔位姿
-         * @param  [in] tool  工具坐标号，范围[0~14]
-         * @param  [in] user  工件坐标号，范围[0~14]
+         * @param  [in] tool  工具坐标号，范围[1~15]
+         * @param  [in] user  工件坐标号，范围[1~15]
          * @param  [in] vel  速度百分比，范围[0~100]
          * @param  [in] acc  加速度百分比，范围[0~100],暂不开放
          * @param  [in] ovl  速度缩放因子，范围[0~100]
@@ -1104,11 +1014,12 @@ namespace fairino
          * @param  [in] search  0-不焊丝寻位，1-焊丝寻位
          * @param  [in] offset_flag  0-不偏移，1-基坐标系/工件坐标系下偏移，2-工具坐标系下偏移
          * @param  [in] offset_pos  位姿偏移量
+         * @param  [in] velAccParamMode 速度加速度参数模式；0-百分比；1-物理速度(mm/s)加速度(mm/s2)
          * @param  [in] overSpeedStrategy  超速处理策略，1-标准；2-超速时报错停止；3-自适应降速，默认为0
          * @param  [in] speedPercent  允许降速阈值百分比[0-100]，默认10%
          * @return  错误码
          */
-        public int MoveL(JointPos joint_pos, DescPose desc_pos, int tool, int user, float vel, float acc, float ovl, float blendR, int blendMode, ExaxisPos epos, byte search, byte offset_flag, DescPose offset_pos, int overSpeedStrategy = 0, int speedPercent = 10)
+        public int MoveL(JointPos joint_pos, DescPose desc_pos, int tool, int user, float vel, float acc, float ovl, float blendR, int blendMode, ExaxisPos epos, int search, int offset_flag, DescPose offset_pos, int velAccParamMode, int overSpeedStrategy = 0, int speedPercent = 10)
         {
             if (IsSockComError())
             {
@@ -1116,12 +1027,14 @@ namespace fairino
             }
             if (GetSafetyCode() != 0)
             {
-
                 return GetSafetyCode();
             }
+
             try
             {
                 int rtn = -1;
+
+                // 超速保护开始
                 if (overSpeedStrategy > 1)
                 {
                     rtn = proxy.JointOverSpeedProtectStart(overSpeedStrategy, speedPercent);
@@ -1135,33 +1048,72 @@ namespace fairino
                     }
                 }
 
-                double[] joint = joint_pos.jPos;
-                double[] desc = new double[6] { desc_pos.tran.x, desc_pos.tran.y, desc_pos.tran.z, desc_pos.rpy.rx, desc_pos.rpy.ry, desc_pos.rpy.rz };
-                double[] exteraxis = epos.ePos;
-                double[] offect = new double[6] { offset_pos.tran.x, offset_pos.tran.y, offset_pos.tran.z, offset_pos.rpy.rx, offset_pos.rpy.ry, offset_pos.rpy.rz };
-                rtn = proxy.MoveL(joint, desc, tool, user, vel, acc, ovl, blendR, blendMode, exteraxis, search, offset_flag, offect);
+                // 构建与C++完全一致的参数数组
+                object[] moveLParams = new object[33];
+                moveLParams[0] = (double)joint_pos.jPos[0];  // 关键修改1：float->double
+                moveLParams[1] = (double)joint_pos.jPos[1];
+                moveLParams[2] = (double)joint_pos.jPos[2];
+                moveLParams[3] = (double)joint_pos.jPos[3];
+                moveLParams[4] = (double)joint_pos.jPos[4];
+                moveLParams[5] = (double)joint_pos.jPos[5];
+                moveLParams[6] = (double)desc_pos.tran.x;
+                moveLParams[7] = (double)desc_pos.tran.y;
+                moveLParams[8] = (double)desc_pos.tran.z;
+                moveLParams[9] = (double)desc_pos.rpy.rx;
+                moveLParams[10] = (double)desc_pos.rpy.ry;
+                moveLParams[11] = (double)desc_pos.rpy.rz;
+                moveLParams[12] = tool;
+                moveLParams[13] = user;
+                moveLParams[14] = (double)vel;    // 关键修改2：float->double
+                moveLParams[15] = (double)acc;
+                moveLParams[16] = (double)ovl;
+                moveLParams[17] = (double)blendR;
+                moveLParams[18] = blendMode;
+                moveLParams[19] = (double)epos.ePos[0];
+                moveLParams[20] = (double)epos.ePos[1];
+                moveLParams[21] = (double)epos.ePos[2];
+                moveLParams[22] = (double)epos.ePos[3];
+                moveLParams[23] = search;
+                moveLParams[24] = offset_flag;
+                moveLParams[25] = (double)offset_pos.tran.x;
+                moveLParams[26] = (double)offset_pos.tran.y;
+                moveLParams[27] = (double)offset_pos.tran.z;
+                moveLParams[28] = (double)offset_pos.rpy.rx;
+                moveLParams[29] = (double)offset_pos.rpy.ry;
+                moveLParams[30] = (double)offset_pos.rpy.rz;
+                moveLParams[31] = 100.0; // 固定值
+                moveLParams[32] = velAccParamMode;
+                object[] moveLParams1 =new object[1];
+                moveLParams1[0] = moveLParams;
+                // 调用RPC
+
+                rtn = proxy.MoveL(moveLParams);
+
                 if (log != null)
                 {
-                    log.LogInfo($"MoveL({joint[0]},{joint[1]},{joint[2]},{joint[3]},{joint[4]},{joint[5]},{desc[0]},{desc[1]},{desc[2]},{desc[3]},{desc[4]},{desc[5]},{tool},{user},{vel},{acc},{ovl},{blendR}" +
-                        $"{epos.ePos[0]},{epos.ePos[1]},{epos.ePos[2]},{epos.ePos[3]},{search},{offset_flag},{offect[0]},{offect[1]},{offect[2]},{offect[3]},{offect[4]},{offect[5]}) : {rtn}");
+                    log.LogInfo($"MoveL called with {moveLParams.Length} parameters. Return: {rtn}");
                 }
 
+                // 超速保护结束
                 if (overSpeedStrategy > 1)
                 {
-                    rtn = proxy.JointOverSpeedProtectEnd();
+                    int protectEndRtn = proxy.JointOverSpeedProtectEnd();
                     if (log != null)
                     {
-                        log.LogInfo($"JointOverSpeedProtectEnd() : {rtn}");
+                        log.LogInfo($"JointOverSpeedProtectEnd() : {protectEndRtn}");
                     }
-                    if (rtn != 0)
+                    if (protectEndRtn != 0)
                     {
-                        return rtn;
+                        return protectEndRtn;
                     }
                 }
+
+                // 检查机器人状态
                 if ((robot_state_pkg.main_code != 0 || robot_state_pkg.sub_code != 0) && rtn == 0)
                 {
                     rtn = 14;
                 }
+
                 return rtn;
             }
             catch
@@ -1170,10 +1122,9 @@ namespace fairino
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError("RPC exception occurred");
                     }
                     return g_sock_com_err;
-
                 }
                 else
                 {
@@ -1181,6 +1132,7 @@ namespace fairino
                 }
             }
         }
+
 
         /**
          * @brief  笛卡尔空间圆弧运动
@@ -1204,10 +1156,149 @@ namespace fairino
          * @param  [in] offset_pos_t  位姿偏移量	 
          * @param  [in] ovl  速度缩放因子，范围[0~100]	 
          * @param  [in] blendR [-1.0]-运动到位(阻塞)，[0~1000.0]-平滑半径(非阻塞)，单位mm	 
+         * @param  [in] velAccParamMode 速度加速度参数模式；0-百分比；1-物理速度(mm/s)加速度(mm/s2)
          * @return  错误码
          */
-        public int MoveC(JointPos joint_pos_p, DescPose desc_pos_p, int ptool, int puser, float pvel, float pacc, ExaxisPos epos_p, byte poffset_flag, DescPose offset_pos_p, JointPos joint_pos_t, DescPose desc_pos_t, int ttool, int tuser, float tvel, float tacc, ExaxisPos epos_t, byte toffset_flag, DescPose offset_pos_t, float ovl, float blendR)
+        public int MoveC(
+            JointPos joint_pos_p, DescPose desc_pos_p, int ptool, int puser, float pvel, float pacc,
+            ExaxisPos epos_p, int poffset_flag, DescPose offset_pos_p,
+            JointPos joint_pos_t, DescPose desc_pos_t, int ttool, int tuser, float tvel, float tacc,
+            ExaxisPos epos_t, int toffset_flag, DescPose offset_pos_t,
+            float ovl, float blendR, int velAccParamMode)
         {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            if (GetSafetyCode() != 0)
+            {
+                return GetSafetyCode();
+            }
+
+            try
+            {
+                // 构建与C++完全一致的参数数组（共58个参数）
+                object[] moveCParams = new object[58];
+
+                // 路径点参数 (0-26)
+                moveCParams[0] = joint_pos_p.jPos[0];
+                moveCParams[1] = joint_pos_p.jPos[1];
+                moveCParams[2] = joint_pos_p.jPos[2];
+                moveCParams[3] = joint_pos_p.jPos[3];
+                moveCParams[4] = joint_pos_p.jPos[4];
+                moveCParams[5] = joint_pos_p.jPos[5];
+                moveCParams[6] = desc_pos_p.tran.x;
+                moveCParams[7] = desc_pos_p.tran.y;
+                moveCParams[8] = desc_pos_p.tran.z;
+                moveCParams[9] = desc_pos_p.rpy.rx;
+                moveCParams[10] = desc_pos_p.rpy.ry;
+                moveCParams[11] = desc_pos_p.rpy.rz;
+                moveCParams[12] = ptool;
+                moveCParams[13] = puser;
+                moveCParams[14] = (double)pvel;
+                moveCParams[15] = (double)pacc;
+                moveCParams[16] = epos_p.ePos[0];
+                moveCParams[17] = epos_p.ePos[1];
+                moveCParams[18] = epos_p.ePos[2];
+                moveCParams[19] = epos_p.ePos[3];
+                moveCParams[20] = poffset_flag;
+                moveCParams[21] = offset_pos_p.tran.x;
+                moveCParams[22] = offset_pos_p.tran.y;
+                moveCParams[23] = offset_pos_p.tran.z;
+                moveCParams[24] = offset_pos_p.rpy.rx;
+                moveCParams[25] = offset_pos_p.rpy.ry;
+                moveCParams[26] = offset_pos_p.rpy.rz;
+
+                // 目标点参数 (27-53)
+                moveCParams[27] = joint_pos_t.jPos[0];
+                moveCParams[28] = joint_pos_t.jPos[1];
+                moveCParams[29] = joint_pos_t.jPos[2];
+                moveCParams[30] = joint_pos_t.jPos[3];
+                moveCParams[31] = joint_pos_t.jPos[4];
+                moveCParams[32] = joint_pos_t.jPos[5];
+                moveCParams[33] = desc_pos_t.tran.x;
+                moveCParams[34] = desc_pos_t.tran.y;
+                moveCParams[35] = desc_pos_t.tran.z;
+                moveCParams[36] = desc_pos_t.rpy.rx;
+                moveCParams[37] = desc_pos_t.rpy.ry;
+                moveCParams[38] = desc_pos_t.rpy.rz;
+                moveCParams[39] = ttool;
+                moveCParams[40] = tuser;
+                moveCParams[41] = (double)tvel;
+                moveCParams[42] = (double)tacc;
+                moveCParams[43] = epos_t.ePos[0];
+                moveCParams[44] = epos_t.ePos[1];
+                moveCParams[45] = epos_t.ePos[2];
+                moveCParams[46] = epos_t.ePos[3];
+                moveCParams[47] = toffset_flag;
+                moveCParams[48] = offset_pos_t.tran.x;
+                moveCParams[49] = offset_pos_t.tran.y;
+                moveCParams[50] = offset_pos_t.tran.z;
+                moveCParams[51] = offset_pos_t.rpy.rx;
+                moveCParams[52] = offset_pos_t.rpy.ry;
+                moveCParams[53] = offset_pos_t.rpy.rz;
+
+                // 通用参数 (54-57)
+                moveCParams[54] = (double)ovl;
+                moveCParams[55] = (double)blendR;
+                moveCParams[56] = 100.0;  // 固定值，与C++版本一致
+                moveCParams[57] = velAccParamMode;
+                object[] moveCParams1 = new object[1];
+                moveCParams1[0] = moveCParams;
+                // 调用RPC
+
+
+
+
+         
+                int rtn = proxy.MoveC(moveCParams);
+  
+                if (log != null)
+                {
+                    log.LogInfo($"MoveC called with {moveCParams.Length} parameters. Return: {rtn}");
+                }
+
+                return rtn;
+            }
+            catch
+            {
+                if (IsSockComError())
+                {
+                    if (log != null)
+                    {
+                        log.LogError("RPC exception occurred");
+                    }
+                    return g_sock_com_err;
+                }
+                else
+                {
+                    return (int)RobotError.ERR_SUCCESS;
+                }
+            }
+        }
+        /**
+     * @brief  笛卡尔空间直线运动(重载函数2 不需要输入关节位置)
+     * @param  [in] desc_pos   目标笛卡尔位姿
+     * @param  [in] tool  工具坐标号，范围[1~15]
+     * @param  [in] user  工件坐标号，范围[1~15]
+     * @param  [in] vel  速度百分比，范围[0~100]
+     * @param  [in] acc  加速度百分比，范围[0~100],暂不开放
+     * @param  [in] ovl  速度缩放因子，范围[0~100]
+     * @param  [in] blendR [-1.0]-运动到位(阻塞)，[0~1000.0]-平滑半径(非阻塞)，单位mm
+     * @param  [in] blendMode 过渡方式；0-内切过渡；1-角点过渡
+     * @param  [in] epos  扩展轴位置，单位mm
+     * @param  [in] search  0-不焊丝寻位，1-焊丝寻位
+     * @param  [in] offset_flag  0-不偏移，1-基坐标系/工件坐标系下偏移，2-工具坐标系下偏移
+     * @param  [in] offset_pos  位姿偏移量
+     * @param  [in] config 逆解关节空间配置，[-1]-参考当前关节位置解算，[0~7]-依据特定关节空间配置求解
+     * @param  [in] velAccParamMode 速度加速度参数模式；0-百分比；1-物理速度(mm/s)加速度(mm/s2)
+     * @param  [in] overSpeedStrategy  超速处理策略，1-标准；2-超速时报错停止；3-自适应降速，默认为0
+     * @param  [in] speedPercent  允许降速阈值百分比[0-100]，默认10%
+     * @return  错误码
+     */
+        public int MoveL(JointPos joint_pos, DescPose desc_pos, int tool, int user, float vel, float acc, float ovl, float blendR, ExaxisPos epos, byte search, byte offset_flag, DescPose offset_pos, int velAccParamMode, int overSpeedStrategy = 0, int speedPercent = 10)
+        {
+
             if (IsSockComError())
             {
                 return g_sock_com_err;
@@ -1217,27 +1308,157 @@ namespace fairino
 
                 return GetSafetyCode();
             }
+
+            int errcode = MoveL(joint_pos, desc_pos, tool, user, vel, acc, ovl, blendR, 0, epos, search, offset_flag, offset_pos, velAccParamMode, overSpeedStrategy, speedPercent);
+            return errcode;
+
+        }
+        /**
+        * @brief  笛卡尔空间直线运动
+        * @param  [in] desc_pos   目标笛卡尔位姿
+        * @param  [in] tool  工具坐标号，范围[1~15]
+        * @param  [in] user  工件坐标号，范围[1~15]
+        * @param  [in] vel  速度百分比，范围[0~100]
+        * @param  [in] acc  加速度百分比，范围[0~100],暂不开放
+        * @param  [in] ovl  速度缩放因子，范围[0~100]
+        * @param  [in] blendR [-1.0]-运动到位(阻塞)，[0~1000.0]-平滑半径(非阻塞)，单位mm
+        * @param  [in] blendMode 过渡方式；0-内切过渡；1-角点过渡
+        * @param  [in] epos  扩展轴位置，单位mm
+        * @param  [in] search  0-不焊丝寻位，1-焊丝寻位
+        * @param  [in] offset_flag  0-不偏移，1-基坐标系/工件坐标系下偏移，2-工具坐标系下偏移
+        * @param  [in] offset_pos  位姿偏移量
+        * @param  [in] config 逆解关节空间配置，[-1]-参考当前关节位置解算，[0~7]-依据特定关节空间配置求解
+        * @param  [in] overSpeedStrategy  超速处理策略，1-标准；2-超速时报错停止；3-自适应降速，默认为0
+        * @param  [in] speedPercent  允许降速阈值百分比[0-100]，默认10%
+        * @return  错误码
+        */
+        public int MoveL(JointPos joint_pos, DescPose desc_pos, int tool, int user, float vel, float acc, float ovl, float blendR, float blendMode, ExaxisPos epos, byte search, byte offset_flag, DescPose offset_pos, int overSpeedStrategy = 0, int speedPercent = 10)
+        {
+
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            if (GetSafetyCode() != 0)
+            {
+
+                return GetSafetyCode();
+            }
+
+            int errcode = MoveL(joint_pos, desc_pos, tool, user, vel, acc, ovl, blendR, 0, epos, search, offset_flag, offset_pos, 0, overSpeedStrategy, speedPercent);
+            return errcode;
+
+        }
+        /**
+ *@brief  笛卡尔空间整圆运动
+ *@param  [in] joint_pos_p  路径点1关节位置,单位deg
+ *@param  [in] desc_pos_p   路径点1笛卡尔位姿
+ *@param  [in] ptool  工具坐标号，范围[1~15]
+ *@param  [in] puser  工件坐标号，范围[1~15]
+ *@param  [in] pvel  速度百分比，范围[0~100]
+ *@param  [in] pacc  加速度百分比，范围[0~100],暂不开放
+ *@param  [in] epos_p  扩展轴位置，单位mm
+ *@param  [in] joint_pos_t  路径点2关节位置,单位deg
+ *@param  [in] desc_pos_t   路径点2笛卡尔位姿
+ *@param  [in] ttool  工具坐标号，范围[1~15]
+ *@param  [in] tuser  工件坐标号，范围[1~15]
+ *@param  [in] tvel  速度百分比，范围[0~100]
+ *@param  [in] tacc  加速度百分比，范围[0~100],暂不开放
+ *@param  [in] epos_t  扩展轴位置，单位mm
+ *@param  [in] ovl  速度缩放因子，范围[0~100]
+ *@param  [in] offset_flag  0-不偏移，1-基坐标系/工件坐标系下偏移，2-工具坐标系下偏移
+ *@param  [in] offset_pos  位姿偏移量
+ *@param  [in] oacc 加速度百分比
+ *@param  [in] blendR -1：阻塞；0~1000：平滑半径
+ *@param  [in] velAccParamMode 速度加速度参数模式；0-百分比；1-物理速度(mm/s)加速度(mm/s2)
+ *@return  错误码
+ */
+        public int Circle(
+      JointPos joint_pos_p, DescPose desc_pos_p, int ptool, int puser, float pvel, float pacc,
+      ExaxisPos epos_p, JointPos joint_pos_t, DescPose desc_pos_t, int ttool, int tuser,
+      float tvel, float tacc, ExaxisPos epos_t, float ovl, int offset_flag,
+      DescPose offset_pos, double oacc, double blendR, int velAccParamMode)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            if (GetSafetyCode() != 0)
+            {
+                return GetSafetyCode();
+            }
+
             try
             {
-                double[] jointP = joint_pos_p.jPos;
-                double[] descP = new double[6] { desc_pos_p.tran.x, desc_pos_p.tran.y, desc_pos_p.tran.z, desc_pos_p.rpy.rx, desc_pos_p.rpy.ry, desc_pos_p.rpy.rz };
-                double[] exteraxisP = epos_p.ePos;
-                double[] offectP = new double[6] { offset_pos_p.tran.x, offset_pos_p.tran.y, offset_pos_p.tran.z, offset_pos_p.rpy.rx, offset_pos_p.rpy.ry, offset_pos_p.rpy.rz };
-                double[] controlP = new double[4] { ptool, puser, pvel, pacc };
+                // 构建与C++完全一致的参数数组（共51个参数）
+                object[] circleParams = new object[51];
 
-                double[] jointT = joint_pos_t.jPos;
-                double[] descT = new double[6] { desc_pos_t.tran.x, desc_pos_t.tran.y, desc_pos_t.tran.z, desc_pos_t.rpy.rx, desc_pos_t.rpy.ry, desc_pos_t.rpy.rz };
-                double[] exteraxisT = epos_t.ePos;
-                double[] offectT = new double[6] { offset_pos_t.tran.x, offset_pos_t.tran.y, offset_pos_t.tran.z, offset_pos_t.rpy.rx, offset_pos_t.rpy.ry, offset_pos_t.rpy.rz };
-                double[] controlT = new double[4] { ttool, tuser, tvel, tacc };
-                int rtn = proxy.MoveC(jointP, descP, controlP, exteraxisP, poffset_flag, offectP, jointT, descT, controlT, exteraxisT, toffset_flag, offectT, ovl, blendR);
+                // 路径点1参数 (0-19)
+                circleParams[0] = joint_pos_p.jPos[0];
+                circleParams[1] = joint_pos_p.jPos[1];
+                circleParams[2] = joint_pos_p.jPos[2];
+                circleParams[3] = joint_pos_p.jPos[3];
+                circleParams[4] = joint_pos_p.jPos[4];
+                circleParams[5] = joint_pos_p.jPos[5];
+                circleParams[6] = desc_pos_p.tran.x;
+                circleParams[7] = desc_pos_p.tran.y;
+                circleParams[8] = desc_pos_p.tran.z;
+                circleParams[9] = desc_pos_p.rpy.rx;
+                circleParams[10] = desc_pos_p.rpy.ry;
+                circleParams[11] = desc_pos_p.rpy.rz;
+                circleParams[12] = ptool;
+                circleParams[13] = puser;
+                circleParams[14] = (double)pvel;
+                circleParams[15] = (double)pacc;
+                circleParams[16] = epos_p.ePos[0];
+                circleParams[17] = epos_p.ePos[1];
+                circleParams[18] = epos_p.ePos[2];
+                circleParams[19] = epos_p.ePos[3];
+
+                // 路径点2参数 (20-39)
+                circleParams[20] = joint_pos_t.jPos[0];
+                circleParams[21] = joint_pos_t.jPos[1];
+                circleParams[22] = joint_pos_t.jPos[2];
+                circleParams[23] = joint_pos_t.jPos[3];
+                circleParams[24] = joint_pos_t.jPos[4];
+                circleParams[25] = joint_pos_t.jPos[5];
+                circleParams[26] = desc_pos_t.tran.x;
+                circleParams[27] = desc_pos_t.tran.y;
+                circleParams[28] = desc_pos_t.tran.z;
+                circleParams[29] = desc_pos_t.rpy.rx;
+                circleParams[30] = desc_pos_t.rpy.ry;
+                circleParams[31] = desc_pos_t.rpy.rz;
+                circleParams[32] = ttool;
+                circleParams[33] = tuser;
+                circleParams[34] = (double)tvel;
+                circleParams[35] = (double)tacc;
+                circleParams[36] = epos_t.ePos[0];
+                circleParams[37] = epos_t.ePos[1];
+                circleParams[38] = epos_t.ePos[2];
+                circleParams[39] = epos_t.ePos[3];
+
+                // 通用参数 (40-50)
+                circleParams[40] = (double)ovl;
+                circleParams[41] = (int)offset_flag;
+                circleParams[42] = offset_pos.tran.x;
+                circleParams[43] = offset_pos.tran.y;
+                circleParams[44] = offset_pos.tran.z;
+                circleParams[45] = offset_pos.rpy.rx;
+                circleParams[46] = offset_pos.rpy.ry;
+                circleParams[47] = offset_pos.rpy.rz;
+                circleParams[48] = oacc;
+                circleParams[49] = blendR;
+                circleParams[50] = velAccParamMode;
+                object[] circleParams1 = new object[1];
+                circleParams1[0] = circleParams;
+                // 调用RPC
+                int rtn = proxy.Circle(circleParams);
+
                 if (log != null)
                 {
-                    log.LogInfo($"MoveC({jointP[0]},{jointP[1]},{jointP[2]},{jointP[3]},{jointP[4]},{jointP[5]},{descP[0]},{descP[1]},{descP[2]},{descP[3]},{descP[4]},{descP[5]},{ptool},{puser},{pvel},{pacc}," +
-                        $"{epos_p.ePos[0]},{epos_p.ePos[1]},{epos_p.ePos[2]},{epos_p.ePos[3]},{poffset_flag},{offectP[0]},{offectP[1]},{offectP[2]},{offectP[3]},{offectP[4]},{offectP[5]},) " +
-                        $"{jointT[0]},{jointT[1]},{jointT[2]},{jointT[3]},{jointT[4]},{jointT[5]},{descT[0]},{descT[1]},{descT[2]},{descT[3]},{descT[4]},{descT[5]},{ttool},{tuser},{tvel},{tacc}," +
-                        $"{epos_t.ePos[0]},{epos_t.ePos[1]},{epos_t.ePos[2]},{epos_t.ePos[3]},{toffset_flag},{offectT[0]},{offectT[1]},{offectT[2]},{offectT[3]},{offectT[4]},{offectT[5]},{ovl},{blendR} : {rtn}");
+                    log.LogInfo($"Circle called with {circleParams.Length} parameters. Return: {rtn}");
                 }
+
                 return rtn;
             }
             catch
@@ -1246,7 +1467,7 @@ namespace fairino
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError("RPC exception occurred");
                     }
                     return g_sock_com_err;
                 }
@@ -1257,91 +1478,21 @@ namespace fairino
             }
         }
 
-        ///**
-        // * @brief  笛卡尔空间整圆运动
-        // * @param  [in] joint_pos_p  路径点1关节位置,单位deg
-        // * @param  [in] desc_pos_p   路径点1笛卡尔位姿
-        // * @param  [in] ptool  工具坐标号，范围[0~14]
-        // * @param  [in] puser  工件坐标号，范围[0~14]
-        // * @param  [in] pvel  速度百分比，范围[0~100]
-        // * @param  [in] pacc  加速度百分比，范围[0~100],暂不开放
-        // * @param  [in] epos_p  扩展轴位置，单位mm
-        // * @param  [in] joint_pos_t  路径点2关节位置,单位deg
-        // * @param  [in] desc_pos_t   路径点2笛卡尔位姿
-        // * @param  [in] ttool  工具坐标号，范围[0~14]
-        // * @param  [in] tuser  工件坐标号，范围[0~14]
-        // * @param  [in] tvel  速度百分比，范围[0~100]
-        // * @param  [in] tacc  加速度百分比，范围[0~100],暂不开放
-        // * @param  [in] epos_t  扩展轴位置，单位mm
-        // * @param  [in] ovl  速度缩放因子，范围[0~100]	
-        // * @param  [in] offset_flag  0-不偏移，1-基坐标系/工件坐标系下偏移，2-工具坐标系下偏移
-        // * @param  [in] offset_pos  位姿偏移量	 	 
-        // * @return  错误码
-        // */
-        //public int Circle(JointPos joint_pos_p, DescPose desc_pos_p, int ptool, int puser, float pvel, float pacc, ExaxisPos epos_p, JointPos joint_pos_t, DescPose desc_pos_t, int ttool, int tuser, float tvel, float tacc, ExaxisPos epos_t, float ovl, byte offset_flag, DescPose offset_pos)
-        //{
-        //    if (IsSockComError())
-        //    {
-        //        return g_sock_com_err;
-        //    }
-        //    if (GetSafetyCode() != 0)
-        //    {
-
-        //        return GetSafetyCode();
-        //    }
-        //    try
-        //    {
-        //        double[] jointP = joint_pos_p.jPos;
-        //        double[] descP = new double[6] { desc_pos_p.tran.x, desc_pos_p.tran.y, desc_pos_p.tran.z, desc_pos_p.rpy.rx, desc_pos_p.rpy.ry, desc_pos_p.rpy.rz };
-        //        double[] exteraxisP = epos_p.ePos;
-        //        double[] offect = new double[6] { offset_pos.tran.x, offset_pos.tran.y, offset_pos.tran.z, offset_pos.rpy.rx, offset_pos.rpy.ry, offset_pos.rpy.rz };
-        //        double[] controlP = new double[4] { ptool, puser, pvel, pacc };
-        //        double[] jointT = joint_pos_t.jPos;
-        //        double[] descT = new double[6] { desc_pos_t.tran.x, desc_pos_t.tran.y, desc_pos_t.tran.z, desc_pos_t.rpy.rx, desc_pos_t.rpy.ry, desc_pos_t.rpy.rz };
-        //        double[] exteraxisT = epos_t.ePos;
-        //        double[] controlT = new double[4] { ttool, tuser, tvel, tacc };
-        //        int rtn = proxy.Circle(jointP, descP, controlP, exteraxisP, jointT, descT, controlT, exteraxisT, ovl, offset_flag, offect);
-        //        if (log != null)
-        //        {
-        //            log.LogInfo($"Circle({jointP[0]},{jointP[1]},{jointP[2]},{jointP[3]},{jointP[4]},{jointP[5]},{descP[0]},{descP[1]},{descP[2]},{descP[3]},{descP[4]},{descP[5]},{ptool},{puser},{pvel},{pacc}," +
-        //                $"{epos_p.ePos[0]},{epos_p.ePos[1]},{epos_p.ePos[2]},{epos_p.ePos[3]},) " +
-        //                $"{jointT[0]},{jointT[1]},{jointT[2]},{jointT[3]},{jointT[4]},{jointT[5]},{descT[0]},{descT[1]},{descT[2]},{descT[3]},{descT[4]},{descT[5]},{ttool},{tuser},{tvel},{tacc}," +
-        //                $"{epos_t.ePos[0]},{epos_t.ePos[1]},{epos_t.ePos[2]},{epos_t.ePos[3]},{ovl},{offset_flag},{offect[0]},{offect[1]},{offect[2]},{offect[3]},{offect[4]},{offect[5]} : {rtn}");
-        //        }
-        //        return rtn;
-        //    }
-        //    catch
-        //    {
-        //        if (IsSockComError())
-        //        {
-        //            if (log != null)
-        //            {
-        //                log.LogError($"RPC exception");
-        //            }
-        //            return g_sock_com_err;
-        //        }
-        //        else
-        //        {
-        //            return (int)RobotError.ERR_SUCCESS;
-        //        }
-        //    }
-        //}
-
         /**
-         * @brief  笛卡尔空间螺旋线运动
-         * @param  [in] joint_pos  目标关节位置,单位deg
-         * @param  [in] desc_pos   目标笛卡尔位姿
-         * @param  [in] tool  工具坐标号，范围[0~14]
-         * @param  [in] user  工件坐标号，范围[0~14]
-         * @param  [in] vel  速度百分比，范围[0~100]
-         * @param  [in] acc  加速度百分比，范围[0~100],暂不开放
-         * @param  [in] epos  扩展轴位置，单位mm
-         * @param  [in] ovl  速度缩放因子，范围[0~100]	 
-         * @param  [in] offset_flag  0-不偏移，1-基坐标系/工件坐标系下偏移，2-工具坐标系下偏移
-         * @param  [in] offset_pos  位姿偏移量
-         * @param  [in] spiral_param  螺旋参数
-         * @return  错误码
-         */
+ * @brief  笛卡尔空间螺旋线运动
+ * @param  [in] joint_pos  目标关节位置,单位deg
+ * @param  [in] desc_pos   目标笛卡尔位姿
+ * @param  [in] tool  工具坐标号，范围[0~14]
+ * @param  [in] user  工件坐标号，范围[0~14]
+ * @param  [in] vel  速度百分比，范围[0~100]
+ * @param  [in] acc  加速度百分比，范围[0~100],暂不开放
+ * @param  [in] epos  扩展轴位置，单位mm
+ * @param  [in] ovl  速度缩放因子，范围[0~100]	 
+ * @param  [in] offset_flag  0-不偏移，1-基坐标系/工件坐标系下偏移，2-工具坐标系下偏移
+ * @param  [in] offset_pos  位姿偏移量
+ * @param  [in] spiral_param  螺旋参数
+ * @return  错误码
+ */
         public int NewSpiral(JointPos joint_pos, DescPose desc_pos, int tool, int user, float vel, float acc, ExaxisPos epos, float ovl, byte offset_flag, DescPose offset_pos, SpiralParam spiral_param)
         {
             if (IsSockComError())
@@ -1386,8 +1537,57 @@ namespace fairino
                 }
             }
         }
+       
 
+        /**
+         * @brief  关节空间样条运动
+         * @param  [in] joint_pos  目标关节位置,单位deg
+         * @param  [in] desc_pos   目标笛卡尔位姿
+         * @param  [in] tool  工具坐标号，范围[0~14]
+         * @param  [in] user  工件坐标号，范围[0~14]
+         * @param  [in] vel  速度百分比，范围[0~100]
+         * @param  [in] acc  加速度百分比，范围[0~100],暂不开放
+         * @param  [in] ovl  速度缩放因子，范围[0~100]	
+         * @return  错误码
+         */
+        public int SplinePTP(JointPos joint_pos, DescPose desc_pos, int tool, int user, float vel, float acc, float ovl)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            if (GetSafetyCode() != 0)
+            {
 
+                return GetSafetyCode();
+            }
+            try
+            {
+                double[] jointPos = joint_pos.jPos;
+                double[] descPos = new double[6] { desc_pos.tran.x, desc_pos.tran.y, desc_pos.tran.z, desc_pos.rpy.rx, desc_pos.rpy.ry, desc_pos.rpy.rz };
+                int rtn = proxy.SplinePTP(jointPos, descPos, tool, user, vel, acc, ovl);
+                if (log != null)
+                {
+                    log.LogInfo($"SplinePTP({jointPos[0]},{jointPos[1]},{jointPos[2]},{jointPos[3]},{jointPos[4]},{jointPos[5]},{descPos[0]},{descPos[1]},{descPos[2]},{descPos[3]},{descPos[4]},{descPos[5]},{tool},{user},{vel},{acc},{ovl} : {rtn}");
+                }
+                return rtn;
+            }
+            catch
+            {
+                if (IsSockComError())
+                {
+                    if (log != null)
+                    {
+                        log.LogError($"RPC exception");
+                    }
+                    return g_sock_com_err;
+                }
+                else
+                {
+                    return (int)RobotError.ERR_SUCCESS;
+                }
+            }
+        }
         /**
          * @brief 伺服运动开始，配合ServoJ、ServoCart指令使用
          * @return  错误码
@@ -1658,18 +1858,21 @@ namespace fairino
             }
         }
 
+       
         /**
-         * @brief  关节空间样条运动
-         * @param  [in] joint_pos  目标关节位置,单位deg
-         * @param  [in] desc_pos   目标笛卡尔位姿
-         * @param  [in] tool  工具坐标号，范围[0~14]
-         * @param  [in] user  工件坐标号，范围[0~14]
-         * @param  [in] vel  速度百分比，范围[0~100]
-         * @param  [in] acc  加速度百分比，范围[0~100],暂不开放
-         * @param  [in] ovl  速度缩放因子，范围[0~100]	
-         * @return  错误码
-         */
-        public int SplinePTP(JointPos joint_pos, DescPose desc_pos, int tool, int user, float vel, float acc, float ovl)
+        * @brief 新样条指令点
+        * @param  [in] joint_pos  目标关节位置,单位deg
+        * @param  [in] desc_pos   目标笛卡尔位姿
+        * @param  [in] tool  工具坐标号，范围[0~14]
+        * @param  [in] user  工件坐标号，范围[0~14]
+        * @param  [in] vel  速度百分比，范围[0~100]
+        * @param  [in] acc  加速度百分比，范围[0~100],暂不开放
+        * @param  [in] ovl  速度缩放因子，范围[0~100]
+        * @param  [in] blendR [-1.0]-运动到位(阻塞)，[0~1000.0]-平滑半径(非阻塞)，单位mm
+        * @param  [in] lastFlag 是否为最后一个点，0-否，1-是
+        * @return  错误码
+        */
+        public int NewSplinePoint(JointPos joint_pos, DescPose desc_pos, int tool, int user, float vel, float acc, float ovl, float blendR, int lastFlag)
         {
             if (IsSockComError())
             {
@@ -1684,10 +1887,11 @@ namespace fairino
             {
                 double[] jointPos = joint_pos.jPos;
                 double[] descPos = new double[6] { desc_pos.tran.x, desc_pos.tran.y, desc_pos.tran.z, desc_pos.rpy.rx, desc_pos.rpy.ry, desc_pos.rpy.rz };
-                int rtn = proxy.SplinePTP(jointPos, descPos, tool, user, vel, acc, ovl);
+                int rtn = proxy.NewSplinePoint(jointPos, descPos, tool, user, vel, acc, ovl, blendR, lastFlag);
                 if (log != null)
                 {
-                    log.LogInfo($"SplinePTP({jointPos[0]},{jointPos[1]},{jointPos[2]},{jointPos[3]},{jointPos[4]},{jointPos[5]},{descPos[0]},{descPos[1]},{descPos[2]},{descPos[3]},{descPos[4]},{descPos[5]},{tool},{user},{vel},{acc},{ovl} : {rtn}");
+                    log.LogInfo($"NewSplinePoint({jointPos[0]},{jointPos[1]},{jointPos[2]},{jointPos[3]},{jointPos[4]},{jointPos[5]},{descPos[0]},{descPos[1]},{descPos[2]},{descPos[3]},{descPos[4]},{descPos[5]}," +
+                        $"{tool},{user},{vel},{acc},{ovl},{blendR},{lastFlag} : {rtn}");
                 }
                 return rtn;
             }
@@ -1707,7 +1911,6 @@ namespace fairino
                 }
             }
         }
-
         /**
          * @brief  样条运动结束
          * @return  错误码
@@ -1787,20 +1990,23 @@ namespace fairino
             }
         }
 
+        
         /**
-         * @brief 新样条指令点
-         * @param  [in] joint_pos  目标关节位置,单位deg
-         * @param  [in] desc_pos   目标笛卡尔位姿
-         * @param  [in] tool  工具坐标号，范围[0~14]
-         * @param  [in] user  工件坐标号，范围[0~14]
-         * @param  [in] vel  速度百分比，范围[0~100]
-         * @param  [in] acc  加速度百分比，范围[0~100],暂不开放
-         * @param  [in] ovl  速度缩放因子，范围[0~100]
-         * @param  [in] blendR [-1.0]-运动到位(阻塞)，[0~1000.0]-平滑半径(非阻塞)，单位mm
-         * @param  [in] lastFlag 是否为最后一个点，0-否，1-是
-         * @return  错误码
-         */
-        public int NewSplinePoint(JointPos joint_pos, DescPose desc_pos, int tool, int user, float vel, float acc, float ovl, float blendR, int lastFlag)
+        * @brief  UDP扩展轴与机器人关节运动同步运动
+        * @param  [in] jopublic int_pos  目标关节位置,单位deg
+        * @param  [in] desc_pos   目标笛卡尔位姿
+        * @param  [in] tool  工具坐标号，范围[0~14]
+        * @param  [in] user  工件坐标号，范围[0~14]
+        * @param  [in] vel  速度百分比，范围[0~100]
+        * @param  [in] acc  加速度百分比，范围[0~100],暂不开放
+        * @param  [in] ovl  速度缩放因子，范围[0~100]
+        * @param  [in] epos  扩展轴位置，单位mm
+        * @param  [in] blendT [-1.0]-运动到位(阻塞)，[0~500.0]-平滑时间(非阻塞)，单位ms
+        * @param  [in] offset_flag  0-不偏移，1-基坐标系/工件坐标系下偏移，2-工具坐标系下偏移
+        * @param  [in] offset_pos  位姿偏移量
+        * @return  错误码
+        */
+        public int ExtAxisSyncMoveJ(JointPos joint_pos, DescPose desc_pos, int tool, int user, float vel, float acc, float ovl, ExaxisPos epos, float blendT, byte offset_flag, DescPose offset_pos)
         {
             if (IsSockComError())
             {
@@ -1813,13 +2019,25 @@ namespace fairino
             }
             try
             {
-                double[] jointPos = joint_pos.jPos;
-                double[] descPos = new double[6] { desc_pos.tran.x, desc_pos.tran.y, desc_pos.tran.z, desc_pos.rpy.rx, desc_pos.rpy.ry, desc_pos.rpy.rz };
-                int rtn = proxy.NewSplinePoint(jointPos, descPos, tool, user, vel, acc, ovl, blendR, lastFlag);
+                double[] joint = joint_pos.jPos;
+                double[] desc = new double[6] { desc_pos.tran.x, desc_pos.tran.y, desc_pos.tran.z, desc_pos.rpy.rx, desc_pos.rpy.ry, desc_pos.rpy.rz };
+                double[] offect = new double[6] { offset_pos.tran.x, offset_pos.tran.y, offset_pos.tran.z, offset_pos.rpy.rx, offset_pos.rpy.ry, offset_pos.rpy.rz };
+                int rtn = 0;
+                rtn = proxy.ExtAxisMoveJ(1, epos.ePos[0], epos.ePos[1], epos.ePos[2], epos.ePos[3], ovl, blendT);
+                if (rtn != 0)
+                {
+                    if (log != null)
+                    {
+                        log.LogInfo($"ExtAxisSyncMoveJ({joint[0]},{joint[1]},{joint[2]},{joint[3]},{joint[4]},{joint[5]},{desc[0]},{desc[1]},{desc[2]},{desc[3]},{desc[4]},{desc[5]},{tool},{user},{vel},{acc},{ovl}," +
+                            $"{epos.ePos[0]},{epos.ePos[1]},{epos.ePos[2]},{epos.ePos[3]},{blendT},{offset_flag},{offect[0]},{offect[1]},{offect[2]},{offect[3]},{offect[4]},{offect[5]}) : {rtn}");
+                    }
+                    return rtn;
+                }
+                rtn = proxy.MoveJ(joint, desc, tool, user, vel, acc, ovl, epos.ePos, blendT, offset_flag, offect);
                 if (log != null)
                 {
-                    log.LogInfo($"NewSplinePoint({jointPos[0]},{jointPos[1]},{jointPos[2]},{jointPos[3]},{jointPos[4]},{jointPos[5]},{descPos[0]},{descPos[1]},{descPos[2]},{descPos[3]},{descPos[4]},{descPos[5]}," +
-                        $"{tool},{user},{vel},{acc},{ovl},{blendR},{lastFlag} : {rtn}");
+                    log.LogInfo($"ExtAxisSyncMoveJ({joint[0]},{joint[1]},{joint[2]},{joint[3]},{joint[4]},{joint[5]},{desc[0]},{desc[1]},{desc[2]},{desc[3]},{desc[4]},{desc[5]},{tool},{user},{vel},{acc},{ovl}," +
+                        $"{epos.ePos[0]},{epos.ePos[1]},{epos.ePos[2]},{epos.ePos[3]},{blendT},{offset_flag},{offect[0]},{offect[1]},{offect[2]},{offect[3]},{offect[4]},{offect[5]}) : {rtn}");
                 }
                 return rtn;
             }
@@ -1832,6 +2050,7 @@ namespace fairino
                         log.LogError($"RPC exception");
                     }
                     return g_sock_com_err;
+
                 }
                 else
                 {
@@ -1839,7 +2058,6 @@ namespace fairino
                 }
             }
         }
-
         /**
          * @brief 新样条运动结束
          * @return  错误码
@@ -1886,30 +2104,20 @@ namespace fairino
             {
                 return g_sock_com_err;
             }
-            try
+
+            while (is_sendcmd == true) //说明当前正在处理上一条指令
             {
-                int rtn = proxy.StopMotion();
-                if (log != null)
-                {
-                    log.LogInfo($"StopMotion() : {rtn}");
-                }
-                return rtn;
+                Thread.Sleep(10);
             }
-            catch
+
+            g_sendbuf = $"/f/bIII44III102III4IIISTOPIII/b/f";
+            is_sendcmd = true;
+            if (log != null)
             {
-                if (IsSockComError())
-                {
-                    if (log != null)
-                    {
-                        log.LogError($"RPC exception");
-                    }
-                    return g_sock_com_err;
-                }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                log.LogInfo($"StopMotion() : {g_sock_com_err}");
             }
+            return 0;
+
         }
 
         /**
@@ -9591,7 +9799,7 @@ namespace fairino
                                     return rtn;
                                 }
                             }
-                            rtn = MoveL(endJPos, endDesePos, tmpTool, tmpUser, vel, acc, ovl, blendR, epos, search, 0, endOffPos);
+                            rtn = MoveL(endJPos, endDesePos, tmpTool, tmpUser, vel, acc, ovl, blendR, epos, search, 0, endOffPos, 0);
                             if (rtn != 0)
                             {
                                 ARCEnd(weldIOType, arcNum, weldTimeout);
@@ -9645,7 +9853,7 @@ namespace fairino
                                     return rtn;
                                 }
                             }
-                            rtn = MoveL(tmpJoint, tmpWeldDesc, tmpTool, tmpUser, vel, acc, ovl, blendR, epos, search, 0, endOffPos);
+                            rtn = MoveL(tmpJoint, tmpWeldDesc, tmpTool, tmpUser, vel, acc, ovl, blendR, epos, search, 0, endOffPos,0);
                             if (rtn != 0)
                             {
                                 ARCEnd(weldIOType, arcNum, weldTimeout);
@@ -9685,7 +9893,7 @@ namespace fairino
                             int tmpTool = 0;
                             int tmpUser = 0;
                             rtn = GetSegmentWeldPoint(startDesePos, endDesePos, distance, ref tmpWeldDesc, ref tmpJoint, ref tmpTool, ref tmpUser);
-                            rtn = MoveL(tmpJoint, tmpWeldDesc, tmpTool, tmpUser, vel, acc, ovl, blendR, epos, search, 0, endOffPos);
+                            rtn = MoveL(tmpJoint, tmpWeldDesc, tmpTool, tmpUser, vel, acc, ovl, blendR, epos, search, 0, endOffPos, 0);
                             if (rtn != 0)
                             {
                                 return rtn;
@@ -9704,7 +9912,7 @@ namespace fairino
                             {
                                 return rtn;
                             }
-                            rtn = MoveL(tmpJoint, tmpWeldDesc, tmpTool, tmpUser, vel, acc, ovl, blendR, epos, search, 0, endOffPos);
+                            rtn = MoveL(tmpJoint, tmpWeldDesc, tmpTool, tmpUser, vel, acc, ovl, blendR, epos, search, 0, endOffPos,0);
                             if (rtn != 0)
                             {
                                 return rtn;
@@ -12873,90 +13081,23 @@ namespace fairino
             }
         }
 
+       
         /**
-         * @brief  UDP扩展轴与机器人关节运动同步运动
-         * @param  [in] jopublic int_pos  目标关节位置,单位deg
-         * @param  [in] desc_pos   目标笛卡尔位姿
-         * @param  [in] tool  工具坐标号，范围[0~14]
-         * @param  [in] user  工件坐标号，范围[0~14]
-         * @param  [in] vel  速度百分比，范围[0~100]
-         * @param  [in] acc  加速度百分比，范围[0~100],暂不开放
-         * @param  [in] ovl  速度缩放因子，范围[0~100]
-         * @param  [in] epos  扩展轴位置，单位mm
-         * @param  [in] blendT [-1.0]-运动到位(阻塞)，[0~500.0]-平滑时间(非阻塞)，单位ms
-         * @param  [in] offset_flag  0-不偏移，1-基坐标系/工件坐标系下偏移，2-工具坐标系下偏移
-         * @param  [in] offset_pos  位姿偏移量
-         * @return  错误码
-         */
-        public int ExtAxisSyncMoveJ(JointPos joint_pos, DescPose desc_pos, int tool, int user, float vel, float acc, float ovl, ExaxisPos epos, float blendT, byte offset_flag, DescPose offset_pos)
-        {
-            if (IsSockComError())
-            {
-                return g_sock_com_err;
-            }
-            if (GetSafetyCode() != 0)
-            {
-
-                return GetSafetyCode();
-            }
-            try
-            {
-                double[] joint = joint_pos.jPos;
-                double[] desc = new double[6] { desc_pos.tran.x, desc_pos.tran.y, desc_pos.tran.z, desc_pos.rpy.rx, desc_pos.rpy.ry, desc_pos.rpy.rz };
-                double[] offect = new double[6] { offset_pos.tran.x, offset_pos.tran.y, offset_pos.tran.z, offset_pos.rpy.rx, offset_pos.rpy.ry, offset_pos.rpy.rz };
-                int rtn = 0;
-                rtn = proxy.ExtAxisMoveJ(1, epos.ePos[0], epos.ePos[1], epos.ePos[2], epos.ePos[3], ovl, blendT);
-                if (rtn != 0)
-                {
-                    if (log != null)
-                    {
-                        log.LogInfo($"ExtAxisSyncMoveJ({joint[0]},{joint[1]},{joint[2]},{joint[3]},{joint[4]},{joint[5]},{desc[0]},{desc[1]},{desc[2]},{desc[3]},{desc[4]},{desc[5]},{tool},{user},{vel},{acc},{ovl}," +
-                            $"{epos.ePos[0]},{epos.ePos[1]},{epos.ePos[2]},{epos.ePos[3]},{blendT},{offset_flag},{offect[0]},{offect[1]},{offect[2]},{offect[3]},{offect[4]},{offect[5]}) : {rtn}");
-                    }
-                    return rtn;
-                }
-                rtn = proxy.MoveJ(joint, desc, tool, user, vel, acc, ovl, epos.ePos, blendT, offset_flag, offect);
-                if (log != null)
-                {
-                    log.LogInfo($"ExtAxisSyncMoveJ({joint[0]},{joint[1]},{joint[2]},{joint[3]},{joint[4]},{joint[5]},{desc[0]},{desc[1]},{desc[2]},{desc[3]},{desc[4]},{desc[5]},{tool},{user},{vel},{acc},{ovl}," +
-                        $"{epos.ePos[0]},{epos.ePos[1]},{epos.ePos[2]},{epos.ePos[3]},{blendT},{offset_flag},{offect[0]},{offect[1]},{offect[2]},{offect[3]},{offect[4]},{offect[5]}) : {rtn}");
-                }
-                return rtn;
-            }
-            catch
-            {
-                if (IsSockComError())
-                {
-                    if (log != null)
-                    {
-                        log.LogError($"RPC exception");
-                    }
-                    return g_sock_com_err;
-
-                }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
-            }
-        }
-
-        /**
-         * @brief  UDP扩展轴与机器人直线运动同步运动
-         * @param  [in] joint_pos  目标关节位置,单位deg
-         * @param  [in] desc_pos   目标笛卡尔位姿
-         * @param  [in] tool  工具坐标号，范围[0~14]
-         * @param  [in] user  工件坐标号，范围[0~14]
-         * @param  [in] vel  速度百分比，范围[0~100]
-         * @param  [in] acc  加速度百分比，范围[0~100],暂不开放
-         * @param  [in] ovl  速度缩放因子，范围[0~100]
-         * @param  [in] blendR [-1.0]-运动到位(阻塞)，[0~1000.0]-平滑半径(非阻塞)，单位mm	 
-         * @param  [in] epos  扩展轴位置，单位mm
-         * @param  [in] offset_flag  0-不偏移，1-基坐标系/工件坐标系下偏移，2-工具坐标系下偏移
-         * @param  [in] offset_pos  位姿偏移量
-         * @return  错误码
-         */
-        public int ExtAxisSyncMoveL(JointPos joint_pos, DescPose desc_pos, int tool, int user, float vel, float acc, float ovl, double blendR, ExaxisPos epos, int offset_flag, DescPose offset_pos)
+       * @brief  UDP扩展轴与机器人直线运动同步运动
+       * @param  [in] joint_pos  目标关节位置,单位deg
+       * @param  [in] desc_pos   目标笛卡尔位姿
+       * @param  [in] tool  工具坐标号，范围[0~14]
+       * @param  [in] user  工件坐标号，范围[0~14]
+       * @param  [in] vel  速度百分比，范围[0~100]
+       * @param  [in] acc  加速度百分比，范围[0~100],暂不开放
+       * @param  [in] ovl  速度缩放因子，范围[0~100]
+       * @param  [in] blendR [-1.0]-运动到位(阻塞)，[0~1000.0]-平滑半径(非阻塞)，单位mm	 
+       * @param  [in] epos  扩展轴位置，单位mm
+       * @param  [in] offset_flag  0-不偏移，1-基坐标系/工件坐标系下偏移，2-工具坐标系下偏移
+       * @param  [in] offset_pos  位姿偏移量
+       * @return  错误码
+       */
+        public int ExtAxisSyncMoveL(JointPos joint_pos, DescPose desc_pos, int tool, int user, float vel, float acc, float ovl, float blendR, ExaxisPos epos, int offset_flag, DescPose offset_pos)
         {
             if (IsSockComError())
             {
@@ -12984,7 +13125,7 @@ namespace fairino
                     }
                     return rtn;
                 }
-                rtn = proxy.MoveL(joint, desc, tool, user, vel, acc, ovl, blendR, 0,epos.ePos, search, offset_flag, offect);
+               MoveL(joint_pos, desc_pos, tool, user, vel, acc, ovl, blendR, 0, epos, search, offset_flag, offset_pos, 0);
                 if (log != null)
                 {
                     log.LogInfo($"MoveL({joint[0]},{joint[1]},{joint[2]},{joint[3]},{joint[4]},{joint[5]},{desc[0]},{desc[1]},{desc[2]},{desc[3]},{desc[4]},{desc[5]},{tool},{user},{vel},{acc},{ovl},{blendR}" +
@@ -13068,7 +13209,7 @@ namespace fairino
                     return rtn;
                 }
 
-                rtn = proxy.MoveC(jointP, descP, controlP, epos_p.ePos, poffset_flag, offectP, jointT, descT, controlT, epos_t.ePos, toffset_flag, offectT, ovl, blendR);
+                MoveC(joint_pos_p, desc_pos_p, ptool, puser, pvel, pacc, epos_p, poffset_flag, offset_pos_p, joint_pos_t, desc_pos_t, ttool, tuser, tvel, tacc, epos_t, toffset_flag, offset_pos_t, ovl, blendR, 0);
                 if (log != null)
                 {
                     log.LogInfo($"MoveC({jointP[0]},{jointP[1]},{jointP[2]},{jointP[3]},{jointP[4]},{jointP[5]},{descP[0]},{descP[1]},{descP[2]},{descP[3]},{descP[4]},{descP[5]},{ptool},{puser},{pvel},{pacc}," +
@@ -13095,6 +13236,10 @@ namespace fairino
                 }
             }
         }
+
+     
+
+       
 
         /**
          * @brief  焊丝寻位开始
@@ -17286,9 +17431,10 @@ namespace fairino
         * @param  [in] vamx 设定的最大速度，mm/s
         * @param  [in] amax 设定的最大加速度，mm/s2
         * @param  [in] jmax 设定的最大加加速度，mm/s3
+        * @param  [in] flag 匀速前瞻开启开关 0-不开启；1-开启
         * @return  错误码     3.8.0
         */
-        public int LoadTrajectoryLA(string name, int mode, double errorLim, int type, double precision, double vamx, double amax, double jmax)
+        public int LoadTrajectoryLA(string name, int mode, double errorLim, int type, double precision, double vamx, double amax, double jmax, int flag)
         {
             if (IsSockComError())
             {
@@ -17296,7 +17442,7 @@ namespace fairino
             }
             try
             {
-                int result = proxy.LoadTrajectoryLA(name, mode, errorLim, type, precision, vamx, amax, jmax);
+                int result = proxy.LoadTrajectoryLA(name, mode, errorLim, type, precision, vamx, amax, jmax,flag);
 
                 if (log != null)
                 {
@@ -18240,96 +18386,6 @@ namespace fairino
             }
         }
 
-
-        /**
-       *@brief  笛卡尔空间整圆运动
-       *@param  [in] joint_pos_p  路径点1关节位置,单位deg
-       *@param  [in] desc_pos_p   路径点1笛卡尔位姿
-       *@param  [in] ptool  工具坐标号，范围[1~15]
-       *@param  [in] puser  工件坐标号，范围[1~15]
-       *@param  [in] pvel  速度百分比，范围[0~100]
-       *@param  [in] pacc  加速度百分比，范围[0~100],暂不开放
-       *@param  [in] epos_p  扩展轴位置，单位mm
-       *@param  [in] joint_pos_t  路径点2关节位置,单位deg
-       *@param  [in] desc_pos_t   路径点2笛卡尔位姿
-       *@param  [in] ttool  工具坐标号，范围[1~15]
-       *@param  [in] tuser  工件坐标号，范围[1~15]
-       *@param  [in] tvel  速度百分比，范围[0~100]
-       *@param  [in] tacc  加速度百分比，范围[0~100],暂不开放
-       *@param  [in] epos_t  扩展轴位置，单位mm
-       *@param  [in] ovl  速度缩放因子，范围[0~100]
-       *@param  [in] offset_flag  0-不偏移，1-基坐标系/工件坐标系下偏移，2-工具坐标系下偏移
-       *@param  [in] offset_pos  位姿偏移量
-       *@param  [in] oacc 加速度百分比
-       *@param  [in] blendR -1：阻塞；0~1000：平滑半径
-       *@return  错误码
-       */
-
-        public int Circle(JointPos joint_pos_p, DescPose desc_pos_p, int ptool, int puser, float pvel, float pacc, ExaxisPos epos_p, JointPos joint_pos_t, DescPose desc_pos_t, int ttool, int tuser, float tvel, float tacc, ExaxisPos epos_t, float ovl, int offset_flag, DescPose offset_pos, double oacc=100, double blendR=-1)
-        {
-            {
-                if (IsSockComError())
-                {
-                    return g_sock_com_err;
-                }
-
-                if (GetSafetyCode() != 0)
-                {
-                    return GetSafetyCode();
-                }
-
-                try
-                {
-                    double[] jointP = joint_pos_p.jPos;
-                    double[] descP = new double[6] { desc_pos_p.tran.x, desc_pos_p.tran.y, desc_pos_p.tran.z, desc_pos_p.rpy.rx, desc_pos_p.rpy.ry, desc_pos_p.rpy.rz };
-
-                    double[] controlP = new double[4] { ptool, puser, pvel, pacc };
-
-
-
-                    double[] exteraxisP = epos_p.ePos;
-
-                    double[] jointT = joint_pos_t.jPos;
-                    double[] descT = new double[6] { desc_pos_t.tran.x, desc_pos_t.tran.y, desc_pos_t.tran.z, desc_pos_t.rpy.rx, desc_pos_t.rpy.ry, desc_pos_t.rpy.rz };
-                    double[] controlT = new double[4] { ttool, tuser, tvel, tacc };
-                    double[] exteraxisT = epos_t.ePos;
-
-
-                    double[] offect = new double[6] { offset_pos.tran.x, offset_pos.tran.y, offset_pos.tran.z, offset_pos.rpy.rx, offset_pos.rpy.ry, offset_pos.rpy.rz };
-
-                    double[] ooacc = new double[2] { oacc, blendR };
-
-                    double[] oovl = new double[2] { ovl, offset_flag };
-
-
-                    int rtn = proxy.Circle(jointP, descP, controlP, exteraxisP, jointT, descT, controlT, exteraxisT, oovl, offect, ooacc);
-                    if (log != null)
-                    {
-                        log.LogInfo($"Circle({jointP[0]},{jointP[1]},{jointP[2]},{jointP[3]},{jointP[4]},{jointP[5]},{descP[0]},{descP[1]},{descP[2]},{descP[3]},{descP[4]},{descP[5]},{ptool},{puser},{pvel},{pacc}," +
-                            $"{epos_p.ePos[0]},{epos_p.ePos[1]},{epos_p.ePos[2]},{epos_p.ePos[3]},) " +
-                            $"{jointT[0]},{jointT[1]},{jointT[2]},{jointT[3]},{jointT[4]},{jointT[5]},{descT[0]},{descT[1]},{descT[2]},{descT[3]},{descT[4]},{descT[5]},{ttool},{tuser},{tvel},{tacc}," +
-                            $"{epos_t.ePos[0]},{epos_t.ePos[1]},{epos_t.ePos[2]},{epos_t.ePos[3]},{ovl},{offset_flag},{offect[0]},{offect[1]},{offect[2]},{offect[3]},{offect[4]},{offect[5]} : {rtn}");
-                    }
-                    return rtn;
-                }
-                catch
-                {
-                    if (IsSockComError())
-                    {
-                        if (log != null)
-                        {
-                            log.LogError($"RPC exception");
-                        }
-                        return g_sock_com_err;
-                    }
-                    else
-                    {
-                        return (int)RobotError.ERR_SUCCESS;
-                    }
-                }
-            }
-
-        }
         /**
         * @brief  力传感器辅助拖动
         * @param  [in] status 控制状态，0-关闭；1-开启
@@ -18864,6 +18920,1076 @@ namespace fairino
             else
             {
                 log.LogError(string.Format("JointAllParam Upgrade fail. errcode is: {0}.", errcode));
+            }
+
+            return errcode;
+        }
+
+
+        /**
+        * @brief 激光传感器记录点
+        * @param [in] coordID 激光传感器坐标系
+        * @param [out] desc 激光传感器识别点笛卡尔位置
+        * @param [out] joint 激光传感器识别点关节位置
+        * @param [out] exaxis 激光传感器识别点扩展轴位置
+        * @return 错误码
+        */
+        public int LaserRecordPoint(int coordID, ref DescPose desc, ref JointPos joint, ref ExaxisPos exaxis)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+                object[] result = proxy.LaserRecordPoint(coordID, 0, 100);
+
+                int errcode = Convert.ToInt32(result[0]);
+                if (errcode == 0)
+                {
+                    string paramStr = (string)result[1];
+                    string[] parS = paramStr.Split(',', (char)StringSplitOptions.None);
+
+                    if (parS.Length != 16)
+                    {
+                        log.LogError("LaserRecordPoint size fail");
+                        return -1;
+                    }
+
+                    // Parse and assign to DescPose
+                    desc.tran.x = double.Parse(parS[6]);
+                    desc.tran.y = double.Parse(parS[7]);
+                    desc.tran.z = double.Parse(parS[8]);
+
+                    desc.rpy.rx = double.Parse(parS[9]);
+                    desc.rpy.ry = double.Parse(parS[10]);
+                    desc.rpy.rz = double.Parse(parS[11]);
+
+                    // Parse and assign to JointPos
+                    for (int i = 0; i < 6; i++)
+                    {
+                        joint.jPos[i] = double.Parse(parS[i]);
+                    }
+
+                    // Parse and assign to ExaxisPos
+                    for (int i = 0; i < 4; i++)
+                    {
+                        exaxis.ePos[i] = double.Parse(parS[12 + i]);
+                    }
+                }
+                else
+                {
+                    log.LogError($"execute LaserRecordPoint fail {errcode}");
+                }
+                return errcode;
+            }
+            catch
+            {
+                if (IsSockComError())
+                {
+                    if (log != null)
+                    {
+                        log.LogError($"RPC exception");
+                    }
+                    return g_sock_com_err;
+                }
+                else
+                {
+                    return (int)RobotError.ERR_RPC_ERROR;
+                }
+            }
+        }
+
+
+        public int LaserTrackingSearchStart(int direction, DescTran directionPoint, int vel, int distance, int timeout, int posSensorNum)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+
+                int rtn = proxy.LaserTrackingSearchStart(direction, directionPoint.x, directionPoint.y, directionPoint.z,vel, distance, timeout, posSensorNum);
+                if (log != null)
+                {
+                    log.LogInfo($"LaserTrackingSearchStart  direction:{direction}, directionPoint.x:{directionPoint.x}," +
+                        $" {{directionPoint.y:{directionPoint.y}, directionPoint.z:{directionPoint.z}," +
+                        $"vel:{vel}, distance:{distance}, timeout:{timeout}, posSensorNum:{posSensorNum},rtn:{rtn}");
+
+                }
+                return rtn;
+            }
+            catch
+            {
+                if (IsSockComError())
+                {
+                    if (log != null)
+                    {
+                        log.LogError($"RPC exception");
+                    }
+                    return g_sock_com_err;
+                }
+                else
+                {
+                    return (int)RobotError.ERR_RPC_ERROR;
+                }
+            }
+        }
+
+        public int LaserTrackingSearchStop()
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+
+                int rtn = proxy.LaserTrackingSearchStop();
+                if (log != null)
+                {
+                    log.LogInfo($"LaserTrackingSearchStop: {rtn}");
+                }
+                return rtn;
+            }
+            catch
+            {
+                if (IsSockComError())
+                {
+                    if (log != null)
+                    {
+                        log.LogError($"RPC exception");
+                    }
+                    return g_sock_com_err;
+                }
+                else
+                {
+                    return (int)RobotError.ERR_RPC_ERROR;
+                }
+            }
+        }
+
+        /**
+        * @brief  关节空间运动(重载函数 不需要输入笛卡尔位置)
+        * @param  [in] jopublic int_pos  目标关节位置,单位deg
+        * @param  [in] tool  工具坐标号，范围[0~14]
+        * @param  [in] user  工件坐标号，范围[0~14]
+        * @param  [in] vel  速度百分比，范围[0~100]
+        * @param  [in] acc  加速度百分比，范围[0~100],暂不开放
+        * @param  [in] ovl  速度缩放因子，范围[0~100]
+        * @param  [in] epos  扩展轴位置，单位mm
+        * @param  [in] blendT [-1.0]-运动到位(阻塞)，[0~500.0]-平滑时间(非阻塞)，单位ms
+        * @param  [in] offset_flag  0-不偏移，1-基坐标系/工件坐标系下偏移，2-工具坐标系下偏移
+        * @param  [in] offset_pos  位姿偏移量
+        * @return  错误码
+        */
+        public int MoveJ(JointPos joint_pos, int tool, int user, float vel, float acc, float ovl, ExaxisPos epos, float blendT, byte offset_flag, DescPose offset_pos)
+        {
+            int rtn;
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            if (GetSafetyCode() != 0)
+            {
+
+                return GetSafetyCode();
+            }
+
+            DescPose desc_pos = new DescPose(0, 0, 0, 0, 0, 0);
+            int errcode = GetForwardKin(joint_pos, ref desc_pos);
+            if (errcode != 0)
+            {
+                log.LogError($"MoveJ GetForwardKin failed rtn is{errcode}");
+                return errcode;
+            }
+
+
+            errcode = MoveJ(joint_pos, desc_pos, tool, user, vel, acc, ovl, epos, blendT, offset_flag, offset_pos);
+
+            return errcode;
+
+        }
+
+        /**
+         * @brief 笛卡尔空间直线运动(重载函数2 不需要输入关节位置)
+         * @param  [in] desc_pos   目标笛卡尔位姿
+         * @param  [in] tool  工具坐标号，范围[0~14]
+         * @param  [in] user  工件坐标号，范围[0~14]
+         * @param  [in] vel  速度百分比，范围[0~100]
+         * @param  [in] acc  加速度百分比，范围[0~100],暂不开放
+         * @param  [in] ovl  速度缩放因子，范围[0~100]
+         * @param  [in] blendR [-1.0]-运动到位(阻塞)，[0~1000.0]-平滑半径(非阻塞)，单位mm
+         * @param  [in] blendMode 过渡方式；0-内切过渡；1-角点过渡
+         * @param  [in] epos  扩展轴位置，单位mm
+         * @param  [in] search  0-不焊丝寻位，1-焊丝寻位
+         * @param  [in] offset_flag  0-不偏移，1-基坐标系/工件坐标系下偏移，2-工具坐标系下偏移
+         * @param  [in] offset_pos  位姿偏移量
+         * @param  [in] config 逆解关节空间配置，[-1]-参考当前关节位置解算，[0~7]-依据特定关节空间配置求解
+        * @param  [in] velAccParamMode 速度加速度参数模式；0-百分比；1-物理速度(mm/s)加速度(mm/s2)
+         * @param  [in] overSpeedStrategy  超速处理策略，1-标准；2-超速时报错停止；3-自适应降速，默认为0
+         * @param  [in] speedPercent  允许降速阈值百分比[0-100]，默认10%
+         * @return  错误码
+         */
+        public int MoveL(DescPose desc_pos, int tool, int user, float vel, float acc, float ovl, float blendR, int blendMode, ExaxisPos epos, byte search, byte offset_flag, DescPose offset_pos, int config,int velAccParamMode, int overSpeedStrategy = 0, int speedPercent = 10)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            if (GetSafetyCode() != 0)
+            {
+
+                return GetSafetyCode();
+            }
+            JointPos joint_pos = new JointPos(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+            int errcode = GetInverseKin(0, desc_pos, config, ref joint_pos);
+            if (errcode != 0)
+            {
+                log.LogError($"MoveL GetInverseKin failed rtn is {errcode}");
+                return errcode;
+            }
+       
+                errcode = MoveL(joint_pos, desc_pos, tool, user, vel, acc, ovl, blendR, blendMode, epos, search, offset_flag, offset_pos, velAccParamMode,0,10);
+
+                return errcode;
+        }
+
+
+
+        public int MoveC(DescPose desc_pos_p, int ptool, int puser, float pvel, float pacc, ExaxisPos epos_p, byte poffset_flag, DescPose offset_pos_p, DescPose desc_pos_t, int ttool, int tuser, float tvel, float tacc, ExaxisPos epos_t, byte toffset_flag, DescPose offset_pos_t, float ovl, float blendR, int config)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            if (GetSafetyCode() != 0)
+            {
+
+                return GetSafetyCode();
+            }
+            JointPos joint_pos_p = new JointPos(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+            JointPos joint_pos_t = new JointPos(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+            int errcode = GetInverseKin(0, desc_pos_p, config, ref joint_pos_p);
+            if (errcode != 0)
+            {
+                log.LogError($"MoveC  GetInverseKin P failed rtn is {errcode}");
+                return errcode;
+            }
+
+            errcode = GetInverseKin(0, desc_pos_t, config, ref joint_pos_t);
+            if (errcode != 0)
+            {
+                log.LogError($"MoveC  GetInverseKin T failed rtn is{errcode}");
+                return errcode;
+            }
+            errcode = MoveC(joint_pos_p, desc_pos_p, ptool, puser, pvel, pacc, epos_p, poffset_flag, offset_pos_p, joint_pos_t, desc_pos_t, ttool, tuser, tvel, tacc, epos_t, toffset_flag, offset_pos_t, ovl, blendR, 0);
+            return errcode;
+
+        }
+        /**
+       * @brief  笛卡尔空间圆弧运动 (重载函数1 不需要输入关节位置)
+       * @param  [in] desc_pos_p   路径点笛卡尔位姿
+       * @param  [in] ptool  工具坐标号，范围[0~14]
+       * @param  [in] puser  工件坐标号，范围[0~14]
+       * @param  [in] pvel  速度百分比，范围[0~100]
+       * @param  [in] pacc  加速度百分比，范围[0~100],暂不开放
+       * @param  [in] epos_p  扩展轴位置，单位mm
+       * @param  [in] poffset_flag  0-不偏移，1-基坐标系/工件坐标系下偏移，2-工具坐标系下偏移
+       * @param  [in] offset_pos_p  位姿偏移量
+       * @param  [in] desc_pos_t   目标点笛卡尔位姿
+       * @param  [in] ttool  工具坐标号，范围[0~14]
+       * @param  [in] tuser  工件坐标号，范围[0~14]
+       * @param  [in] tvel  速度百分比，范围[0~100]
+       * @param  [in] tacc  加速度百分比，范围[0~100],暂不开放
+       * @param  [in] epos_t  扩展轴位置，单位mm
+       * @param  [in] toffset_flag  0-不偏移，1-基坐标系/工件坐标系下偏移，2-工具坐标系下偏移
+       * @param  [in] offset_pos_t  位姿偏移量	 
+       * @param  [in] ovl  速度缩放因子，范围[0~100]	 
+       * @param  [in] blendR [-1.0]-运动到位(阻塞)，[0~1000.0]-平滑半径(非阻塞)，单位mm
+       * @param  [in] config 逆解关节空间配置，[-1]-参考当前关节位置解算，[0~7]-依据特定关节空间配置求解
+       * @param  [in] velAccParamMode 速度加速度参数模式；0-百分比；1-物理速度(mm/s)加速度(mm/s2)
+       * @return  错误码
+       */
+        public int MoveC(DescPose desc_pos_p, int ptool, int puser, float pvel, float pacc, ExaxisPos epos_p, byte poffset_flag, DescPose offset_pos_p, DescPose desc_pos_t, int ttool, int tuser, float tvel, float tacc, ExaxisPos epos_t, byte toffset_flag, DescPose offset_pos_t, float ovl, float blendR, int config, int velAccParamMode)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            if (GetSafetyCode() != 0)
+            {
+
+                return GetSafetyCode();
+            }
+            JointPos joint_pos_p = new JointPos(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+            JointPos joint_pos_t = new JointPos(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+            int errcode = GetInverseKin(0, desc_pos_p, config, ref joint_pos_p);
+            if (errcode != 0)
+            {
+                log.LogError($"MoveC  GetInverseKin P failed rtn is {errcode}");
+                return errcode;
+            }
+
+            errcode = GetInverseKin(0, desc_pos_t, config, ref joint_pos_t);
+            if (errcode != 0)
+            {
+                log.LogError($"MoveC  GetInverseKin T failed rtn is{errcode}");
+                return errcode;
+            }
+            errcode = MoveC(joint_pos_p, desc_pos_p, ptool, puser, pvel, pacc, epos_p, poffset_flag, offset_pos_p, joint_pos_t, desc_pos_t, ttool, tuser, tvel, tacc, epos_t, toffset_flag, offset_pos_t, ovl, blendR, velAccParamMode);
+            return errcode;
+
+        }
+
+        /**
+        * @brief  笛卡尔空间整圆运动 (重载函数1 不需要输入关节位置)
+        * @param  [in] desc_pos_p   路径点1笛卡尔位姿
+        * @param  [in] ptool  工具坐标号，范围[1~15]
+        * @param  [in] puser  工件坐标号，范围[1~15]
+        * @param  [in] pvel  速度百分比，范围[0~100]
+        * @param  [in] pacc  加速度百分比，范围[0~100],暂不开放
+        * @param  [in] epos_p  扩展轴位置，单位mm
+        * @param  [in] desc_pos_t   路径点2笛卡尔位姿
+        * @param  [in] ttool  工具坐标号，范围[1~15]
+        * @param  [in] tuser  工件坐标号，范围[1~15]
+        * @param  [in] tvel  速度百分比，范围[0~100]
+        * @param  [in] tacc  加速度百分比，范围[0~100],暂不开放
+        * @param  [in] epos_t  扩展轴位置，单位mm
+        * @param  [in] ovl  速度缩放因子，范围[0~100]
+        * @param  [in] offset_flag  0-不偏移，1-基坐标系/工件坐标系下偏移，2-工具坐标系下偏移
+        * @param  [in] offset_pos  位姿偏移量
+        * @param  [in] oacc 加速度百分比
+        * @param  [in] blendR -1：阻塞；0~1000：平滑半径
+        * @param  [in] config 逆解关节空间配置，[-1]-参考当前关节位置解算，[0~7]-依据特定关节空间配置求解
+        *@param  [in] velAccParamMode 速度加速度参数模式；0-百分比；1-物理速度(mm/s)加速度(mm/s2)
+        * @return  错误码
+        */
+
+        public int Circle(DescPose desc_pos_p, int ptool, int puser, float pvel, float pacc, ExaxisPos epos_p, DescPose desc_pos_t, int ttool, int tuser, float tvel, float tacc, ExaxisPos epos_t, float ovl, int offset_flag, DescPose offset_pos, double oacc, double blendR, int config,int velAccParamMode)
+        {
+            {
+                if (IsSockComError())
+                {
+                    return g_sock_com_err;
+                }
+
+                if (GetSafetyCode() != 0)
+                {
+                    return GetSafetyCode();
+                }
+                JointPos joint_pos_p = new JointPos(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+                JointPos joint_pos_t = new JointPos(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+                int errcode = GetInverseKin(0, desc_pos_p, config, ref joint_pos_p);
+                if (errcode != 0)
+                {
+                    log.LogError($"MoveC  GetInverseKin P failed rtn is {errcode}");
+                    return errcode;
+                }
+
+                errcode = GetInverseKin(0, desc_pos_t, config, ref joint_pos_t);
+                if (errcode != 0)
+                {
+                    log.LogError($"MoveC  GetInverseKin T failed rtn is{errcode}");
+                    return errcode;
+                }
+
+
+                errcode = Circle(joint_pos_p, desc_pos_p, ptool, puser, pvel, pacc, epos_p, joint_pos_t, desc_pos_t, ttool, tuser, tvel, tacc, epos_t, ovl, offset_flag, offset_pos, oacc, blendR, velAccParamMode);
+                return errcode;
+
+            }
+
+        }
+
+        /**
+        * @brief  笛卡尔空间螺旋线运动 (重载函数1 不需要输入关节位置)
+        * @param  [in] desc_pos   目标笛卡尔位姿
+        * @param  [in] tool  工具坐标号，范围[0~14]
+        * @param  [in] user  工件坐标号，范围[0~14]
+        * @param  [in] vel  速度百分比，范围[0~100]
+        * @param  [in] acc  加速度百分比，范围[0~100],暂不开放
+        * @param  [in] epos  扩展轴位置，单位mm
+        * @param  [in] ovl  速度缩放因子，范围[0~100]	 
+        * @param  [in] offset_flag  0-不偏移，1-基坐标系/工件坐标系下偏移，2-工具坐标系下偏移
+        * @param  [in] offset_pos  位姿偏移量
+        * @param  [in] spiral_param  螺旋参数
+        * @param  [in] config 逆解关节空间配置，[-1]-参考当前关节位置解算，[0~7]-依据特定关节空间配置求解
+        * @return  错误码
+        */
+        public int NewSpiral(DescPose desc_pos, int tool, int user, float vel, float acc, ExaxisPos epos, float ovl, byte offset_flag, DescPose offset_pos, SpiralParam spiral_param, int config)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            if (GetSafetyCode() != 0)
+            {
+
+                return GetSafetyCode();
+            }
+            JointPos joint_pos = new JointPos(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+            int errcode = GetInverseKin(0, desc_pos, config, ref joint_pos);
+            if (errcode != 0)
+            {
+                log.LogError($"MoveL GetInverseKin failed rtn is {errcode}");
+                return errcode;
+            }
+
+            errcode = NewSpiral(joint_pos, desc_pos, tool, user, vel, acc, epos, ovl, offset_flag, offset_pos, spiral_param);
+            return errcode;
+        }
+
+        /**
+        * @brief  关节空间样条运动 (重载函数1 不需要输入笛卡尔位置)
+        * @param  [in] joint_pos  目标关节位置,单位deg
+        * @param  [in] tool  工具坐标号，范围[0~14]
+        * @param  [in] user  工件坐标号，范围[0~14]
+        * @param  [in] vel  速度百分比，范围[0~100]
+        * @param  [in] acc  加速度百分比，范围[0~100],暂不开放
+        * @param  [in] ovl  速度缩放因子，范围[0~100]	
+        * @return  错误码
+        */
+        public int SplinePTP(JointPos joint_pos, int tool, int user, float vel, float acc, float ovl)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            if (GetSafetyCode() != 0)
+            {
+
+                return GetSafetyCode();
+            }
+            DescPose desc_pos = new DescPose(0, 0, 0, 0, 0, 0);
+            int errcode = GetForwardKin(joint_pos, ref desc_pos);
+            if (errcode != 0)
+            {
+                log.LogError($"MoveJ GetForwardKin failed rtn is{errcode}");
+                return errcode;
+            }
+
+            errcode = SplinePTP(joint_pos, desc_pos, tool, user, vel, acc, ovl);
+            return errcode;
+        }
+
+        /**
+         * @brief 新样条指令点(重载函数1 不需要输入关节位置)
+         * @param  [in] desc_pos   目标笛卡尔位姿
+         * @param  [in] tool  工具坐标号，范围[0~14]
+         * @param  [in] user  工件坐标号，范围[0~14]
+         * @param  [in] vel  速度百分比，范围[0~100]
+         * @param  [in] acc  加速度百分比，范围[0~100],暂不开放
+         * @param  [in] ovl  速度缩放因子，范围[0~100]
+         * @param  [in] blendR [-1.0]-运动到位(阻塞)，[0~1000.0]-平滑半径(非阻塞)，单位mm
+         * @param  [in] lastFlag 是否为最后一个点，0-否，1-是
+         * @param  [in] config 逆解关节空间配置，[-1]-参考当前关节位置解算，[0~7]-依据特定关节空间配置求解
+         * @return  错误码
+         */
+        public int NewSplinePoint(DescPose desc_pos, int tool, int user, float vel, float acc, float ovl, float blendR, int lastFlag, int config)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            if (GetSafetyCode() != 0)
+            {
+
+                return GetSafetyCode();
+            }
+            JointPos joint_pos = new JointPos(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+            int errcode = GetInverseKin(0, desc_pos, config, ref joint_pos);
+            if (errcode != 0)
+            {
+                log.LogError($"MoveL GetInverseKin failed rtn is {errcode}");
+                return errcode;
+            }
+
+            errcode = NewSplinePoint(joint_pos, desc_pos, tool, user, vel, acc, ovl, blendR, lastFlag);
+            return errcode;
+        }
+
+        /**
+        * @brief UDP扩展轴与机器人关节运动同步运动 (重载函数 不需要输入笛卡尔位置)
+        * @param  [in] joint_pos  目标关节位置,单位deg
+        * @param  [in] tool  工具坐标号，范围[0~14]
+        * @param  [in] user  工件坐标号，范围[0~14]
+        * @param  [in] vel  速度百分比，范围[0~100]
+        * @param  [in] acc  加速度百分比，范围[0~100],暂不开放
+        * @param  [in] ovl  速度缩放因子，范围[0~100]
+        * @param  [in] epos  扩展轴位置，单位mm
+        * @param  [in] blendT [-1.0]-运动到位(阻塞)，[0~500.0]-平滑时间(非阻塞)，单位ms
+        * @param  [in] offset_flag  0-不偏移，1-基坐标系/工件坐标系下偏移，2-工具坐标系下偏移
+        * @param  [in] offset_pos  位姿偏移量
+        * @return  错误码
+        */
+        public int ExtAxisSyncMoveJ(JointPos joint_pos, int tool, int user, float vel, float acc, float ovl, ExaxisPos epos, float blendT, byte offset_flag, DescPose offset_pos)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            if (GetSafetyCode() != 0)
+            {
+
+                return GetSafetyCode();
+            }
+            DescPose desc_pos = new DescPose(0, 0, 0, 0, 0, 0);
+            int errcode = GetForwardKin(joint_pos, ref desc_pos);
+            if (errcode != 0)
+            {
+                log.LogError($"MoveJ GetForwardKin failed rtn is{errcode}");
+                return errcode;
+            }
+            errcode = ExtAxisSyncMoveJ(joint_pos, desc_pos, tool, user, vel, acc, ovl, epos, blendT, offset_flag, offset_pos);
+            return errcode;
+        }
+
+        /**
+      * @brief  UDP扩展轴与机器人直线运动同步运动 (重载函数 不需要输入关节位置)
+      * @param  [in] desc_pos   目标笛卡尔位姿
+      * @param  [in] tool  工具坐标号，范围[0~14]
+      * @param  [in] user  工件坐标号，范围[0~14]
+      * @param  [in] vel  速度百分比，范围[0~100]
+      * @param  [in] acc  加速度百分比，范围[0~100],暂不开放
+      * @param  [in] ovl  速度缩放因子，范围[0~100]
+      * @param  [in] blendR [-1.0]-运动到位(阻塞)，[0~1000.0]-平滑半径(非阻塞)，单位mm	 
+      * @param  [in] epos  扩展轴位置，单位mm
+      * @param  [in] offset_flag  0-不偏移，1-基坐标系/工件坐标系下偏移，2-工具坐标系下偏移
+      * @param  [in] offset_pos  位姿偏移量
+      * @param  [in] config 逆解关节空间配置，[-1]-参考当前关节位置解算，[0~7]-依据特定关节空间配置求解
+      * @return  错误码
+      */
+        public int ExtAxisSyncMoveL(DescPose desc_pos, int tool, int user, float vel, float acc, float ovl, double blendR, ExaxisPos epos, int offset_flag, DescPose offset_pos, int config)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            if (GetSafetyCode() != 0)
+            {
+
+                return GetSafetyCode();
+            }
+            JointPos joint_pos = new JointPos(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+            int errcode = GetInverseKin(0, desc_pos, config, ref joint_pos);
+            if (errcode != 0)
+            {
+                log.LogError($"ExtAxisSyncMoveL GetInverseKin failed rtn is {errcode}");
+                return errcode;
+            }
+
+            errcode = ExtAxisSyncMoveL(joint_pos, desc_pos, tool, user, vel, acc, ovl, (float)blendR, epos, offset_flag, offset_pos);
+            return errcode;
+        }
+
+        /**
+        * @brief  UDP扩展轴与机器人圆弧运动同步运动 (重载函数 不需要输入关节位置)
+        * @param  [in] desc_pos_p   路径点笛卡尔位姿
+        * @param  [in] ptool  工具坐标号，范围[0~14]
+        * @param  [in] puser  工件坐标号，范围[0~14]
+        * @param  [in] pvel  速度百分比，范围[0~100]
+        * @param  [in] pacc  加速度百分比，范围[0~100],暂不开放
+        * @param  [in] epos_p  中间点扩展轴位置，单位mm
+        * @param  [in] poffset_flag  0-不偏移，1-基坐标系/工件坐标系下偏移，2-工具坐标系下偏移
+        * @param  [in] offset_pos_p  位姿偏移量
+        * @param  [in] desc_pos_t   目标点笛卡尔位姿
+        * @param  [in] ttool  工具坐标号，范围[0~14]
+        * @param  [in] tuser  工件坐标号，范围[0~14]
+        * @param  [in] tvel  速度百分比，范围[0~100]
+        * @param  [in] tacc  加速度百分比，范围[0~100],暂不开放
+        * @param  [in] epos_t  扩展轴位置，单位mm
+        * @param  [in] toffset_flag  0-不偏移，1-基坐标系/工件坐标系下偏移，2-工具坐标系下偏移
+        * @param  [in] offset_pos_t  位姿偏移量	 
+        * @param  [in] ovl  速度缩放因子，范围[0~100]
+        * @param  [in] blendR [-1.0]-运动到位(阻塞)，[0~1000.0]-平滑半径(非阻塞)，单位mm	
+        * @param  [in] config 逆解关节空间配置，[-1]-参考当前关节位置解算，[0~7]-依据特定关节空间配置求解
+        * @return  错误码
+        */
+        public int ExtAxisSyncMoveC(DescPose desc_pos_p, int ptool, int puser, float pvel, float pacc, ExaxisPos epos_p, int poffset_flag, DescPose offset_pos_p, DescPose desc_pos_t, int ttool, int tuser, float tvel, float tacc, ExaxisPos epos_t, int toffset_flag, DescPose offset_pos_t, float ovl, float blendR, int config)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            if (GetSafetyCode() != 0)
+            {
+
+                return GetSafetyCode();
+            }
+            JointPos joint_pos_p = new JointPos(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+            int errcode = GetInverseKin(0, desc_pos_p, config, ref joint_pos_p);
+            JointPos joint_pos_t = new JointPos(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+            errcode = GetInverseKin(0, desc_pos_t, config, ref joint_pos_t);
+            if (errcode != 0)
+            {
+                log.LogError($"ExtAxisSyncMoveL GetInverseKin failed rtn is {errcode}");
+                return errcode;
+            }
+
+
+            errcode = ExtAxisSyncMoveC(joint_pos_p, desc_pos_p, ptool, puser, pvel, pacc, epos_p, poffset_flag, offset_pos_p, joint_pos_t, desc_pos_t, ttool, tuser, tvel, tacc, epos_t, toffset_flag, offset_pos_t, ovl, blendR);
+            return errcode;
+        }
+
+        /**
+        * @brief 设置扩展轴与机器人同步运动策略
+        * @param [in] strategy 策略；0-以机器人为主；1-扩展轴与机器人同步
+        * @return 错误码
+        */
+        public int SetExAxisRobotPlan(int strategy)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            if (GetSafetyCode() != 0)
+            {
+
+                return GetSafetyCode();
+            }
+            try
+            {
+
+                int rtn = proxy.SetExAxisRobotPlan(strategy);
+                if (log != null)
+                {
+                    log.LogInfo($"SetExAxisRobotPlan: {rtn}");
+                }
+                return rtn;
+            }
+            catch
+            {
+                if (IsSockComError())
+                {
+                    if (log != null)
+                    {
+                        log.LogError($"RPC exception");
+                    }
+                    return g_sock_com_err;
+                }
+                else
+                {
+                    return (int)RobotError.ERR_RPC_ERROR;
+                }
+            }
+        }
+
+        /**
+        * @brief  获取从站板卡参数
+        * @param [out] type  0-Ethercat，1-CClink, 3-Ethercat, 4-EIP
+        * @param [out] version  协议版本
+        * @param [out] connState  0-未连接 1-已连接
+        * @return 错误码
+        */
+        public int GetFieldBusConfig(ref int type, ref int version, ref int connState)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+                object[] result = proxy.GetFieldBusConfig();
+                int rtn = (int)result[0];
+                if (rtn == 0)
+                {
+                    type = (int)(int)result[2];
+                    version = (int)(int)result[3];
+                    connState = (int)(int)result[4];
+                }
+                if (log != null)
+                {
+                    log.LogInfo($"GetFieldBusConfig: {rtn}");
+                }
+                return rtn;
+            }
+            catch
+            {
+                if (log != null)
+                {
+                    log.LogError("RPC exception");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief  写入从站DO
+         * @param [in] DOIndex DO编号
+         * @param [in] wirteNum 写入数量
+         * @param [in] status 写入数值数组（最多8个）
+         * @return 错误码
+         */
+        public int FieldBusSlaveWriteDO(int DOIndex, int wirteNum, int[] status)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+              
+                int rtn = proxy.FieldBusSlaveWriteDO(DOIndex, wirteNum, status);
+
+                if (log != null)
+                {
+                    log.LogInfo($"FieldBusSlaveWriteDO: {rtn}");
+                }
+                return rtn;
+            }
+            catch
+            {
+                if (log != null)
+                {
+                    log.LogError("RPC exception");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief  写入从站AO
+         * @param [in] AOIndex AO编号
+         * @param [in] wirteNum 写入数量
+         * @param [in] status 写入数值数组（最多8个）
+         * @return 错误码
+         */
+        public int FieldBusSlaveWriteAO(int AOIndex, int wirteNum, int[] status)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+
+                int rtn = proxy.FieldBusSlaveWriteAO(AOIndex, wirteNum, status);
+
+                if (log != null)
+                {
+                    log.LogInfo($"FieldBusSlaveWriteAO: {rtn}");
+                }
+                return rtn;
+            }
+            catch
+            {
+                if (log != null)
+                {
+                    log.LogError("RPC exception");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief  读取从站DI
+         * @param [in] DOIndex DI编号
+         * @param [in] readNum 读取数量
+         * @param [out] status 读取数值数组（最多8个）
+         * @return 错误码
+         */
+        public int FieldBusSlaveReadDI(int DOIndex, int readNum, ref int[] status)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+                object[] result = proxy.FieldBusSlaveReadDI(DOIndex, readNum);
+                int rtn = (int)result[0];
+                if (rtn == 0)
+                {
+                    for (int i = 0; i < readNum; i++)
+                    {
+                        status[i] = (int)(int)result[i + 1];
+                    }
+                }
+                if (log != null)
+                {
+                    log.LogInfo($"FieldBusSlaveReadDI: {rtn}");
+                }
+                return rtn;
+            }
+            catch
+            {
+                if (log != null)
+                {
+                    log.LogError("RPC exception");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief  读取从站AI
+         * @param [in] AIIndex AI编号
+         * @param [in] readNum 读取数量
+         * @param [out] status 读取数值数组（最多8个）
+         * @return 错误码
+         */
+        public int FieldBusSlaveReadAI(int AIIndex, int readNum, ref double[] status)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+                object[] result = proxy.FieldBusSlaveReadAI(AIIndex, readNum);
+                int rtn = (int)result[0];
+                if (rtn == 0)
+                {
+                    for (int i = 0; i < readNum; i++)
+                    {
+                        status[i] = (double)result[i + 1];
+                    }
+                }
+                if (log != null)
+                {
+                    log.LogInfo($"FieldBusSlaveReadAI: {rtn}");
+                }
+                return rtn;
+            }
+            catch
+            {
+                if (log != null)
+                {
+                    log.LogError("RPC exception");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief 等待扩展DI输入
+         * @param [in] DIIndex DI编号
+         * @param [in] status 0-低电平；1-高电平
+         * @param [in] waitMs 最大等待时间(ms)
+         * @return 错误码
+         */
+        public int FieldBusSlaveWaitDI(int DIIndex, int status, int waitMs)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+                int rtn = proxy.FieldBusSlaveWaitDI(DIIndex, status, waitMs);
+
+                if (log != null)
+                {
+                    log.LogInfo($"FieldBusSlaveWaitDI: {rtn}");
+                }
+                return rtn;
+            }
+            catch
+            {
+                if (log != null)
+                {
+                    log.LogError("RPC exception");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief 等待扩展AI输入
+         * @param [in] AIIndex AI编号
+         * @param [in] waitType 0-大于；1-小于
+         * @param [in] value AI值
+         * @param [in] waitMs 最大等待时间(ms)
+         * @return 错误码
+         */
+        public int FieldBusSlaveWaitAI(int AIIndex, int waitType, double value, int waitMs)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+                int rtn = proxy.FieldBusSlaveWaitAI(AIIndex, waitType, value, waitMs);
+
+                if (log != null)
+                {
+                    log.LogInfo($"FieldBusSlaveWaitAI: {rtn}");
+                }
+                return rtn;
+            }
+            catch
+            {
+                if (log != null)
+                {
+                    log.LogError("RPC exception");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief 控制阵列式吸盘
+         * @param [in] slaveID 从站号
+         * @param [in] len 长度
+         * @param [in] ctrlValue 控制值数组
+         * @return 错误码
+         */
+        public int SetSuckerCtrl(int slaveID, int len, int[] ctrlValue)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+     
+                int rtn = proxy.SetSuckerCtrl(slaveID, len, ctrlValue);
+
+                if (log != null)
+                {
+                    log.LogInfo($"SetSuckerCtrl: {rtn}");
+                }
+                return rtn;
+            }
+            catch
+            {
+                if (log != null)
+                {
+                    log.LogError("RPC exception");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief 获取阵列式吸盘状态
+         * @param [in] slaveID 从站号
+         * @param [out] state 吸附状态
+         * @param [out] pressValue 当前真空度(kpa)
+         * @param [out] error 错误码
+         * @return 错误码
+         */
+        public int GetSuckerState(int slaveID, ref int state, ref int pressValue, ref int error)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+                object[] result = proxy.GetSuckerState(slaveID);
+                int rtn = (int)result[0];
+                if (rtn == 0)
+                {
+                    state = (int)(int)result[1];
+                    pressValue = (int)result[2];
+                    error = (int)result[3];
+                }
+                if (log != null)
+                {
+                    log.LogInfo($"GetSuckerState: {rtn}");
+                }
+                return rtn;
+            }
+            catch
+            {
+                if (log != null)
+                {
+                    log.LogError("RPC exception");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief 等待吸盘状态
+         * @param [in] slaveID 从站号
+         * @param [in] state 目标状态（0-释放 1-吸附成功 2-未吸附 3-脱离）
+         * @param [in] ms 最大等待时间(ms)
+         * @return 错误码
+         */
+        public int WaitSuckerState(int slaveID, int state, int ms)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+                int rtn = proxy.WaitSuckerState(slaveID, state, ms);
+
+                if (log != null)
+                {
+                    log.LogInfo($"WaitSuckerState: {rtn}");
+                }
+                return rtn;
+            }
+            catch
+            {
+                if (log != null)
+                {
+                    log.LogError("RPC exception");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+        * @brief 上传Lua文件
+        * @param [in] filePath 本地lua文件路径名
+        * @return 错误码
+        */
+        public int OpenLuaUpload(string filePath)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            /* 上传 */
+            int errcode = FileUpLoad(11, filePath);
+            if (errcode == 0)
+            {
+   
+                /* 提取文件名称 */
+                int pos = filePath.LastIndexOfAny(new char[] { '/', '\\' });
+                if (pos == -1)
+                {
+             
+                    log.LogInfo("format of path is wrong, should be like /home/fd/xxx.lua");
+                    return (int)RobotError.ERR_UPLOAD_FILE_NOT_FOUND;
+                }
+                string filename = filePath.Substring(pos + 1);
+
+                object[] result = proxy.CtrlOpenLuaUpLoadCheck(filename);
+                int rtn = (int)result[0];
+                if (rtn == 0)
+                {
+                    log.LogInfo("file name is: [{0}]", filename);
+            
+                    errcode = (int)result[0];
+                    string res_str = (string)result[1];
+                    log.LogInfo("lua format, error code is: {0}, {1}", errcode.ToString());
+                    if (errcode != 0)
+                    {
+                        log.LogInfo("lua format error.,error code is: {0}, {1}", errcode.ToString());
+                    }
+
+                    return errcode;
+                }
+                else
+                {
+                    log.LogInfo("execute CtrlOpenLuaUpLoadCheck fail.");
+      
+                    return (int)RobotError.ERR_RPC_ERROR;
+                }
+            }
+            else
+            {
+                log.LogInfo("upload file fail. errcode is: {0}.", errcode.ToString());
             }
 
             return errcode;

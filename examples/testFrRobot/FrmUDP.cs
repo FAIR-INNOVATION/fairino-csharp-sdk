@@ -591,9 +591,7 @@ namespace testFrRobot
             robot.MoveJ(startjointPos, startdescPose, 1, 1, 100, 100, 100, startexaxisPos, 0, 0, offdese);
 
             //开始同步运动
-            robot.ExtAxisSyncMoveJ(endjointPos, enddescPose, 1, 1, 100, 100, 100, endexaxisPos, -1, 0, offdese);
-
-
+            robot.ExtAxisSyncMoveJ(endjointPos, 1, 1, 100, 100, 100, endexaxisPos, -1, 0, offdese);
 
         }
 
@@ -711,9 +709,7 @@ namespace testFrRobot
             robot.MoveJ(startjointPos, startdescPose, 1, 1, 100, 100, 100, startexaxisPos, 0, 0, offdese);
 
             //开始同步运动
-            robot.ExtAxisSyncMoveL(endjointPos, enddescPose, 1, 1, 100, 100, 100, 0, endexaxisPos, 0, offdese);
-
-
+            robot.ExtAxisSyncMoveL( enddescPose, 1, 1, 100, 100, 100, 0, endexaxisPos, 0, offdese,-1);
 
         }
 
@@ -833,10 +829,10 @@ namespace testFrRobot
             //运动到起始点，假设应用的工具坐标系、工件坐标系都是1
             robot.ExtAxisMove(startexaxisPos, 20);
             DescPose offdese = new DescPose(0, 0, 0, 0, 0, 0);
-            robot.MoveJ(startjointPos, startdescPose, 1, 1, 100, 100, 100, startexaxisPos, 0, 0, offdese);
+            robot.MoveJ(startjointPos, 1, 1, 100, 100, 100, startexaxisPos, 0, 0, offdese);
 
             //开始同步运动
-            robot.ExtAxisSyncMoveC(midjointPos, middescPose, 1, 1, 100, 100, midexaxisPos, 0, offdese, endjointPos, enddescPose, 1, 1, 100, 100, endexaxisPos, 0, offdese, 100, 0);
+            robot.ExtAxisSyncMoveC( middescPose, 1, 1, 100, 100, midexaxisPos, 0, offdese, enddescPose, 1, 1, 100, 100, endexaxisPos, 0, offdese, 100, 0,-1);
 
 
         }
@@ -1354,7 +1350,9 @@ namespace testFrRobot
 
             robot.MoveL(startjointPos, startdescPose, 0, 0, 50, 100, 100, -1, 0, exaxisPos, 0, 0, offdese, 1, 1);
             robot.SingularAvoidStart(0, 150, 50, 20);
-            robot.MoveC(midjointPos, middescPose, 0, 0, 50, 100, exaxisPos, 0, offdese, endjointPos, enddescPose, 0, 0, 100, 100, exaxisPos, 0, offdese, 100, -1);
+
+         
+                robot.MoveC(midjointPos, middescPose, 0, 0, 50, 100, exaxisPos, 0, offdese, endjointPos, enddescPose, 0, 0, 100, 100, exaxisPos, 0, offdese, 100, -1,0);
             robot.SingularAvoidEnd();
 
 

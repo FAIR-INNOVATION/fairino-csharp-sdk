@@ -55,6 +55,8 @@
             this.button83 = new System.Windows.Forms.Button();
             this.button84 = new System.Windows.Forms.Button();
             this.button85 = new System.Windows.Forms.Button();
+            this.button86 = new System.Windows.Forms.Button();
+            this.button87 = new System.Windows.Forms.Button();
             this.flowLayoutPanel3 = new System.Windows.Forms.FlowLayoutPanel();
             this.button14 = new System.Windows.Forms.Button();
             this.button15 = new System.Windows.Forms.Button();
@@ -123,7 +125,27 @@
             this.button72 = new System.Windows.Forms.Button();
             this.button73 = new System.Windows.Forms.Button();
             this.button74 = new System.Windows.Forms.Button();
-            this.button86 = new System.Windows.Forms.Button();
+            this.flowLayoutPanel8 = new System.Windows.Forms.FlowLayoutPanel();
+            this.button89 = new System.Windows.Forms.Button();
+            this.button88 = new System.Windows.Forms.Button();
+            this.button90 = new System.Windows.Forms.Button();
+            this.button92 = new System.Windows.Forms.Button();
+            this.btnSplineMove = new System.Windows.Forms.Button();
+            this.btnNewSpline = new System.Windows.Forms.Button();
+            this.btnDescSpiral = new System.Windows.Forms.Button();
+            this.button91 = new System.Windows.Forms.Button();
+            this.button93 = new System.Windows.Forms.Button();
+            this.button94 = new System.Windows.Forms.Button();
+            this.button95 = new System.Windows.Forms.Button();
+            this.button96 = new System.Windows.Forms.Button();
+            this.button97 = new System.Windows.Forms.Button();
+            this.button98 = new System.Windows.Forms.Button();
+            this.button103 = new System.Windows.Forms.Button();
+            this.button102 = new System.Windows.Forms.Button();
+            this.button100 = new System.Windows.Forms.Button();
+            this.button99 = new System.Windows.Forms.Button();
+            this.button101 = new System.Windows.Forms.Button();
+            this.TestMovePhy = new System.Windows.Forms.Button();
             this.flowLayoutPanel1.SuspendLayout();
             this.flowLayoutPanel2.SuspendLayout();
             this.flowLayoutPanel3.SuspendLayout();
@@ -131,6 +153,7 @@
             this.flowLayoutPanel5.SuspendLayout();
             this.flowLayoutPanel6.SuspendLayout();
             this.flowLayoutPanel7.SuspendLayout();
+            this.flowLayoutPanel8.SuspendLayout();
             this.SuspendLayout();
             // 
             // flowLayoutPanel1
@@ -265,6 +288,7 @@
             this.flowLayoutPanel2.Controls.Add(this.button84);
             this.flowLayoutPanel2.Controls.Add(this.button85);
             this.flowLayoutPanel2.Controls.Add(this.button86);
+            this.flowLayoutPanel2.Controls.Add(this.button87);
             this.flowLayoutPanel2.Location = new System.Drawing.Point(218, 12);
             this.flowLayoutPanel2.Name = "flowLayoutPanel2";
             this.flowLayoutPanel2.Size = new System.Drawing.Size(140, 695);
@@ -416,9 +440,29 @@
             this.button85.Name = "button85";
             this.button85.Size = new System.Drawing.Size(136, 34);
             this.button85.TabIndex = 25;
-            this.button85.Text = "固件1";
+            this.button85.Text = "固件";
             this.button85.UseVisualStyleBackColor = true;
             this.button85.Click += new System.EventHandler(this.button85_Click);
+            // 
+            // button86
+            // 
+            this.button86.Location = new System.Drawing.Point(3, 603);
+            this.button86.Name = "button86";
+            this.button86.Size = new System.Drawing.Size(136, 34);
+            this.button86.TabIndex = 26;
+            this.button86.Text = "记录激光点";
+            this.button86.UseVisualStyleBackColor = true;
+            this.button86.Click += new System.EventHandler(this.button86_Click);
+            // 
+            // button87
+            // 
+            this.button87.Location = new System.Drawing.Point(3, 643);
+            this.button87.Name = "button87";
+            this.button87.Size = new System.Drawing.Size(136, 34);
+            this.button87.TabIndex = 27;
+            this.button87.Text = "轨迹前瞻";
+            this.button87.UseVisualStyleBackColor = true;
+            this.button87.Click += new System.EventHandler(this.button87_Click);
             // 
             // flowLayoutPanel3
             // 
@@ -983,7 +1027,7 @@
             // button63
             // 
             this.button63.ImageAlign = System.Drawing.ContentAlignment.TopCenter;
-            this.button63.Location = new System.Drawing.Point(891, 15);
+            this.button63.Location = new System.Drawing.Point(49, 445);
             this.button63.Name = "button63";
             this.button63.Size = new System.Drawing.Size(136, 34);
             this.button63.TabIndex = 45;
@@ -1156,21 +1200,239 @@
             this.button74.UseVisualStyleBackColor = true;
             this.button74.Click += new System.EventHandler(this.button74_Click);
             // 
-            // button86
+            // flowLayoutPanel8
             // 
-            this.button86.Location = new System.Drawing.Point(3, 603);
-            this.button86.Name = "button86";
-            this.button86.Size = new System.Drawing.Size(136, 34);
-            this.button86.TabIndex = 26;
-            this.button86.Text = "固件2";
-            this.button86.UseVisualStyleBackColor = true;
-            this.button86.Click += new System.EventHandler(this.button86_Click);
+            this.flowLayoutPanel8.Controls.Add(this.button89);
+            this.flowLayoutPanel8.Controls.Add(this.button88);
+            this.flowLayoutPanel8.Controls.Add(this.button90);
+            this.flowLayoutPanel8.Controls.Add(this.button92);
+            this.flowLayoutPanel8.Controls.Add(this.btnSplineMove);
+            this.flowLayoutPanel8.Controls.Add(this.btnNewSpline);
+            this.flowLayoutPanel8.Controls.Add(this.btnDescSpiral);
+            this.flowLayoutPanel8.Controls.Add(this.button91);
+            this.flowLayoutPanel8.Controls.Add(this.button93);
+            this.flowLayoutPanel8.Controls.Add(this.button94);
+            this.flowLayoutPanel8.Controls.Add(this.button95);
+            this.flowLayoutPanel8.Controls.Add(this.button96);
+            this.flowLayoutPanel8.Controls.Add(this.button97);
+            this.flowLayoutPanel8.Controls.Add(this.button98);
+            this.flowLayoutPanel8.Controls.Add(this.button103);
+            this.flowLayoutPanel8.Controls.Add(this.button102);
+            this.flowLayoutPanel8.Controls.Add(this.button100);
+            this.flowLayoutPanel8.Controls.Add(this.button99);
+            this.flowLayoutPanel8.Controls.Add(this.button101);
+            this.flowLayoutPanel8.Controls.Add(this.TestMovePhy);
+            this.flowLayoutPanel8.Location = new System.Drawing.Point(883, 24);
+            this.flowLayoutPanel8.Name = "flowLayoutPanel8";
+            this.flowLayoutPanel8.Size = new System.Drawing.Size(313, 668);
+            this.flowLayoutPanel8.TabIndex = 50;
+            // 
+            // button89
+            // 
+            this.button89.Location = new System.Drawing.Point(3, 3);
+            this.button89.Name = "button89";
+            this.button89.Size = new System.Drawing.Size(136, 34);
+            this.button89.TabIndex = 30;
+            this.button89.Text = "稳定性";
+            this.button89.UseVisualStyleBackColor = true;
+            this.button89.Click += new System.EventHandler(this.button89_Click);
+            // 
+            // button88
+            // 
+            this.button88.Location = new System.Drawing.Point(145, 3);
+            this.button88.Name = "button88";
+            this.button88.Size = new System.Drawing.Size(136, 34);
+            this.button88.TabIndex = 28;
+            this.button88.Text = "movel";
+            this.button88.UseVisualStyleBackColor = true;
+            this.button88.Click += new System.EventHandler(this.button88_Click);
+            // 
+            // button90
+            // 
+            this.button90.Location = new System.Drawing.Point(3, 43);
+            this.button90.Name = "button90";
+            this.button90.Size = new System.Drawing.Size(136, 34);
+            this.button90.TabIndex = 31;
+            this.button90.Text = "movec";
+            this.button90.UseVisualStyleBackColor = true;
+            this.button90.Click += new System.EventHandler(this.button90_Click);
+            // 
+            // button92
+            // 
+            this.button92.Location = new System.Drawing.Point(145, 43);
+            this.button92.Name = "button92";
+            this.button92.Size = new System.Drawing.Size(136, 34);
+            this.button92.TabIndex = 35;
+            this.button92.Text = "circle";
+            this.button92.UseVisualStyleBackColor = true;
+            this.button92.Click += new System.EventHandler(this.button92_Click);
+            // 
+            // btnSplineMove
+            // 
+            this.btnSplineMove.Location = new System.Drawing.Point(3, 83);
+            this.btnSplineMove.Name = "btnSplineMove";
+            this.btnSplineMove.Size = new System.Drawing.Size(125, 39);
+            this.btnSplineMove.TabIndex = 29;
+            this.btnSplineMove.Text = "样条运动";
+            this.btnSplineMove.UseVisualStyleBackColor = true;
+            this.btnSplineMove.Click += new System.EventHandler(this.btnSplineMove_Click);
+            // 
+            // btnNewSpline
+            // 
+            this.btnNewSpline.Location = new System.Drawing.Point(134, 83);
+            this.btnNewSpline.Name = "btnNewSpline";
+            this.btnNewSpline.Size = new System.Drawing.Size(125, 44);
+            this.btnNewSpline.TabIndex = 32;
+            this.btnNewSpline.Text = "新样条运动";
+            this.btnNewSpline.UseVisualStyleBackColor = true;
+            this.btnNewSpline.Click += new System.EventHandler(this.btnNewSpline_Click);
+            // 
+            // btnDescSpiral
+            // 
+            this.btnDescSpiral.Location = new System.Drawing.Point(3, 133);
+            this.btnDescSpiral.Name = "btnDescSpiral";
+            this.btnDescSpiral.Size = new System.Drawing.Size(131, 41);
+            this.btnDescSpiral.TabIndex = 33;
+            this.btnDescSpiral.Text = "笛卡尔空间螺旋线运动";
+            this.btnDescSpiral.UseVisualStyleBackColor = true;
+            this.btnDescSpiral.Click += new System.EventHandler(this.btnDescSpiral_Click);
+            // 
+            // button91
+            // 
+            this.button91.Location = new System.Drawing.Point(140, 133);
+            this.button91.Name = "button91";
+            this.button91.Size = new System.Drawing.Size(131, 41);
+            this.button91.TabIndex = 34;
+            this.button91.Text = "同步运动";
+            this.button91.UseVisualStyleBackColor = true;
+            this.button91.Click += new System.EventHandler(this.button91_Click);
+            // 
+            // button93
+            // 
+            this.button93.Location = new System.Drawing.Point(3, 180);
+            this.button93.Name = "button93";
+            this.button93.Size = new System.Drawing.Size(136, 34);
+            this.button93.TabIndex = 36;
+            this.button93.Text = "稳定性";
+            this.button93.UseVisualStyleBackColor = true;
+            this.button93.Click += new System.EventHandler(this.button93_Click);
+            // 
+            // button94
+            // 
+            this.button94.Location = new System.Drawing.Point(145, 180);
+            this.button94.Name = "button94";
+            this.button94.Size = new System.Drawing.Size(136, 34);
+            this.button94.TabIndex = 37;
+            this.button94.Text = "TestExtAxisStrategy";
+            this.button94.UseVisualStyleBackColor = true;
+            this.button94.Click += new System.EventHandler(this.button94_Click);
+            // 
+            // button95
+            // 
+            this.button95.Location = new System.Drawing.Point(3, 220);
+            this.button95.Name = "button95";
+            this.button95.Size = new System.Drawing.Size(136, 34);
+            this.button95.TabIndex = 38;
+            this.button95.Text = "TestExtAxisStrategy";
+            this.button95.UseVisualStyleBackColor = true;
+            this.button95.Click += new System.EventHandler(this.button95_Click);
+            // 
+            // button96
+            // 
+            this.button96.Location = new System.Drawing.Point(145, 220);
+            this.button96.Name = "button96";
+            this.button96.Size = new System.Drawing.Size(136, 34);
+            this.button96.TabIndex = 39;
+            this.button96.Text = "TestExtAxisStrategy";
+            this.button96.UseVisualStyleBackColor = true;
+            this.button96.Click += new System.EventHandler(this.button96_Click);
+            // 
+            // button97
+            // 
+            this.button97.Location = new System.Drawing.Point(3, 260);
+            this.button97.Name = "button97";
+            this.button97.Size = new System.Drawing.Size(136, 34);
+            this.button97.TabIndex = 40;
+            this.button97.Text = "TestExtAxisStrategy";
+            this.button97.UseVisualStyleBackColor = true;
+            this.button97.Click += new System.EventHandler(this.button97_Click);
+            // 
+            // button98
+            // 
+            this.button98.Location = new System.Drawing.Point(145, 260);
+            this.button98.Name = "button98";
+            this.button98.Size = new System.Drawing.Size(136, 34);
+            this.button98.TabIndex = 41;
+            this.button98.Text = "TestExtAxisStrategy";
+            this.button98.UseVisualStyleBackColor = true;
+            this.button98.Click += new System.EventHandler(this.button98_Click);
+            // 
+            // button103
+            // 
+            this.button103.Location = new System.Drawing.Point(3, 300);
+            this.button103.Name = "button103";
+            this.button103.Size = new System.Drawing.Size(268, 34);
+            this.button103.TabIndex = 46;
+            this.button103.Text = "TestFieldBusSlaveReadDIAI_WaitDIAI";
+            this.button103.UseVisualStyleBackColor = true;
+            this.button103.Click += new System.EventHandler(this.button103_Click);
+            // 
+            // button102
+            // 
+            this.button102.Location = new System.Drawing.Point(3, 340);
+            this.button102.Name = "button102";
+            this.button102.Size = new System.Drawing.Size(268, 34);
+            this.button102.TabIndex = 45;
+            this.button102.Text = "TestFieldBusSlaveWriteDOAO";
+            this.button102.UseVisualStyleBackColor = true;
+            this.button102.Click += new System.EventHandler(this.button102_Click);
+            // 
+            // button100
+            // 
+            this.button100.Location = new System.Drawing.Point(3, 380);
+            this.button100.Name = "button100";
+            this.button100.Size = new System.Drawing.Size(136, 34);
+            this.button100.TabIndex = 43;
+            this.button100.Text = "testSuckerMove";
+            this.button100.UseVisualStyleBackColor = true;
+            this.button100.Click += new System.EventHandler(this.button100_Click);
+            // 
+            // button99
+            // 
+            this.button99.Location = new System.Drawing.Point(3, 420);
+            this.button99.Name = "button99";
+            this.button99.Size = new System.Drawing.Size(268, 34);
+            this.button99.TabIndex = 42;
+            this.button99.Text = "吸盘";
+            this.button99.UseVisualStyleBackColor = true;
+            this.button99.Click += new System.EventHandler(this.button99_Click);
+            // 
+            // button101
+            // 
+            this.button101.Location = new System.Drawing.Point(3, 460);
+            this.button101.Name = "button101";
+            this.button101.Size = new System.Drawing.Size(268, 34);
+            this.button101.TabIndex = 44;
+            this.button101.Text = "CtrlDev_field";
+            this.button101.UseVisualStyleBackColor = true;
+            this.button101.Click += new System.EventHandler(this.button101_Click);
+            // 
+            // TestMovePhy
+            // 
+            this.TestMovePhy.Location = new System.Drawing.Point(3, 500);
+            this.TestMovePhy.Name = "TestMovePhy";
+            this.TestMovePhy.Size = new System.Drawing.Size(268, 34);
+            this.TestMovePhy.TabIndex = 47;
+            this.TestMovePhy.Text = "TestMovePhy";
+            this.TestMovePhy.UseVisualStyleBackColor = true;
+            this.TestMovePhy.Click += new System.EventHandler(this.TestMovePhy_Click);
             // 
             // Test
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1434, 735);
+            this.Controls.Add(this.flowLayoutPanel8);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.flowLayoutPanel7);
             this.Controls.Add(this.label1);
@@ -1191,6 +1453,7 @@
             this.flowLayoutPanel5.ResumeLayout(false);
             this.flowLayoutPanel6.ResumeLayout(false);
             this.flowLayoutPanel7.ResumeLayout(false);
+            this.flowLayoutPanel8.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1294,5 +1557,27 @@
         private System.Windows.Forms.Button button84;
         private System.Windows.Forms.Button button85;
         private System.Windows.Forms.Button button86;
+        private System.Windows.Forms.Button button87;
+        private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel8;
+        private System.Windows.Forms.Button button88;
+        private System.Windows.Forms.Button btnSplineMove;
+        private System.Windows.Forms.Button button90;
+        private System.Windows.Forms.Button button89;
+        private System.Windows.Forms.Button btnNewSpline;
+        private System.Windows.Forms.Button btnDescSpiral;
+        private System.Windows.Forms.Button button91;
+        private System.Windows.Forms.Button button92;
+        private System.Windows.Forms.Button button93;
+        private System.Windows.Forms.Button button94;
+        private System.Windows.Forms.Button button95;
+        private System.Windows.Forms.Button button96;
+        private System.Windows.Forms.Button button97;
+        private System.Windows.Forms.Button button98;
+        private System.Windows.Forms.Button button99;
+        private System.Windows.Forms.Button button100;
+        private System.Windows.Forms.Button button101;
+        private System.Windows.Forms.Button button102;
+        private System.Windows.Forms.Button button103;
+        private System.Windows.Forms.Button TestMovePhy;
     }
 }
