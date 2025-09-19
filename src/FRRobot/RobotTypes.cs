@@ -17,7 +17,10 @@ namespace fairino
     {
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 6)]
         public double[] jPos;   /* 六个关节位置，单位deg */
-
+        //public JointPos()
+        //{
+        //    jPos = new double[6]; // 初始化为长度为6的零数组
+        //}
         public JointPos(double[] pos)
         {
             jPos = pos;
@@ -327,9 +330,21 @@ namespace fairino
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 6)]
         public double[] jt_tgt_tor;//关节指令力矩
         public int smartToolState; //SmartTool手柄按钮状态
-
         public float wideVoltageCtrlBoxTemp;        //宽电压控制箱温度
         public UInt16 wideVoltageCtrlBoxFanVel;   //宽电压控制箱风扇电流（mA）
+
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 6)]
+        public double[] toolCoord;         //工具坐标系
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 6)]
+        public double[] wobjCoord;         //工件坐标系
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 6)]
+        public double[] extoolCoord;        //外部工具坐标系
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 6)]
+        public double[] exAxisCoord;          //扩展轴坐标系
+        public double load;                   //负载质量
+
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
+        public double[] loadCog;           //负载质心
         public UInt16 check_sum;         /* 和校验 */                 
     }
 

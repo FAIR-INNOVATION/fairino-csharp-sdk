@@ -570,7 +570,7 @@ namespace fairino
         * @param  [in] coord 质心坐标，单位mm
         * @return  错误码
         */[XmlRpcMethod("SetLoadCoord")]
-        int SetLoadCoord(double coordX, double coordY, double coordZ);
+        int SetLoadCoord(double coordX, double coordY, double coordZ, int loadNum);
 
         /**
         * @brief  设置机器人安装方式
@@ -2030,6 +2030,86 @@ namespace fairino
 
         [XmlRpcMethod("CtrlOpenLuaUpLoadCheck")]
         object[] CtrlOpenLuaUpLoadCheck(string filePath);
+
+
+        [XmlRpcMethod("SetTorqueDetectionSwitch")]
+        int SetTorqueDetectionSwitch(int flag);
+
+
+
+        [XmlRpcMethod("LaserTrackingLaserOnOff")]
+        int LaserTrackingLaserOnOff(int OnOff, int weldId);
+
+        [XmlRpcMethod("LaserTrackingTrackOnOff")]
+        int LaserTrackingTrackOnOff(int OnOff, int coordId);
+
+        [XmlRpcMethod("LaserTrackingSearchStart_xyz")]
+        int LaserTrackingSearchStart_xyz(int direction, int vel, int distance, int timeout, int posSensorNum);
+
+        [XmlRpcMethod("LaserTrackingSearchStart_point")]
+        int LaserTrackingSearchStart_point(int param0, int vel, int distance, int timeout, int posSensorNum, double x, double y, double z);
+
+        [XmlRpcMethod("LaserTrackingSensorConfig")]
+        int LaserTrackingSensorConfig(string ip, int port);
+
+        [XmlRpcMethod("LaserTrackingSensorSamplePeriod")]
+        int LaserTrackingSensorSamplePeriod(int period);
+
+        [XmlRpcMethod("LoadPosSensorDriver")]
+        int LoadPosSensorDriver(int type);
+
+        [XmlRpcMethod("UnLoadPosSensorDriver")]
+        int UnLoadPosSensorDriver();
+
+        [XmlRpcMethod("LaserSensorRecord1")]
+        int LaserSensorRecord1(int status, int delayTime);
+
+        [XmlRpcMethod("LaserSensorReplay")]
+        int LaserSensorReplay(int param0, int delayTime, double speed);
+
+        [XmlRpcMethod("MoveLTR")]
+        int MoveLTR(int param0);
+
+        [XmlRpcMethod("LaserSensorRecordandReplay")]
+        int LaserSensorRecordandReplay(int param0, int delayMode, int delayTime, int delayDisExAxisNum, double delayDis, double sensitivePara, double speed);
+
+        [XmlRpcMethod("MoveToLaserRecordStart")]
+        int MoveToLaserRecordStart(int moveType, double ovl);
+
+        [XmlRpcMethod("MoveToLaserRecordEnd")]
+        int MoveToLaserRecordEnd(int moveType, double ovl);
+
+        [XmlRpcMethod("MoveToLaserSeamPos")]
+        int MoveToLaserSeamPos(object[] parm);
+
+        [XmlRpcMethod("GetLaserSeamPos")]
+        object[] GetLaserSeamPos(object[] parm);
+
+        [XmlRpcMethod("ImpedanceControlStartStop")]
+        int ImpedanceControlStartStop(object[] impedanceParams);
+
+
+        [XmlRpcMethod("GetToolCoordWithID")]
+        object[] GetToolCoordWithID(int param);
+
+        [XmlRpcMethod("GetWObjCoordWithID")]
+        object[] GetWObjCoordWithID(int param);
+
+        [XmlRpcMethod("GetExToolCoordWithID")]
+        object[] GetExToolCoordWithID(int param);
+
+        [XmlRpcMethod("GetExAxisCoordWithID")]
+        object[] GetExAxisCoordWithID(int param);
+
+        [XmlRpcMethod("GetTargetPayloadWithID")]
+        object[] GetTargetPayloadWithID(int param);
+
+
+        [XmlRpcMethod("CustomWeaveSetPara")]
+        int CustomWeaveSetPara(object[] param);
+
+        [XmlRpcMethod("CustomWeaveGetPara")]
+        object[] CustomWeaveGetPara(int param);
     }
     internal class RPCHandle
     {

@@ -146,6 +146,8 @@
             this.button99 = new System.Windows.Forms.Button();
             this.button101 = new System.Windows.Forms.Button();
             this.TestMovePhy = new System.Windows.Forms.Button();
+            this.TestDragSwitchDetect = new System.Windows.Forms.Button();
+            this.button104 = new System.Windows.Forms.Button();
             this.flowLayoutPanel1.SuspendLayout();
             this.flowLayoutPanel2.SuspendLayout();
             this.flowLayoutPanel3.SuspendLayout();
@@ -1222,10 +1224,13 @@
             this.flowLayoutPanel8.Controls.Add(this.button99);
             this.flowLayoutPanel8.Controls.Add(this.button101);
             this.flowLayoutPanel8.Controls.Add(this.TestMovePhy);
+            this.flowLayoutPanel8.Controls.Add(this.TestDragSwitchDetect);
+            this.flowLayoutPanel8.Controls.Add(this.button104);
             this.flowLayoutPanel8.Location = new System.Drawing.Point(883, 24);
             this.flowLayoutPanel8.Name = "flowLayoutPanel8";
             this.flowLayoutPanel8.Size = new System.Drawing.Size(313, 668);
             this.flowLayoutPanel8.TabIndex = 50;
+
             // 
             // button89
             // 
@@ -1427,6 +1432,26 @@
             this.TestMovePhy.UseVisualStyleBackColor = true;
             this.TestMovePhy.Click += new System.EventHandler(this.TestMovePhy_Click);
             // 
+            // TestDragSwitchDetect
+            // 
+            this.TestDragSwitchDetect.Location = new System.Drawing.Point(3, 540);
+            this.TestDragSwitchDetect.Name = "TestDragSwitchDetect";
+            this.TestDragSwitchDetect.Size = new System.Drawing.Size(268, 34);
+            this.TestDragSwitchDetect.TabIndex = 48;
+            this.TestDragSwitchDetect.Text = "TestDragSwitchDetect";
+            this.TestDragSwitchDetect.UseVisualStyleBackColor = true;
+            this.TestDragSwitchDetect.Click += new System.EventHandler(this.TestDragSwitchDetect_Click);
+            // 
+            // button104
+            // 
+            this.button104.Location = new System.Drawing.Point(3, 580);
+            this.button104.Name = "button104";
+            this.button104.Size = new System.Drawing.Size(268, 34);
+            this.button104.TabIndex = 49;
+            this.button104.Text = "button104";
+            this.button104.UseVisualStyleBackColor = true;
+            this.button104.Click += new System.EventHandler(this.button104_Click);
+            // 
             // Test
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
@@ -1579,5 +1604,7 @@
         private System.Windows.Forms.Button button102;
         private System.Windows.Forms.Button button103;
         private System.Windows.Forms.Button TestMovePhy;
+        private System.Windows.Forms.Button TestDragSwitchDetect;
+        private System.Windows.Forms.Button button104;
     }
 }
