@@ -41,7 +41,7 @@ namespace fairino
     {
         ICallSupervisor proxy = null;
 
-        const string SDK_VERSION = " C#SDK-V1.1.7  Web-3.8.5";
+        const string SDK_VERSION = " C#SDK-V1.1.8  Web-3.8.6";
 
         private string robot_ip = "192.168.57.2";//机器人ip
         private int g_sock_com_err = (int)RobotError.ERR_SUCCESS;
@@ -1021,6 +1021,7 @@ namespace fairino
          */
         public int MoveL(JointPos joint_pos, DescPose desc_pos, int tool, int user, float vel, float acc, float ovl, float blendR, int blendMode, ExaxisPos epos, int search, int offset_flag, DescPose offset_pos, int velAccParamMode, int overSpeedStrategy = 0, int speedPercent = 10)
         {
+            //log.LogInfo($"MoveL");
             if (IsSockComError())
             {
                 return g_sock_com_err;
@@ -1086,9 +1087,33 @@ namespace fairino
                 object[] moveLParams1 =new object[1];
                 moveLParams1[0] = moveLParams;
                 // 调用RPC
-
                 rtn = proxy.MoveL(moveLParams);
-
+               // log.LogInfo($"proxy MoveL completed with return code: {rtn}");
+                //try
+                //{
+                //    rtn = proxy.MoveL(moveLParams);
+                //    log.LogInfo($"proxy MoveL completed with return code: {rtn}");
+                //}
+                //catch (CookComputing.XmlRpc.XmlRpcFaultException ex)
+                //{
+                //    log.LogError($"XML-RPC Fault Exception in MoveL: FaultCode={ex.FaultCode}, FaultString={ex.FaultString}");
+                //    // 根据错误码进行相应的错误处理
+                //    return (int)RobotError.ERR_RPC_ERROR;
+                //}
+                //catch (System.Net.WebException ex)
+                //{
+                //    log.LogError($"Network Exception in MoveL: {ex.Message}");
+                //    if (ex.Status == System.Net.WebExceptionStatus.ConnectFailure)
+                //    {
+                //        return (int)RobotError.ERR_RPC_ERROR;
+                //    }
+                //    return (int)RobotError.ERR_RPC_ERROR;
+                //}
+                //catch (System.Exception ex)
+                //{
+                //    log.LogError($"Unexpected Exception in MoveL: {ex.Message}");
+                //    return (int)RobotError.ERR_RPC_ERROR;
+                //}
                 if (log != null)
                 {
                     log.LogInfo($"MoveL called with {moveLParams.Length} parameters. Return: {rtn}");
@@ -1113,7 +1138,6 @@ namespace fairino
                 {
                     rtn = 14;
                 }
-
                 return rtn;
             }
             catch
@@ -1277,7 +1301,7 @@ namespace fairino
             }
         }
         /**
-     * @brief  笛卡尔空间直线运动(重载函数2 不需要输入关节位置)
+     * @brief  笛卡尔空间直线运动(重载函数2 不需要输入blendMode)
      * @param  [in] desc_pos   目标笛卡尔位姿
      * @param  [in] tool  工具坐标号，范围[1~15]
      * @param  [in] user  工件坐标号，范围[1~15]
@@ -3630,7 +3654,7 @@ namespace fairino
 
             try
             {
-                int rtn = proxy.SetLoadCoord(coord.x, coord.y, coord.z);
+                int rtn = proxy.SetLoadCoord(coord.x, coord.y, coord.z,0);
                 if (log != null)
                 {
                     log.LogInfo($"SetLoadCoord({coord.x},{coord.y},{coord.z}) : {rtn}");
@@ -3654,6 +3678,44 @@ namespace fairino
             }
         }
 
+        /**
+ * @brief  设置末端负载质心坐标
+ * @param  [in] loadNum 负载编号
+ * @param  [in] coord 质心坐标，单位mm
+ * @return  错误码
+ */
+        public int SetLoadCoord(int loadNum, DescTran coord)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            try
+            {
+                int rtn = proxy.SetLoadCoord(coord.x, coord.y, coord.z, loadNum);
+                if (log != null)
+                {
+                    log.LogInfo($"SetLoadCoord({coord.x},{coord.y},{coord.z}) : {rtn}");
+                }
+                return rtn;
+            }
+            catch
+            {
+                if (IsSockComError())
+                {
+                    if (log != null)
+                    {
+                        log.LogError($"RPC exception");
+                    }
+                    return g_sock_com_err;
+                }
+                else
+                {
+                    return (int)RobotError.ERR_SUCCESS;
+                }
+            }
+        }
         /**
          * @brief  设置机器人安装方式
          * @param  [in] install  安装方式，0-正装，1-侧装，2-倒装
@@ -19993,6 +20055,1311 @@ namespace fairino
             }
 
             return errcode;
+        }
+
+        /**
+        * @brief 设置拖动开启前负载力检测
+        * @param [in] flag 0-关闭；1-开启
+        * @return 错误码
+*/
+        public int SetTorqueDetectionSwitch(int flag)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            try
+            {
+                int rtn = proxy.SetTorqueDetectionSwitch(flag);
+
+                if (log != null)
+                {
+                    log.LogInfo($"WaitSuckerState: {rtn}");
+                }
+                return rtn;
+            }
+            catch(Exception ex)
+            {
+                if (log != null)
+                {
+                    log.LogError("RPC exception" + ex.ToString());
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+  
+        }
+
+        /**
+ * @brief 激光外设打开关闭函数
+ * @param [in] OnOff 0-关闭 1-打开
+ * @param [in] weldId 焊缝ID 默认为0
+ * @return 错误码
+ */
+        public int LaserTrackingLaserOnOff(int OnOff, int weldId = 0)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+                int rtn = proxy.LaserTrackingLaserOnOff(OnOff, weldId);
+    
+                if (log != null)
+                {
+                    log.LogInfo($"LaserTrackingLaserOnOff: {rtn}");
+                }
+                return rtn;
+            }
+            catch
+            {
+                if (log != null)
+                {
+                    log.LogError("RPC exception");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief 激光跟踪开始结束函数
+         * @param [in] OnOff 0-结束 1-开始
+         * @param [in] coordId 激光外设工具坐标系编号
+         * @return 错误码
+         */
+        public int LaserTrackingTrackOnOff(int OnOff, int coordId)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+                int rtn = proxy.LaserTrackingTrackOnOff(OnOff, coordId);
+    
+                if (log != null)
+                {
+                    log.LogInfo($"LaserTrackingTrackOnOff: {rtn}");
+                }
+                return rtn;
+            }
+            catch
+            {
+                if (log != null)
+                {
+                    log.LogError("RPC exception");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief 激光寻位-固定反向
+         * @param [in] direction 0-x+ 1-x- 2-y+ 3-y- 4-z+ 5-z-
+         * @param [in] vel 速度 单位%
+         * @param [in] distance 最大寻位距离 单位mm
+         * @param [in] timeout 寻位超时时间 单位ms
+         * @param [in] posSensorNum 激光标定的工具坐标编号
+         * @return 错误码
+         */
+        public int LaserTrackingSearchStart_xyz(int direction, int vel, int distance, int timeout, int posSensorNum)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+                int rtn = proxy.LaserTrackingSearchStart_xyz(direction, vel, distance, timeout, posSensorNum);
+     
+                if (log != null)
+                {
+                    log.LogInfo($"LaserTrackingSearchStart_xyz: {rtn}");
+                }
+                return rtn;
+            }
+            catch
+            {
+                if (log != null)
+                {
+                    log.LogError("RPC exception");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief 激光寻位-任意方向
+         * @param [in] directionPoint 寻位输入的点的xyz坐标
+         * @param [in] vel 速度 单位%
+         * @param [in] distance 最大寻位距离 单位mm
+         * @param [in] timeout 寻位超时时间 单位ms
+         * @param [in] posSensorNum 激光标定的工具坐标编号
+         * @return 错误码
+         */
+        public int LaserTrackingSearchStart_point(DescTran directionPoint, int vel, int distance, int timeout, int posSensorNum)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+                int rtn = proxy.LaserTrackingSearchStart_point(6, vel, distance, timeout, posSensorNum, directionPoint.x, directionPoint.y, directionPoint.z);
+       
+                if (log != null)
+                {
+                    log.LogInfo($"LaserTrackingSearchStart_point: {rtn}");
+                }
+                return rtn;
+            }
+            catch
+            {
+                if (log != null)
+                {
+                    log.LogError("RPC exception");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief 激光IP配置
+         * @param [in] ip 激光外设的ip地址
+         * @param [in] port 激光外设的端口号
+         * @return 错误码
+         */
+        public int LaserTrackingSensorConfig(string ip, int port)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+                int rtn = proxy.LaserTrackingSensorConfig(ip, port);
+        
+                if (log != null)
+                {
+                    log.LogInfo($"LaserTrackingSensorConfig: {rtn}");
+                }
+                return rtn;
+            }
+            catch
+            {
+                if (log != null)
+                {
+                    log.LogError("RPC exception");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief 激光外设采样周期配置
+         * @param [in] period 激光外设采样周期 单位ms
+         * @return 错误码
+         */
+        public int LaserTrackingSensorSamplePeriod(int period)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+                int rtn = proxy.LaserTrackingSensorSamplePeriod(period);
+           
+                if (log != null)
+                {
+                    log.LogInfo($"LaserTrackingSensorSamplePeriod: {rtn}");
+                }
+                return rtn;
+            }
+            catch
+            {
+                if (log != null)
+                {
+                    log.LogError("RPC exception");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief 激光外设驱动加载
+         * @param [in] type 激光外设驱动的协议类型 101-睿牛 102-创想 103-全视 104-同舟 105-奥太
+         * @return 错误码
+         */
+        public int LoadPosSensorDriver(int type)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+                int rtn = proxy.LoadPosSensorDriver(type);
+     
+                if (log != null)
+                {
+                    log.LogInfo($"LoadPosSensorDriver: {rtn}");
+                }
+                return rtn;
+            }
+            catch
+            {
+                if (log != null)
+                {
+                    log.LogError("RPC exception");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief 激光外设驱动卸载
+         * @return 错误码
+         */
+        public int UnLoadPosSensorDriver()
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+                int rtn = proxy.UnLoadPosSensorDriver();
+   
+                if (log != null)
+                {
+                    log.LogInfo($"UnLoadPosSensorDriver: {rtn}");
+                }
+                return rtn;
+            }
+            catch
+            {
+                if (log != null)
+                {
+                    log.LogError("RPC exception");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief 激光焊缝轨迹记录
+         * @param [in] status 0-停止记录 1-实时跟踪  2-开始记录
+         * @param [in] delayTime 延时时间 单位ms
+         * @return 错误码
+         */
+        public int LaserSensorRecord1(int status, int delayTime)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+                int rtn = proxy.LaserSensorRecord1(status, delayTime);
+     
+                if (log != null)
+                {
+                    log.LogInfo($"LaserSensorRecord1: {rtn}");
+                }
+                return rtn;
+            }
+            catch
+            {
+                if (log != null)
+                {
+                    log.LogError("RPC exception");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief 激光焊缝轨迹复现
+         * @param [in] delayTime 延时时间 单位ms
+         * @param [in] speed 速度 单位%
+         * @return 错误码
+         */
+        public int LaserSensorReplay(int delayTime, double speed)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+                int rtn = proxy.LaserSensorReplay(3, delayTime, speed);
+      
+                if (log != null)
+                {
+                    log.LogInfo($"LaserSensorReplay: {rtn}");
+                }
+                return rtn;
+            }
+            catch
+            {
+                if (log != null)
+                {
+                    log.LogError("RPC exception");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief 激光跟踪复现
+         * @return 错误码
+         */
+        public int MoveLTR()
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+                int rtn = proxy.MoveLTR(0);
+          
+                if (log != null)
+                {
+                    log.LogInfo($"MoveLTR: {rtn}");
+                }
+                return rtn;
+            }
+            catch
+            {
+                if (log != null)
+                {
+                    log.LogError("RPC exception");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief 激光焊缝轨迹复现
+         * @param [in] delayMode 模式 0-延时时间 1-延时距离
+         * @param [in] delayTime 延时时间 单位ms
+         * @param [in] delayDisExAxisNum 扩展轴编号
+         * @param [in] delayDis 延时距离 单位mm
+         * @param [in] sensitivePara 补偿灵敏系数
+         * @param [in] speed 速度 单位%
+         * @return 错误码
+         */
+        public int LaserSensorRecordandReplay(int delayMode, int delayTime, int delayDisExAxisNum, double delayDis, double sensitivePara, double speed)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+                int rtn = proxy.LaserSensorRecordandReplay(4, delayMode, delayTime, delayDisExAxisNum, delayDis, sensitivePara, speed);
+       
+                if (log != null)
+                {
+                    log.LogInfo($"LaserSensorRecordandReplay: {rtn}");
+                }
+                return rtn;
+            }
+            catch
+            {
+                if (log != null)
+                {
+                    log.LogError("RPC exception");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief 运动到焊缝记录的起点
+         * @param [in] moveType 0-PTP 1-LIN
+         * @param [in] ovl 速度 单位%
+         * @return 错误码
+         */
+        public int MoveToLaserRecordStart(int moveType, double ovl)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+                int rtn = proxy.MoveToLaserRecordStart(moveType, ovl);
+
+                if (log != null)
+                {
+                    log.LogInfo($"MoveToLaserRecordStart: {rtn}");
+                }
+                return rtn;
+            }
+            catch
+            {
+                if (log != null)
+                {
+                    log.LogError("RPC exception");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+        /**
+ * @brief 运动到焊缝记录的终点
+ * @param [in] moveType 0-PTP 1-LIN
+ * @param [in] ovl 速度 单位%
+ * @return 错误码
+ */
+        public int MoveToLaserRecordEnd(int moveType, double ovl)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+                int rtn = proxy.MoveToLaserRecordEnd(moveType, ovl);
+
+                if (log != null)
+                {
+                    log.LogInfo($"MoveToLaserRecordEnd: {rtn}");
+                }
+                return rtn;
+            }
+            catch
+            {
+                if (log != null)
+                {
+                    log.LogError("RPC exception");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+     
+        /// <summary>
+        /// 运动到激光传感器寻位点
+        /// </summary>
+        /// <param name="moveFlag">运动类型：0-PTP；1-LIN</param>
+        /// <param name="ovl">速度缩放因子，0-100</param>
+        /// <param name="dataFlag">焊缝缓存数据选择：0-执行规划数据；1-执行记录数据</param>
+        /// <param name="plateType">板材类型：0-波纹板；1-瓦楞板；2-围栏板；3-油桶；4-波纹甲壳钢</param>
+        /// <param name="trackOffectType">激光传感器偏移类型：0-不偏移；1-基坐标系偏移；2-工具坐标系偏移；3-激光传感器原始数据偏移</param>
+        /// <param name="offset">偏移量</param>
+        /// <returns>错误码</returns>
+        public int MoveToLaserSeamPos(int moveFlag, double ovl, int dataFlag, int plateType, int trackOffectType, DescPose offset)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            try
+            {
+                object[] moveLParams = new object[11];
+                moveLParams[0] = moveFlag;  // 关键修改1：float->double
+                moveLParams[1] = ovl;
+                moveLParams[2] = dataFlag;
+                moveLParams[3] = plateType;
+                moveLParams[4] = trackOffectType;
+                moveLParams[5] = offset.tran.x;
+                moveLParams[6] = offset.tran.y;
+                moveLParams[7] = offset.tran.z;
+                moveLParams[8] = offset.rpy.rx;
+                moveLParams[9] = offset.rpy.ry;
+                moveLParams[10] = offset.rpy.rz;
+
+                // 调用RPC服务
+                int rtn = proxy.MoveToLaserSeamPos(moveLParams);
+
+                if (log != null)
+                {
+                    if (rtn != 0)
+                    {
+                        log.LogError($"Execute MoveToLaserSeamPos fail: {rtn}");
+                    }
+                    else
+                    {
+                        log.LogInfo($"MoveToLaserSeamPos executed successfully: {rtn}");
+                    }
+                }
+
+                return rtn;
+            }
+            catch (Exception ex)
+            {
+                if (log != null)
+                {
+                    log.LogError($"RPC exception in MoveToLaserSeamPos: {ex.Message}");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /// <summary>
+        /// 获取激光传感器寻位点坐标信息
+        /// </summary>
+        /// <param name="trackOffectType">激光传感器偏移类型：0-不偏移；1-基坐标系偏移；2-工具坐标系偏移；3-激光传感器原始数据偏移</param>
+        /// <param name="offset">偏移量</param>
+        /// <param name="jPos">关节位置[°]</param>
+        /// <param name="descPos">笛卡尔位置[mm]</param>
+        /// <param name="tool">工具坐标系</param>
+        /// <param name="user">工件坐标系</param>
+        /// <param name="exaxis">扩展轴位置[mm]</param>
+        /// <returns>错误码</returns>
+        public int GetLaserSeamPos(int trackOffectType, DescPose offset, ref JointPos jPos, ref DescPose descPos, ref int tool, ref int user, ref ExaxisPos exaxis)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            jPos = new JointPos(0,0,0,0,0,0); // 传入已初始化的数组
+            descPos = new DescPose(0,0,0,0,0,0);
+
+            exaxis = new ExaxisPos(0, 0, 0, 0);
+            try
+            {
+                // 创建参数数组
+                object[] getLaserSeamPosParams = new object[7];
+                getLaserSeamPosParams[0] = trackOffectType;
+                getLaserSeamPosParams[1] = offset.tran.x;
+                getLaserSeamPosParams[2] = offset.tran.y;
+                getLaserSeamPosParams[3] = offset.tran.z;
+                getLaserSeamPosParams[4] = offset.rpy.rx;
+                getLaserSeamPosParams[5] = offset.rpy.ry;
+                getLaserSeamPosParams[6] = offset.rpy.rz;
+
+                // 调用RPC服务
+                object[] result = proxy.GetLaserSeamPos(getLaserSeamPosParams);
+                int rtn = (int)result[0];
+
+                if (rtn == 0)
+                {
+                    string res_str = (string)result[1];
+                    log.LogInfo("GetLaserSeamPos response: {0}", res_str);
+                                // 解析返回的参数字符串
+                    string[] parS = res_str.Split(',');
+                    Console.WriteLine("parS[0]::::::" + parS[0]);
+                    //if (parS.Length != 20)
+                    //{
+                    //    log.LogError("Get SeamPos Point size fail, expected 20 but got {0}", parS.Length.ToString());
+                    //    return -1;
+                    //}
+
+                    // 解析关节位置
+                    jPos.jPos[0] = Convert.ToDouble(parS[0]);
+                    jPos.jPos[1] = Convert.ToDouble(parS[1]);
+                    jPos.jPos[2] = Convert.ToDouble(parS[2]);
+                    jPos.jPos[3] = Convert.ToDouble(parS[3]);
+                    jPos.jPos[4] = Convert.ToDouble(parS[4]);
+                    jPos.jPos[5] = Convert.ToDouble(parS[5]);
+
+                    // 解析笛卡尔位置
+                    descPos.tran.x = Convert.ToDouble(parS[6]);
+                    descPos.tran.y = Convert.ToDouble(parS[7]);
+                    descPos.tran.z = Convert.ToDouble(parS[8]);
+                    descPos.rpy.rx = Convert.ToDouble(parS[9]);
+                    descPos.rpy.ry = Convert.ToDouble(parS[10]);
+                    descPos.rpy.rz = Convert.ToDouble(parS[11]);
+
+                    // 解析工具和工件坐标系
+                    tool = Convert.ToInt32(parS[12]);
+                    user = Convert.ToInt32(parS[13]);
+
+                    // 解析扩展轴位置（跳过14、15，从16开始）
+                    exaxis.ePos[0] = Convert.ToDouble(parS[16]);
+                    exaxis.ePos[1] = Convert.ToDouble(parS[17]);
+                    exaxis.ePos[2] = Convert.ToDouble(parS[18]);
+                    exaxis.ePos[3] = Convert.ToDouble(parS[19]);
+                }
+                else
+                {
+                    log.LogError("Execute GetLaserSeamPos fail, error code is: {0}", rtn.ToString());
+                }
+
+                return rtn;
+            }
+            catch (Exception ex)
+            {
+                if (log != null)
+                {
+                    log.LogError("RPC exception in GetLaserSeamPos: {0}", ex.Message);
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+
+        /**
+        * @brief 阻抗启停控制
+        * @param [in] status 0：关闭；1-开启
+        * @param [in] workSpace 0-关节空间；1-迪卡尔空间
+        * @param [in] forceThreshold 触发力阈值(N)
+        * @param [in] m 质量参数
+        * @param [in] b 阻尼参数
+        * @param [in] k 刚度参数
+        * @param [in] maxV 最大线速度(mm/s)
+        * @param [in] maxVA 最大线加速度(mm/s2)
+        * @param [in] maxW 最大角速度(°/s)
+        * @param [in] maxWA 最大角加速度(°/s2)
+        * @return 错误码
+        */
+        public int ImpedanceControlStartStop(int status, int workSpace, double[] forceThreshold,
+                                    double[] m, double[] b, double[] k,
+                                    double maxV, double maxVA, double maxW, double maxWA)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            try
+            {
+                // 创建参数数组
+                object[] impedanceParams = new object[30];
+                impedanceParams[0] = status;
+                impedanceParams[1] = workSpace;
+
+                // 添加forceThreshold数组的6个元素
+                for (int i = 0; i < 6; i++)
+                {
+                    impedanceParams[2 + i] = forceThreshold[i];
+                }
+
+                // 添加m数组的6个元素
+                for (int i = 0; i < 6; i++)
+                {
+                    impedanceParams[8 + i] = m[i];
+                }
+
+                // 添加b数组的6个元素
+                for (int i = 0; i < 6; i++)
+                {
+                    impedanceParams[14 + i] = b[i];
+                }
+
+                // 添加k数组的6个元素
+                for (int i = 0; i < 6; i++)
+                {
+                    impedanceParams[20 + i] = k[i];
+                }
+                impedanceParams[26] = maxV;
+                impedanceParams[27] = maxVA;
+                impedanceParams[28] = maxW;
+                impedanceParams[29] = maxWA;
+                int rtn = proxy.ImpedanceControlStartStop(impedanceParams);
+
+                // 日志记录
+                if (log != null)
+                {
+                    if (rtn != 0)
+                    {
+                        log.LogError($"Execute ImpedanceControlStartStop fail: {rtn}");
+                    }
+                    else
+                    {
+                        log.LogInfo($"ImpedanceControlStartStop executed successfully: {rtn}");
+                    }
+                }
+
+                return rtn;
+            }
+            catch (Exception ex)
+            {
+                if (log != null)
+                {
+                    log.LogError($"RPC exception in ImpedanceControlStartStop: {ex.Message}");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+
+        /// <summary>
+        /// 根据编号获取工具坐标系
+        /// </summary>
+        public int GetToolCoordWithID(int id, ref DescPose coord)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            if (id < 0 || id > 14)
+            {
+                return 4;
+            }
+
+            try
+            {
+                //object[] param = new object[1];
+                //param[0] = id;
+
+                object[] result = proxy.GetToolCoordWithID(id);
+
+                int errcode = (int)result[0];
+                if (errcode != 0)
+                {
+                    if (log != null)
+                    {
+                        log.LogError($"Execute GetToolCoordWithID fail: {errcode}");
+                    }
+                    return errcode;
+                }
+                else
+                {
+                    coord.tran.x = (double)result[1];
+                    coord.tran.y = (double)result[2];
+                    coord.tran.z = (double)result[3];
+                    coord.rpy.rx = (double)result[4];
+                    coord.rpy.ry = (double)result[5];
+                    coord.rpy.rz = (double)result[6];
+
+                    if (log != null)
+                    {
+                        log.LogInfo($"GetToolCoordWithID executed successfully: {errcode}");
+                    }
+                    return errcode;
+                }
+            }
+            catch (Exception ex)
+            {
+                if (log != null)
+                {
+                    log.LogError($"RPC exception in GetToolCoordWithID: {ex.Message}");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /// <summary>
+        /// 根据编号获取工件坐标系
+        /// </summary>
+        public int GetWObjCoordWithID(int id, ref DescPose coord)
+        {
+            if (id < 0 || id > 14)
+            {
+                return 4;
+            }
+
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            try
+            {
+                //object[] param = new object[1];
+                //param[0] = id;
+
+                object[] result = proxy.GetWObjCoordWithID(id);
+
+                int errcode = (int)result[0];
+                if (errcode != 0)
+                {
+                    if (log != null)
+                    {
+                        log.LogError($"Execute GetWObjCoordWithID fail: {errcode}");
+                    }
+                    return errcode;
+                }
+                else
+                {
+                    coord.tran.x = (double)result[1];
+                    coord.tran.y = (double)result[2];
+                    coord.tran.z = (double)result[3];
+                    coord.rpy.rx = (double)result[4];
+                    coord.rpy.ry = (double)result[5];
+                    coord.rpy.rz = (double)result[6];
+
+                    if (log != null)
+                    {
+                        log.LogInfo($"GetWObjCoordWithID executed successfully: {errcode}");
+                    }
+                    return errcode;
+                }
+            }
+            catch (Exception ex)
+            {
+                if (log != null)
+                {
+                    log.LogError($"RPC exception in GetWObjCoordWithID: {ex.Message}");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /// <summary>
+        /// 根据编号获取外部工具坐标系
+        /// </summary>
+        public int GetExToolCoordWithID(int id, ref DescPose coord)
+        {
+            if (id < 0 || id > 14)
+            {
+                return 4;
+            }
+
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            try
+            {
+                //object[] param = new object[1];
+                //param[0] = id;
+
+                object[] result = proxy.GetExToolCoordWithID(id);
+
+                int errcode = (int)result[0];
+                if (errcode != 0)
+                {
+                    if (log != null)
+                    {
+                        log.LogError($"Execute GetExToolCoordWithID fail: {errcode}");
+                    }
+                    return errcode;
+                }
+                else
+                {
+                    coord.tran.x = (double)result[1];
+                    coord.tran.y = (double)result[2];
+                    coord.tran.z = (double)result[3];
+                    coord.rpy.rx = (double)result[4];
+                    coord.rpy.ry = (double)result[5];
+                    coord.rpy.rz = (double)result[6];
+
+                    if (log != null)
+                    {
+                        log.LogInfo($"GetExToolCoordWithID executed successfully: {errcode}");
+                    }
+                    return errcode;
+                }
+            }
+            catch (Exception ex)
+            {
+                if (log != null)
+                {
+                    log.LogError($"RPC exception in GetExToolCoordWithID: {ex.Message}");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /// <summary>
+        /// 根据编号获取扩展轴坐标系
+        /// </summary>
+        public int GetExAxisCoordWithID(int id, ref DescPose coord)
+        {
+            if (id < 0 || id > 4)
+            {
+                return 4;
+            }
+
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            try
+            {
+                //object[] param = new object[1];
+                //param[0] = id;
+
+                object[] result = proxy.GetExAxisCoordWithID(id);
+
+                int errcode = (int)result[0];
+                if (errcode != 0)
+                {
+                    if (log != null)
+                    {
+                        log.LogError($"Execute GetExAxisCoordWithID fail: {errcode}");
+                    }
+                    return errcode;
+                }
+                else
+                {
+                    coord.tran.x = (double)result[1];
+                    coord.tran.y = (double)result[2];
+                    coord.tran.z = (double)result[3];
+                    coord.rpy.rx = (double)result[4];
+                    coord.rpy.ry = (double)result[5];
+                    coord.rpy.rz = (double)result[6];
+
+                    if (log != null)
+                    {
+                        log.LogInfo($"GetExAxisCoordWithID executed successfully: {errcode}");
+                    }
+                    return errcode;
+                }
+            }
+            catch (Exception ex)
+            {
+                if (log != null)
+                {
+                    log.LogError($"RPC exception in GetExAxisCoordWithID: {ex.Message}");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /// <summary>
+        /// 根据编号获取负载质量及质心
+        /// </summary>
+        public int GetTargetPayloadWithID(int id, ref double weight, ref DescTran cog)
+        {
+            if (id < 0 || id > 19)
+            {
+                return 4;
+            }
+
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            try
+            {
+                //object[] param = new object[1];
+                //param[0] = id;
+
+                object[] result = proxy.GetTargetPayloadWithID(id);
+
+                int errcode = (int)result[0];
+                if (errcode != 0)
+                {
+                    if (log != null)
+                    {
+                        log.LogError($"Execute GetTargetPayloadWithID fail: {errcode}");
+                    }
+                    return errcode;
+                }
+                else
+                {
+                    weight = (double)result[1];
+                    cog.x = (double)result[2];
+                    cog.y = (double)result[3];
+                    cog.z = (double)result[4];
+
+                    if (log != null)
+                    {
+                        log.LogInfo($"GetTargetPayloadWithID executed successfully: {errcode}");
+                    }
+                    return errcode;
+                }
+            }
+            catch (Exception ex)
+            {
+                if (log != null)
+                {
+                    log.LogError($"RPC exception in GetTargetPayloadWithID: {ex.Message}");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /// <summary>
+        /// 获取当前工具坐标系
+        /// </summary>
+        public int GetCurToolCoord(ref DescPose coord)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            if (g_sock_com_err == (int)RobotError.ERR_SUCCESS)
+            {
+                coord.tran.x = robot_state_pkg.toolCoord[0];
+                coord.tran.y = robot_state_pkg.toolCoord[1];
+                coord.tran.z = robot_state_pkg.toolCoord[2];
+                coord.rpy.rx = robot_state_pkg.toolCoord[3];
+                coord.rpy.ry = robot_state_pkg.toolCoord[4];
+                coord.rpy.rz = robot_state_pkg.toolCoord[5];
+
+                if (log != null)
+                {
+                    log.LogInfo($"GetCurToolCoord: {coord.tran.x}, {coord.tran.y}, {coord.tran.z}, {coord.rpy.rx}, {coord.rpy.ry}, {coord.rpy.rz}");
+                }
+            }
+
+            return g_sock_com_err;
+        }
+
+        /// <summary>
+        /// 获取当前工件坐标系
+        /// </summary>
+        public int GetCurWObjCoord(ref DescPose coord)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            if (g_sock_com_err == (int)RobotError.ERR_SUCCESS)
+            {
+                coord.tran.x = robot_state_pkg.wobjCoord[0];
+                coord.tran.y = robot_state_pkg.wobjCoord[1];
+                coord.tran.z = robot_state_pkg.wobjCoord[2];
+                coord.rpy.rx = robot_state_pkg.wobjCoord[3];
+                coord.rpy.ry = robot_state_pkg.wobjCoord[4];
+                coord.rpy.rz = robot_state_pkg.wobjCoord[5];
+
+                if (log != null)
+                {
+                    log.LogInfo($"GetCurWObjCoord: {coord.tran.x}, {coord.tran.y}, {coord.tran.z}, {coord.rpy.rx}, {coord.rpy.ry}, {coord.rpy.rz}");
+                }
+            }
+
+            return g_sock_com_err;
+        }
+
+        /// <summary>
+        /// 获取当前外部工具坐标系
+        /// </summary>
+        public int GetCurExToolCoord(ref DescPose coord)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            if (g_sock_com_err == (int)RobotError.ERR_SUCCESS)
+            {
+                coord.tran.x = robot_state_pkg.extoolCoord[0];
+                coord.tran.y = robot_state_pkg.extoolCoord[1];
+                coord.tran.z = robot_state_pkg.extoolCoord[2];
+                coord.rpy.rx = robot_state_pkg.extoolCoord[3];
+                coord.rpy.ry = robot_state_pkg.extoolCoord[4];
+                coord.rpy.rz = robot_state_pkg.extoolCoord[5];
+
+                if (log != null)
+                {
+                    log.LogInfo($"GetCurExToolCoord: {coord.tran.x}, {coord.tran.y}, {coord.tran.z}, {coord.rpy.rx}, {coord.rpy.ry}, {coord.rpy.rz}");
+                }
+            }
+
+            return g_sock_com_err;
+        }
+
+        /// <summary>
+        /// 获取当前扩展轴坐标系
+        /// </summary>
+        public int GetCurExAxisCoord(ref DescPose coord)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            if (g_sock_com_err == (int)RobotError.ERR_SUCCESS)
+            {
+                coord.tran.x = robot_state_pkg.exAxisCoord[0];
+                coord.tran.y = robot_state_pkg.exAxisCoord[1];
+                coord.tran.z = robot_state_pkg.exAxisCoord[2];
+                coord.rpy.rx = robot_state_pkg.exAxisCoord[3];
+                coord.rpy.ry = robot_state_pkg.exAxisCoord[4];
+                coord.rpy.rz = robot_state_pkg.exAxisCoord[5];
+
+                if (log != null)
+                {
+                    log.LogInfo($"GetCurExAxisCoord: {coord.tran.x}, {coord.tran.y}, {coord.tran.z}, {coord.rpy.rx}, {coord.rpy.ry}, {coord.rpy.rz}");
+                }
+            }
+
+            return g_sock_com_err;
+        }
+
+
+        /// <summary>
+        /// 设置自定义摆动参数
+        /// </summary>
+        /// <param name="id">自定义摆动编号：0-2</param>
+        /// <param name="pointNum">摆动点位个数 0-10</param>
+        /// <param name="points">移动端点数据x,y,z</param>
+        /// <param name="stayTimes">摆动停留时间ms</param>
+        /// <param name="frequency">摆动频率 Hz</param>
+        /// <param name="incStayType">等待模式：0-周期不包含等待时间；1-周期包含等待时间</param>
+        /// <param name="stationary">摆动位置等待：0-等待时间内继续运动；1-等待时间内位置静止</param>
+        /// <returns>错误码</returns>
+        public int CustomWeaveSetPara(int id, int pointNum, DescTran[] points, double[] stayTimes, double frequency, int incStayType, int stationary)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            if (id < 0 || id > 2)
+            {
+                return 4;
+            }
+
+            if (pointNum < 0 || pointNum > 10)
+            {
+                return 4;
+            }
+
+            try
+            {
+                object[] param = new object[45]; // 总共45个参数
+
+                param[0] = id;
+                param[1] = pointNum;
+
+                // 填充点位数据
+                for (int i = 0; i < 10; i++)
+                {
+                    if (i < pointNum)
+                    {
+                        param[i * 3 + 2] = points[i].x;
+                        param[i * 3 + 3] = points[i].y;
+                        param[i * 3 + 4] = points[i].z;
+                    }
+                    else
+                    {
+                        // 未使用的点位填充默认值
+                        param[i * 3 + 2] = 0.0;
+                        param[i * 3 + 3] = 0.0;
+                        param[i * 3 + 4] = 0.0;
+                    }
+                }
+
+                // 填充停留时间
+                for (int i = 0; i < 10; i++)
+                {
+                    if (i < pointNum)
+                    {
+                        param[i + 32] = stayTimes[i];
+                    }
+                    else
+                    {
+                        // 未使用的停留时间填充默认值
+                        param[i + 32] = 0.0;
+                    }
+                }
+
+                param[42] = frequency;
+                param[43] = incStayType;
+                param[44] = stationary;
+
+                int rtn = proxy.CustomWeaveSetPara(param);
+
+                if (log != null)
+                {
+                    if (rtn != 0)
+                    {
+                        log.LogError($"Execute CustomWeaveSetPara fail: {rtn}");
+                    }
+                    else
+                    {
+                        log.LogInfo($"CustomWeaveSetPara executed successfully: {rtn}");
+                    }
+                }
+
+                return rtn;
+            }
+            catch (Exception ex)
+            {
+                if (log != null)
+                {
+                    log.LogError($"RPC exception in CustomWeaveSetPara: {ex.Message}");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /// <summary>
+        /// 获取自定义摆动参数
+        /// </summary>
+        /// <param name="id">自定义摆动编号：0-2</param>
+        /// <param name="pointNum">摆动点位个数 0-10</param>
+        /// <param name="points">移动端点数据x,y,z</param>
+        /// <param name="stayTimes">摆动停留时间ms</param>
+        /// <param name="frequency">摆动频率 Hz</param>
+        /// <param name="incStayType">等待模式：0-周期不包含等待时间；1-周期包含等待时间</param>
+        /// <param name="stationary">摆动位置等待：0-等待时间内继续运动；1-等待时间内位置静止</param>
+        /// <returns>错误码</returns>
+        public int CustomWeaveGetPara(int id, ref int pointNum, ref DescTran[] points, ref double[] stayTimes, ref double frequency, ref int incStayType, ref int stationary)
+        {
+            if (id < 0 || id > 2)
+            {
+                return 4;
+            }
+
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            try
+            {
+                object[] param = new object[1];
+                param[0] = id;
+
+                object[] result = proxy.CustomWeaveGetPara(id);
+
+                int errcode = (int)result[0];
+                if (errcode != 0)
+                {
+                    if (log != null)
+                    {
+                        log.LogError($"Execute CustomWeaveGetPara fail: {errcode}");
+                    }
+                    return errcode;
+                }
+                else
+                {
+                    string rtnStr = (string)result[1];
+                    string[] parS = rtnStr.Split(',');
+
+                    if (parS.Length != 44)
+                    {
+                        if (log != null)
+                        {
+                            log.LogError("CustomWeaveGetPara size fail");
+                        }
+                        return -1;
+                    }
+
+                    pointNum = int.Parse(parS[0]);
+
+                    // 初始化数组
+                    points = new DescTran[10];
+                    stayTimes = new double[10];
+
+                    for (int i = 0; i < 10; i++)
+                    {
+                        points[i] = new DescTran();
+                        points[i].x = double.Parse(parS[i * 3 + 1]);
+                        points[i].y = double.Parse(parS[i * 3 + 2]);
+                        points[i].z = double.Parse(parS[i * 3 + 3]);
+
+                        stayTimes[i] = double.Parse(parS[i + 31]);
+                    }
+
+                    frequency = double.Parse(parS[41]);
+                    incStayType = int.Parse(parS[42]);
+                    stationary = int.Parse(parS[43]);
+
+                    if (log != null)
+                    {
+                        log.LogInfo($"CustomWeaveGetPara executed successfully: {errcode}");
+                    }
+                    return errcode;
+                }
+            }
+            catch (Exception ex)
+            {
+                if (log != null)
+                {
+                    log.LogError($"RPC exception in CustomWeaveGetPara: {ex.Message}");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
         }
     }
 }
