@@ -2109,9 +2109,9 @@ namespace testFrRobot
             DescPose offset_pos = new DescPose(0, 0, 0, 0, 0, 0);
 
             int rtn = robot.MoveJ(j1, desc_p1, 0, 0, 100.0f, 180.0f, 100.0f, epos, -1.0f, 0, offset_pos);
-            robot.FT_Control(1, sensor_id, select, ft, ft_pid, adj_sign, ILC_sign, max_dis, max_ang);
+           // robot.FT_Control(1, sensor_id, select, ft, ft_pid, adj_sign, ILC_sign, max_dis, max_ang);
             rtn = robot.MoveJ(j2, desc_p2, 0, 0, 100.0f, 180.0f, 100.0f, epos, -1.0f, 0, offset_pos);
-            robot.FT_Control(0, sensor_id, select, ft, ft_pid, adj_sign, ILC_sign, max_dis, max_ang);
+         //   robot.FT_Control(0, sensor_id, select, ft, ft_pid, adj_sign, ILC_sign, max_dis, max_ang);
         }
 
         private void button58_Click(object sender, EventArgs e)
@@ -2323,7 +2323,7 @@ namespace testFrRobot
             DescPose desc_p1 = new DescPose(-419.524, -13.000, 351.569, -178.118, 0.314, 3.833);
             DescPose desc_p2 = new DescPose(-321.222, 185.189, 335.520, -179.030, -1.284, -29.869);
 
-            robot.FT_Control(flag, (byte)sensor_id, select, ft, ft_pid, adj_sign, ILC_sign, max_dis, max_ang);
+         //   robot.FT_Control(flag, (byte)sensor_id, select, ft, ft_pid, adj_sign, ILC_sign, max_dis, max_ang);
             float p = 0.00005f;
             float force = 30.0f;
             int rtn = robot.FT_ComplianceStart(p, force);
@@ -2340,7 +2340,7 @@ namespace testFrRobot
             //Console.WriteLine($"FT_ComplianceStop rtn is {rtn}");
 
             flag = 0;
-            robot.FT_Control(flag, (byte)sensor_id, select, ft, ft_pid, adj_sign, ILC_sign, max_dis, max_ang);
+          //  robot.FT_Control(flag, (byte)sensor_id, select, ft, ft_pid, adj_sign, ILC_sign, max_dis, max_ang);
         }
 
         private void button63_Click(object sender, EventArgs e)
@@ -3765,7 +3765,7 @@ namespace testFrRobot
             rtn = robot.MoveJ(j, tool, user, vel, acc, ovl, epos, blendT, flag, offset_pos1);
             Console.WriteLine($"MoveJ errcode:{rtn}");
 
-            rtn = robot.NewSpiral(desc_pos, tool, user, vel, acc, epos, ovl, flag, offset_pos2, sp, -1);
+          //  rtn = robot.NewSpiral(desc_pos, tool, user, vel, acc, epos, ovl, flag, offset_pos2, sp, -1);
             Console.WriteLine($"NewSpiral errcode:{rtn}");
         }
 
@@ -4563,7 +4563,433 @@ namespace testFrRobot
             // TestCoordMain2();
             //TestCoordMain3();
             //TestCoordMain4();
-            TestCoordMain5();
+            //TestKernelOTA();
+            // TestLaserRecordAndReplayMoveC();
+            // TestLaserTrackMoveC();
+            //TestSensitivityCalib();
+            // TestServoJ();
+            //  TestSlavePortErr();
+            //  TestSpiral();
+            TestFTControlWithDamping();
+        }
+        public void TestFTControlWithDamping()
+        {
+            int rtn;
+            int sensor_id = 10;
+            byte[] select = new byte[6] { 0, 0, 1, 0, 0, 0 };
+            float[] ft_pid = new float[6] { 0.0008f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+            byte adj_sign = 0;
+            byte ILC_sign = 0;
+            float max_dis = 100.0f;
+            float max_ang = 20.0f;
+            ForceTorque ft = new ForceTorque();
+            ft.fz = -10.0;
+            ExaxisPos epos = new ExaxisPos(0, 0, 0, 0);
+            JointPos j1 = new JointPos(-118.985, -86.882, -118.139, -65.019, 90.002, 54.951);
+            JointPos j2 = new JointPos(-77.055, -77.218, -126.219, -66.591, 90.028, 96.881);
+            DescPose desc_p1 = new DescPose(-300.856, -332.618, 309.240, 179.976, -0.031, 96.065);
+            DescPose desc_p2 = new DescPose(-16.399, -383.760, 309.312, 179.975, -0.031, 96.064);
+            DescPose offset_pos = new DescPose(0, 0, 0, 0, 0, 0);
+            double[] M = new double[2] { 2.0, 2.0 };
+            double[] B = new double[2] { 8.0, 8.0 };
+            double polishRadio = 0.0;
+            int filter_Sign = 0;
+            int posAdapt_sign = 1;
+            int isNoBlock = 0;
+            DescPose ftCoord = new DescPose();
+            robot.FT_SetRCS(2, ftCoord);
+            rtn = robot.FT_Control(1, sensor_id, select, ft, ft_pid, adj_sign, ILC_sign, max_dis, max_ang, M, B, polishRadio, filter_Sign, posAdapt_sign, isNoBlock);
+            Console.WriteLine($"FT_Control start rtn is {rtn}");
+            int tool = 0;
+            int user = 0;
+            float vel = 100.0f;
+            float acc = 100.0f;
+            float ovl = 20.0f;
+            float blendT = -1.0f;
+            byte offset_flag = 0;
+            rtn = robot.MoveL(j1, desc_p1, tool, user, vel, acc, ovl, blendT, epos, offset_flag, 0, offset_pos, 0, 0, 10);
+            rtn = robot.MoveL(j2, desc_p2, tool, user, vel, acc, ovl, blendT, epos, offset_flag, 0, offset_pos, 0, 0, 10);
+            rtn = robot.FT_Control(0, sensor_id, select, ft, ft_pid, adj_sign, ILC_sign, max_dis, max_ang, M, B, polishRadio, filter_Sign, posAdapt_sign, isNoBlock);
+            Console.WriteLine($"FT_Control end rtn is {rtn}");
+            robot.CloseRPC();
+        }
+        public void TestVelFeedForwardRatio()
+        {
+
+            double[] setRadio = new double[6] { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
+            robot.SetVelFeedForwardRatio(setRadio);
+
+            double[] getRadio = new double[6] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+            robot.GetVelFeedForwardRatio(ref getRadio);
+
+            Console.WriteLine($" {getRadio[0]:F6} {getRadio[1]:F6} {getRadio[2]:F6} {getRadio[3]:F6} {getRadio[4]:F6} {getRadio[5]:F6}");
+
+        }
+        public int TestSpiral()
+        {
+
+            int rtn;
+            // 初始化关节位置
+            JointPos j = new JointPos(67.957, -81.482, 87.595, -95.691, -94.899, -9.727);
+
+            // 初始化笛卡尔位姿
+            DescPose desc_pos = new DescPose(-123.142, -551.735, 430.549, 178.753, -4.757, 167.754);
+
+
+            // 初始化偏移位姿
+            DescPose offset_pos1 = new DescPose(50, 0, 0, -30, 0, 0);
+
+
+            DescPose offset_pos2 = new DescPose(50, 0, 0, -30, 0, 0);
+
+
+            // 初始化扩展轴位置
+            ExaxisPos epos = new ExaxisPos(0, 0, 0, 0);
+
+            // 初始化螺旋参数
+            SpiralParam sp = new SpiralParam(
+                2,      // circle_num
+                30.0f,  // circle_angle
+                50.0f,  // rad_init
+                10.0f,  // rad_add
+                10.0f,  // rotaxis_add
+                0,      // rot_direction
+                1       // velAccMode
+            );
+
+            int tool = 0;
+            int user = 0;
+            float vel = 30.0f;
+            float acc = 60.0f;
+            float ovl = 100.0f;
+            float blendT = -1.0f;
+            byte flag = 2;
+
+            robot.SetSpeed(20);
+
+            // 执行关节运动
+            rtn = robot.MoveJ(j, tool, user, vel, acc, ovl, epos, blendT, flag, offset_pos1);
+            Console.WriteLine($"movej errcode:{rtn}");
+
+            // 执行螺旋线运动
+            rtn = robot.NewSpiral(j, desc_pos, tool, user, vel, acc, epos, ovl, flag, offset_pos2, sp);
+            Console.WriteLine($"newspiral errcode:{rtn}");
+
+            robot.CloseRPC();
+            return 0;
+        }
+        public void TestSlavePortErr()
+        {
+
+
+            int[] inRecvErr = new int[8];
+            int[] inCRCErr = new int[8];
+            int[] inTransmitErr = new int[8];
+            int[] inLinkErr = new int[8];
+            int[] outRecvErr = new int[8];
+            int[] outCRCErr = new int[8];
+            int[] outTransmitErr = new int[8];
+            int[] outLinkErr = new int[8];
+
+            robot.GetSlavePortErrCounter(ref inRecvErr, ref inCRCErr, ref inTransmitErr, ref inLinkErr,
+                ref outRecvErr, ref outCRCErr, ref outTransmitErr, ref outLinkErr);
+
+            for (int i = 0; i < 8; i++)
+            {
+                if (inRecvErr[i] != 0)
+                {
+                    Console.WriteLine($"inRecvErr {i} is {inRecvErr[i]}");
+                }
+
+                if (inCRCErr[i] != 0)
+                {
+                    Console.WriteLine($"inCRCErr {i} is {inCRCErr[i]}");
+                }
+
+                if (inTransmitErr[i] != 0)
+                {
+                    Console.WriteLine($"inTransmitErr {i} is {inTransmitErr[i]}");
+                }
+
+                if (inLinkErr[i] != 0)
+                {
+                    Console.WriteLine($"inLinkErr {i} is {inLinkErr[i]}");
+                }
+
+                if (outRecvErr[i] != 0)
+                {
+                    Console.WriteLine($"outRecvErr {i} is {outRecvErr[i]}");
+                }
+
+                if (outCRCErr[i] != 0)
+                {
+                    Console.WriteLine($"outCRCErr {i} is {outCRCErr[i]}");
+                }
+
+                if (outTransmitErr[i] != 0)
+                {
+                    Console.WriteLine($"outTransmitErr {i} is {outTransmitErr[i]}");
+                }
+
+                if (outLinkErr[i] != 0)
+                {
+                    Console.WriteLine($"outLinkErr {i} is {outLinkErr[i]}");
+                }
+            }
+            Console.WriteLine("others has no err!");
+
+            for (int i = 0; i < 8; i++)
+            {
+                robot.SlavePortErrCounterClear(i);
+            }
+
+            robot.CloseRPC();
+        }
+
+        public void TestServoJ()
+        {
+            ROBOT_STATE_PKG pkg = new ROBOT_STATE_PKG();
+
+
+
+            JointPos j = new JointPos(0, 0, 0, 0, 0, 0);
+            ExaxisPos epos = new ExaxisPos(0, 0, 0, 0);
+
+            float vel = 0.0f;
+            float acc = 0.0f;
+            float cmdT = 0.008f;
+            float filterT = 0.0f;
+            float gain = 0.0f;
+            byte flag = 0;
+            int count = 500;
+            float dt = 0.1f;
+            int cmdID = 0;
+
+            int ret = robot.GetActualJointPosDegree(flag, ref j);
+            if (ret == 0)
+            {
+                cmdID += 1;
+                robot.ServoMoveStart();
+                while (count > 0)
+                {
+                    robot.ServoJ( j,  epos, acc, vel, cmdT, filterT, gain, cmdID);
+                    j.jPos[4] += dt;
+                    count -= 1;
+                    robot.WaitMs((int)(cmdT * 1000));
+                    robot.GetRobotRealTimeState(ref pkg);
+                    Console.WriteLine($"Servoj Count {pkg.servoJCmdNum}; last pos is {pkg.lastServoTarget[0]} {pkg.lastServoTarget[1]} {pkg.lastServoTarget[2]} {pkg.lastServoTarget[3]} {pkg.lastServoTarget[4]} {pkg.lastServoTarget[5]}");
+
+                    if (count < 50)
+                    {
+                        robot.MotionQueueClear();
+                        Console.WriteLine($"After queue clear, Servoj Count {pkg.servoJCmdNum}; last pos is {pkg.lastServoTarget[0]} {pkg.lastServoTarget[1]} {pkg.lastServoTarget[2]} {pkg.lastServoTarget[3]} {pkg.lastServoTarget[4]} {pkg.lastServoTarget[5]}");
+                        break;
+                    }
+                }
+                robot.ServoMoveEnd();
+            }
+            else
+            {
+                Console.WriteLine($"GetActualJointPosDegree errcode:{ret}");
+            }
+
+            robot.CloseRPC();
+        }
+        public void TestSensitivityCalib()
+        {
+           int rtn = robot.JointSensitivityEnable(1);
+            Console.WriteLine($"JointSensitivityEnable rtn is {rtn}");
+
+            JointPos curJPos = new JointPos(0, 0, 0, 0, 0, 0);
+            rtn = robot.GetActualJointPosDegree(0, ref curJPos);
+            if (rtn != 0)
+            {
+                Console.WriteLine("Failed to get actual joint position.");
+                robot.CloseRPC();
+                return;
+            }
+
+            ExaxisPos epos = new ExaxisPos(0, 0, 0, 0);
+            DescPose offset_pos = new DescPose(0, 0, 0, 0, 0, 0);
+
+            double[] j2Angles = { 0, -30, -60, -90, -120, -150, -180 };
+
+            foreach (double j2 in j2Angles)
+            {
+                JointPos jointPos = new JointPos(
+                    curJPos.jPos[0], j2, 0, -90, 0.02, curJPos.jPos[5]
+                );
+
+                DescPose descPos = new DescPose(0, 0, 0, 0, 0, 0);
+                rtn = robot.GetForwardKin( jointPos, ref descPos);
+                if (rtn != 0)
+                {
+                    Console.WriteLine($"GetForwardKin failed at J2={j2}.");
+                    continue;
+                }
+
+                rtn = robot.MoveJ( jointPos,  descPos, 0, 0, 100, 100, 100,  epos, -1, 0,  offset_pos);
+                if (rtn != 0)
+                {
+                    Console.WriteLine($"MoveJ failed to J2={j2}, rtn={rtn}");
+                    continue;
+                }
+                Thread.Sleep(200); 
+                rtn = robot.JointSensitivityCollect();
+                Console.WriteLine($"JointSensitivityCollect at J2={j2} rtn is {rtn}");
+                Thread.Sleep(100);
+            }
+
+            double[] calibResult = new double[6];
+            rtn = robot.JointSensitivityCalibration(ref calibResult);
+            Console.WriteLine($"JointSensitivityCalibration rtn is {rtn}");
+
+            rtn = robot.JointSensitivityEnable(0);
+            Console.WriteLine($"JointSensitivityEnable (disable) rtn is {rtn}");
+
+            Console.WriteLine($"Joint Sensor Calib result: " +
+                $"{calibResult[0]:F6} {calibResult[1]:F6} {calibResult[2]:F6} " +
+                $"{calibResult[3]:F6} {calibResult[4]:F6} {calibResult[5]:F6}");
+            robot.CloseRPC();
+        }
+
+        /// <summary>
+        /// 测试从站端口错误计数器：读取并清零所有从站的通信错误帧
+        /// </summary>
+      
+        public void TestLaserTrackMoveC()
+        {
+
+            byte[] ctrl = new byte[20];
+            byte state;
+            int pressValue;
+            int error;
+
+
+            //上传并加载开放协议文件
+            //robot.OpenLuaUpload("E://openlua/CtrlDev_laser_ruiniu-0117.lua");
+            //robot.Sleep(2000);
+            //robot.SetCtrlOpenLUAName(0, "CtrlDev_laser_ruiniu-0117.lua");
+            //robot.UnloadCtrlOpenLUA(0);
+            //robot.LoadCtrlOpenLUA(0);
+            //robot.Sleep(8000);
+
+            robot.ResetAllError();
+            int cnt = 1;
+            while (cnt < 2)
+            {
+                //运动到需要寻位的起始点
+                JointPos startJointPos = new JointPos(40.947, -133.649, 128.497, -108.428, -87.159, -21.741);
+                DescPose startDescPose = new DescPose(-167.396, -301.742, 224.468, -157.008, -6.084, 152.043);
+                ExaxisPos exaxisPos = new ExaxisPos(0, 0, 0, 0);
+                DescPose offDesc = new DescPose(0, 0, 0, 0, 0, 0);
+                DescTran directionPoint = new DescTran();
+
+                robot.MoveL(startJointPos, startDescPose, 1, 0, 50, 100, 100, -1, exaxisPos, 0, 0, offDesc, 0, 0, 10);
+                Thread.Sleep(2000);
+
+                //沿着-y方向开始寻位
+                int ret = robot.LaserTrackingSearchStart_xyz(0, 100, 300, 1000, 2);
+                robot.LaserTrackingSearchStop();
+
+                //如果寻位成功
+                if (ret == 0)
+                {
+                    //运动到寻位点
+                    robot.MoveToLaserSeamPos(1, 30, 0, 0, 0, offDesc);
+                    //开始沿着寻位点进行激光跟踪
+                    robot.LaserTrackingTrackOnOff(1, 2);
+
+                    JointPos midJointPos = new JointPos(23.925, -68.391, 72.649, -89.970, -102.641, 102.979);
+                    DescPose midDescPose = new DescPose(-561.957, -282.616, 179.994, -166.732, -1.366, 11.262);
+                    JointPos endJointPos = new JointPos(-11.146, -110.681, 112.893, -71.999, -83.325, 208.723);
+                    DescPose endDescPose = new DescPose(-250.875, -93.272, 182.343, -159.126, 4.036, -130.316);
+
+                    robot.MoveC(midJointPos, midDescPose, 1, 0, 30, 100, exaxisPos, 0, offDesc, endJointPos, endDescPose, 1, 0, 30, 100, exaxisPos, 0, offDesc, 100, -1, 0);
+                   // robot.Circle(midJointPos, midDescPose, 1, 0, 30, 100, exaxisPos, endJointPos, endDescPose, 1, 0, 30, 100, exaxisPos, 100, 0, offDesc, 100, -1, 0);
+
+                    //停止跟踪
+                    robot.LaserTrackingTrackOnOff(0, 2);
+                }
+                cnt++;
+            }
+            robot.CloseRPC();
+        }
+        public void TestLaserRecordAndReplayMoveC()
+        {
+
+            byte[] ctrl = new byte[20];
+            byte state;
+            int pressValue;
+            int error;
+
+            int rtn;
+            int cnt = 1;
+            while (cnt < 2)
+            {
+                // 运动到扫描的起点
+                JointPos startjointPos1 = new JointPos(-15.647, -119.042, 109.960, -71.222, -73.948, -122.687);
+                DescPose startdescPose1 = new DescPose(-274.669, -122.896, 246.972, -161.315, -0.312, -164.381);
+                ExaxisPos exaxisPos = new ExaxisPos(0, 0, 0, 0);
+                DescPose offdese = new DescPose(0, 0, 0, 0, 0, 0);
+
+                robot.MoveJ( startjointPos1,  startdescPose1, 1, 0, 100, 100, 50,  exaxisPos, -1, 0,  offdese);
+
+                // 运动到扫描的起点
+                JointPos startjointPos = new JointPos(-23.965, -150.841, 137.707, -89.747, -56.114, -122.685);
+                DescPose startdescPose = new DescPose(-274.002, -189.344, 194.938, -157.388, -28.759, -173.209);
+                //robot.MoveL( startjointPos,  startdescPose, 1, 0, 10, 100, 100, -1,  exaxisPos, 0, 0,  offdese, 1, 1);
+                robot.MoveL(startjointPos, startdescPose, 1, 0, 10, 100, 100, -1, exaxisPos, 0, 0, offdese, 0, 0, 10);
+                // 开始轨迹记录
+                robot.LaserSensorRecord1(2, 10);
+
+                // 运动到需要记录的终点
+                JointPos midjointPos = new JointPos(36.350, -59.819, 63.114, -51.373, -105.011, 98.495);
+                DescPose middescPose = new DescPose(-370.608, -294.229, 181.531, -158.073, -39.221, 25.737);
+                Console.WriteLine("111111");
+
+                JointPos endjointPos = new JointPos(-26.944, -101.993, 115.794, -72.164, -53.080, 164.700);
+                DescPose enddescPose = new DescPose(-353.625, -155.023, 185.415, -151.407, -39.177, -122.813);
+
+                robot.MoveC( midjointPos,  middescPose, 1, 0, 10, 100,  exaxisPos, 0,  offdese,  endjointPos,  enddescPose, 1, 0, 10, 100,  exaxisPos, 0,  offdese, 100, -1, 0);
+               // robot.Circle( midjointPos,  middescPose, 1, 0, 10, 100,  exaxisPos,  endjointPos,  enddescPose, 1, 0, 10, 100,  exaxisPos, 100, 0,  offdese, 100, -1, 0);
+              //  robot.Circle(j3, desc_p3, 3, 0, 100, 100, epos, j2, desc_p2, 3, 0, 100, 100, epos, 10, -1, offset_pos, 100, -1, 0);
+                Console.WriteLine("222222");
+                // 停止记录
+                robot.LaserSensorRecord1(0, 10);
+                Console.WriteLine("333333");
+
+                Thread.Sleep(2000);
+                // robot.StopMotion();
+
+                JointPos startjointPos2 = new JointPos(-6.592, -140.898, 122.764, -88.529, -81.143, -82.069);
+                DescPose startdescPose2 = new DescPose(-251.875, -124.247, 250.719, -168.899, -15.289, 165.278);
+                robot.MoveJ( startjointPos2,  startdescPose2, 1, 0, 100, 100, 50,  exaxisPos, -1, 0,  offdese);
+
+                Console.WriteLine("4444444");
+                // 运动到记录的焊缝起点
+                robot.MoveToLaserRecordStart(1, 30);
+                // 开始轨迹复现
+                robot.LaserSensorReplay(10, 100);
+
+                robot.MoveLTR();
+                // 停止轨迹复现
+                robot.LaserSensorRecord1(0, 10);
+                cnt++;
+            }
+
+            robot.CloseRPC();
+        }
+        public int TestKernelOTA()
+        {
+
+            robot.KernelUpgrade("D://zUP/OTA/update_2024_head.img");
+
+            int result = 0;
+            robot.GetKernelUpgradeResult(ref result);
+            Console.WriteLine($"OTA result: {result}");
+
+            return result; // 
         }
         public void TestCoordMain5()
         {

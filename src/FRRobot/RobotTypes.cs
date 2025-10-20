@@ -9,6 +9,7 @@ using System.Threading;
 
 namespace fairino
 {
+
     /**
     * @brief 关节位置数据类型
     */
@@ -180,14 +181,16 @@ namespace fairino
         public float rad_add;              /* 半径增量  */
         public float rotaxis_add;          /* 转轴方向增量  */
         public uint rot_direction;  /* 旋转方向，0-顺时针，1-逆时针  */
-        public SpiralParam(int circleNum, float circleAngle, float radInit, float radAdd, float rotaxisAdd, uint rotDirection)
+        public int velAccMode;      // 速度加速度参数模式：0-角速度恒定；1-线速度恒定
+        public SpiralParam(int num, float angle, float initRad, float addRad, float axisAdd, uint direction, int mode)
         {
-            circle_num = circleNum; 
-            circle_angle = circleAngle;
-            rad_init = radInit;
-            rad_add = radAdd;
-            rotaxis_add = rotaxisAdd;
-            rot_direction = rotDirection;
+            circle_num = num;
+            circle_angle = angle;
+            rad_init = initRad;
+            rad_add = addRad;
+            rotaxis_add = axisAdd;
+            rot_direction = direction;
+            velAccMode = mode;
         }
     }
 
@@ -345,6 +348,10 @@ namespace fairino
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 3)]
         public double[] loadCog;           //负载质心
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 6)]
+        public double[] lastServoTarget;//队列中最后一个servoJ目标位置
+
+        public int servoJCmdNum;// servoJ指令计数
         public UInt16 check_sum;         /* 和校验 */                 
     }
 
