@@ -201,7 +201,7 @@ namespace fairino
         * @return  错误码
         */
         [XmlRpcMethod("NewSpiral")]
-        int NewSpiral(double[] joint_pos, double[] desc_pos, int tool, int user, double vel, double acc, double[] epos, double ovl, int offset_flag, double[] offset_pos, double[] spiral_param);
+        int NewSpiral(object[] spiral_param);
 
 
         /**
@@ -1138,26 +1138,43 @@ namespace fairino
         int FT_Guard(int flag, int sensor_id, int[] select, double[] ft, double[] max_threshold, double[] min_threshold);
 
         /**
-        * @brief  恒力控制
-        * @param  [in] flag 0-关闭恒力控制，1-开启恒力控制
-        * @param  [in] sensor_id 力传感器编号
-        * @param  [in] select  选择六个自由度是否检测碰撞，0-不检测，1-检测
-        * @param  [in] ft  碰撞力/扭矩，fx,fy,fz,tx,ty,tz
-        * @param  [in] ft_pid 力pid参数，力矩pid参数
-        * @param  [in] adj_sign 自适应启停控制，0-关闭，1-开启
-        * @param  [in] ILC_sign ILC启停控制， 0-停止，1-训练，2-实操
-        * @param  [in] max_dis 最大调整距离，单位mm
-        * @param  [in] max_ang 最大调整角度，单位deg
-        * @return  错误码
-        */[XmlRpcMethod("FT_Control")]
-        int FT_Control(int flag, int sensor_id, int[] select, double[] ft, double[] ft_pid, int adj_sign, int ILC_sign, double max_dis, double max_ang, int filter_Sign, int posAdapt_sign, int isNoBlock);
+       * @brief  恒力控制
+       * @param  [in] flag 0-关闭恒力控制，1-开启恒力控制
+       * @param  [in] sensor_id 力传感器编号
+       * @param  [in] select  选择六个自由度是否检测碰撞，0-不检测，1-检测
+       * @param  [in] ft  碰撞力/扭矩，fx,fy,fz,tx,ty,tz
+       * @param  [in] ft_pid 力pid参数，力矩pid参数
+       * @param  [in] adj_sign 自适应启停控制，0-关闭，1-开启
+       * @param  [in] ILC_sign ILC启停控制， 0-停止，1-训练，2-实操
+       * @param  [in] max_dis 最大调整距离，单位mm
+       * @param  [in] max_ang 最大调整角度，单位deg
+       * @return  错误码
+*/
+        [XmlRpcMethod("FT_Control")]
+        int FT_Control(
+            object flag,
+            object sensor_id,
+            object select,
+            object ft,
+            object ft_pid,
+            object adj_sign,
+            object ILC_sign,
+            object max_dis,
+            object max_ang,
+            object polishRadio,
+            object filter_Sign,
+            object posAdapt_sign,
+            object mbParams,
+            object isNoBlock
+        );
 
         /**
         * @brief  柔顺控制开启
         * @param  [in] p 位置调节系数或柔顺系数
         * @param  [in] force 柔顺开启力阈值，单位N
         * @return  错误码
-        */[XmlRpcMethod("FT_ComplianceStart")]
+        */
+        [XmlRpcMethod("FT_ComplianceStart")]
         int FT_ComplianceStart(double p, double force);
 
         /**
@@ -2110,6 +2127,73 @@ namespace fairino
 
         [XmlRpcMethod("CustomWeaveGetPara")]
         object[] CustomWeaveGetPara(int param);
+
+        [XmlRpcMethod("KernelUpgrade")]
+
+        int KernelUpgrade();
+
+        [XmlRpcMethod("GetKernelUpgradeResult")]
+
+        object[] GetKernelUpgradeResult();
+
+        [XmlRpcMethod("JointSensitivityEnable")]
+
+        int JointSensitivityEnable(object[] status);
+
+
+        [XmlRpcMethod("JointSensitivityCalibration")]
+
+        object[] JointSensitivityCalibration();
+
+
+        [XmlRpcMethod("JointSensitivityCollect")]
+
+        int JointSensitivityCollect();
+
+        /// <summary>
+        /// 清空运动指令队列
+        /// </summary>
+        [XmlRpcMethod("MotionQueueClear")]
+        int MotionQueueClear();
+
+        /// <summary>
+        /// 获取机器人8个从站端口错误帧数
+        /// 返回值: object[0] = 错误码 (int)
+        ///        object[1] = 数据字符串，格式: "inRecvErr,inCRCErr,inTransmitErr,inLinkErr" * 8 + 同样格式的输出部分，共64个整数，用逗号分隔
+        /// </summary>
+        [XmlRpcMethod("GetSlavePortErrCounter")]
+        object[] GetSlavePortErrCounter();
+
+        /// <summary>
+        /// 从站端口错误帧清零
+        /// 参数: slaveID (int, 0~7)
+        /// </summary>
+        [XmlRpcMethod("SlavePortErrCounterClear")]
+        int SlavePortErrCounterClear(int param);
+
+        /// <summary>
+        /// 设置各轴速度前馈系数
+        /// 参数: double[6] { j1, j2, j3, j4, j5, j6 }
+        /// </summary>
+        [XmlRpcMethod("SetVelFeedForwardRatio")]
+        int SetVelFeedForwardRatio(object[] param);
+
+        /// <summary>
+        /// 获取各轴速度前馈系数
+        /// 返回值: object[0] = 错误码 (int)
+        ///        object[1..6] = j1 ~ j6 系数 (double)
+        /// </summary>
+        [XmlRpcMethod("GetVelFeedForwardRatio")]
+        object[] GetVelFeedForwardRatio();
+
+        /// <summary>
+        /// 机器人MCU日志生成
+        /// </summary>
+        [XmlRpcMethod("RobotMCULogCollect")]
+        int RobotMCULogCollect();
+
+
+
     }
     internal class RPCHandle
     {

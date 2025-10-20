@@ -184,7 +184,7 @@ namespace testFrRobot
             rtn = robot.MoveJ(j, desc_pos, tool, user, vel, acc, ovl, epos, blendT, flag, offset_pos1);
             Console.WriteLine($"MoveJ errcode:{rtn}");
 
-            rtn = robot.NewSpiral(j, desc_pos, tool, user, vel, acc, epos, ovl, flag, offset_pos2, sp);
+           // rtn = robot.NewSpiral(j, desc_pos, tool, user, vel, acc, epos, ovl, flag, offset_pos2, sp);
             Console.WriteLine($"NewSpiral errcode:{rtn}");
            
         }
@@ -1029,13 +1029,13 @@ namespace testFrRobot
             robot.GetInverseKin(0, desc_p2, -1, ref j2);
 
             robot.MoveJ(j1, desc_p1, 1, 0, 100.0f, 180.0f, 100.0f, epos, -1.0f, 0, offset_pos);
-            int rtn = robot.FT_Control(flag, sensor_id, select, ft, ft_pid, adj_sign, ILC_sign, max_dis, max_ang);
-            Console.WriteLine($"FT_Control start rtn {rtn}");
+          //  int rtn = robot.FT_Control(flag, sensor_id, select, ft, ft_pid, adj_sign, ILC_sign, max_dis, max_ang);
+           // Console.WriteLine($"FT_Control start rtn {rtn}");
 
             robot.MoveL(j2, desc_p2, 1, 0, 100.0f, 180.0f, 20.0f, -1.0f, 0, epos, 0, 0, offset_pos);
             flag = 0;
-            rtn = robot.FT_Control(flag, sensor_id, select, ft, ft_pid, adj_sign, ILC_sign, max_dis, max_ang);
-            Console.WriteLine($"FT_Control end rtn {rtn}");
+        //  rtn = robot.FT_Control(flag, sensor_id, select, ft, ft_pid, adj_sign, ILC_sign, max_dis, max_ang);
+          //  Console.WriteLine($"FT_Control end rtn {rtn}");
         }
 
         private void btnComplience_Click(object sender, EventArgs e)
@@ -1082,7 +1082,7 @@ namespace testFrRobot
     ft.fx = -10.0;
     ft.fy = -10.0;
     ft.fz = -10.0;
-    robot.FT_Control(flag, sensor_id, select, ft, ft_pid, adj_sign, ILC_sign, max_dis, max_ang);
+  //  robot.FT_Control(flag, sensor_id, select, ft, ft_pid, adj_sign, ILC_sign, max_dis, max_ang);
     float p = 0.00005f;
     float force = 30.0f;
     int rtn = robot.FT_ComplianceStart(p, force);
@@ -1097,7 +1097,7 @@ namespace testFrRobot
     rtn = robot.FT_ComplianceStop();
     Console.WriteLine($"FT_ComplianceStop rtn {rtn}");
     flag = 0;
-    robot.FT_Control(flag, sensor_id, select, ft, ft_pid, adj_sign, ILC_sign, max_dis, max_ang);
+    //robot.FT_Control(flag, sensor_id, select, ft, ft_pid, adj_sign, ILC_sign, max_dis, max_ang);
         }
 
         private void btnServoStart_Click(object sender, EventArgs e)
