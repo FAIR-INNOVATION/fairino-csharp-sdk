@@ -1755,7 +1755,7 @@ namespace fairino
         int ServoJTStart();
 
         [XmlRpcMethod("ServoJT")]
-        int ServoJT(double[] torque, double interval);
+        int ServoJT(double[] torque, double interval, int checkFlag, double[] jPowerLimit, double[] jVelLimit);
 
         [XmlRpcMethod("ServoJTEnd")]
         int ServoJTEnd();

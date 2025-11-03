@@ -41,7 +41,7 @@ namespace fairino
     {
         ICallSupervisor proxy = null;
 
-        const string SDK_VERSION = " C#SDK-V1.1.9  Web-3.8.7";
+        const string SDK_VERSION = " C#SDK-V1.2.0  Web-3.8.7.1";
 
         private string robot_ip = "192.168.57.2";//机器人ip
         private int g_sock_com_err = (int)RobotError.ERR_SUCCESS;
@@ -10657,6 +10657,12 @@ namespace fairino
                         return (int)RobotError.ERR_OTHER;
                     }
                 }
+                // 记录发送开始时间
+                DateTime sendStartTime = DateTime.Now;
+                if (log != null)
+                {
+                    log.LogInfo($"send file start at: {sendStartTime:yyyy-MM-dd HH:mm:ss.fff}");
+                }
 
                 num = client.Send(System.Text.Encoding.Default.GetBytes("/b/f"));
                 if (num < 1)
@@ -10668,13 +10674,52 @@ namespace fairino
                     return (int)RobotError.ERR_OTHER;
                 }
 
+                // 记录发送完成时间
+                DateTime sendEndTime = DateTime.Now;
                 if (log != null)
                 {
-                    log.LogDebug($"send file end success!");
+                    log.LogInfo($"send file end success at: {sendEndTime:yyyy-MM-dd HH:mm:ss.fff}");
+                    log.LogInfo($"send duration: {(sendEndTime - sendStartTime).TotalMilliseconds} ms");
                 }
 
-                byte[] resultBuf = new byte[1024];//最大50M
+                byte[] resultBuf = new byte[1024]; // 最大50M
+
+                // 记录接收开始时间
+                DateTime receiveStartTime = DateTime.Now;
+
                 num = client.Receive(resultBuf);
+
+                // 记录接收完成时间
+                DateTime receiveEndTime = DateTime.Now;
+
+                // 计算总耗时（从发送开始到接收完成）
+                TimeSpan totalDuration = receiveEndTime - sendStartTime;
+                // 计算接收耗时
+                TimeSpan receiveDuration = receiveEndTime - receiveStartTime;
+
+                if (log != null)
+                {
+                    log.LogInfo($"receive completed at: {receiveEndTime:yyyy-MM-dd HH:mm:ss.fff}");
+                    log.LogInfo($"total duration (send to receive): {totalDuration.TotalMilliseconds} ms");
+                    log.LogInfo($"receive duration: {receiveDuration.TotalMilliseconds} ms");
+                }
+                //num = client.Send(System.Text.Encoding.Default.GetBytes("/b/f"));
+                //if (num < 1)
+                //{
+                //    if (log != null)
+                //    {
+                //        log.LogDebug("send end failed!");
+                //    }
+                //    return (int)RobotError.ERR_OTHER;
+                //}
+
+                //if (log != null)
+                //{
+                //    log.LogDebug($"send file end success!");
+                //}
+
+                //byte[] resultBuf = new byte[1024];//最大50M
+                //num = client.Receive(resultBuf);
                 if (num < 1)
                 {
                     if (log != null)
@@ -15417,9 +15462,12 @@ namespace fairino
 
         /**
          * @brief 关节扭矩控制
-         * @param  [in] torque j1~j6关节扭矩，单位Nm
-         * @param  [in] interval 指令周期，单位s，范围[0.001~0.008]
-         * @return  错误码
+         * @param [in] torque j1~j6关节扭矩，单位Nm
+         * @param [in] interval 指令周期，单位s，范围[0.001~0.008]
+         * @param [in] checkFlag 检测策略 0-不限制；1-限制功率；2-限制速度；3-功率和速度同时限制
+         * @param [in] jPowerLimit 关节最大功率限制(W)
+         * @param [in] jVelLimit 关节最大速度(°/s)
+         * @return 错误码
          */
         public int ServoJT(double[] torque, double interval)
         {
@@ -15429,7 +15477,10 @@ namespace fairino
             }
             try
             {
-                int rtn = proxy.ServoJT(torque, interval);
+                int checkFlag = 0;
+                double[] jPowerLimit = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+                double[] jVelLimit = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+                int rtn = proxy.ServoJT(torque, interval, checkFlag, jPowerLimit, jVelLimit);
                 if (log != null)
                 {
                     log.LogInfo($"ServoJT() : {rtn}");
@@ -15452,7 +15503,46 @@ namespace fairino
                 }
             }
         }
-
+        /**
+ * @brief 关节扭矩控制
+ * @param [in] torque j1~j6关节扭矩，单位Nm
+ * @param [in] interval 指令周期，单位s，范围[0.001~0.008]
+ * @param [in] checkFlag 检测策略 0-不限制；1-限制功率；2-限制速度；3-功率和速度同时限制
+ * @param [in] jPowerLimit 关节最大功率限制(W)
+ * @param [in] jVelLimit 关节最大速度(°/s)
+ * @return 错误码
+ */
+        public int ServoJT(double[] torque, double interval, int checkFlag, double[] jPowerLimit, double[] jVelLimit)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+                int rtn = proxy.ServoJT(torque, interval, checkFlag, jPowerLimit, jVelLimit);
+                if (log != null)
+                {
+                    log.LogInfo($"ServoJT() : {rtn}");
+                }
+                return rtn;
+            }
+            catch
+            {
+                if (IsSockComError())
+                {
+                    if (log != null)
+                    {
+                        log.LogError($"RPC exception");
+                    }
+                    return g_sock_com_err;
+                }
+                else
+                {
+                    return (int)RobotError.ERR_SUCCESS;
+                }
+            }
+        }
         /**
          * @brief 关节扭矩控制结束
          * @return  错误码

@@ -3134,7 +3134,7 @@ namespace testFrRobot
             for (int i = 0; i < 100; i++)
             {
                 robot.GetRobotRealTimeState(ref pkg);
-                Console.WriteLine($"robot ctrl box temp is {pkg.wideVoltageCtrlBoxTemp}, fan current is {pkg.wideVoltageCtrlBoxFanVel}");
+                Console.WriteLine($"robot ctrl box temp is {pkg.jt_cur_pos[0]}, fan current is {pkg.check_sum}");
                 Thread.Sleep(100);
             }
             int rtn = robot.SetWideBoxTempFanMonitorParam(0, 2);
@@ -4570,8 +4570,71 @@ namespace testFrRobot
             // TestServoJ();
             //  TestSlavePortErr();
             //  TestSpiral();
-            TestFTControlWithDamping();
+            //TestFTControlWithDamping();
+            //ServoJTWithSafety();
+            TestLua();
         }
+
+        public void TestLua()
+        {
+            int rtn;
+            string errStr = "";
+            rtn = robot.LuaUpload("D://zUP/suoluomen/test1.lua", ref errStr);
+            Console.WriteLine("LuaUpload rtn is {0}", errStr);
+            Thread.Sleep(2000);
+        }
+
+  
+        public int ServoJTWithSafety()
+        {
+            robot.ResetAllError();
+            Thread.Sleep(500);
+
+            double[] torques = new double[6] { 0, 0, 0, 0, 0, 0 };
+            robot.GetJointTorques(1, torques);
+
+            robot.ServoJTStart();
+            ROBOT_STATE_PKG pkg = new ROBOT_STATE_PKG();
+            robot.DragTeachSwitch(1);
+
+            int checkFlag = 0;
+            double[] jPowerLimit = new double[6] { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
+            //double[] jPowerLimit = new double[6] { 10.0, 10.0, 10.0, 10.0, 10.0, 10.0 };
+             // double[] jVelLimit = new double[6] { 10.0, 10.0, 10.0, 10.0, 10.0, 10.0 };
+            double[] jVelLimit = new double[6] {50, 50, 50, 50, 50, 50 };
+            int count = 80000;
+            int errorNum = 0;
+            int error = 0;
+            while (count > 0)
+            {
+           
+                torques[2] = torques[2] + 0.01; 
+                error = robot.ServoJT(torques, 0.008, checkFlag, jPowerLimit, jVelLimit); 
+
+                Console.WriteLine($"ServoJT rtn is {error}");
+                count = count - 1;
+                Thread.Sleep(1);
+             
+                robot.GetRobotRealTimeState(ref pkg);
+                Console.WriteLine($"maincode {pkg.main_code}, subcode {pkg.sub_code}");
+                if (error != 0)
+                {
+                    errorNum++;
+                    if (errorNum > 5)
+                    {
+                        break;
+                    }
+
+                }
+            }
+
+            robot.DragTeachSwitch(0);
+            error = robot.ServoJTEnd();
+
+            return 0;
+        }
+
+
         public void TestFTControlWithDamping()
         {
             int rtn;
