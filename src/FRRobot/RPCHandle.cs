@@ -2192,7 +2192,22 @@ namespace fairino
         [XmlRpcMethod("RobotMCULogCollect")]
         int RobotMCULogCollect();
 
+        [XmlRpcMethod("MoveToIntersectLineStart")]
+        int MoveToIntersectLineStart(object[] moveToIntersectLineStartParams);
 
+        [XmlRpcMethod("MoveIntersectLine")]
+        int MoveIntersectLine(object[] moveIntersectLineParams);
+
+        [XmlRpcMethod("JointHysteresisError")]
+        object[] JointHysteresisError();
+
+        [XmlRpcMethod("JointRepeatability")]
+        object[]  JointRepeatability();
+
+
+        [XmlRpcMethod("SetAdmittanceParams")]
+
+        int SetAdmittanceParams(object[] admittanceParams);
 
     }
     internal class RPCHandle
