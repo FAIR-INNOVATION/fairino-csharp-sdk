@@ -1230,7 +1230,6 @@
             this.flowLayoutPanel8.Name = "flowLayoutPanel8";
             this.flowLayoutPanel8.Size = new System.Drawing.Size(313, 668);
             this.flowLayoutPanel8.TabIndex = 50;
-
             // 
             // button89
             // 
@@ -1446,9 +1445,9 @@
             // 
             this.button104.Location = new System.Drawing.Point(3, 580);
             this.button104.Name = "button104";
-            this.button104.Size = new System.Drawing.Size(268, 34);
+            this.button104.Size = new System.Drawing.Size(268, 88);
             this.button104.TabIndex = 49;
-            this.button104.Text = "button104";
+            this.button104.Text = "Text";
             this.button104.UseVisualStyleBackColor = true;
             this.button104.Click += new System.EventHandler(this.button104_Click);
             // 

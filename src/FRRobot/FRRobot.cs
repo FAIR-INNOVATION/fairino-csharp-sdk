@@ -41,7 +41,7 @@ namespace fairino
     {
         ICallSupervisor proxy = null;
 
-        const string SDK_VERSION = " C#SDK-V1.1.9  Web-3.8.7";
+        const string SDK_VERSION = " C#SDK-V1.2.1  Web-3.9.0";
 
         private string robot_ip = "192.168.57.2";//机器人ip
         private int g_sock_com_err = (int)RobotError.ERR_SUCCESS;
@@ -493,7 +493,10 @@ namespace fairino
             Thread.Sleep(2000);
             if (IsSockComError())
             {
-                log.LogInfo("RPC Fail.");
+                if (log != null)
+                {
+                    log.LogInfo($"RPC {ip}");
+                }
 
                 Console.WriteLine("RPC Fail." + g_sock_com_err);
                 return g_sock_com_err;
@@ -1085,8 +1088,8 @@ namespace fairino
                 moveLParams[30] = (double)offset_pos.rpy.rz;
                 moveLParams[31] = 100.0; // 固定值
                 moveLParams[32] = velAccParamMode;
-                object[] moveLParams1 =new object[1];
-                moveLParams1[0] = moveLParams;
+                //object[] moveLParams1 =new object[1];
+                //moveLParams1[0] = moveLParams;
                 // 调用RPC
                 rtn = proxy.MoveL(moveLParams);
                // log.LogInfo($"proxy MoveL completed with return code: {rtn}");
@@ -10657,6 +10660,12 @@ namespace fairino
                         return (int)RobotError.ERR_OTHER;
                     }
                 }
+                // 记录发送开始时间
+                DateTime sendStartTime = DateTime.Now;
+                if (log != null)
+                {
+                    log.LogInfo($"send file start at: {sendStartTime:yyyy-MM-dd HH:mm:ss.fff}");
+                }
 
                 num = client.Send(System.Text.Encoding.Default.GetBytes("/b/f"));
                 if (num < 1)
@@ -10668,13 +10677,52 @@ namespace fairino
                     return (int)RobotError.ERR_OTHER;
                 }
 
+                // 记录发送完成时间
+                DateTime sendEndTime = DateTime.Now;
                 if (log != null)
                 {
-                    log.LogDebug($"send file end success!");
+                    log.LogInfo($"send file end success at: {sendEndTime:yyyy-MM-dd HH:mm:ss.fff}");
+                    log.LogInfo($"send duration: {(sendEndTime - sendStartTime).TotalMilliseconds} ms");
                 }
 
-                byte[] resultBuf = new byte[1024];//最大50M
+                byte[] resultBuf = new byte[1024]; // 最大50M
+
+                // 记录接收开始时间
+                DateTime receiveStartTime = DateTime.Now;
+
                 num = client.Receive(resultBuf);
+
+                // 记录接收完成时间
+                DateTime receiveEndTime = DateTime.Now;
+
+                // 计算总耗时（从发送开始到接收完成）
+                TimeSpan totalDuration = receiveEndTime - sendStartTime;
+                // 计算接收耗时
+                TimeSpan receiveDuration = receiveEndTime - receiveStartTime;
+
+                if (log != null)
+                {
+                    log.LogInfo($"receive completed at: {receiveEndTime:yyyy-MM-dd HH:mm:ss.fff}");
+                    log.LogInfo($"total duration (send to receive): {totalDuration.TotalMilliseconds} ms");
+                    log.LogInfo($"receive duration: {receiveDuration.TotalMilliseconds} ms");
+                }
+                //num = client.Send(System.Text.Encoding.Default.GetBytes("/b/f"));
+                //if (num < 1)
+                //{
+                //    if (log != null)
+                //    {
+                //        log.LogDebug("send end failed!");
+                //    }
+                //    return (int)RobotError.ERR_OTHER;
+                //}
+
+                //if (log != null)
+                //{
+                //    log.LogDebug($"send file end success!");
+                //}
+
+                //byte[] resultBuf = new byte[1024];//最大50M
+                //num = client.Receive(resultBuf);
                 if (num < 1)
                 {
                     if (log != null)
@@ -15417,9 +15465,12 @@ namespace fairino
 
         /**
          * @brief 关节扭矩控制
-         * @param  [in] torque j1~j6关节扭矩，单位Nm
-         * @param  [in] interval 指令周期，单位s，范围[0.001~0.008]
-         * @return  错误码
+         * @param [in] torque j1~j6关节扭矩，单位Nm
+         * @param [in] interval 指令周期，单位s，范围[0.001~0.008]
+         * @param [in] checkFlag 检测策略 0-不限制；1-限制功率；2-限制速度；3-功率和速度同时限制
+         * @param [in] jPowerLimit 关节最大功率限制(W)
+         * @param [in] jVelLimit 关节最大速度(°/s)
+         * @return 错误码
          */
         public int ServoJT(double[] torque, double interval)
         {
@@ -15429,7 +15480,10 @@ namespace fairino
             }
             try
             {
-                int rtn = proxy.ServoJT(torque, interval);
+                int checkFlag = 0;
+                double[] jPowerLimit = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+                double[] jVelLimit = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+                int rtn = proxy.ServoJT(torque, interval, checkFlag, jPowerLimit, jVelLimit);
                 if (log != null)
                 {
                     log.LogInfo($"ServoJT() : {rtn}");
@@ -15452,7 +15506,46 @@ namespace fairino
                 }
             }
         }
-
+        /**
+ * @brief 关节扭矩控制
+ * @param [in] torque j1~j6关节扭矩，单位Nm
+ * @param [in] interval 指令周期，单位s，范围[0.001~0.008]
+ * @param [in] checkFlag 检测策略 0-不限制；1-限制功率；2-限制速度；3-功率和速度同时限制
+ * @param [in] jPowerLimit 关节最大功率限制(W)
+ * @param [in] jVelLimit 关节最大速度(°/s)
+ * @return 错误码
+ */
+        public int ServoJT(double[] torque, double interval, int checkFlag, double[] jPowerLimit, double[] jVelLimit)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+                int rtn = proxy.ServoJT(torque, interval, checkFlag, jPowerLimit, jVelLimit);
+                if (log != null)
+                {
+                    log.LogInfo($"ServoJT() : {rtn}");
+                }
+                return rtn;
+            }
+            catch
+            {
+                if (IsSockComError())
+                {
+                    if (log != null)
+                    {
+                        log.LogError($"RPC exception");
+                    }
+                    return g_sock_com_err;
+                }
+                else
+                {
+                    return (int)RobotError.ERR_SUCCESS;
+                }
+            }
+        }
         /**
          * @brief 关节扭矩控制结束
          * @return  错误码
@@ -21631,12 +21724,13 @@ namespace fairino
             }
         }
 
-        /// <summary>
-        /// 获取关节扭矩传感器灵敏度标定结果
-        /// </summary>
-        /// <param name="calibResult">j1~j6关节灵敏度[0-1]</param>
-        /// <returns>错误码</returns>
-        public int JointSensitivityCalibration(ref double[] calibResult)
+        /**
+        * @brief 获取关节扭矩传感器灵敏度标定结果
+        * @param [out] calibResult j1~j6关节灵敏度[0-1]
+        * @param [out] linearity j1~j6关节线性度[0-1]
+        * @return 错误码
+        */
+        public int JointSensitivityCalibration(ref double[] calibResult, ref double[] linearity)
         {
             if (IsSockComError())
             {
@@ -21645,7 +21739,6 @@ namespace fairino
 
             try
             {
-
                 object[] result = proxy.JointSensitivityCalibration();
 
                 int errcode = (int)result[0];
@@ -21659,9 +21752,8 @@ namespace fairino
                 }
                 else
                 {
-                    // 初始化数组
+                    // 初始化灵敏度数组
                     calibResult = new double[6];
-
                     calibResult[0] = (double)result[1];
                     calibResult[1] = (double)result[2];
                     calibResult[2] = (double)result[3];
@@ -21669,10 +21761,20 @@ namespace fairino
                     calibResult[4] = (double)result[5];
                     calibResult[5] = (double)result[6];
 
+                    // 初始化线性度数组
+                    linearity = new double[6];
+                    linearity[0] = (double)result[7];
+                    linearity[1] = (double)result[8];
+                    linearity[2] = (double)result[9];
+                    linearity[3] = (double)result[10];
+                    linearity[4] = (double)result[11];
+                    linearity[5] = (double)result[12];
+
                     if (log != null)
                     {
                         log.LogInfo($"JointSensitivityCalibration executed successfully: {errcode}");
                         log.LogInfo($"Calibration results: J1={calibResult[0]:F4}, J2={calibResult[1]:F4}, J3={calibResult[2]:F4}, J4={calibResult[3]:F4}, J5={calibResult[4]:F4}, J6={calibResult[5]:F4}");
+                        log.LogInfo($"Linearity results: J1={linearity[0]:F4}, J2={linearity[1]:F4}, J3={linearity[2]:F4}, J4={linearity[3]:F4}, J5={linearity[4]:F4}, J6={linearity[5]:F4}");
                     }
                     return errcode;
                 }
@@ -21687,10 +21789,10 @@ namespace fairino
             }
         }
 
-         /**
-        * @brief 关节扭矩传感器灵敏度数据采集
-        * @return 错误码
-        */
+        /**
+       * @brief 关节扭矩传感器灵敏度数据采集
+       * @return 错误码
+       */
         public int JointSensitivityCollect()
         {
             if (IsSockComError())
@@ -22030,6 +22132,564 @@ namespace fairino
                 if (log != null)
                 {
                     log.LogError($"RPC exception in RobotMCULogCollect: {ex.Message}");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+
+
+        /**
+        * @brief 获取关节扭矩传感器迟滞误差
+        * @param [out] hysteresisError j1~j6关节迟滞误差
+        * @return 错误码
+        */
+        public int JointHysteresisError(ref double[] hysteresisError)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            try
+            {
+                object[] result = proxy.JointHysteresisError();
+
+                int errcode = (int)result[0];
+                if (errcode != 0)
+                {
+                    if (log != null)
+                    {
+                        log.LogError($"Execute JointHysteresisError fail: {errcode}");
+                    }
+                    return errcode;
+                }
+                else
+                {
+                    // 初始化迟滞误差数组
+                    hysteresisError = new double[6];
+                    hysteresisError[0] = (double)result[1];
+                    hysteresisError[1] = (double)result[2];
+                    hysteresisError[2] = (double)result[3];
+                    hysteresisError[3] = (double)result[4];
+                    hysteresisError[4] = (double)result[5];
+                    hysteresisError[5] = (double)result[6];
+
+                    if (log != null)
+                    {
+                        log.LogInfo($"JointHysteresisError executed successfully: {errcode}");
+                        log.LogInfo($"Hysteresis error results: J1={hysteresisError[0]:F4}, J2={hysteresisError[1]:F4}, J3={hysteresisError[2]:F4}, J4={hysteresisError[3]:F4}, J5={hysteresisError[4]:F4}, J6={hysteresisError[5]:F4}");
+                    }
+                    return errcode;
+                }
+            }
+            catch (Exception ex)
+            {
+                if (log != null)
+                {
+                    log.LogError($"RPC exception in JointHysteresisError: {ex.Message}");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+        * @brief 获取关节扭矩传感器重复精度
+        * @param [out] repeatability j1~j6关节重复精度
+        * @return 错误码
+        */
+        public int JointRepeatability(ref double[] repeatability)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            try
+            {
+                object[] result = proxy.JointRepeatability();
+
+                int errcode = (int)result[0];
+                if (errcode != 0)
+                {
+                    if (log != null)
+                    {
+                        log.LogError($"Execute JointRepeatability fail: {errcode}");
+                    }
+                    return errcode;
+                }
+                else
+                {
+                    // 初始化重复精度数组
+                    repeatability = new double[6];
+                    repeatability[0] = (double)result[1];
+                    repeatability[1] = (double)result[2];
+                    repeatability[2] = (double)result[3];
+                    repeatability[3] = (double)result[4];
+                    repeatability[4] = (double)result[5];
+                    repeatability[5] = (double)result[6];
+
+                    if (log != null)
+                    {
+                        log.LogInfo($"JointRepeatability executed successfully: {errcode}");
+                        log.LogInfo($"Repeatability results: J1={repeatability[0]:F4}, J2={repeatability[1]:F4}, J3={repeatability[2]:F4}, J4={repeatability[3]:F4}, J5={repeatability[4]:F4}, J6={repeatability[5]:F4}");
+                    }
+                    return errcode;
+                }
+            }
+            catch (Exception ex)
+            {
+                if (log != null)
+                {
+                    log.LogError($"RPC exception in JointRepeatability: {ex.Message}");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+        * @brief 设置关节力传感器参数
+        * @param [in] M J1-J6质量系数[]
+        * @param [in] B J1-J6阻尼系数[]
+        * @param [in] K J1-J6刚度系数[]
+        * @param [in] threshold 力控制阈值，Nm
+        * @param [in] sensitivity 灵敏度,Nm/V,[]
+        * @param [in] setZeroFlag 功能开启标志位；0-关闭；1-开启；2-位置1记录零点；3-位置2记录零点
+        * @return 错误码
+        */
+        public int SetAdmittanceParams(double[] M, double[] B, double[] K, double[] threshold, double[] sensitivity, int setZeroFlag)
+        {
+            //log.LogInfo($"SetAdmittanceParams");
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            if (GetSafetyCode() != 0)
+            {
+                return GetSafetyCode();
+            }
+
+            try
+            {
+                int rtn = -1;
+
+                // 构建与C++完全一致的参数数组
+                object[] admittanceParams = new object[31];
+
+                // M参数 (0-5)
+                admittanceParams[0] = M[0];
+                admittanceParams[1] = M[1];
+                admittanceParams[2] = M[2];
+                admittanceParams[3] = M[3];
+                admittanceParams[4] = M[4];
+                admittanceParams[5] = M[5];
+
+                // B参数 (6-11)
+                admittanceParams[6] = B[0];
+                admittanceParams[7] = B[1];
+                admittanceParams[8] = B[2];
+                admittanceParams[9] = B[3];
+                admittanceParams[10] = B[4];
+                admittanceParams[11] = B[5];
+
+                // K参数 (12-17)
+                admittanceParams[12] = K[0];
+                admittanceParams[13] = K[1];
+                admittanceParams[14] = K[2];
+                admittanceParams[15] = K[3];
+                admittanceParams[16] = K[4];
+                admittanceParams[17] = K[5];
+
+                // threshold参数 (18-23)
+                admittanceParams[18] = threshold[0];
+                admittanceParams[19] = threshold[1];
+                admittanceParams[20] = threshold[2];
+                admittanceParams[21] = threshold[3];
+                admittanceParams[22] = threshold[4];
+                admittanceParams[23] = threshold[5];
+
+                // sensitivity参数 (24-29)
+                admittanceParams[24] = sensitivity[0];
+                admittanceParams[25] = sensitivity[1];
+                admittanceParams[26] = sensitivity[2];
+                admittanceParams[27] = sensitivity[3];
+                admittanceParams[28] = sensitivity[4];
+                admittanceParams[29] = sensitivity[5];
+
+                // setZeroFlag参数 (30)
+                admittanceParams[30] = setZeroFlag;
+
+                // 调用RPC
+                rtn = proxy.SetAdmittanceParams(admittanceParams);
+
+                if (log != null)
+                {
+                    log.LogInfo($"SetAdmittanceParams called with {admittanceParams.Length} parameters. Return: {rtn}");
+                }
+                return rtn;
+            }
+            catch (Exception ex)
+            {
+                if (log != null)
+                {
+                    log.LogError($"Exception in SetAdmittanceParams: {ex.Message}");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+
+        /**
+        * @brief 移动到相贯线起始点
+        * @param [in] mainPoint 主管6个示教点的笛卡尔位姿
+        * @param [in] piecePoint 辅管6个示教点的笛卡尔位姿
+        * @param [in] tool 工具坐标系编号
+        * @param [in] wobj 工件坐标系编号
+        * @param [in] vel 速度百分比
+        * @param [in] acc 加速度百分比
+        * @param [in] ovl 速度缩放因子
+        * @param [in] oacc 加速度缩放因子
+        * @param [in] moveType 运动类型; 0-PTP；1-LIN
+        * @return 错误码
+        */
+        public int MoveToIntersectLineStart(DescPose[] mainPoint, DescPose[] piecePoint, int tool, int wobj, double vel, double acc, double ovl, double oacc, int moveType)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            if (GetSafetyCode() != 0)
+            {
+                return GetSafetyCode();
+            }
+
+
+            ExaxisPos[] mainExaxisPos = new ExaxisPos[6];
+            ExaxisPos[] pieceExaxisPos = new ExaxisPos[6];
+
+            for (int i = 0; i < 6; i++)
+            {
+                mainExaxisPos[i] = new ExaxisPos(0,0,0,0);
+                pieceExaxisPos[i] = new ExaxisPos(0, 0, 0, 0);
+            }
+            int extAxisFlag = 0;
+            ExaxisPos exaxisPos = new ExaxisPos(0,0,0,0);
+            int moveDirection = 0;
+            DescPose offset = new DescPose(0, 0, 0, 0, 0, 0);
+            int errcode = MoveToIntersectLineStart(mainPoint, mainExaxisPos, piecePoint, pieceExaxisPos, extAxisFlag, exaxisPos, tool, wobj, vel, acc, ovl, oacc, moveType, moveDirection, offset);
+
+            return errcode;
+        }
+
+        /**
+         * @brief 移动到相贯线起始点
+         * @param [in] mainPoint 主管6个示教点的笛卡尔位姿
+         * @param [in] mainExaxisPos 主管6个示教点扩展轴位置
+         * @param [in] piecePoint 辅管6个示教点的笛卡尔位姿
+         * @param [in] pieceExaxisPos 拼接管6个示教点扩展轴位置
+         * @param [in] extAxisFlag 是否启用扩展轴；0-不启用；1-启用
+         * @param [in] exaxisPos 起点扩展轴位置
+         * @param [in] tool 工具坐标系编号
+         * @param [in] wobj 工件坐标系编号
+         * @param [in] vel 速度百分比
+         * @param [in] acc 加速度百分比
+         * @param [in] ovl 速度缩放因子
+         * @param [in] oacc 加速度缩放因子
+         * @param [in] moveType 运动类型; 0-PTP；1-LIN
+         * @param [in] moveDirection 运动方向；0-顺时针；1-逆时针
+         * @param [in] offset 偏移量
+         * @return 错误码
+         */
+        public int MoveToIntersectLineStart(DescPose[] mainPoint, ExaxisPos[] mainExaxisPos, DescPose[] piecePoint, ExaxisPos[] pieceExaxisPos, int extAxisFlag, ExaxisPos exaxisPos, int tool, int wobj, double vel, double acc, double ovl, double oacc, int moveType, int moveDirection, DescPose offset)
+        {
+          
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+           
+            if (GetSafetyCode() != 0)
+            {
+                return GetSafetyCode();
+            }
+
+            try
+            {
+
+                Console.WriteLine(1111);
+                int errcode = 0;
+
+                // 构建与C++完全一致的参数数组
+                object[] intersectParams = new object[139];
+
+                // 主管6个示教点数据 (0-35)
+                for (int i = 0; i < 6; i++)
+                {
+                    intersectParams[i * 6 + 0] = mainPoint[i].tran.x;
+                    intersectParams[i * 6 + 1] = mainPoint[i].tran.y;
+                    intersectParams[i * 6 + 2] = mainPoint[i].tran.z;
+                    intersectParams[i * 6 + 3] = mainPoint[i].rpy.rx;
+                    intersectParams[i * 6 + 4] = mainPoint[i].rpy.ry;
+                    intersectParams[i * 6 + 5] = mainPoint[i].rpy.rz;
+                }
+                Console.WriteLine(22222);
+                // 主管扩展轴位置 (36-59)
+                for (int i = 0; i < 6; i++)
+                {
+                    intersectParams[i * 4 + 0 + 36] = mainExaxisPos[i].ePos[0];
+                    intersectParams[i * 4 + 1 + 36] = mainExaxisPos[i].ePos[1];
+                    intersectParams[i * 4 + 2 + 36] = mainExaxisPos[i].ePos[2];
+                    intersectParams[i * 4 + 3 + 36] = mainExaxisPos[i].ePos[3];
+                }
+                Console.WriteLine(33333);
+                // 辅管6个示教点数据 (60-95)
+                for (int i = 0; i < 6; i++)
+                {
+                    intersectParams[i * 6 + 0 + 60] = piecePoint[i].tran.x;
+                    intersectParams[i * 6 + 1 + 60] = piecePoint[i].tran.y;
+                    intersectParams[i * 6 + 2 + 60] = piecePoint[i].tran.z;
+                    intersectParams[i * 6 + 3 + 60] = piecePoint[i].rpy.rx;
+                    intersectParams[i * 6 + 4 + 60] = piecePoint[i].rpy.ry;
+                    intersectParams[i * 6 + 5 + 60] = piecePoint[i].rpy.rz;
+                }
+                Console.WriteLine(4444);
+                // 辅管扩展轴位置 (96-119)
+                for (int i = 0; i < 6; i++)
+                {
+                    intersectParams[i * 4 + 0 + 96] = pieceExaxisPos[i].ePos[0];
+                    intersectParams[i * 4 + 1 + 96] = pieceExaxisPos[i].ePos[1];
+                    intersectParams[i * 4 + 2 + 96] = pieceExaxisPos[i].ePos[2];
+                    intersectParams[i * 4 + 3 + 96] = pieceExaxisPos[i].ePos[3];
+                }
+
+                // 扩展轴标志和位置 (120-124)
+                intersectParams[120] = extAxisFlag;
+                intersectParams[121] = exaxisPos.ePos[0];
+                intersectParams[122] = exaxisPos.ePos[1];
+                intersectParams[123] = exaxisPos.ePos[2];
+                intersectParams[124] = exaxisPos.ePos[3];
+
+                // 工具和工作坐标系参数 (125-126)
+                intersectParams[125] = tool;
+                intersectParams[126] = wobj;
+
+                // 运动参数 (127-132)
+                intersectParams[127] = vel;
+                intersectParams[128] = acc;
+                intersectParams[129] = ovl;
+                intersectParams[130] = oacc;
+                intersectParams[131] = moveType;
+                intersectParams[132] = moveDirection;
+
+                // 偏移量参数 (133-138)
+                intersectParams[133] = offset.tran.x;
+                intersectParams[134] = offset.tran.y;
+                intersectParams[135] = offset.tran.z;
+                intersectParams[136] = offset.rpy.rx;
+                intersectParams[137] = offset.rpy.ry;
+                intersectParams[138] = offset.rpy.rz;
+
+                // 调用RPC
+          
+                errcode = proxy.MoveToIntersectLineStart(intersectParams);
+                Console.WriteLine(33333);
+                if (log != null)
+                {
+                    log.LogInfo($"MoveToIntersectLineStart called with {intersectParams.Length} parameters. Return: {errcode}");
+                }
+
+                if ((robot_state_pkg.main_code != 0 || robot_state_pkg.sub_code != 0) && errcode == 0)
+                {
+                    errcode = 14;
+                }
+
+                return errcode;
+            }
+            catch (Exception ex)
+            {
+                if (log != null)
+                {
+                    Console.WriteLine($"Exception in MoveToIntersectLineStart: {ex.Message}");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief 相贯线运动
+         * @param [in] mainPoint 主管6个示教点的笛卡尔位姿
+         * @param [in] piecePoint 辅管6个示教点的笛卡尔位姿
+         * @param [in] tool 工具坐标系编号
+         * @param [in] wobj 工件坐标系编号
+         * @param [in] vel 速度百分比
+         * @param [in] acc 加速度百分比
+         * @param [in] ovl 速度缩放因子
+         * @param [in] oacc 加速度缩放因子
+         * @param [in] moveDirection 运动方向; 0-顺时针；1-逆时针
+         * @return 错误码
+         */
+        public int MoveIntersectLine(DescPose[] mainPoint, DescPose[] piecePoint, int tool, int wobj, double vel, double acc, double ovl, double oacc, int moveDirection)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            if (GetSafetyCode() != 0)
+            {
+                return GetSafetyCode();
+            }
+
+            ExaxisPos[] mainExaxisPos = new ExaxisPos[6];
+            ExaxisPos[] pieceExaxisPos = new ExaxisPos[6];
+
+            for (int i = 0; i < 6; i++)
+            {
+                mainExaxisPos[i] = new ExaxisPos(0, 0, 0, 0);
+                pieceExaxisPos[i] = new ExaxisPos(0, 0, 0, 0);
+            }
+            int extAxisFlag = 0;
+            ExaxisPos[] exaxisPos = new ExaxisPos[4];
+            for (int i = 0; i < 4; i++)
+            {
+                exaxisPos[i] = new ExaxisPos(0, 0, 0, 0);
+              
+            }
+            DescPose offset = new DescPose(0,0,0,0,0,0);
+            int errcode = MoveIntersectLine(mainPoint, mainExaxisPos, piecePoint, pieceExaxisPos, extAxisFlag, exaxisPos, tool, wobj, vel, acc, ovl, oacc, moveDirection, offset);
+
+            return errcode;
+        }
+
+        /**
+         * @brief 相贯线运动
+         * @param [in] mainPoint 主管6个示教点的笛卡尔位姿
+         * @param [in] mainExaxisPos 主管6个示教点扩展轴位置
+         * @param [in] piecePoint 辅管6个示教点的笛卡尔位姿
+         * @param [in] pieceExaxisPos 拼接管6个示教点扩展轴位置
+         * @param [in] extAxisFlag 是否启用扩展轴；0-不启用；1-启用
+         * @param [in] exaxisPos 起点扩展轴位置
+         * @param [in] tool 工具坐标系编号
+         * @param [in] wobj 工件坐标系编号
+         * @param [in] vel 速度百分比
+         * @param [in] acc 加速度百分比
+         * @param [in] ovl 速度缩放因子
+         * @param [in] oacc 加速度缩放因子
+         * @param [in] moveDirection 运动方向; 0-顺时针；1-逆时针
+         * @param [in] offset 偏移量
+         * @return 错误码
+         */
+        public int MoveIntersectLine(DescPose[] mainPoint, ExaxisPos[] mainExaxisPos, DescPose[] piecePoint, ExaxisPos[] pieceExaxisPos, int extAxisFlag, ExaxisPos[] exaxisPos, int tool, int wobj, double vel, double acc, double ovl, double oacc, int moveDirection, DescPose offset)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            if (GetSafetyCode() != 0)
+            {
+                return GetSafetyCode();
+            }
+
+            try
+            {
+                int errcode = 0;
+
+                // 构建与C++完全一致的参数数组
+                object[] intersectParams = new object[150];
+
+                // 主管6个示教点数据 (0-35)
+                for (int i = 0; i < 6; i++)
+                {
+                    intersectParams[i * 6 + 0] = mainPoint[i].tran.x;
+                    intersectParams[i * 6 + 1] = mainPoint[i].tran.y;
+                    intersectParams[i * 6 + 2] = mainPoint[i].tran.z;
+                    intersectParams[i * 6 + 3] = mainPoint[i].rpy.rx;
+                    intersectParams[i * 6 + 4] = mainPoint[i].rpy.ry;
+                    intersectParams[i * 6 + 5] = mainPoint[i].rpy.rz;
+                }
+
+                // 主管扩展轴位置 (36-59)
+                for (int i = 0; i < 6; i++)
+                {
+                    intersectParams[i * 4 + 0 + 36] = mainExaxisPos[i].ePos[0];
+                    intersectParams[i * 4 + 1 + 36] = mainExaxisPos[i].ePos[1];
+                    intersectParams[i * 4 + 2 + 36] = mainExaxisPos[i].ePos[2];
+                    intersectParams[i * 4 + 3 + 36] = mainExaxisPos[i].ePos[3];
+                }
+
+                // 辅管6个示教点数据 (60-95)
+                for (int i = 0; i < 6; i++)
+                {
+                    intersectParams[i * 6 + 0 + 60] = piecePoint[i].tran.x;
+                    intersectParams[i * 6 + 1 + 60] = piecePoint[i].tran.y;
+                    intersectParams[i * 6 + 2 + 60] = piecePoint[i].tran.z;
+                    intersectParams[i * 6 + 3 + 60] = piecePoint[i].rpy.rx;
+                    intersectParams[i * 6 + 4 + 60] = piecePoint[i].rpy.ry;
+                    intersectParams[i * 6 + 5 + 60] = piecePoint[i].rpy.rz;
+                }
+
+                // 辅管扩展轴位置 (96-119)
+                for (int i = 0; i < 6; i++)
+                {
+                    intersectParams[i * 4 + 0 + 96] = pieceExaxisPos[i].ePos[0];
+                    intersectParams[i * 4 + 1 + 96] = pieceExaxisPos[i].ePos[1];
+                    intersectParams[i * 4 + 2 + 96] = pieceExaxisPos[i].ePos[2];
+                    intersectParams[i * 4 + 3 + 96] = pieceExaxisPos[i].ePos[3];
+                }
+
+                // 扩展轴标志 (120)
+                intersectParams[120] = extAxisFlag;
+
+                // 扩展轴位置 (121-136)
+                for (int i = 0; i < 4; i++)
+                {
+                    intersectParams[121 + i * 4] = exaxisPos[i].ePos[0];
+                    intersectParams[122 + i * 4] = exaxisPos[i].ePos[1];
+                    intersectParams[123 + i * 4] = exaxisPos[i].ePos[2];
+                    intersectParams[124 + i * 4] = exaxisPos[i].ePos[3];
+                }
+
+                // 工具和工作坐标系参数 (137-138)
+                intersectParams[137] = tool;
+                intersectParams[138] = wobj;
+
+                // 运动参数 (139-143)
+                intersectParams[139] = vel;
+                intersectParams[140] = acc;
+                intersectParams[141] = ovl;
+                intersectParams[142] = oacc;
+                intersectParams[143] = moveDirection;
+
+                // 偏移量参数 (144-149)
+                intersectParams[144] = offset.tran.x;
+                intersectParams[145] = offset.tran.y;
+                intersectParams[146] = offset.tran.z;
+                intersectParams[147] = offset.rpy.rx;
+                intersectParams[148] = offset.rpy.ry;
+                intersectParams[149] = offset.rpy.rz;
+
+                // 调用RPC
+                errcode = proxy.MoveIntersectLine(intersectParams);
+
+                if (log != null)
+                {
+                    log.LogInfo($"MoveIntersectLine called with {intersectParams.Length} parameters. Return: {errcode}");
+                }
+
+                if ((robot_state_pkg.main_code != 0 || robot_state_pkg.sub_code != 0) && errcode == 0)
+                {
+                    errcode = 14;
+                }
+
+                return errcode;
+            }
+            catch (Exception ex)
+            {
+                if (log != null)
+                {
+                  //  log.LogError($"Exception in MoveIntersectLine: {ex.Message}");
                 }
                 return (int)RobotError.ERR_RPC_ERROR;
             }

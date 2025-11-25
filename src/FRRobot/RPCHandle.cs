@@ -1755,7 +1755,7 @@ namespace fairino
         int ServoJTStart();
 
         [XmlRpcMethod("ServoJT")]
-        int ServoJT(double[] torque, double interval);
+        int ServoJT(double[] torque, double interval, int checkFlag, double[] jPowerLimit, double[] jVelLimit);
 
         [XmlRpcMethod("ServoJTEnd")]
         int ServoJTEnd();
@@ -2192,7 +2192,22 @@ namespace fairino
         [XmlRpcMethod("RobotMCULogCollect")]
         int RobotMCULogCollect();
 
+        [XmlRpcMethod("MoveToIntersectLineStart")]
+        int MoveToIntersectLineStart(object[] moveToIntersectLineStartParams);
 
+        [XmlRpcMethod("MoveIntersectLine")]
+        int MoveIntersectLine(object[] moveIntersectLineParams);
+
+        [XmlRpcMethod("JointHysteresisError")]
+        object[] JointHysteresisError();
+
+        [XmlRpcMethod("JointRepeatability")]
+        object[]  JointRepeatability();
+
+
+        [XmlRpcMethod("SetAdmittanceParams")]
+
+        int SetAdmittanceParams(object[] admittanceParams);
 
     }
     internal class RPCHandle

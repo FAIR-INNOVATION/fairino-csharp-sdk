@@ -3134,7 +3134,7 @@ namespace testFrRobot
             for (int i = 0; i < 100; i++)
             {
                 robot.GetRobotRealTimeState(ref pkg);
-                Console.WriteLine($"robot ctrl box temp is {pkg.wideVoltageCtrlBoxTemp}, fan current is {pkg.wideVoltageCtrlBoxFanVel}");
+                Console.WriteLine($"robot ctrl box temp is {pkg.jt_cur_pos[0]}, fan current is {pkg.check_sum}");
                 Thread.Sleep(100);
             }
             int rtn = robot.SetWideBoxTempFanMonitorParam(0, 2);
@@ -4570,8 +4570,264 @@ namespace testFrRobot
             // TestServoJ();
             //  TestSlavePortErr();
             //  TestSpiral();
-            TestFTControlWithDamping();
+            //TestFTControlWithDamping();
+            //ServoJTWithSafety();
+            //TestLua();
+             TestIntersectLineMove();
+           // TestSensitivityCalib();
+
         }
+
+        public int TestSensitivityCalib()
+        {
+            int rtn;
+   
+            rtn = robot.JointSensitivityEnable(0);
+            rtn = robot.JointSensitivityEnable(1);
+            Console.WriteLine($"JointSensitivityEnable rtn is {rtn}");
+
+            JointPos curJPos = new JointPos(0, 0, 0, 0, 0, 0);
+            robot.GetActualJointPosDegree(0, ref curJPos);
+            ExaxisPos epos = new ExaxisPos(0, 0, 0, 0);
+            DescPose offset_pos = new DescPose(0, 0, 0, 0, 0, 0);
+            JointPos[] jointPoses = new JointPos[]
+            {
+                new JointPos(curJPos.jPos[0], 0, 0, -90, 0.02, curJPos.jPos[5]),
+                new JointPos(curJPos.jPos[0], -30, 0, -90, 0.02, curJPos.jPos[5]),
+                new JointPos(curJPos.jPos[0], -60, 0, -90, 0.02, curJPos.jPos[5]),
+                new JointPos(curJPos.jPos[0], -90, 0, -90, 0.02, curJPos.jPos[5]),
+                new JointPos(curJPos.jPos[0], -120, 0, -90, 0.02, curJPos.jPos[5]),
+                new JointPos(curJPos.jPos[0], -150, 0, -90, 0.02, curJPos.jPos[5]),
+                new JointPos(curJPos.jPos[0], -180, 0, -90, 0.02, curJPos.jPos[5])
+            };
+            for (int i = 0; i < jointPoses.Length; i++)
+            {
+                DescPose descPos = new DescPose(0, 0, 0, 0, 0, 0);
+                robot.GetForwardKin(jointPoses[i], ref descPos);
+                robot.MoveJ(jointPoses[i], descPos, 0, 0, 100, 100, 100, epos, -1, 0, offset_pos);
+
+                Thread.Sleep(i == 0 ? 200 : 100);
+                rtn = robot.JointSensitivityCollect();
+                Console.WriteLine($"JointSensitivityCollect {i + 1} rtn is {rtn}");
+                Thread.Sleep(100);
+            }
+
+            for (int i = jointPoses.Length - 2; i >= 0; i--)
+            {
+                DescPose descPos = new DescPose();
+                robot.GetForwardKin(jointPoses[i], ref descPos);
+                robot.MoveJ(jointPoses[i], descPos, 0, 0, 100, 100, 100, epos, -1, 0, offset_pos);
+
+                Thread.Sleep(100);
+                rtn = robot.JointSensitivityCollect();
+                Console.WriteLine($"JointSensitivityCollect {jointPoses.Length + (jointPoses.Length - 1 - i)} rtn is {rtn}");
+                Thread.Sleep(100);
+            }
+
+            double[] calibResult = new double[6];
+            double[] linearity = new double[6];
+            rtn = robot.JointSensitivityCalibration(ref calibResult, ref linearity);
+            Console.WriteLine($"JointSensitivityCalibration rtn is {rtn}");
+
+            rtn = robot.JointSensitivityEnable(0);
+            Console.WriteLine($"JointSensitivityEnable rtn is {rtn}");
+
+            Console.WriteLine($"jointSensor Calib result is {calibResult[0]:F6} {calibResult[1]:F6} {calibResult[2]:F6} {calibResult[3]:F6} {calibResult[4]:F6} {calibResult[5]:F6}");
+            Console.WriteLine($"jointSensor linearity is {linearity[0]:F6} {linearity[1]:F6} {linearity[2]:F6} {linearity[3]:F6} {linearity[4]:F6} {linearity[5]:F6}");
+
+   
+            double[] hysteresisError = new double[6];
+            rtn = robot.JointHysteresisError(ref hysteresisError);
+            Console.WriteLine($"JointHysteresisError result is {hysteresisError[0]:F6} {hysteresisError[1]:F6} {hysteresisError[2]:F6} {hysteresisError[3]:F6} {hysteresisError[4]:F6} {hysteresisError[5]:F6}");
+
+     
+            double[] repeatability = new double[6];
+            rtn = robot.JointRepeatability(ref repeatability);
+            Console.WriteLine($"JointRepeatability result is {repeatability[0]:F6} {repeatability[1]:F6} {repeatability[2]:F6} {repeatability[3]:F6} {repeatability[4]:F6} {repeatability[5]:F6}");
+
+
+            double[] M = new double[6] { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
+            double[] B = new double[6] { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
+            double[] K = new double[6] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+            double[] threshold = new double[6] { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
+            int setZeroFlag = 1;
+            rtn = robot.SetAdmittanceParams(M, B, K, threshold, calibResult, setZeroFlag);
+            Console.WriteLine($"SetAdmittanceParams rtn is {rtn}");
+
+            robot.CloseRPC();
+            return 0;
+        }
+
+        public void TestIntersectLineMove()
+        {
+            int rtn;
+      
+     
+
+            DescPose[] mainPoint = new DescPose[6];
+            DescPose[] piecePoint = new DescPose[6];
+
+            ExaxisPos[] mainExaxisPos = new ExaxisPos[6];
+            ExaxisPos[] pieceExaxisPos = new ExaxisPos[6];
+            int extAxisFlag = 1;
+            ExaxisPos[] exaxisPos = new ExaxisPos[4];
+            DescPose offset = new DescPose(0.0, 2.0, 30.0, -2.0, 0.0, 0.0);
+
+            mainPoint[0] = new DescPose(490.004, -383.194, 402.735, -9.332, -1.528, 69.594);
+            mainPoint[1] = new DescPose(444.950, -407.117, 389.011, -5.546, -2.196, 65.279);
+            mainPoint[2] = new DescPose(445.168, -463.605, 355.759, -1.544, -10.886, 57.104);
+            mainPoint[3] = new DescPose(507.529, -485.385, 343.013, -0.786, -4.834, 61.799);
+            mainPoint[4] = new DescPose(554.390, -442.647, 367.701, -4.761, -10.181, 64.925);
+            mainPoint[5] = new DescPose(532.552, -394.003, 396.467, -13.732, -13.592, 67.411);
+
+            mainExaxisPos[0] = new ExaxisPos(-29.996, 0.000, 0.000, 0.000);
+            mainExaxisPos[1] = new ExaxisPos(-29.996, 0.000, 0.000, 0.000);
+            mainExaxisPos[2] = new ExaxisPos(-29.996, 0.000, 0.000, 0.000);
+            mainExaxisPos[3] = new ExaxisPos(-29.996, 0.000, 0.000, 0.000);
+            mainExaxisPos[4] = new ExaxisPos(-29.996, 0.000, 0.000, 0.000);
+            mainExaxisPos[5] = new ExaxisPos(-29.996, 0.000, 0.000, 0.000);
+
+            piecePoint[0] = new DescPose(505.571, -192.408, 316.759, 38.098, 37.051, 139.447);
+            piecePoint[1] = new DescPose(533.837, -201.558, 332.340, 34.644, 42.339, 137.748);
+            piecePoint[2] = new DescPose(530.386, -225.085, 373.808, 35.431, 45.111, 137.560);
+            piecePoint[3] = new DescPose(485.646, -229.195, 383.778, 33.870, 45.173, 137.064);
+            piecePoint[4] = new DescPose(460.551, -212.161, 354.256, 28.856, 45.602, 135.930);
+            piecePoint[5] = new DescPose(474.217, -197.124, 324.611, 42.469, 41.133, 148.167);
+
+            pieceExaxisPos[0] = new ExaxisPos(-29.996, -0.000, 0.000, 0.000);
+            pieceExaxisPos[1] = new ExaxisPos(-29.996, -0.000, 0.000, 0.000);
+            pieceExaxisPos[2] = new ExaxisPos(-29.996, -0.000, 0.000, 0.000);
+            pieceExaxisPos[3] = new ExaxisPos(-29.996, -0.000, 0.000, 0.000);
+            pieceExaxisPos[4] = new ExaxisPos(-29.996, -0.000, 0.000, 0.000);
+            pieceExaxisPos[5] = new ExaxisPos(-29.996, -0.000, 0.000, 0.000);
+
+
+            exaxisPos[0] = new ExaxisPos(-29.996, -0.000, 0.000, 0.000);
+            exaxisPos[1] = new ExaxisPos(-44.994, 90.000, 0.000, 0.000);
+            exaxisPos[2] = new ExaxisPos(-59.992, 0.002, 0.000, 0.000);
+            exaxisPos[3] = new ExaxisPos(-44.994, -89.997, 0.000, 0.000);
+
+            int tool = 2;
+            int wobj = 0;
+            double vel = 100.0;
+            double acc = 100.0;
+            double ovl = 12.0;
+            double oacc = 12.0;
+            int moveType = 1;
+            int moveDirection = 1;
+
+            rtn = robot.MoveToIntersectLineStart(mainPoint, mainExaxisPos, piecePoint, pieceExaxisPos, extAxisFlag, exaxisPos[0], tool, wobj, vel, acc, ovl, oacc, moveType, moveDirection, offset);
+            Console.WriteLine($"MoveToIntersectLineStart rtn is {rtn}");
+
+            rtn = robot.MoveIntersectLine(mainPoint, mainExaxisPos, piecePoint, pieceExaxisPos, extAxisFlag, exaxisPos, tool, wobj, vel, acc, 5.0, 5.0, moveDirection, offset);
+            Console.WriteLine($"MoveIntersectLine rtn is {rtn}");
+
+            robot.CloseRPC();
+            return;
+        }
+        //public void TestIntersectLineMove()
+        //{
+        //    int rtn;
+
+
+        //    DescPose[] mainPoint = new DescPose[6];
+        //    DescPose[] piecePoint = new DescPose[6];
+
+        //    mainPoint[0] = new DescPose(144.084, 512.064, 8.899, -58.958, 40.838, 23.295);
+        //    mainPoint[1] = new DescPose(132.150, 512.638, 28.157, -58.626, 40.788, 24.966);
+        //    mainPoint[2] = new DescPose(150.155, 514.479, 74.107, -47.740, 40.410, 27.552);
+        //    mainPoint[3] = new DescPose(188.346, 518.501, 73.946, -17.227, 60.139, 15.265);
+        //    mainPoint[4] = new DescPose(206.811, 520.214, 52.966, -18.198, 60.381, 12.624);
+        //    mainPoint[5] = new DescPose(203.002, 518.627, 19.028, -23.830, 61.410, 8.343);
+
+
+        //    piecePoint[0] = new DescPose(190.428, 480.862, 102.236, 8.966, 46.472, 35.582);
+        //    piecePoint[1] = new DescPose(201.770, 510.904, 101.912, 12.079, 66.897, 26.452);
+        //    piecePoint[2] = new DescPose(186.344, 533.294, 102.866, 1.980, 62.882, 25.094);
+        //    piecePoint[3] = new DescPose(162.969, 537.537, 103.015, -22.013, 46.227, 28.606);
+        //    piecePoint[4] = new DescPose(139.465, 510.090, 103.505, -23.996, 33.774, 41.829);
+        //    piecePoint[5] = new DescPose(168.329, 475.251, 102.325, 4.241, 42.293, 38.624);
+
+        //    int tool = 4;
+        //    int wobj = 0;
+        //    double vel = 100.0;
+        //    double acc = 100.0;
+        //    double ovl = 10.0;
+        //    double oacc = 10.0;
+        //    int moveType = 1;
+        //    int moveDirection = 1;
+
+
+        //    rtn = robot.MoveToIntersectLineStart(mainPoint, piecePoint, tool, wobj, vel, acc, ovl, oacc, moveType);
+        //    Console.WriteLine($"MoveToIntersectLineStart rtn is {rtn}");
+
+
+        //    rtn = robot.MoveIntersectLine(mainPoint, piecePoint, tool, wobj, vel, acc, ovl, oacc, moveDirection);
+        //    Console.WriteLine($"MoveIntersectLine rtn is {rtn}");
+
+        //    robot.CloseRPC();
+        //    return;
+        //}
+        public void TestLua()
+        {
+            int rtn;
+            string errStr = "";
+            rtn = robot.LuaUpload("D://zUP/suoluomen/test1.lua", ref errStr);
+            Console.WriteLine("LuaUpload rtn is {0}", errStr);
+            Thread.Sleep(2000);
+        }
+
+  
+        public int ServoJTWithSafety()
+        {
+            robot.ResetAllError();
+            Thread.Sleep(500);
+
+            double[] torques = new double[6] { 0, 0, 0, 0, 0, 0 };
+            robot.GetJointTorques(1, torques);
+
+            robot.ServoJTStart();
+            ROBOT_STATE_PKG pkg = new ROBOT_STATE_PKG();
+            robot.DragTeachSwitch(1);
+
+            int checkFlag = 0;
+            double[] jPowerLimit = new double[6] { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
+            //double[] jPowerLimit = new double[6] { 10.0, 10.0, 10.0, 10.0, 10.0, 10.0 };
+             // double[] jVelLimit = new double[6] { 10.0, 10.0, 10.0, 10.0, 10.0, 10.0 };
+            double[] jVelLimit = new double[6] {50, 50, 50, 50, 50, 50 };
+            int count = 80000;
+            int errorNum = 0;
+            int error = 0;
+            while (count > 0)
+            {
+           
+                torques[2] = torques[2] + 0.01; 
+                error = robot.ServoJT(torques, 0.008, checkFlag, jPowerLimit, jVelLimit); 
+
+                Console.WriteLine($"ServoJT rtn is {error}");
+                count = count - 1;
+                Thread.Sleep(1);
+             
+                robot.GetRobotRealTimeState(ref pkg);
+                Console.WriteLine($"maincode {pkg.main_code}, subcode {pkg.sub_code}");
+                if (error != 0)
+                {
+                    errorNum++;
+                    if (errorNum > 5)
+                    {
+                        break;
+                    }
+
+                }
+            }
+
+            robot.DragTeachSwitch(0);
+            error = robot.ServoJTEnd();
+
+            return 0;
+        }
+
+
         public void TestFTControlWithDamping()
         {
             int rtn;
@@ -4795,63 +5051,63 @@ namespace testFrRobot
 
             robot.CloseRPC();
         }
-        public void TestSensitivityCalib()
-        {
-           int rtn = robot.JointSensitivityEnable(1);
-            Console.WriteLine($"JointSensitivityEnable rtn is {rtn}");
+        //public void TestSensitivityCalib()
+        //{
+        //   int rtn = robot.JointSensitivityEnable(1);
+        //    Console.WriteLine($"JointSensitivityEnable rtn is {rtn}");
 
-            JointPos curJPos = new JointPos(0, 0, 0, 0, 0, 0);
-            rtn = robot.GetActualJointPosDegree(0, ref curJPos);
-            if (rtn != 0)
-            {
-                Console.WriteLine("Failed to get actual joint position.");
-                robot.CloseRPC();
-                return;
-            }
+        //    JointPos curJPos = new JointPos(0, 0, 0, 0, 0, 0);
+        //    rtn = robot.GetActualJointPosDegree(0, ref curJPos);
+        //    if (rtn != 0)
+        //    {
+        //        Console.WriteLine("Failed to get actual joint position.");
+        //        robot.CloseRPC();
+        //        return;
+        //    }
 
-            ExaxisPos epos = new ExaxisPos(0, 0, 0, 0);
-            DescPose offset_pos = new DescPose(0, 0, 0, 0, 0, 0);
+        //    ExaxisPos epos = new ExaxisPos(0, 0, 0, 0);
+        //    DescPose offset_pos = new DescPose(0, 0, 0, 0, 0, 0);
 
-            double[] j2Angles = { 0, -30, -60, -90, -120, -150, -180 };
+        //    double[] j2Angles = { 0, -30, -60, -90, -120, -150, -180 };
 
-            foreach (double j2 in j2Angles)
-            {
-                JointPos jointPos = new JointPos(
-                    curJPos.jPos[0], j2, 0, -90, 0.02, curJPos.jPos[5]
-                );
+        //    foreach (double j2 in j2Angles)
+        //    {
+        //        JointPos jointPos = new JointPos(
+        //            curJPos.jPos[0], j2, 0, -90, 0.02, curJPos.jPos[5]
+        //        );
 
-                DescPose descPos = new DescPose(0, 0, 0, 0, 0, 0);
-                rtn = robot.GetForwardKin( jointPos, ref descPos);
-                if (rtn != 0)
-                {
-                    Console.WriteLine($"GetForwardKin failed at J2={j2}.");
-                    continue;
-                }
+        //        DescPose descPos = new DescPose(0, 0, 0, 0, 0, 0);
+        //        rtn = robot.GetForwardKin( jointPos, ref descPos);
+        //        if (rtn != 0)
+        //        {
+        //            Console.WriteLine($"GetForwardKin failed at J2={j2}.");
+        //            continue;
+        //        }
 
-                rtn = robot.MoveJ( jointPos,  descPos, 0, 0, 100, 100, 100,  epos, -1, 0,  offset_pos);
-                if (rtn != 0)
-                {
-                    Console.WriteLine($"MoveJ failed to J2={j2}, rtn={rtn}");
-                    continue;
-                }
-                Thread.Sleep(200); 
-                rtn = robot.JointSensitivityCollect();
-                Console.WriteLine($"JointSensitivityCollect at J2={j2} rtn is {rtn}");
-                Thread.Sleep(100);
-            }
+        //        rtn = robot.MoveJ( jointPos,  descPos, 0, 0, 100, 100, 100,  epos, -1, 0,  offset_pos);
+        //        if (rtn != 0)
+        //        {
+        //            Console.WriteLine($"MoveJ failed to J2={j2}, rtn={rtn}");
+        //            continue;
+        //        }
+        //        Thread.Sleep(200); 
+        //        rtn = robot.JointSensitivityCollect();
+        //        Console.WriteLine($"JointSensitivityCollect at J2={j2} rtn is {rtn}");
+        //        Thread.Sleep(100);
+        //    }
 
-            double[] calibResult = new double[6];
-            rtn = robot.JointSensitivityCalibration(ref calibResult);
-            Console.WriteLine($"JointSensitivityCalibration rtn is {rtn}");
+        //    double[] calibResult = new double[6];
+        //    //rtn = robot.JointSensitivityCalibration(ref calibResult);
+        //    Console.WriteLine($"JointSensitivityCalibration rtn is {rtn}");
 
-            rtn = robot.JointSensitivityEnable(0);
-            Console.WriteLine($"JointSensitivityEnable (disable) rtn is {rtn}");
+        //    rtn = robot.JointSensitivityEnable(0);
+        //    Console.WriteLine($"JointSensitivityEnable (disable) rtn is {rtn}");
 
-            Console.WriteLine($"Joint Sensor Calib result: " +
-                $"{calibResult[0]:F6} {calibResult[1]:F6} {calibResult[2]:F6} " +
-                $"{calibResult[3]:F6} {calibResult[4]:F6} {calibResult[5]:F6}");
-            robot.CloseRPC();
-        }
+        //    Console.WriteLine($"Joint Sensor Calib result: " +
+        //        $"{calibResult[0]:F6} {calibResult[1]:F6} {calibResult[2]:F6} " +
+        //        $"{calibResult[3]:F6} {calibResult[4]:F6} {calibResult[5]:F6}");
+        //    robot.CloseRPC();
+        //}
 
         /// <summary>
         /// 测试从站端口错误计数器：读取并清零所有从站的通信错误帧
