@@ -387,7 +387,7 @@ namespace testFrRobot
             robot.SingularAvoidStart(2, 10, 5, 5);
 
         
-                robot.MoveC(midjointPos, middescPose, 0, 0, 30, 100, exaxisPos, 0, offdese, endjointPos, enddescPose, 0, 0, 30, 100, exaxisPos, 0, offdese, 100, -1,0);
+                robot.MoveC(midjointPos, middescPose, 0, 0, 30, 100, exaxisPos, 0, offdese, endjointPos, enddescPose, 0, 0, 30, 100, exaxisPos, 0, offdese, 100, -1,100,0);
             robot.SingularAvoidEnd();
 
         }

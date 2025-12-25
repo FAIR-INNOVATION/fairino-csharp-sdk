@@ -11,10 +11,11 @@ internal class StatusTCPClient
     public Socket mSocket;
     private NetworkStream mNetworkStream;
     private bool isConnected = false;
-    private bool reconnEnable = false;  // 重连使能  
+    private bool reconnEnable = true;  // 重连使能  
     private int reconnTimes = 100;     // 重连次数  
     private int curReconnTimes = 0;    // 当前重连次数  
     private int reconnPeriod = 200;    // 重连时间间隔（毫秒）  
+    private int timeOut = 500;    // 发送、接收超时（毫秒） 
     private bool reconnState = false;  // 当前重连状态  
     private Log log;
     private readonly object socketLock = new object();
@@ -139,8 +140,8 @@ internal class StatusTCPClient
 
                 Console.WriteLine("连接成功");
 
-                mSocket.ReceiveTimeout = reconnPeriod;
-                mSocket.SendTimeout = reconnPeriod;
+                mSocket.ReceiveTimeout = timeOut;
+                mSocket.SendTimeout = timeOut;
 
                 isConnected = true;
                 return true;

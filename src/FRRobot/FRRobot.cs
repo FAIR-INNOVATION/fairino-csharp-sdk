@@ -41,7 +41,7 @@ namespace fairino
     {
         ICallSupervisor proxy = null;
 
-        const string SDK_VERSION = " C#SDK-V1.2.1  Web-3.9.0";
+        const string SDK_VERSION = " C#SDK-V1.2.2  Web-3.9.1";
 
         private string robot_ip = "192.168.57.2";//机器人ip
         private int g_sock_com_err = (int)RobotError.ERR_SUCCESS;
@@ -1004,26 +1004,27 @@ namespace fairino
 
 
         /**
-         * @brief  笛卡尔空间直线运动(重载函数1 增加blendMode)
-         * @param  [in] joint_pos  目标关节位置,单位deg
-         * @param  [in] desc_pos   目标笛卡尔位姿
-         * @param  [in] tool  工具坐标号，范围[1~15]
-         * @param  [in] user  工件坐标号，范围[1~15]
-         * @param  [in] vel  速度百分比，范围[0~100]
-         * @param  [in] acc  加速度百分比，范围[0~100],暂不开放
-         * @param  [in] ovl  速度缩放因子，范围[0~100]
-         * @param  [in] blendR [-1.0]-运动到位(阻塞)，[0~1000.0]-平滑半径(非阻塞)，单位mm
-         * @param  [in] blendMode 过渡方式；0-内切过渡；1-角点过渡
-         * @param  [in] epos  扩展轴位置，单位mm
-         * @param  [in] search  0-不焊丝寻位，1-焊丝寻位
-         * @param  [in] offset_flag  0-不偏移，1-基坐标系/工件坐标系下偏移，2-工具坐标系下偏移
-         * @param  [in] offset_pos  位姿偏移量
-         * @param  [in] velAccParamMode 速度加速度参数模式；0-百分比；1-物理速度(mm/s)加速度(mm/s2)
-         * @param  [in] overSpeedStrategy  超速处理策略，1-标准；2-超速时报错停止；3-自适应降速，默认为0
-         * @param  [in] speedPercent  允许降速阈值百分比[0-100]，默认10%
-         * @return  错误码
-         */
-        public int MoveL(JointPos joint_pos, DescPose desc_pos, int tool, int user, float vel, float acc, float ovl, float blendR, int blendMode, ExaxisPos epos, int search, int offset_flag, DescPose offset_pos, int velAccParamMode, int overSpeedStrategy = 0, int speedPercent = 10)
+     * @brief  笛卡尔空间直线运动(重载函数1 增加blendMode)
+     * @param  [in] joint_pos  目标关节位置,单位deg
+     * @param  [in] desc_pos   目标笛卡尔位姿
+     * @param  [in] tool  工具坐标号，范围[1~15]
+     * @param  [in] user  工件坐标号，范围[1~15]
+     * @param  [in] vel  速度百分比，范围[0~100]
+     * @param  [in] acc  加速度百分比，范围[0~100],暂不开放
+     * @param  [in] ovl  速度缩放因子[0~100]/物理速度(mm/s)
+     * @param  [in] blendR [-1.0]-运动到位(阻塞)，[0~1000.0]-平滑半径(非阻塞)，单位mm
+     * @param  [in] blendMode 过渡方式；0-内切过渡；1-角点过渡
+     * @param  [in] epos  扩展轴位置，单位mm
+     * @param  [in] search  0-不焊丝寻位，1-焊丝寻位
+     * @param  [in] offset_flag  0-不偏移，1-基坐标系/工件坐标系下偏移，2-工具坐标系下偏移
+     * @param  [in] offset_pos  位姿偏移量
+     * @param  [in] oacc 加速度缩放因子[0-100]/物理加速度(mm/s2)
+     * @param  [in] velAccParamMode 速度加速度参数模式；0-百分比；1-物理速度(mm/s)加速度(mm/s2)
+     * @param  [in] overSpeedStrategy  超速处理策略，1-标准；2-超速时报错停止；3-自适应降速，默认为0
+     * @param  [in] speedPercent  允许降速阈值百分比[0-100]，默认10%
+     * @return  错误码
+     */
+        public int MoveL(JointPos joint_pos, DescPose desc_pos, int tool, int user, float vel, float acc, float ovl, float blendR, int blendMode, ExaxisPos epos, int search, int offset_flag, DescPose offset_pos, float oacc, int velAccParamMode, int overSpeedStrategy = 0, int speedPercent = 10)
         {
             //log.LogInfo($"MoveL");
             if (IsSockComError())
@@ -1086,7 +1087,7 @@ namespace fairino
                 moveLParams[28] = (double)offset_pos.rpy.rx;
                 moveLParams[29] = (double)offset_pos.rpy.ry;
                 moveLParams[30] = (double)offset_pos.rpy.rz;
-                moveLParams[31] = 100.0; // 固定值
+                moveLParams[31] = (double)oacc; // 固定值
                 moveLParams[32] = velAccParamMode;
                 //object[] moveLParams1 =new object[1];
                 //moveLParams1[0] = moveLParams;
@@ -1163,36 +1164,37 @@ namespace fairino
 
 
         /**
-         * @brief  笛卡尔空间圆弧运动
-         * @param  [in] joint_pos_p  路径点关节位置,单位deg
-         * @param  [in] desc_pos_p   路径点笛卡尔位姿
-         * @param  [in] ptool  工具坐标号，范围[0~14]
-         * @param  [in] puser  工件坐标号，范围[0~14]
-         * @param  [in] pvel  速度百分比，范围[0~100]
-         * @param  [in] pacc  加速度百分比，范围[0~100],暂不开放
-         * @param  [in] epos_p  扩展轴位置，单位mm
-         * @param  [in] poffset_flag  0-不偏移，1-基坐标系/工件坐标系下偏移，2-工具坐标系下偏移
-         * @param  [in] offset_pos_p  位姿偏移量
-         * @param  [in] joint_pos_t  目标点关节位置,单位deg
-         * @param  [in] desc_pos_t   目标点笛卡尔位姿
-         * @param  [in] ttool  工具坐标号，范围[0~14]
-         * @param  [in] tuser  工件坐标号，范围[0~14]
-         * @param  [in] tvel  速度百分比，范围[0~100]
-         * @param  [in] tacc  加速度百分比，范围[0~100],暂不开放
-         * @param  [in] epos_t  扩展轴位置，单位mm
-         * @param  [in] toffset_flag  0-不偏移，1-基坐标系/工件坐标系下偏移，2-工具坐标系下偏移
-         * @param  [in] offset_pos_t  位姿偏移量	 
-         * @param  [in] ovl  速度缩放因子，范围[0~100]	 
-         * @param  [in] blendR [-1.0]-运动到位(阻塞)，[0~1000.0]-平滑半径(非阻塞)，单位mm	 
-         * @param  [in] velAccParamMode 速度加速度参数模式；0-百分比；1-物理速度(mm/s)加速度(mm/s2)
-         * @return  错误码
-         */
+   * @brief  笛卡尔空间圆弧运动
+   * @param  [in] joint_pos_p  路径点关节位置,单位deg
+   * @param  [in] desc_pos_p   路径点笛卡尔位姿
+   * @param  [in] ptool  工具坐标号，范围[1~15]
+   * @param  [in] puser  工件坐标号，范围[1~15]
+   * @param  [in] pvel  速度百分比，范围[0~100]
+   * @param  [in] pacc  加速度百分比，范围[0~100],暂不开放
+   * @param  [in] epos_p  扩展轴位置，单位mm
+   * @param  [in] poffset_flag  0-不偏移，1-基坐标系/工件坐标系下偏移，2-工具坐标系下偏移
+   * @param  [in] offset_pos_p  位姿偏移量
+   * @param  [in] joint_pos_t  目标点关节位置,单位deg
+   * @param  [in] desc_pos_t   目标点笛卡尔位姿
+   * @param  [in] ttool  工具坐标号，范围[1~15]
+   * @param  [in] tuser  工件坐标号，范围[1~15]
+   * @param  [in] tvel  速度百分比，范围[0~100]
+   * @param  [in] tacc  加速度百分比，范围[0~100],暂不开放
+   * @param  [in] epos_t  扩展轴位置，单位mm
+   * @param  [in] toffset_flag  0-不偏移，1-基坐标系/工件坐标系下偏移，2-工具坐标系下偏移
+   * @param  [in] offset_pos_t  位姿偏移量
+   * @param  [in] ovl  速度缩放因子[0~100]/物理速度(mm/s)
+   * @param  [in] blendR [-1.0]-运动到位(阻塞)，[0~1000.0]-平滑半径(非阻塞)，单位mm
+   * @param  [in] oacc 加速度缩放因子[0-100]/物理加速度(mm/s2)
+   * @param  [in] velAccParamMode 速度加速度参数模式；0-百分比；1-物理速度(mm/s)加速度(mm/s2)
+   * @return  错误码
+   */
         public int MoveC(
             JointPos joint_pos_p, DescPose desc_pos_p, int ptool, int puser, float pvel, float pacc,
             ExaxisPos epos_p, int poffset_flag, DescPose offset_pos_p,
             JointPos joint_pos_t, DescPose desc_pos_t, int ttool, int tuser, float tvel, float tacc,
             ExaxisPos epos_t, int toffset_flag, DescPose offset_pos_t,
-            float ovl, float blendR, int velAccParamMode)
+            float ovl, float blendR, float oacc, int velAccParamMode)
         {
             if (IsSockComError())
             {
@@ -1269,7 +1271,7 @@ namespace fairino
                 // 通用参数 (54-57)
                 moveCParams[54] = (double)ovl;
                 moveCParams[55] = (double)blendR;
-                moveCParams[56] = 100.0;  // 固定值，与C++版本一致
+                moveCParams[56] = (double)oacc;  // 固定值，与C++版本一致
                 moveCParams[57] = velAccParamMode;
                 object[] moveCParams1 = new object[1];
                 moveCParams1[0] = moveCParams;
@@ -1373,7 +1375,7 @@ namespace fairino
                 return GetSafetyCode();
             }
 
-            int errcode = MoveL(joint_pos, desc_pos, tool, user, vel, acc, ovl, blendR, 0, epos, search, offset_flag, offset_pos, 0, overSpeedStrategy, speedPercent);
+            int errcode = MoveL(joint_pos, desc_pos, tool, user, vel, acc, ovl, blendR, 0, epos, search, offset_flag, offset_pos, ovl,0, overSpeedStrategy, speedPercent);
             return errcode;
 
         }
@@ -1393,10 +1395,10 @@ namespace fairino
  *@param  [in] tvel  速度百分比，范围[0~100]
  *@param  [in] tacc  加速度百分比，范围[0~100],暂不开放
  *@param  [in] epos_t  扩展轴位置，单位mm
- *@param  [in] ovl  速度缩放因子，范围[0~100]
+ *@param  [in] ovl  速度缩放因子[0~100]/物理速度(mm/s)
  *@param  [in] offset_flag  0-不偏移，1-基坐标系/工件坐标系下偏移，2-工具坐标系下偏移
  *@param  [in] offset_pos  位姿偏移量
- *@param  [in] oacc 加速度百分比
+ *@param  [in] oacc 加速度缩放因子[0-100]/物理加速度(mm/s2)
  *@param  [in] blendR -1：阻塞；0~1000：平滑半径
  *@param  [in] velAccParamMode 速度加速度参数模式；0-百分比；1-物理速度(mm/s)加速度(mm/s2)
  *@return  错误码
@@ -7594,52 +7596,86 @@ namespace fairino
             }
         }
 
+
+
         /**
-      * @brief  恒力控制
-      * @param  [in] flag 0-关闭恒力控制，1-开启恒力控制
-      * @param  [in] sensor_id 力传感器编号
-      * @param  [in] select  选择六个自由度是否检测碰撞，0-不检测，1-检测
-      * @param  [in] ft  碰撞力/扭矩，fx,fy,fz,tx,ty,tz
-      * @param  [in] ft_pid 力pid参数，力矩pid参数
-      * @param  [in] adj_sign 自适应启停控制，0-关闭，1-开启
-      * @param  [in] ILC_sign ILC启停控制， 0-停止，1-训练，2-实操
-      * @param  [in] max_dis 最大调整距离，单位mm
-      * @param  [in] max_ang 最大调整角度，单位deg
-      * @param  [in] filter_Sign 滤波开启标志 0-关；1-开，默认关闭
-      * @param  [in] posAdapt_sign 姿态顺应开启标志 0-关；1-开，默认关闭
-      * @param  [in] isNoBlock 阻塞标志，0-阻塞；1-非阻塞
-      * @return  错误码
-      */
-        public int FT_Control(byte flag, int sensor_id, byte[] select, ForceTorque ft, float[] ft_pid, byte adj_sign, byte ILC_sign, float max_dis, float max_ang, int filter_Sign, int posAdapt_sign, int isNoBlock)
+ * @brief  恒力控制（简化版）
+ * @param  [in] flag 0-关闭恒力控制，1-开启恒力控制
+ * @param  [in] sensor_id 力传感器编号
+ * @param  [in] select  选择六个自由度是否检测碰撞，0-不检测，1-检测
+ * @param  [in] ft  碰撞力/扭矩，fx,fy,fz,tx,ty,tz
+ * @param  [in] ft_pid 力pid参数，力矩pid参数
+ * @param  [in] adj_sign 自适应启停控制，0-关闭，1-开启
+ * @param  [in] ILC_sign ILC启停控制，0-停止，1-训练，2-实操
+ * @param  [in] max_dis 最大调整距离，单位mm
+ * @param  [in] max_ang 最大调整角度，单位deg
+ * @param  [in] filter_Sign 滤波开启标志 0-关；1-开，默认关闭
+ * @param  [in] posAdapt_sign 姿态顺应开启标志 0-关；1-开，默认关闭
+ * @param  [in] isNoBlock 阻塞标志，0-阻塞；1-非阻塞
+ * @return  错误码
+ */
+        public int FT_Control(byte flag, int sensor_id, byte[] select, ForceTorque ft, float[] ft_pid,
+                             byte adj_sign, byte ILC_sign, float max_dis, float max_ang,
+                             int filter_Sign, int posAdapt_sign, int isNoBlock)
         {
             double[] M = new double[2] { 0.0, 0.0 };
             double[] B = new double[2] { 0.0, 0.0 };
-            return FT_Control(flag, sensor_id, select, ft, ft_pid, adj_sign, ILC_sign, max_dis, max_ang, M, B, 0.0, filter_Sign, posAdapt_sign, isNoBlock);
+            return FT_Control(flag, sensor_id, select, ft, ft_pid, adj_sign, ILC_sign, max_dis, max_ang,
+                             M, B, 0.0, filter_Sign, posAdapt_sign, isNoBlock);
         }
 
         /**
-  * @brief  恒力控制
-  * @param  [in] flag 0-关闭恒力控制，1-开启恒力控制
-  * @param  [in] sensor_id 力传感器编号
-  * @param  [in] select  选择六个自由度是否检测碰撞，0-不检测，1-检测
-  * @param  [in] ft  碰撞力/扭矩，fx,fy,fz,tx,ty,tz
-  * @param  [in] ft_pid 力pid参数，力矩pid参数
-  * @param  [in] adj_sign 自适应启停控制，0-关闭，1-开启
-  * @param  [in] ILC_sign ILC启停控制， 0-停止，1-训练，2-实操
-  * @param  [in] max_dis 最大调整距离，单位mm
-  * @param  [in] max_ang 最大调整角度，单位deg
-  * @param  [in] M 质量参数
-  * @param  [in] B 阻尼参数
-  * @param  [in] polishRadio 打磨半径，单位mm
-  * @param  [in] filter_Sign 滤波开启标志 0-关；1-开，默认关闭
-  * @param  [in] posAdapt_sign 姿态顺应开启标志 0-关；1-开，默认关闭
-  * @param  [in] isNoBlock 阻塞标志，0-阻塞；1-非阻塞
-  * @return  错误码
-  */
+         * @brief  恒力控制（带质量阻尼参数版）
+         * @param  [in] flag 0-关闭恒力控制，1-开启恒力控制
+         * @param  [in] sensor_id 力传感器编号
+         * @param  [in] select  选择六个自由度是否检测碰撞，0-不检测，1-检测
+         * @param  [in] ft  碰撞力/扭矩，fx,fy,fz,tx,ty,tz
+         * @param  [in] ft_pid 力pid参数，力矩pid参数
+         * @param  [in] adj_sign 自适应启停控制，0-关闭，1-开启
+         * @param  [in] ILC_sign ILC启停控制，0-停止，1-训练，2-实操
+         * @param  [in] max_dis 最大调整距离，单位mm
+         * @param  [in] max_ang 最大调整角度，单位deg
+         * @param  [in] M rx、ry质量参数[0.1-10]，默认0（内部会使用默认值2）
+         * @param  [in] B rx、ry阻尼参数[0.1-50]，默认0（内部会使用默认值8）
+         * @param  [in] polishRadio 打磨半径，单位mm
+         * @param  [in] filter_Sign 滤波开启标志 0-关；1-开，默认关闭
+         * @param  [in] posAdapt_sign 姿态顺应开启标志 0-关；1-开，默认关闭
+         * @param  [in] isNoBlock 阻塞标志，0-阻塞；1-非阻塞
+         * @return  错误码
+         */
         public int FT_Control(byte flag, int sensor_id, byte[] select, ForceTorque ft, float[] ft_pid,
-                       byte adj_sign, byte ILC_sign, float max_dis, float max_ang,
-                       double[] M, double[] B, double polishRadio, int filter_Sign,
-                       int posAdapt_sign, int isNoBlock)
+                             byte adj_sign, byte ILC_sign, float max_dis, float max_ang,
+                             double[] M, double[] B, double polishRadio, int filter_Sign,
+                             int posAdapt_sign, int isNoBlock)
+        {
+            double[] threshold = new double[2] { 0.0, 0.0 };
+            double[] adjustCoeff = new double[2] { 0.0, 0.0 };
+            return FT_Control(flag, sensor_id, select, ft, ft_pid, adj_sign, ILC_sign, max_dis, max_ang,
+                             M, B, threshold, adjustCoeff, polishRadio, filter_Sign, posAdapt_sign, isNoBlock);
+        }
+
+        /**
+         * @brief  恒力控制（完整版）
+         * @param  [in] flag 0-关闭恒力控制，1-开启恒力控制
+         * @param  [in] sensor_id 力传感器编号
+         * @param  [in] select  选择六个自由度是否检测碰撞，0-不检测，1-检测
+         * @param  [in] ft  碰撞力/扭矩，fx,fy,fz,tx,ty,tz
+         * @param  [in] ft_pid 力pid参数，力矩pid参数
+         * @param  [in] adj_sign 自适应启停控制，0-关闭，1-开启
+         * @param  [in] ILC_sign ILC启停控制，0-停止，1-训练，2-实操
+         * @param  [in] max_dis 最大调整距离，单位mm
+         * @param  [in] max_ang 最大调整角度，单位deg
+         * @param  [in] M rx、ry质量参数[0.1-10]，默认2
+         * @param  [in] B rx、ry阻尼参数[0.1-50]，默认8
+         * @param  [in] threshold rx、ry启动阈值[0-10]，默认0.2
+         * @param  [in] adjustCoeff rx、ry力矩调节系数[0-1]，默认1
+         * @param  [in] polishRadio 打磨半径，单位mm
+         * @param  [in] filter_Sign 滤波开启标志 0-关；1-开，默认关闭
+         * @param  [in] posAdapt_sign 姿态顺应开启标志 0-关；1-开，默认关闭
+         * @param  [in] isNoBlock 阻塞标志，0-阻塞；1-非阻塞
+         * @return  错误码
+         */
+        public int FT_Control(byte flag, int sensor_id, byte[] select, ForceTorque ft, float[] ft_pid,byte adj_sign, byte ILC_sign, float max_dis, float max_ang,double[] M, double[] B, double[] threshold, double[] adjustCoeff,double polishRadio, int filter_Sign, int posAdapt_sign, int isNoBlock)
         {
             if (IsSockComError())
             {
@@ -7656,9 +7692,17 @@ namespace fairino
                 int[] selectInt = new int[6] { select[0], select[1], select[2], select[3], select[4], select[5] };
                 double[] ftArray = new double[6] { ft.fx, ft.fy, ft.fz, ft.tx, ft.ty, ft.tz };
                 double[] pidArray = new double[6] { ft_pid[0], ft_pid[1], ft_pid[2], ft_pid[3], ft_pid[4], ft_pid[5] };
-                double[] mbArray = new double[4] { M[0], M[1], B[0], B[1] };
 
-                // 展开传递所有14个参数
+                // 合并M、B、threshold、adjustCoeff为一个8元素数组
+                double[] mbArray = new double[8]
+                {
+            M[0], M[1],          // M[0], M[1]
+            B[0], B[1],          // B[0], B[1]
+            threshold[0], threshold[1],    // threshold[0], threshold[1]
+            adjustCoeff[0], adjustCoeff[1] // adjustCoeff[0], adjustCoeff[1]
+                };
+
+                // 调用代理方法
                 int rtn = proxy.FT_Control(
                     (int)flag,                    // 参数0
                     sensor_id,                    // 参数1
@@ -7678,25 +7722,16 @@ namespace fairino
 
                 if (log != null)
                 {
-                    log.LogInfo($"FT_Control(" +
-                        $"标志:{(int)flag}, 传感器ID:{sensor_id}, " +
-                        $"选择:[{string.Join(",", selectInt)}], " +
-                        $"力/扭矩:[{string.Join(",", ftArray)}], " +
-                        $"PID:[{string.Join(",", pidArray)}], " +
-                        $"自适应:{(int)adj_sign}, ILC:{(int)ILC_sign}, " +
-                        $"最大距离:{(double)max_dis}, 最大角度:{(double)max_ang}, " +
-                        $"打磨半径:{polishRadio}, 滤波:{filter_Sign}, " +
-                        $"姿态顺应:{posAdapt_sign}, 质量阻尼:[{string.Join(",", mbArray)}], " +
-                        $"非阻塞:{isNoBlock}" +
-                        $") : {rtn}");
+                    log.LogInfo($"FT_Control完整版调用返回: {rtn}");
                 }
+
                 return rtn;
             }
             catch (Exception ex)
             {
                 if (log != null)
                 {
-                    log.LogError($"FT_Control RPC exception: {ex.Message}");
+                    log.LogError($"FT_Control RPC异常: {ex.Message}");
                 }
 
                 if (IsSockComError())
@@ -7709,6 +7744,121 @@ namespace fairino
                 }
             }
         }
+        //      /**
+        //    * @brief  恒力控制
+        //    * @param  [in] flag 0-关闭恒力控制，1-开启恒力控制
+        //    * @param  [in] sensor_id 力传感器编号
+        //    * @param  [in] select  选择六个自由度是否检测碰撞，0-不检测，1-检测
+        //    * @param  [in] ft  碰撞力/扭矩，fx,fy,fz,tx,ty,tz
+        //    * @param  [in] ft_pid 力pid参数，力矩pid参数
+        //    * @param  [in] adj_sign 自适应启停控制，0-关闭，1-开启
+        //    * @param  [in] ILC_sign ILC启停控制， 0-停止，1-训练，2-实操
+        //    * @param  [in] max_dis 最大调整距离，单位mm
+        //    * @param  [in] max_ang 最大调整角度，单位deg
+        //    * @param  [in] filter_Sign 滤波开启标志 0-关；1-开，默认关闭
+        //    * @param  [in] posAdapt_sign 姿态顺应开启标志 0-关；1-开，默认关闭
+        //    * @param  [in] isNoBlock 阻塞标志，0-阻塞；1-非阻塞
+        //    * @return  错误码
+        //    */
+        //      public int FT_Control(byte flag, int sensor_id, byte[] select, ForceTorque ft, float[] ft_pid, byte adj_sign, byte ILC_sign, float max_dis, float max_ang, int filter_Sign, int posAdapt_sign, int isNoBlock)
+        //      {
+        //          double[] M = new double[2] { 0.0, 0.0 };
+        //          double[] B = new double[2] { 0.0, 0.0 };
+        //          return FT_Control(flag, sensor_id, select, ft, ft_pid, adj_sign, ILC_sign, max_dis, max_ang, M, B, 0.0, filter_Sign, posAdapt_sign, isNoBlock);
+        //      }
+
+        //      /**
+        //* @brief  恒力控制
+        //* @param  [in] flag 0-关闭恒力控制，1-开启恒力控制
+        //* @param  [in] sensor_id 力传感器编号
+        //* @param  [in] select  选择六个自由度是否检测碰撞，0-不检测，1-检测
+        //* @param  [in] ft  碰撞力/扭矩，fx,fy,fz,tx,ty,tz
+        //* @param  [in] ft_pid 力pid参数，力矩pid参数
+        //* @param  [in] adj_sign 自适应启停控制，0-关闭，1-开启
+        //* @param  [in] ILC_sign ILC启停控制， 0-停止，1-训练，2-实操
+        //* @param  [in] max_dis 最大调整距离，单位mm
+        //* @param  [in] max_ang 最大调整角度，单位deg
+        //* @param  [in] M 质量参数
+        //* @param  [in] B 阻尼参数
+        //* @param  [in] polishRadio 打磨半径，单位mm
+        //* @param  [in] filter_Sign 滤波开启标志 0-关；1-开，默认关闭
+        //* @param  [in] posAdapt_sign 姿态顺应开启标志 0-关；1-开，默认关闭
+        //* @param  [in] isNoBlock 阻塞标志，0-阻塞；1-非阻塞
+        //* @return  错误码
+        //*/
+        //      public int FT_Control(byte flag, int sensor_id, byte[] select, ForceTorque ft, float[] ft_pid,
+        //                     byte adj_sign, byte ILC_sign, float max_dis, float max_ang,
+        //                     double[] M, double[] B, double polishRadio, int filter_Sign,
+        //                     int posAdapt_sign, int isNoBlock)
+        //      {
+        //          if (IsSockComError())
+        //          {
+        //              return g_sock_com_err;
+        //          }
+        //          if (GetSafetyCode() != 0)
+        //          {
+        //              return GetSafetyCode();
+        //          }
+
+        //          try
+        //          {
+        //              // 准备数组参数
+        //              int[] selectInt = new int[6] { select[0], select[1], select[2], select[3], select[4], select[5] };
+        //              double[] ftArray = new double[6] { ft.fx, ft.fy, ft.fz, ft.tx, ft.ty, ft.tz };
+        //              double[] pidArray = new double[6] { ft_pid[0], ft_pid[1], ft_pid[2], ft_pid[3], ft_pid[4], ft_pid[5] };
+        //              double[] mbArray = new double[4] { M[0], M[1], B[0], B[1] };
+
+        //              // 展开传递所有14个参数
+        //              int rtn = proxy.FT_Control(
+        //                  (int)flag,                    // 参数0
+        //                  sensor_id,                    // 参数1
+        //                  selectInt,                    // 参数2
+        //                  ftArray,                      // 参数3
+        //                  pidArray,                     // 参数4
+        //                  (int)adj_sign,               // 参数5
+        //                  (int)ILC_sign,               // 参数6
+        //                  (double)max_dis,             // 参数7
+        //                  (double)max_ang,             // 参数8
+        //                  polishRadio,                  // 参数9
+        //                  filter_Sign,                  // 参数10
+        //                  posAdapt_sign,                // 参数11
+        //                  mbArray,                      // 参数12
+        //                  isNoBlock                     // 参数13
+        //              );
+
+        //              if (log != null)
+        //              {
+        //                  log.LogInfo($"FT_Control(" +
+        //                      $"标志:{(int)flag}, 传感器ID:{sensor_id}, " +
+        //                      $"选择:[{string.Join(",", selectInt)}], " +
+        //                      $"力/扭矩:[{string.Join(",", ftArray)}], " +
+        //                      $"PID:[{string.Join(",", pidArray)}], " +
+        //                      $"自适应:{(int)adj_sign}, ILC:{(int)ILC_sign}, " +
+        //                      $"最大距离:{(double)max_dis}, 最大角度:{(double)max_ang}, " +
+        //                      $"打磨半径:{polishRadio}, 滤波:{filter_Sign}, " +
+        //                      $"姿态顺应:{posAdapt_sign}, 质量阻尼:[{string.Join(",", mbArray)}], " +
+        //                      $"非阻塞:{isNoBlock}" +
+        //                      $") : {rtn}");
+        //              }
+        //              return rtn;
+        //          }
+        //          catch (Exception ex)
+        //          {
+        //              if (log != null)
+        //              {
+        //                  log.LogError($"FT_Control RPC exception: {ex.Message}");
+        //              }
+
+        //              if (IsSockComError())
+        //              {
+        //                  return g_sock_com_err;
+        //              }
+        //              else
+        //              {
+        //                  return (int)RobotError.ERR_SUCCESS;
+        //              }
+        //          }
+        //      }
 
         /**
          * @brief  柔顺控制开启
@@ -13364,7 +13514,7 @@ namespace fairino
                     }
                     return rtn;
                 }
-               MoveL(joint_pos, desc_pos, tool, user, vel, acc, ovl, blendR, 0, epos, search, offset_flag, offset_pos, 0);
+               MoveL(joint_pos, desc_pos, tool, user, vel, acc, ovl, blendR, 0, epos,search, offset_flag, offset_pos, ovl,0);
                 if (log != null)
                 {
                     log.LogInfo($"MoveL({joint[0]},{joint[1]},{joint[2]},{joint[3]},{joint[4]},{joint[5]},{desc[0]},{desc[1]},{desc[2]},{desc[3]},{desc[4]},{desc[5]},{tool},{user},{vel},{acc},{ovl},{blendR}" +
@@ -13448,7 +13598,7 @@ namespace fairino
                     return rtn;
                 }
 
-                MoveC(joint_pos_p, desc_pos_p, ptool, puser, pvel, pacc, epos_p, poffset_flag, offset_pos_p, joint_pos_t, desc_pos_t, ttool, tuser, tvel, tacc, epos_t, toffset_flag, offset_pos_t, ovl, blendR, 0);
+                MoveC(joint_pos_p, desc_pos_p, ptool, puser, pvel, pacc, epos_p, poffset_flag, offset_pos_p, joint_pos_t, desc_pos_t, ttool, tuser, tvel, tacc, epos_t, toffset_flag, offset_pos_t, ovl, blendR, ovl, 0);
                 if (log != null)
                 {
                     log.LogInfo($"MoveC({jointP[0]},{jointP[1]},{jointP[2]},{jointP[3]},{jointP[4]},{jointP[5]},{descP[0]},{descP[1]},{descP[2]},{descP[3]},{descP[4]},{descP[5]},{ptool},{puser},{pvel},{pacc}," +
@@ -19397,25 +19547,25 @@ namespace fairino
         }
 
         /**
-         * @brief 笛卡尔空间直线运动(重载函数2 不需要输入关节位置)
-         * @param  [in] desc_pos   目标笛卡尔位姿
-         * @param  [in] tool  工具坐标号，范围[0~14]
-         * @param  [in] user  工件坐标号，范围[0~14]
-         * @param  [in] vel  速度百分比，范围[0~100]
-         * @param  [in] acc  加速度百分比，范围[0~100],暂不开放
-         * @param  [in] ovl  速度缩放因子，范围[0~100]
-         * @param  [in] blendR [-1.0]-运动到位(阻塞)，[0~1000.0]-平滑半径(非阻塞)，单位mm
-         * @param  [in] blendMode 过渡方式；0-内切过渡；1-角点过渡
-         * @param  [in] epos  扩展轴位置，单位mm
-         * @param  [in] search  0-不焊丝寻位，1-焊丝寻位
-         * @param  [in] offset_flag  0-不偏移，1-基坐标系/工件坐标系下偏移，2-工具坐标系下偏移
-         * @param  [in] offset_pos  位姿偏移量
-         * @param  [in] config 逆解关节空间配置，[-1]-参考当前关节位置解算，[0~7]-依据特定关节空间配置求解
+        * @brief  笛卡尔空间直线运动(重载函数2 不需要输入关节位置)
+        * @param  [in] desc_pos   目标笛卡尔位姿
+        * @param  [in] tool  工具坐标号，范围[1~15]
+        * @param  [in] user  工件坐标号，范围[1~15]
+        * @param  [in] vel  速度百分比，范围[0~100]
+        * @param  [in] acc  加速度百分比，范围[0~100],暂不开放
+        * @param  [in] ovl  速度缩放因子，范围[0~100]
+        * @param  [in] blendR [-1.0]-运动到位(阻塞)，[0~1000.0]-平滑半径(非阻塞)，单位mm
+        * @param  [in] blendMode 过渡方式；0-内切过渡；1-角点过渡
+        * @param  [in] epos  扩展轴位置，单位mm
+        * @param  [in] search  0-不焊丝寻位，1-焊丝寻位
+        * @param  [in] offset_flag  0-不偏移，1-基坐标系/工件坐标系下偏移，2-工具坐标系下偏移
+        * @param  [in] offset_pos  位姿偏移量
+        * @param  [in] config 逆解关节空间配置，[-1]-参考当前关节位置解算，[0~7]-依据特定关节空间配置求解
         * @param  [in] velAccParamMode 速度加速度参数模式；0-百分比；1-物理速度(mm/s)加速度(mm/s2)
-         * @param  [in] overSpeedStrategy  超速处理策略，1-标准；2-超速时报错停止；3-自适应降速，默认为0
-         * @param  [in] speedPercent  允许降速阈值百分比[0-100]，默认10%
-         * @return  错误码
-         */
+        * @param  [in] overSpeedStrategy  超速处理策略，1-标准；2-超速时报错停止；3-自适应降速，默认为0
+        * @param  [in] speedPercent  允许降速阈值百分比[0-100]，默认10%
+        * @return  错误码
+        */
         public int MoveL(DescPose desc_pos, int tool, int user, float vel, float acc, float ovl, float blendR, int blendMode, ExaxisPos epos, byte search, byte offset_flag, DescPose offset_pos, int config,int velAccParamMode, int overSpeedStrategy = 0, int speedPercent = 10)
         {
             if (IsSockComError())
@@ -19435,7 +19585,7 @@ namespace fairino
                 return errcode;
             }
        
-                errcode = MoveL(joint_pos, desc_pos, tool, user, vel, acc, ovl, blendR, blendMode, epos, search, offset_flag, offset_pos, velAccParamMode,0,10);
+                errcode = MoveL(joint_pos, desc_pos, tool, user, vel, acc, ovl, blendR, blendMode, epos, search, offset_flag, offset_pos, ovl,velAccParamMode, overSpeedStrategy, speedPercent);
 
                 return errcode;
         }
@@ -19468,7 +19618,7 @@ namespace fairino
                 log.LogError($"MoveC  GetInverseKin T failed rtn is{errcode}");
                 return errcode;
             }
-            errcode = MoveC(joint_pos_p, desc_pos_p, ptool, puser, pvel, pacc, epos_p, poffset_flag, offset_pos_p, joint_pos_t, desc_pos_t, ttool, tuser, tvel, tacc, epos_t, toffset_flag, offset_pos_t, ovl, blendR, 0);
+            errcode = MoveC(joint_pos_p, desc_pos_p, ptool, puser, pvel, pacc, epos_p, poffset_flag, offset_pos_p, joint_pos_t, desc_pos_t, ttool, tuser, tvel, tacc, epos_t, toffset_flag, offset_pos_t, ovl, blendR, ovl, 0);
             return errcode;
 
         }
@@ -19522,7 +19672,7 @@ namespace fairino
                 log.LogError($"MoveC  GetInverseKin T failed rtn is{errcode}");
                 return errcode;
             }
-            errcode = MoveC(joint_pos_p, desc_pos_p, ptool, puser, pvel, pacc, epos_p, poffset_flag, offset_pos_p, joint_pos_t, desc_pos_t, ttool, tuser, tvel, tacc, epos_t, toffset_flag, offset_pos_t, ovl, blendR, velAccParamMode);
+            errcode = MoveC(joint_pos_p, desc_pos_p, ptool, puser, pvel, pacc, epos_p, poffset_flag, offset_pos_p, joint_pos_t, desc_pos_t, ttool, tuser, tvel, tacc, epos_t, toffset_flag, offset_pos_t, ovl, blendR, ovl, velAccParamMode);
             return errcode;
 
         }
@@ -22694,6 +22844,50 @@ namespace fairino
                 return (int)RobotError.ERR_RPC_ERROR;
             }
         }
+
+
+        /**
+        * @brief 开启力矩补偿功能及补偿系数
+        * @param [in] status 开关，0-关闭；1-开启
+        * @param [in] torqueCoeff J1-J6力矩补偿系数[0-1]
+        * @return 错误码
+        */
+        public int SerCoderCompenParams(int status, double[] torqueCoeff)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            if (GetSafetyCode() != 0)
+            {
+                return GetSafetyCode();
+            }
+
+            try
+            {
+                int errcode = 0;
+                object[] param = new object[7];
+
+                param[0] = status;
+                param[1] = torqueCoeff[0];
+                param[2] = torqueCoeff[1];
+                param[3] = torqueCoeff[2];
+                param[4] = torqueCoeff[3];
+                param[5] = torqueCoeff[4];
+                param[6] = torqueCoeff[5];
+
+                errcode = proxy.SerCoderCompenParams(param);
+
+                return errcode;
+            }
+            catch
+            {
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+
     }
 }
 
