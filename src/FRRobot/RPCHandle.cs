@@ -1150,22 +1150,39 @@ namespace fairino
        * @param  [in] max_ang 最大调整角度，单位deg
        * @return  错误码
 */
+        //[XmlRpcMethod("FT_Control")]
+        //int FT_Control(
+        //    object flag,
+        //    object sensor_id,
+        //    object select,
+        //    object ft,
+        //    object ft_pid,
+        //    object adj_sign,
+        //    object ILC_sign,
+        //    object max_dis,
+        //    object max_ang,
+        //    object polishRadio,
+        //    object filter_Sign,
+        //    object posAdapt_sign,
+        //    object mbParams,
+        //    object isNoBlock
+        //);
         [XmlRpcMethod("FT_Control")]
         int FT_Control(
-            object flag,
-            object sensor_id,
-            object select,
-            object ft,
-            object ft_pid,
-            object adj_sign,
-            object ILC_sign,
-            object max_dis,
-            object max_ang,
-            object polishRadio,
-            object filter_Sign,
-            object posAdapt_sign,
-            object mbParams,
-            object isNoBlock
+            int flag,                    // byte转int
+            int sensor_id,               // int
+            int[] select,                // byte[]转int[]
+            double[] ft,                 // 6个元素的double数组
+            double[] ft_pid,             // 6个元素的double数组
+            int adj_sign,                // byte转int
+            int ILC_sign,                // byte转int
+            double max_dis,              // float转double
+            double max_ang,              // float转double
+            double polishRadio,          // double
+            int filter_Sign,             // int
+            int posAdapt_sign,           // int
+            double[] mbParams,           // 8个元素的double数组
+            int isNoBlock                // int
         );
 
         /**
@@ -2208,6 +2225,10 @@ namespace fairino
         [XmlRpcMethod("SetAdmittanceParams")]
 
         int SetAdmittanceParams(object[] admittanceParams);
+
+        [XmlRpcMethod("SerCoderCompenParams")]
+        int SerCoderCompenParams(object[] serCoderParams);
+
 
     }
     internal class RPCHandle

@@ -1230,6 +1230,7 @@
             this.flowLayoutPanel8.Name = "flowLayoutPanel8";
             this.flowLayoutPanel8.Size = new System.Drawing.Size(313, 668);
             this.flowLayoutPanel8.TabIndex = 50;
+            this.flowLayoutPanel8.Paint += new System.Windows.Forms.PaintEventHandler(this.flowLayoutPanel8_Paint);
             // 
             // button89
             // 
