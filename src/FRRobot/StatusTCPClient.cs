@@ -2,6 +2,8 @@
 using System.Net.Sockets;
 using System.Net;
 using System;
+using System.Diagnostics;
+using System.Threading;
 
 internal class StatusTCPClient
 {
@@ -158,19 +160,111 @@ internal class StatusTCPClient
 
     public int RecvPkg(byte[] recvBytes, int recvSize)
     {
-        //Console.WriteLine($"11111111111111   {recvSize}");
         Array.Clear(recvBytes, 0, recvSize);
         int curRecvTotalSize = 0;
         byte[] allRecvBuf = new byte[4 * 1024];
         byte[] tmpRecvBuf = new byte[4 * 1024];
-        while (recvSize - curRecvTotalSize > 0)  //还有数据未接收
+
+        while (recvSize - curRecvTotalSize > 0)
         {
             Array.Clear(tmpRecvBuf, 0, tmpRecvBuf.Length);
 
-            int tmpRecvSize = mSocket.Receive(tmpRecvBuf, recvSize - curRecvTotalSize, SocketFlags.None);
-            // Console.WriteLine($"recv length {tmpRecvSize}...");
-            if (tmpRecvSize <= 0)
+            try
             {
+        
+                DateTime scheduleStart = DateTime.Now;
+                int tmpRecvSize = mSocket.Receive(tmpRecvBuf, recvSize - curRecvTotalSize, SocketFlags.None);
+                TimeSpan scheduleDelay = DateTime.Now - scheduleStart;
+
+                if (scheduleDelay.TotalMilliseconds > 10)
+                {
+                  //  Console.WriteLine($"警告：Receive调用调度延迟 {scheduleDelay.TotalMilliseconds:F1}ms");
+
+                    //// 检查线程优先级
+                    //Console.WriteLine($"当前线程优先级: {Thread.CurrentThread.Priority}");
+
+                    //// 检查CPU使用率
+                    //PerformanceCounter cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
+                    //float cpuUsage = cpuCounter.NextValue();
+                    //Thread.Sleep(100);
+                    //cpuUsage = cpuCounter.NextValue();
+                    //Console.WriteLine($"系统CPU使用率: {cpuUsage:F1}%");
+                }
+
+                if (tmpRecvSize == 0)
+                {
+                    // 连接被对方正常关闭
+                    Console.WriteLine($"连接被远程主机关闭 (Receive返回0)");
+                    Console.WriteLine($"Socket状态: Connected={mSocket.Connected}, Available={mSocket.Available}");
+
+                    Close();
+                    bool reconnectSuccess = ReConnect();
+                    if (reconnectSuccess)
+                    {
+                        curRecvTotalSize = 0;
+                        continue;
+                    }
+                    else
+                    {
+                        return -1;
+                    }
+                }
+                else if (tmpRecvSize < 0)
+                {
+                    // 接收错误
+                    Console.WriteLine($"Receive返回负值: {tmpRecvSize}");
+                    int lastError = System.Runtime.InteropServices.Marshal.GetLastWin32Error();
+                    Console.WriteLine($"Win32错误码: {lastError}");
+
+                    if (lastError != 0)
+                    {
+                        try
+                        {
+                            Console.WriteLine($"错误描述: {new System.ComponentModel.Win32Exception(lastError).Message}");
+                        }
+                        catch { }
+                    }
+
+                    Close();
+                    bool reconnectSuccess = ReConnect();
+                    if (reconnectSuccess)
+                    {
+                        curRecvTotalSize = 0;
+                        continue;
+                    }
+                    else
+                    {
+                        return -1;
+                    }
+                }
+                else
+                {
+                    // 正常接收数据
+                    Array.Copy(tmpRecvBuf, 0, allRecvBuf, curRecvTotalSize, tmpRecvSize);
+                    curRecvTotalSize += tmpRecvSize;
+                    //Console.WriteLine($"成功接收 {tmpRecvSize} 字节，累计 {curRecvTotalSize}/{recvSize}");
+                }
+            }
+            catch (SocketException ex)
+            {
+                // 捕获Socket异常并打印详细错误
+                Console.WriteLine($"Socket异常: 错误码={ex.ErrorCode}, Socket错误={ex.SocketErrorCode}");
+                Console.WriteLine($"错误消息: {ex.Message}");
+
+                // 常见的错误处理
+                if (ex.SocketErrorCode == SocketError.ConnectionReset)
+                {
+                    Console.WriteLine("连接被远程主机重置");
+                }
+                else if (ex.SocketErrorCode == SocketError.TimedOut)
+                {
+                    Console.WriteLine("接收超时");
+                }
+                else if (ex.SocketErrorCode == SocketError.Shutdown)
+                {
+                    Console.WriteLine("连接已关闭");
+                }
+
                 Close();
                 bool reconnectSuccess = ReConnect();
                 if (reconnectSuccess)
@@ -180,13 +274,18 @@ internal class StatusTCPClient
                 }
                 else
                 {
-                    return -1;   //接收数据异常
+                    return -1;
                 }
             }
-            else
+            catch (ObjectDisposedException)
             {
-                Array.Copy(tmpRecvBuf, 0, allRecvBuf, curRecvTotalSize, tmpRecvSize);
-                curRecvTotalSize += tmpRecvSize;
+                Console.WriteLine("Socket已被释放");
+                return -1;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"其他异常: {ex.GetType().Name} - {ex.Message}");
+                return -1;
             }
 
             if (recvSize == curRecvTotalSize)

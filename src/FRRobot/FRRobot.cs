@@ -41,7 +41,7 @@ namespace fairino
     {
         ICallSupervisor proxy = null;
 
-        const string SDK_VERSION = " C#SDK-V1.2.2  Web-3.9.1";
+        const string SDK_VERSION = " C#SDK-V1.2.3  Web-3.9.2";
 
         private string robot_ip = "192.168.57.2";//机器人ip
         private int g_sock_com_err = (int)RobotError.ERR_SUCCESS;
@@ -81,10 +81,11 @@ namespace fairino
         private StatusTCPClient sock_cli_state; //实时状态反馈通讯
         private TCPClient sock_cli_cmd;//实时指令发送接收通讯
 
-        private int ReceivePortTimeout = 200;//20004端口接受超时时间
+        private int ReceivePortTimeout = 20000;//20004端口接受超时时间
         public Robot()
         {
             proxy = XmlRpcProxyGen.Create<ICallSupervisor>();
+            proxy.Timeout = 1800000;
         }
 
         /// <summary>  
@@ -159,8 +160,9 @@ namespace fairino
 
                         // 启用 TCP KeepAlive
                         sock_cli_state.mSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
-                        uint keepAliveTime = 500;    // 1秒后开始探测
-                        uint keepAliveInterval = 500; // 每次探测间隔1秒
+                        uint keepAliveTime = 1000;     // 100ms后开始探测
+                        uint keepAliveInterval = 1000; // 100ms探测间隔
+                  
                         byte[] keepAliveConfig = new byte[12];
                         BitConverter.GetBytes((uint)1).CopyTo(keepAliveConfig, 0);
                         BitConverter.GetBytes(keepAliveTime).CopyTo(keepAliveConfig, 4);
@@ -187,12 +189,12 @@ namespace fairino
                     }
                     catch (SocketException ex) when (ex.SocketErrorCode == SocketError.TimedOut)
                     {
-                        Console.WriteLine("Receive timed out, reconnecting...");
+                        Console.WriteLine($"Receive timed out, 错误码={ex.ErrorCode}, 消息={ex.Message}");
                         if (!sock_cli_state.ReConnect())
                         {
                             Console.WriteLine($"断线重连失败");
                             g_sock_com_err = (int)RobotError.ERR_SOCKET_COM_FAILED;
-                            break; // 重连失败则设置错误码并退出
+                            break;
                         }
                         else
                         {
@@ -202,7 +204,22 @@ namespace fairino
                     }
                     catch (ObjectDisposedException ex)
                     {
-                        Console.WriteLine($"Socket was disposed: {ex.Message}");
+                        int lastError = System.Runtime.InteropServices.Marshal.GetLastWin32Error();
+                        Console.WriteLine($"Socket was disposed: {ex.Message}, 最后Win32错误={lastError}");
+                        if (!sock_cli_state.ReConnect())
+                        {
+                            g_sock_com_err = (int)RobotError.ERR_SOCKET_COM_FAILED;
+                            break;
+                        }
+                        else
+                        {
+                            g_sock_com_err = (int)RobotError.ERR_SUCCESS;
+                            Console.WriteLine("断线重连成功");
+                        }
+                    }
+                    catch (SocketException ex)  // 捕获其他Socket异常
+                    {
+                        Console.WriteLine($"Socket异常: 错误码={ex.ErrorCode}, Socket错误={ex.SocketErrorCode}, 消息={ex.Message}");
                         if (!sock_cli_state.ReConnect())
                         {
                             g_sock_com_err = (int)RobotError.ERR_SOCKET_COM_FAILED;
@@ -216,7 +233,8 @@ namespace fairino
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"Unexpected error: {ex.Message}");
+                        int lastError = System.Runtime.InteropServices.Marshal.GetLastWin32Error();
+                        Console.WriteLine($"Unexpected error: {ex.Message}, 最后Win32错误: {lastError}");
                         if (!sock_cli_state.ReConnect())
                         {
                             g_sock_com_err = (int)RobotError.ERR_SOCKET_COM_FAILED;
@@ -359,7 +377,7 @@ namespace fairino
                     byte[] recvBytes = new byte[BUFFER_SIZE];
                     try
                     {
-                        //Console.WriteLine($"now recv cmd rtn");
+                        Console.WriteLine($"now recv cmd rtn");
                         recvbyte = sock_cli_cmd.mSocket.Receive(recvBytes);
                         if (recvbyte < 0)
                         {
@@ -1039,7 +1057,8 @@ namespace fairino
             try
             {
                 int rtn = -1;
-
+              
+            
                 // 超速保护开始
                 if (overSpeedStrategy > 1)
                 {
@@ -10125,7 +10144,7 @@ namespace fairino
                             JointPos tmpJoint = new JointPos(0, 0, 0, 0, 0, 0);
                             int tmpTool = 0;
                             int tmpUser = 0;
-                            //rtn = GetSegmentWeldPoint(startDesePos, endDesePos, distance, ref tmpWeldDesc, ref tmpJoint, ref tmpTool, ref tmpUser);
+                            rtn = GetSegmentWeldPoint(startDesePos, endDesePos, distance, ref tmpWeldDesc, ref tmpJoint, ref tmpTool, ref tmpUser);
                             if (rtn != 0) //起弧前要先计算一下焊接点，
                             {
                                 return rtn;
@@ -10143,7 +10162,7 @@ namespace fairino
                                     return rtn;
                                 }
                             }
-                            rtn = MoveL(endJPos, endDesePos, tmpTool, tmpUser, vel, acc, ovl, blendR, epos, search, 0, endOffPos, 0);
+                            rtn = MoveL(endJPos, endDesePos, tmpTool, tmpUser, vel, acc, ovl, blendR, epos, search, 0, endOffPos, 0,0,10);
                             if (rtn != 0)
                             {
                                 ARCEnd(weldIOType, arcNum, weldTimeout);
@@ -20463,11 +20482,11 @@ namespace fairino
         }
 
         /**
- * @brief 激光外设打开关闭函数
- * @param [in] OnOff 0-关闭 1-打开
- * @param [in] weldId 焊缝ID 默认为0
- * @return 错误码
- */
+        * @brief 激光外设打开关闭函数
+        * @param [in] OnOff 0-关闭 1-打开
+        * @param [in] weldId 焊缝ID 默认为0
+        * @return 错误码
+        */
         public int LaserTrackingLaserOnOff(int OnOff, int weldId = 0)
         {
             if (IsSockComError())
@@ -20824,31 +20843,31 @@ namespace fairino
          * @param [in] speed 速度 单位%
          * @return 错误码
          */
-        public int LaserSensorRecordandReplay(int delayMode, int delayTime, int delayDisExAxisNum, double delayDis, double sensitivePara, double speed)
-        {
-            if (IsSockComError())
-            {
-                return g_sock_com_err;
-            }
-            try
-            {
-                int rtn = proxy.LaserSensorRecordandReplay(4, delayMode, delayTime, delayDisExAxisNum, delayDis, sensitivePara, speed);
+        //public int LaserSensorRecordandReplay(int delayMode, int delayTime, int delayDisExAxisNum, double delayDis, double sensitivePara, double speed)
+        //{
+        //    if (IsSockComError())
+        //    {
+        //        return g_sock_com_err;
+        //    }
+        //    try
+        //    {
+        //        int rtn = proxy.LaserSensorRecordandReplay(4, delayMode, delayTime, delayDisExAxisNum, delayDis, sensitivePara, speed);
        
-                if (log != null)
-                {
-                    log.LogInfo($"LaserSensorRecordandReplay: {rtn}");
-                }
-                return rtn;
-            }
-            catch
-            {
-                if (log != null)
-                {
-                    log.LogError("RPC exception");
-                }
-                return (int)RobotError.ERR_RPC_ERROR;
-            }
-        }
+        //        if (log != null)
+        //        {
+        //            log.LogInfo($"LaserSensorRecordandReplay: {rtn}");
+        //        }
+        //        return rtn;
+        //    }
+        //    catch
+        //    {
+        //        if (log != null)
+        //        {
+        //            log.LogError("RPC exception");
+        //        }
+        //        return (int)RobotError.ERR_RPC_ERROR;
+        //    }
+        //}
 
         /**
          * @brief 运动到焊缝记录的起点
@@ -22887,7 +22906,606 @@ namespace fairino
             }
         }
 
+        /**
+        * @brief 光电传感器TCP标定-计算工具RPY
+        * @param [in] Btool 机器人笛卡尔位置
+        * @param [in] Etool 当前工具坐标系数值
+        * @param [in] senser 当前传感器坐标系数值(暂未开放)
+        * @param [in] radius 圆周运动半径mm(暂未开放)
+        * @param [in] dz 沿基座标系z轴负方向运动距离；当dz = 10000时，函数直接返回工具RPY
+        * @param [out] TCPRPY 工具RPY数值
+        * @return 错误码
+        */
+        public int TCPComputeRPY(DescPose Btool, DescPose Etool, DescPose sensor, double radius, double dz, out Rpy TCPRPY)
+        {
+            TCPRPY = new Rpy();
 
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            if (GetSafetyCode() != 0)
+            {
+                return GetSafetyCode();
+            }
+
+            try
+            {
+                int errcode = 0;
+
+                // 构建与C++完全一致的参数数组 (24个参数)
+                object[] param = new object[24];
+
+                param[0] = Btool.tran.x;
+                param[1] = Btool.tran.y;
+                param[2] = Btool.tran.z;
+                param[3] = Btool.rpy.rx;
+                param[4] = Btool.rpy.ry;
+                param[5] = Btool.rpy.rz;
+                param[6] = Etool.tran.x;
+                param[7] = Etool.tran.y;
+                param[8] = Etool.tran.z;
+                param[9] = Etool.rpy.rx;
+                param[10] = Etool.rpy.ry;
+                param[11] = Etool.rpy.rz;
+                param[12] = sensor.tran.x;
+                param[13] = sensor.tran.y;
+                param[14] = sensor.tran.z;
+                param[15] = sensor.rpy.rx;
+                param[16] = sensor.rpy.ry;
+                param[17] = sensor.rpy.rz;
+                param[18] = radius;
+                param[19] = dz;
+                param[20] = 0.0;
+                param[21] = 0.0;
+                param[22] = 0.0;
+                param[23] = 0.0;
+
+                // 调用RPC方法
+                object[] result = proxy.TCPComputeRPY(param);
+
+                errcode = Convert.ToInt32(result[0]);
+                if (errcode == 0)
+                {
+                    TCPRPY.rx = Convert.ToDouble(result[1]);
+                    TCPRPY.ry = Convert.ToDouble(result[2]);
+                    TCPRPY.rz = Convert.ToDouble(result[3]);
+                }
+                else
+                {
+                    if (log != null)
+                    {
+                        log.LogError($"execute TCPComputeRPY fail {errcode}");
+                    }
+                }
+
+                if ((robot_state_pkg.main_code != 0 || robot_state_pkg.sub_code != 0) && errcode == 0)
+                {
+                    errcode = 14;
+                }
+
+                return errcode;
+            }
+            catch (Exception ex)
+            {
+                if (log != null)
+                {
+                    log.LogError($"Exception in TCPComputeRPY: {ex.Message}");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+        * @brief 光电传感器TCP标定-计算工具XYZ
+        * @param [in] select 0-计算工具TCP；1-计算传感器原点；2-计算传感器姿态；3-直接返回工具TCP；4-记录当前工件坐标系和工具坐标系
+        * @param [in] originDirection 0-X方向；1-Y方向；2-Z方向
+        * @param [in] pos1 机器人笛卡尔位置1
+        * @param [in] pos2 机器人笛卡尔位置2
+        * @param [in] pos3 机器人笛卡尔位置3
+        * @param [in] pos4 机器人笛卡尔位置4
+        * @param [out] TCP 工具XYZ数值
+        * @return 错误码
+        */
+        public int TCPComputeXYZ(int select, double originDirection, DescTran pos1, DescTran pos2,DescTran pos3, DescTran pos4, out DescTran TCP)
+        {
+            TCP = new DescTran();
+
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            if (GetSafetyCode() != 0)
+            {
+                return GetSafetyCode();
+            }
+
+            try
+            {
+                int errcode = 0;
+
+                // 构建与C++完全一致的参数数组 (14个参数)
+                object[] param = new object[14];
+
+                param[0] = select;
+                param[1] = originDirection;
+                param[2] = pos1.x;
+                param[3] = pos1.y;
+                param[4] = pos1.z;
+                param[5] = pos2.x;
+                param[6] = pos2.y;
+                param[7] = pos2.z;
+                param[8] = pos3.x;
+                param[9] = pos3.y;
+                param[10] = pos3.z;
+                param[11] = pos4.x;
+                param[12] = pos4.y;
+                param[13] = pos4.z;
+
+                // 调用RPC方法
+                object[] result = proxy.TCPComputeXYZ(param);
+
+                errcode = Convert.ToInt32(result[0]);
+                if (errcode == 0)
+                {
+                    TCP.x = Convert.ToDouble(result[1]);
+                    TCP.y = Convert.ToDouble(result[2]);
+                    TCP.z = Convert.ToDouble(result[3]);
+                }
+                else
+                {
+                    if (log != null)
+                    {
+                        log.LogError($"execute TCPComputeXYZ fail {errcode}");
+                    }
+                }
+
+                if ((robot_state_pkg.main_code != 0 || robot_state_pkg.sub_code != 0) && errcode == 0)
+                {
+                    errcode = 14;
+                }
+
+                return errcode;
+            }
+            catch (Exception ex)
+            {
+                if (log != null)
+                {
+                    log.LogError($"Exception in TCPComputeXYZ: {ex.Message}");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+        * @brief 光电传感器TCP标定-开始记录末端法兰中心位置
+        * @return 错误码
+        */
+        public int TCPRecordFlangePosStart()
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            if (GetSafetyCode() != 0)
+            {
+                return GetSafetyCode();
+            }
+
+            try
+            {
+                int errcode = 0;
+
+                // 调用无参数的RPC方法
+                object[] param = new object[0];
+                errcode = proxy.TCPRecordFlangePosStart(param);
+
+                if (errcode != 0)
+                {
+                    if (log != null)
+                    {
+                        log.LogError($"execute TCPRecordFlangePosStart fail: {errcode}");
+                    }
+                }
+
+                if ((robot_state_pkg.main_code != 0 || robot_state_pkg.sub_code != 0) && errcode == 0)
+                {
+                    errcode = 14;
+                }
+
+                return errcode;
+            }
+            catch (Exception ex)
+            {
+                if (log != null)
+                {
+                    log.LogError($"Exception in TCPRecordFlangePosStart: {ex.Message}");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+        * @brief 光电传感器TCP标定-停止记录末端法兰中心位置
+        * @return 错误码
+        */
+        public int TCPRecordFlangePosEnd()
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            if (GetSafetyCode() != 0)
+            {
+                return GetSafetyCode();
+            }
+
+            try
+            {
+                int errcode = 0;
+
+                // 调用无参数的RPC方法
+                object[] param = new object[0];
+                errcode = proxy.TCPRecordFlangePosEnd(param);
+
+                if (errcode != 0)
+                {
+                    if (log != null)
+                    {
+                        log.LogError($"execute TCPRecordFlangePosEnd fail: {errcode}");
+                    }
+                }
+
+                if ((robot_state_pkg.main_code != 0 || robot_state_pkg.sub_code != 0) && errcode == 0)
+                {
+                    errcode = 14;
+                }
+
+                return errcode;
+            }
+            catch (Exception ex)
+            {
+                if (log != null)
+                {
+                    log.LogError($"Exception in TCPRecordFlangePosEnd: {ex.Message}");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+        * @brief 光电传感器TCP标定-获取末端工具中心点位置
+        * @param [out] TCP 工具中心点位置(x,y,z)
+        * @return 错误码
+        */
+        public int TCPGetRecordFlangePos(out DescTran TCP)
+        {
+            TCP = new DescTran();
+
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            if (GetSafetyCode() != 0)
+            {
+                return GetSafetyCode();
+            }
+
+            try
+            {
+                int errcode = 0;
+
+                // 调用无参数的RPC方法
+                object[] param = new object[0];
+                object[] result = proxy.TCPGetRecordFlangePos(param);
+
+                errcode = Convert.ToInt32(result[0]);
+                if (errcode == 0)
+                {
+                    TCP.x = Convert.ToDouble(result[1]);
+                    TCP.y = Convert.ToDouble(result[2]);
+                    TCP.z = Convert.ToDouble(result[3]);
+                }
+                else
+                {
+                    if (log != null)
+                    {
+                        log.LogError($"execute TCPGetRecordFlangePos fail {errcode}");
+                    }
+                }
+
+                if ((robot_state_pkg.main_code != 0 || robot_state_pkg.sub_code != 0) && errcode == 0)
+                {
+                    errcode = 14;
+                }
+
+                return errcode;
+            }
+            catch (Exception ex)
+            {
+                if (log != null)
+                {
+                    log.LogError($"Exception in TCPGetRecordFlangePos: {ex.Message}");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+        * @brief 光电传感器TCP标定
+        * @param [in] luaPath 自动标定lua程序路径：QX版本机器人-"/fruser/FR_CalibrateTheToolTcp.lua";LA版本机器人-"/usr/local/etc/controller/lua/FR_CalibrateTheToolTcp.lua"
+        * @param [in] offsetX 示教点偏移(x,y,z)mm
+        * @param [out] TCP 标定后的工具坐标系(x,y,z,rx,ry,rz)
+        * @return 错误码
+        */
+        public int PhotoelectricSensorTCPCalibration(string luaPath, DescTran offset, out DescPose TCP)
+        {
+            TCP = new DescPose();
+
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            if (GetSafetyCode() != 0)
+            {
+                return GetSafetyCode();
+            }
+
+            try
+            {
+                int rtn = 0;
+
+                // 设置系统变量
+                rtn = SetSysVarValue(1, offset.x);
+                if (rtn != 0)
+                {
+                    return rtn;
+                }
+
+                rtn = SetSysVarValue(2, offset.y);
+                if (rtn != 0)
+                {
+                    return rtn;
+                }
+
+                rtn = SetSysVarValue(3, offset.z);
+                if (rtn != 0)
+                {
+                    return rtn;
+                }
+
+                // 设置模式
+                rtn = Mode(0);
+                if (rtn != 0)
+                {
+                    return rtn;
+                }
+
+                // 加载并运行Lua程序
+                rtn = ProgramLoad(luaPath);
+                if (rtn != 0)
+                {
+                    return rtn;
+                }
+
+                rtn = ProgramRun();
+                if (rtn != 0)
+                {
+                    return rtn;
+                }
+
+                // 等待2秒
+                Thread.Sleep(2 * 1000);
+
+                // 等待程序运行完成
+                while (robot_state_pkg.program_state != 1)
+                {
+                    Thread.Sleep(200);
+                }
+
+                // 获取工具TCP
+                DescTran pos1 = new DescTran();
+                DescTran pos2 = new DescTran();
+                DescTran pos3 = new DescTran();
+                DescTran pos4 = new DescTran();
+
+                rtn = TCPComputeXYZ(3, 0, pos1, pos2, pos3, pos4, out TCP.tran);
+                if (rtn != 0)
+                {
+                    return rtn;
+                }
+
+                // 获取工具RPY
+                DescPose Btool = new DescPose();
+                DescPose Etool = new DescPose();
+                DescPose sensor = new DescPose();
+                double radius = 1.0;
+
+                Rpy tcpRpy = new Rpy();
+                rtn = TCPComputeRPY(Btool, Etool, sensor, radius, 10000, out tcpRpy);
+                TCP.rpy = tcpRpy;
+
+                return rtn;
+            }
+            catch (Exception ex)
+            {
+                if (log != null)
+                {
+                    log.LogError($"Exception in PhotoelectricSensorTCPCalibration: {ex.Message}");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+        * @brief 激光焊缝轨迹记录及复现
+        * @param [in] delayMode 模式 0-延时时间 1-延时距离
+        * @param [in] delayTime 延时时间 单位ms
+        * @param [in] delayDisExAxisNum 扩展轴编号
+        * @param [in] delayDis 延时距离 单位mm
+        * @param [in] sensitivePara 补偿灵敏系数
+        * @param [in] trackMode 定点跟踪类型。0-扩展轴异步运动；1-机器人
+        * @param [in] triggerMode 定点跟踪触发方式。0-跟踪时长；1-IO
+        * @param [in] runTime 机器人定点跟踪时长(s)
+        * @param [in] speed 速度 单位%
+        * @return 错误码
+        */
+        public int LaserSensorRecordandReplay(int delayMode, int delayTime, int delayDisExAxisNum,double delayDis, double sensitivePara, int trackMode, int triggerMode,double runTime, double speed)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            if (GetSafetyCode() != 0)
+            {
+                return GetSafetyCode();
+            }
+
+            try
+            {
+                int errcode = 0;
+
+                // 直接传递参数，不要包装成数组
+                errcode = proxy.LaserSensorRecordandReplay(
+                    4,        // param0: 固定值
+                    delayTime, // param1
+                    speed,     // param2
+                    delayMode, // param3
+                    delayDisExAxisNum, // param4
+                    delayDis,  // param5
+                    sensitivePara, // param6
+                    trackMode, // param7
+                    triggerMode, // param8
+                    runTime    // param9
+                );
+
+
+                if (errcode != 0)
+                {
+                    if (log != null)
+                    {
+                        log.LogError($"execute LaserSensorRecordandReplay fail {errcode}");
+                    }
+                }
+
+                if ((robot_state_pkg.main_code != 0 || robot_state_pkg.sub_code != 0) && errcode == 0)
+                {
+                    errcode = 14;
+                }
+
+                return errcode;
+            }
+            catch (Exception ex)
+            {
+                if (log != null)
+                {
+                    log.LogError($"Exception in LaserSensorRecordandReplay: {ex.Message}");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+        * @brief 原地空运动
+        * @return 错误码
+        */
+        public int MoveStationary()
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            if (GetSafetyCode() != 0)
+            {
+                return GetSafetyCode();
+            }
+
+            try
+            {
+                int errcode = 0;
+
+                // 准备参数数组（无参数方法）
+
+
+                // 调用RPC方法
+                errcode = proxy.MoveStationary();
+
+                if (errcode != 0)
+                {
+                    if (log != null)
+                    {
+                        log.LogError($"execute MoveStationary fail {errcode}");
+                    }
+                }
+
+                if ((robot_state_pkg.main_code != 0 || robot_state_pkg.sub_code != 0) && errcode == 0)
+                {
+                    errcode = 14; // 机器人状态错误码
+                }
+
+                return errcode;
+            }
+            catch (Exception ex)
+            {
+                if (log != null)
+                {
+                    log.LogError($"Exception in MoveStationary: {ex.Message}");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+        * @brief 旋转插入
+        * @param [in] rcs 参考坐标系，0-工具坐标系，1-基坐标系
+        * @param [in] angVelRot 旋转角速度，单位deg/s
+        * @param [in] ft  力/扭矩阈值，fx,fy,fz,tx,ty,tz，范围[0~100]
+        * @param [in] max_angle 最大旋转角度，单位deg
+        * @param [in] orn 力/扭矩方向，1-沿z轴方向，2-绕z轴方向
+        * @param [in] max_angAcc 最大旋转加速度，单位deg/s^2，暂不使用，默认为0
+        * @param [in] rotorn  旋转方向，1-顺时针，2-逆时针
+        * @param [in] strategy 未检测到力/力矩的处理策略，0-报错；1-警告，继续运动
+        * @return  错误码
+        */
+        public int FT_RotInsertion(int rcs, double angVelRot, double ft, double max_angle, int orn, double max_angAcc, int rotorn, int strategy)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            if (GetSafetyCode() != 0)
+            {
+                return GetSafetyCode();
+            }
+
+            try
+            {
+                int rtn = proxy.FT_RotInsertion(rcs, angVelRot, ft, max_angle, orn, max_angAcc, rotorn, strategy);
+
+                if (log != null)
+                {
+                    log.LogInfo($"FT_RotInsertion: {rtn}");
+                }
+                return rtn;
+            }
+            catch
+            {
+                if (log != null)
+                {
+                    log.LogError("RPC exception");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
     }
 }
 

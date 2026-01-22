@@ -2104,8 +2104,8 @@ namespace fairino
         [XmlRpcMethod("MoveLTR")]
         int MoveLTR(int param0);
 
-        [XmlRpcMethod("LaserSensorRecordandReplay")]
-        int LaserSensorRecordandReplay(int param0, int delayMode, int delayTime, int delayDisExAxisNum, double delayDis, double sensitivePara, double speed);
+        //[XmlRpcMethod("LaserSensorRecordandReplay")]
+        //int LaserSensorRecordandReplay(int param0, int delayMode, int delayTime, int delayDisExAxisNum, double delayDis, double sensitivePara, double speed);
 
         [XmlRpcMethod("MoveToLaserRecordStart")]
         int MoveToLaserRecordStart(int moveType, double ovl);
@@ -2228,6 +2228,36 @@ namespace fairino
 
         [XmlRpcMethod("SerCoderCompenParams")]
         int SerCoderCompenParams(object[] serCoderParams);
+
+        [XmlRpcMethod("TCPComputeRPY")]
+        object[] TCPComputeRPY(object[] tcpComputeParams);
+
+        [XmlRpcMethod("TCPComputeXYZ")]
+        object[] TCPComputeXYZ(object[] tcpComputeParams);
+
+        [XmlRpcMethod("TCPRecordFlangePosStart")]
+        int TCPRecordFlangePosStart(object[] emptyParams);
+
+        [XmlRpcMethod("TCPRecordFlangePosEnd")]
+        int TCPRecordFlangePosEnd(object[] emptyParams);
+
+        [XmlRpcMethod("TCPGetRecordFlangePos")]
+        object[] TCPGetRecordFlangePos(object[] emptyParams);
+
+        // 激光焊缝轨迹复现方法的RPC句柄
+        // 修改接口定义，将参数展开为单独的参数
+        [XmlRpcMethod("LaserSensorRecordandReplay")]
+        int LaserSensorRecordandReplay(
+            int param0, int param1, double param2, int param3,
+            int param4, double param5, double param6,
+            int param7, int param8, double param9);
+
+        // 原地空运动方法的RPC句柄
+        [XmlRpcMethod("MoveStationary")]
+        int MoveStationary();
+
+        [XmlRpcMethod("FT_RotInsertion")]
+        int FT_RotInsertion(int rcs, double angVelRot, double ft, double max_angle, int orn, double max_angAcc, int rotorn, int strategy);
 
 
     }
