@@ -14,6 +14,9 @@ using System.IO.Ports;
 using System.Runtime.InteropServices.ComTypes;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using System.Runtime.InteropServices;
+using System.Diagnostics;
+using System.Runtime;
+using System.Drawing.Drawing2D;
 namespace testFrRobot
 {
     public partial class Test : Form
@@ -4576,11 +4579,1164 @@ namespace testFrRobot
             // TestIntersectLineMove();
             // TestSensitivityCalib();
             //TestFTControlWithAdjustCoeff();
-             TestMove();
+            //TestMove();
+            //TestSegWeld1();
+            //  TestPhotoelectricSensorTCPCalib();
+            //LaserSensorRecordandReplay();
+            Console.WriteLine("=== 机器人SDK连接断开测试 ===\n");
 
+            // 测试1：正常连接测试
+            //TestNormalConnection();
+
+            // 测试2：CPU压力测试
+            // TestCPUStressImpactHigh();
+
+            // 测试3：内存压力测试
+            //   TestMemoryStressImpact();
+
+            // 测试4：混合压力测试
+            // TestMixedStressImpact();
+
+            // 测试5：手动断开连接测试
+            // TestManualDisconnection();
+
+            //  TestMemoryStressImpactExtreme();
+
+            //  Console.WriteLine("\n所有测试完成！");
+            TestRotInsert();
 
         }
 
+        public void TestRotInsert()
+        {
+            int rtn;
+            ROBOT_STATE_PKG pkg = new ROBOT_STATE_PKG();
+            float forceInsertion = 2.0f; //力或力矩阈值（0~100），单位N或Nm
+            int angleMax = 12; //最大旋转角度，单位°
+            byte orn = 2; //力的方向，1-fz,2-mz
+            float angAccmax = 5.0f; //最大旋转角加速度，单位°/s^2,暂不使用
+            byte status = 1;  //恒力控制开启标志，0-关，1-开
+            int sensor_num = 2; //力传感器编号
+            float[] gain = { 0.0001f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };  //最大阈值
+            byte adj_sign = 0;  //自适应启停状态，0-关闭，1-开启
+            byte ILC_sign = 0;  //ILC控制启停状态，0-停止，1-训练，2-实操
+            float max_dis = 1000.0f;  //最大调整距离
+            float max_ang = 5.0f;  //最大调整角度
+            ForceTorque ft = new ForceTorque(); // 假设ForceTorque是已定义的C#结构体/类
+            int rcs = 0;  //参考坐标系，0-工具坐标系，1-基坐标系
+            float angVelRot = 2.0f;  //旋转角速度，单位°/s
+            byte rotorn = 1; //旋转方向，1-顺时针，2-逆时针
+
+
+            float acc = 100.0f;
+            float ovl = 100.0f;
+            float oacc = 100.0f;
+            byte flag = 0;
+            byte search = 0;
+            int blendMode = 0;
+            int velAccMode = 0;
+            JointPos j1 = new JointPos(58.417f, -85.578f, -100.516f, -83.915f, 90.000f, -31.662f);
+            JointPos j2 = new JointPos(58.417f, -87.111f, -107.956f, -74.942f, 90.000f, -31.662f);
+            DescPose desc_p1 = new DescPose(328.796f, 339.109f, 433.617f, 179.993f, 0.005f, 0.079f);
+            DescPose desc_p2 = new DescPose(328.795f, 339.109f, 373.605f, 179.993f, 0.005f, 0.079f);
+            ExaxisPos epos = new ExaxisPos(0.0f, 0.0f, 0.0f, 0.0f);
+            DescPose offset_pos = new DescPose(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+
+           // robot.MoveL(j1, desc_p1, 0, 0, 100.0f, 180.0f, 100.0f, -1.0f, epos, 0, 1, offset_pos, 0, 10);
+            rtn = robot.MoveL(j1, desc_p1, 0, 0, 100.0f, 180.0f, 100.0f, -1.0f, blendMode, epos, 0, 0, offset_pos, oacc, velAccMode, 0, 10);
+
+            byte[] select3 = { 0, 0, 1, 0, 0, 0 };  //六个自由度选择[fx,fy,fz,mx,my,mz]，0-不生效，1-生效
+            ft.fz = -10.0f;
+            gain[0] = 0.0001f;
+            status = 1;
+
+            robot.FT_Control(status, sensor_num, select3, ft, gain, adj_sign, ILC_sign, max_dis, max_ang, 0, 0, 0);
+            rtn = robot.FT_RotInsertion(rcs, angVelRot, forceInsertion, angleMax, orn, angAccmax, rotorn, 1);
+            Console.WriteLine($"FT_RotInsertion rtn is {rtn}");
+
+            status = 0;
+            robot.FT_Control(status, sensor_num, select3, ft, gain, adj_sign, ILC_sign, max_dis, max_ang, 0, 0, 0);
+           // robot.MoveL(j2, desc_p2, 0, 0, 100.0f, 180.0f, 100.0f, -1.0f, epos, 0, 0, offset_pos, 0, 10);
+            rtn = robot.MoveL(j2, desc_p2, 0, 0, 100.0f, 180.0f, 100.0f, -1.0f, blendMode, epos, 0, 0, offset_pos, oacc, velAccMode, 0, 10);
+            Thread.Sleep(1000);
+            robot.GetRobotRealTimeState(ref pkg);
+            Console.WriteLine($"robot errcode {pkg.main_code}  {pkg.sub_code}");
+
+
+        }
+        public void TestCPUStressImpactHigh()
+        {
+            Console.WriteLine("=== 测试2：CPU压力对连接的影响（高强度版）===");
+
+            // 先测试正常状态
+            Console.WriteLine("CPU压力前测试...");
+            ROBOT_STATE_PKG statePkg = new ROBOT_STATE_PKG();
+            int initialResult = robot.GetRobotRealTimeState(ref statePkg);
+            Console.WriteLine($"初始状态：返回 {initialResult}");
+
+            // 创建高强度CPU压力
+            Console.WriteLine("\n开始施加高强度CPU压力...");
+            CancellationTokenSource cts = new CancellationTokenSource();
+            List<Task> cpuTasks = new List<Task>();
+
+            int coreCount = Environment.ProcessorCount;
+
+            // 高强度：4倍核心数，每个线程100%占用
+            int threadCount = coreCount * 4;
+
+            Console.WriteLine($"系统核心数: {coreCount}");
+            Console.WriteLine($"创建压力线程数: {threadCount}");
+
+            for (int i = 0; i < threadCount; i++)
+            {
+                cpuTasks.Add(Task.Run(() =>
+                {
+                    int threadId = i;
+                    Random rnd = new Random(threadId + DateTime.Now.Millisecond);
+
+                    // 记录线程开始时间
+                    Stopwatch threadSw = Stopwatch.StartNew();
+
+                    while (!cts.Token.IsCancellationRequested && threadSw.ElapsedMilliseconds < 35000) // 比测试时间长一点
+                    {
+                        // 高强度计算循环 - 尽量减少休眠
+                        double result = 0;
+
+                        // 根据线程ID调整计算模式
+                        if (threadId % 4 == 0)
+                        {
+                            // 模式1：密集浮点计算
+                            for (long j = 0; j < 8000000 && !cts.Token.IsCancellationRequested; j++)
+                            {
+                                result += Math.Sqrt(j * j + 1) * Math.Sin(j) * Math.Cos(j);
+                                // 少量分支增加CPU压力
+                                if (j % 100000 == 0)
+                                {
+                                    result = Math.Abs(result);
+                                }
+                            }
+                        }
+                        else if (threadId % 4 == 1)
+                        {
+                            // 模式2：密集整数和内存计算
+                            long sum = 0;
+                            for (long j = 0; j < 12000000 && !cts.Token.IsCancellationRequested; j++)
+                            {
+                                sum += j ^ (j >> 3) ^ (j << 5);
+                                // 每100万次重置，避免溢出
+                                if (j % 1000000 == 0 && j > 0)
+                                {
+                                    result += Math.Sqrt(sum);
+                                    sum = 0;
+                                }
+                            }
+                            result += Math.Sqrt(sum);
+                        }
+                        else if (threadId % 4 == 2)
+                        {
+                            // 模式3：混合计算
+                            for (long j = 0; j < 10000000 && !cts.Token.IsCancellationRequested; j++)
+                            {
+                                double x = j * 0.001;
+                                result += Math.Exp(-x * x) * Math.Log(x + 1.0) * Math.Atan(x);
+
+                                // 添加一些条件分支增加压力
+                                if ((j & 0xFFF) == 0)
+                                {
+                                    result = result > 1000000 ? result / 1000 : result;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            // 模式4：矩阵计算模拟
+                            for (long j = 0; j < 6000000 && !cts.Token.IsCancellationRequested; j++)
+                            {
+                                double a = j * 0.01;
+                                double b = (j + 1000) * 0.01;
+                                result += Math.Pow(Math.Sin(a), 2) + Math.Pow(Math.Cos(b), 2)
+                                        - 2 * Math.Sin(a) * Math.Cos(b);
+                            }
+                        }
+
+                        // 极短暂的休息（仅用于防止死循环优化）
+                        if (!cts.Token.IsCancellationRequested && threadSw.ElapsedMilliseconds % 5000 < 10)
+                        {
+                            Thread.Sleep(1);
+                        }
+
+                        // 防止编译器优化掉计算结果
+                        if (Math.Abs(result) < 0.0001 && threadSw.ElapsedMilliseconds > 10000)
+                        {
+                            // 重新开始计算
+                            result = 0;
+                        }
+                    }
+                }, cts.Token));
+            }
+
+            // 等待压力线程充分启动
+            Console.WriteLine("等待压力线程启动...");
+            Thread.Sleep(2000);
+
+            // 监控CPU使用率
+            Task monitoringTask = Task.Run(() =>
+            {
+                PerformanceCounter cpuCounter = null;
+                try
+                {
+                    cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
+                    cpuCounter.NextValue(); // 第一次调用需要初始化
+
+                    while (!cts.Token.IsCancellationRequested)
+                    {
+                        Thread.Sleep(2000);
+                        float cpuUsage = cpuCounter.NextValue();
+                        Console.WriteLine($"[监控] CPU使用率: {cpuUsage:F1}%");
+                    }
+                }
+                catch
+                {
+                    Console.WriteLine("[监控] 无法获取CPU使用率");
+                }
+                finally
+                {
+                    cpuCounter?.Dispose();
+                }
+            });
+
+            // 在CPU压力下测试SDK连接
+            Console.WriteLine("\n在高强度CPU压力下测试SDK连接...");
+            int successCount = 0;
+            int disconnectCount = 0;
+            int otherErrors = 0;
+            int totalAttempts = 0;
+
+            Stopwatch testTimer = Stopwatch.StartNew();
+            DateTime lastPrintTime = DateTime.Now;
+            int consecutiveFails = 0;
+            int maxConsecutiveFails = 0;
+
+            List<string> errorPattern = new List<string>();
+
+            while (testTimer.ElapsedMilliseconds < 30000) // 30秒测试
+            {
+                totalAttempts++;
+
+                try
+                {
+                    int result = robot.GetRobotRealTimeState(ref statePkg);
+
+                    if (result == 0)
+                    {
+                        successCount++;
+                        Console.Write("✓");
+                        consecutiveFails = 0;
+                        errorPattern.Add("S");
+                    }
+                    else if (result == -2)
+                    {
+                        disconnectCount++;
+                        Console.Write("X");
+                        consecutiveFails++;
+                        maxConsecutiveFails = Math.Max(maxConsecutiveFails, consecutiveFails);
+                        errorPattern.Add("X");
+                    }
+                    else
+                    {
+                        otherErrors++;
+                        Console.Write($"[{result}]");
+                        consecutiveFails++;
+                        errorPattern.Add($"E{result}");
+                    }
+
+                    // 定期显示详细状态
+                    if (DateTime.Now - lastPrintTime > TimeSpan.FromSeconds(3))
+                    {
+                        double successRate = totalAttempts > 0 ? (double)successCount / totalAttempts * 100 : 0;
+                        Console.WriteLine($"\n[状态] 成功: {successCount}/{totalAttempts} ({successRate:F1}%) | "
+                            + $"断开: {disconnectCount} | 其他错误: {otherErrors} | "
+                            + $"最大连续失败: {maxConsecutiveFails}");
+                        lastPrintTime = DateTime.Now;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    otherErrors++;
+                    Console.Write($"!{ex.GetType().Name[0]}");
+                    errorPattern.Add("!");
+                }
+
+                // 动态调整测试间隔 - 根据失败率调整
+                int delay = 300; // 基础间隔300ms
+
+                if (consecutiveFails > 5)
+                {
+                    delay = 1000; // 连续失败时延长间隔
+                }
+                else if (disconnectCount > successCount * 3)
+                {
+                    delay = 800; // 失败率过高时延长间隔
+                }
+                else if (successCount > disconnectCount * 2)
+                {
+                    delay = 200; // 成功率较高时缩短间隔
+                }
+
+                Thread.Sleep(delay);
+            }
+
+            // 停止压力
+            cts.Cancel();
+            Console.WriteLine("\n\n停止CPU压力...");
+
+            try
+            {
+                Task.WaitAll(cpuTasks.ToArray(), 3000);
+            }
+            catch (AggregateException) { }
+
+            try
+            {
+                monitoringTask?.Wait(1000);
+            }
+            catch { }
+
+            // 分析错误模式
+            Console.WriteLine("\n=== 错误模式分析 ===");
+            string patternStr = string.Join("", errorPattern);
+            Console.WriteLine($"测试序列: {patternStr}");
+
+            // 统计连续失败段
+            var failSegments = new List<int>();
+            int currentFail = 0;
+            foreach (char c in patternStr)
+            {
+                if (c == 'X' || c == '!' || (c >= 'E' && c <= 'E' + 9))
+                {
+                    currentFail++;
+                }
+                else if (currentFail > 0)
+                {
+                    failSegments.Add(currentFail);
+                    currentFail = 0;
+                }
+            }
+            if (currentFail > 0) failSegments.Add(currentFail);
+
+            if (failSegments.Count > 0)
+            {
+                Console.WriteLine($"连续失败段数: {failSegments.Count}");
+                Console.WriteLine($"平均连续失败长度: {failSegments.Average():F1}");
+                Console.WriteLine($"最大连续失败长度: {failSegments.Max()}");
+            }
+
+            Console.WriteLine("\n=== 测试结果 ===");
+            Console.WriteLine($"总尝试次数：{totalAttempts}");
+            Console.WriteLine($"成功调用：{successCount}次 ({(double)successCount / totalAttempts:P1})");
+            Console.WriteLine($"连接断开(-2)：{disconnectCount}次 ({(double)disconnectCount / totalAttempts:P1})");
+            Console.WriteLine($"其他错误：{otherErrors}次 ({(double)otherErrors / totalAttempts:P1})");
+
+            double overallSuccessRate = totalAttempts > 0 ? (double)successCount / totalAttempts * 100 : 0;
+            Console.WriteLine($"\n总体成功率：{overallSuccessRate:F1}%");
+
+            // 恢复测试 - 更详细的恢复过程
+            Console.WriteLine("\n=== 恢复测试 ===");
+            Console.WriteLine("等待系统恢复...");
+
+            // 给系统更多时间恢复
+            for (int i = 0; i < 5; i++)
+            {
+                Thread.Sleep(1000);
+                Console.Write(".");
+            }
+            Console.WriteLine();
+
+            int recoverySuccess = 0;
+            for (int i = 0; i < 10; i++) // 尝试10次恢复
+            {
+                try
+                {
+                    int recoveryResult = robot.GetRobotRealTimeState(ref statePkg);
+
+                    if (recoveryResult == 0)
+                    {
+                        recoverySuccess++;
+                        Console.WriteLine($"恢复测试 {i + 1}: ✓ 成功");
+
+                        // 连续成功3次认为已恢复
+                        if (recoverySuccess >= 3)
+                        {
+                            Console.WriteLine("✓ 连接已稳定恢复");
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine($"恢复测试 {i + 1}: 返回 {recoveryResult}");
+                        recoverySuccess = 0; // 重置连续成功计数
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"恢复测试 {i + 1}: 异常 {ex.Message}");
+                    recoverySuccess = 0;
+                }
+
+                if (i < 9) Thread.Sleep(500);
+            }
+
+            if (recoverySuccess < 3)
+            {
+                Console.WriteLine("⚠️ 连接恢复不完全");
+            }
+
+            Console.WriteLine("\n测试完成！");
+        }
+        public void TestCPUStressImpactImproved()
+        {
+            Console.WriteLine("=== 测试2：CPU压力对连接的影响（改进版）===");
+
+            // 先测试正常状态
+            Console.WriteLine("CPU压力前测试...");
+            ROBOT_STATE_PKG statePkg = new ROBOT_STATE_PKG();
+            int initialResult = robot.GetRobotRealTimeState(ref statePkg);
+            Console.WriteLine($"初始状态：返回 {initialResult}");
+
+            // 创建可控的CPU压力
+            Console.WriteLine("\n开始施加可控CPU压力...");
+            CancellationTokenSource cts = new CancellationTokenSource();
+            List<Task> cpuTasks = new List<Task>();
+
+            int coreCount = Environment.ProcessorCount;
+
+            // 使用更合理的压力级别
+            for (int i = 0; i < coreCount; i++) // 1倍核心数
+            {
+                cpuTasks.Add(Task.Run(() =>
+                {
+                    int threadId = i;
+                    Random rnd = new Random(threadId);
+
+                    while (!cts.Token.IsCancellationRequested)
+                    {
+                        // 使用更可控的计算强度
+                        DateTime start = DateTime.Now;
+                        double result = 0;
+
+                        // 根据线程ID调整计算强度
+                        long iterations = 500000 + rnd.Next(500000);
+
+                        for (long j = 0; j < iterations && !cts.Token.IsCancellationRequested; j++)
+                        {
+                            result += Math.Sqrt(j) * Math.Log(j + 1);
+
+                            // 每计算一定次数后检查取消令牌
+                            if (j % 10000 == 0 && cts.Token.IsCancellationRequested)
+                                break;
+                        }
+
+                        // 更频繁的短暂休息，让出CPU时间
+                        if (!cts.Token.IsCancellationRequested)
+                        {
+                            Thread.Sleep(10 + rnd.Next(20));
+                        }
+                    }
+                }, cts.Token));
+            }
+
+            // 等待压力线程稳定
+            Thread.Sleep(1000);
+
+            // 测试SDK连接
+            Console.WriteLine("在可控CPU压力下测试SDK连接...");
+            int successCount = 0;
+            int disconnectCount = 0;
+            int totalAttempts = 0;
+
+            Stopwatch testTimer = Stopwatch.StartNew();
+            DateTime lastPrintTime = DateTime.Now;
+
+            while (testTimer.ElapsedMilliseconds < 30000)
+            {
+                totalAttempts++;
+
+                try
+                {
+                    int result = robot.GetRobotRealTimeState(ref statePkg);
+
+                    if (result == 0)
+                    {
+                        successCount++;
+                        Console.Write("✓");
+                    }
+                    else if (result == -2)
+                    {
+                        disconnectCount++;
+                        Console.Write("X");
+                    }
+                    else
+                    {
+                        Console.Write($"[{result}]");
+                    }
+
+                    // 定期显示状态
+                    if (DateTime.Now - lastPrintTime > TimeSpan.FromSeconds(5))
+                    {
+                        Console.WriteLine($"\n[进度] 成功: {successCount}/{totalAttempts} 失败: {disconnectCount}");
+                        lastPrintTime = DateTime.Now;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.Write($"E({ex.Message.Substring(0, Math.Min(10, ex.Message.Length))})");
+                }
+
+                // 动态调整测试间隔
+                int delay = 500; // 500ms基础间隔
+                if (disconnectCount > successCount * 2)
+                {
+                    delay = 1000; // 失败较多时延长间隔
+                }
+
+                Thread.Sleep(delay);
+            }
+
+            // 停止CPU压力
+            cts.Cancel();
+            Task.WaitAll(cpuTasks.ToArray(), 2000);
+
+            Console.WriteLine($"\n\nCPU压力测试结果：");
+            Console.WriteLine($"总尝试次数：{totalAttempts}");
+            Console.WriteLine($"成功调用：{successCount}次 ({(double)successCount / totalAttempts:P1})");
+            Console.WriteLine($"连接断开：{disconnectCount}次 ({(double)disconnectCount / totalAttempts:P1})");
+
+            // 恢复测试
+            Console.WriteLine("\n等待系统恢复...");
+            Thread.Sleep(3000); // 更长的恢复时间
+
+            for (int i = 0; i < 3; i++)
+            {
+                int recoveryResult = robot.GetRobotRealTimeState(ref statePkg);
+                Console.WriteLine($"恢复测试 {i + 1}: 返回 {recoveryResult}");
+
+                if (recoveryResult == 0)
+                {
+                    Console.WriteLine("✓ 连接已恢复");
+                    break;
+                }
+
+                Thread.Sleep(1000);
+            }
+        }
+
+        public void TestMemoryStressImpact()
+        {
+            Console.WriteLine("=== 测试3：内存压力对连接的影响 ===");
+
+            // var robot = new fairino.Robot();
+            ROBOT_STATE_PKG statePkg = new ROBOT_STATE_PKG();
+
+            // 先测试正常状态
+            Console.WriteLine("内存压力前测试...");
+            int initialResult = robot.GetRobotRealTimeState(ref statePkg);
+            Console.WriteLine($"初始状态：返回 {initialResult}");
+
+            // 内存压力测试
+            Console.WriteLine("\n开始施加内存压力...");
+            List<byte[]> memoryBlocks = new List<byte[]>();
+            List<object> objectList = new List<object>();
+
+            int successCount = 0;
+            int disconnectCount = 0;
+            bool memoryException = false;
+
+            try
+            {
+                for (int i = 0; i < 50; i++) // 最多尝试50次
+                {
+                    // 分配内存块 (10-50MB随机)
+                    int blockSize = 10 + (i % 5) * 10; // 10, 20, 30, 40, 50 MB
+                    byte[] block = new byte[blockSize * 1024 * 1024];
+                    memoryBlocks.Add(block);
+
+                    // 填充一些数据
+                    for (int j = 0; j < 1000; j++)
+                    {
+                        objectList.Add(new string('X', 10000));
+                    }
+
+                    // 测试SDK连接
+                    int result = robot.GetRobotRealTimeState(ref statePkg);
+
+                    if (result == 0)
+                    {
+                        successCount++;
+                        Console.Write(".");
+                    }
+                    else if (result == -2)
+                    {
+                        disconnectCount++;
+                        Console.Write("X");
+
+                        // 连接断开后尝试清理内存并重试
+                        Console.WriteLine($"\n连接断开，尝试清理内存...");
+                        memoryBlocks.Clear();
+                        objectList.Clear();
+                        GC.Collect();
+                        GC.WaitForPendingFinalizers();
+                        Thread.Sleep(1000);
+
+                        // 重试连接
+                        result = robot.GetRobotRealTimeState(ref statePkg);
+                        Console.WriteLine($"清理后重试：返回 {result}");
+                    }
+                    else
+                    {
+                        Console.Write($"E{result}");
+                    }
+
+                    // 每10次换行并显示内存状态
+                    if ((i + 1) % 10 == 0)
+                    {
+                        Console.WriteLine();
+                        long totalMemory = GC.GetTotalMemory(false) / 1024 / 1024;
+                        Console.WriteLine($"已分配：{memoryBlocks.Count}个块，总内存：{totalMemory}MB");
+                    }
+
+                    // 触发垃圾回收测试
+                    if (i % 15 == 0 && i > 0)
+                    {
+                        Console.WriteLine($"\n触发垃圾回收...");
+                        memoryBlocks.Clear();
+                        GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, true, true);
+                        GC.WaitForPendingFinalizers();
+                        Thread.Sleep(1000);
+                    }
+
+                    Thread.Sleep(500);
+                }
+            }
+            catch (OutOfMemoryException)
+            {
+                memoryException = true;
+                Console.WriteLine("\n触发内存不足异常！");
+            }
+            finally
+            {
+                // 清理内存
+                memoryBlocks.Clear();
+                objectList.Clear();
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+            }
+
+            Console.WriteLine($"\n内存压力测试结果：");
+            Console.WriteLine($"成功调用：{successCount}次");
+            Console.WriteLine($"连接断开：{disconnectCount}次");
+            Console.WriteLine($"内存异常：{(memoryException ? "是" : "否")}");
+
+            // 内存清理后测试恢复
+            Console.WriteLine("\n内存清理后测试恢复...");
+            Thread.Sleep(2000);
+
+            int recoveryResult = robot.GetRobotRealTimeState(ref statePkg);
+            Console.WriteLine($"恢复测试：返回 {recoveryResult}");
+
+            Console.WriteLine();
+        }
+
+        public void TestMemoryStressImpactExtreme()
+        {
+            Console.WriteLine("=== 测试3：内存压力对连接的影响（激进版）===");
+
+            // 先测试正常状态
+            Console.WriteLine("内存压力前测试...");
+            ROBOT_STATE_PKG statePkg = new ROBOT_STATE_PKG();
+            int initialResult = robot.GetRobotRealTimeState(ref statePkg);
+            Console.WriteLine($"初始状态：返回 {initialResult}");
+
+            // 激进内存压力测试
+            Console.WriteLine("\n开始施加激进内存压力...");
+            List<object> memoryHolders = new List<object>();
+            Random rnd = new Random();
+
+            int successCount = 0;
+            int disconnectCount = 0;
+            bool outOfMemory = false;
+            double totalAllocatedMB = 0; // 改为double类型
+            int testCount = 0;
+
+            Stopwatch testTimer = Stopwatch.StartNew();
+
+            try
+            {
+                // 策略1：直接分配超大内存块（接近物理内存极限）
+                Console.WriteLine("策略1：分配超大内存块...");
+
+                // 尝试分配接近系统内存的大块
+                long[] hugeBlockSizes = { 512, 1024, 2048, 4096 }; // MB
+
+                foreach (long sizeMB in hugeBlockSizes)
+                {
+                    if (outOfMemory) break;
+
+                    Console.Write($"尝试分配 {sizeMB}MB... ");
+                    try
+                    {
+                        // 分配超大块（可能触发LOH和页面文件）
+                        byte[] hugeBlock = new byte[sizeMB * 1024 * 1024];
+                        memoryHolders.Add(hugeBlock);
+                        totalAllocatedMB += sizeMB;
+
+                        // 写入数据防止被优化
+                        for (long i = 0; i < Math.Min(hugeBlock.LongLength, 1000000); i += 4096)
+                        {
+                            hugeBlock[i] = (byte)rnd.Next(256);
+                        }
+
+                        Console.WriteLine("✓");
+
+                        // 分配成功后立即测试连接
+                        TestConnectionExtreme(ref statePkg, ref successCount, ref disconnectCount, ref testCount);
+
+                        // 故意不立即清理，保持内存压力
+                    }
+                    catch (OutOfMemoryException)
+                    {
+                        outOfMemory = true;
+                        Console.WriteLine("✗ OOM");
+                        break;
+                    }
+                }
+
+                if (!outOfMemory)
+                {
+                    // 策略2：持续分配直到内存耗尽
+                    Console.WriteLine("\n策略2：持续分配直到内存耗尽...");
+                    int allocationAttempts = 0;
+
+                    while (!outOfMemory && testTimer.ElapsedMilliseconds < 30000)
+                    {
+                        allocationAttempts++;
+
+                        try
+                        {
+                            // 分配随机大小块（50-300MB）
+                            int blockSizeMB = 50 + rnd.Next(250);
+                            byte[] block = new byte[blockSizeMB * 1024 * 1024];
+                            memoryHolders.Add(block);
+                            totalAllocatedMB += blockSizeMB;
+
+                            Console.Write($"+{blockSizeMB}MB ");
+
+                            // 每分配2次测试一次连接
+                            if (allocationAttempts % 2 == 0)
+                            {
+                                TestConnectionExtreme(ref statePkg, ref successCount, ref disconnectCount, ref testCount);
+                            }
+
+                            // 随机触发GC制造压力
+                            if (rnd.NextDouble() < 0.3)
+                            {
+                                Console.Write("GC ");
+                                GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, true, true);
+                                Thread.Sleep(100);
+                            }
+                        }
+                        catch (OutOfMemoryException)
+                        {
+                            outOfMemory = true;
+                            Console.Write("!OOM! ");
+
+                            // 内存耗尽后测试连接
+                            TestConnectionExtreme(ref statePkg, ref successCount, ref disconnectCount, ref testCount);
+
+                            // 尝试部分释放后继续
+                            Console.Write("[清理部分...]");
+                            int removeCount = Math.Min(5, memoryHolders.Count);
+                            memoryHolders.RemoveRange(0, removeCount);
+                            GC.Collect();
+                            outOfMemory = false; // 尝试继续
+                        }
+
+                        // 每10次显示状态
+                        if (allocationAttempts % 10 == 0)
+                        {
+                            Console.WriteLine();
+                            ShowMemoryStatus(totalAllocatedMB, memoryHolders.Count);
+                        }
+
+                        Thread.Sleep(100);
+                    }
+                }
+
+                // 策略3：碎片化攻击（如果还有内存）
+                if (!outOfMemory && memoryHolders.Count > 0)
+                {
+                    Console.WriteLine("\n策略3：内存碎片化攻击...");
+
+                    // 先释放一半
+                    int halfCount = memoryHolders.Count / 2;
+                    memoryHolders.RemoveRange(0, halfCount);
+                    GC.Collect();
+
+                    // 然后分配大量小对象填充空隙
+                    for (int i = 0; i < 10000 && !outOfMemory; i++)
+                    {
+                        try
+                        {
+                            int size = 80000 + rnd.Next(20000); // 80-100KB，接近LOH边界
+                            byte[] fragBlock = new byte[size];
+                            memoryHolders.Add(fragBlock);
+                            totalAllocatedMB += size / 1024.0 / 1024.0; // 使用double
+
+                            if (i % 1000 == 0)
+                            {
+                                Console.Write(".");
+                                TestConnectionExtreme(ref statePkg, ref successCount, ref disconnectCount, ref testCount);
+                            }
+                        }
+                        catch (OutOfMemoryException)
+                        {
+                            Console.Write("F");
+                            outOfMemory = true;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"\n测试异常: {ex.Message}");
+            }
+            finally
+            {
+                // 彻底清理内存
+                Console.WriteLine("\n\n开始彻底清理内存...");
+
+                // 阶段1：释放所有对象
+                memoryHolders.Clear();
+
+                // 阶段2：强制多次GC
+                for (int i = 0; i < 5; i++)
+                {
+                    Console.Write($"[GC{i + 1}] ");
+                    GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, true, true);
+                    GC.WaitForPendingFinalizers();
+                    Thread.Sleep(300);
+                }
+
+                // 阶段3：释放大对象堆
+                if (Environment.Version.Major >= 4)
+                {
+                    Console.Write("[LOH压缩] ");
+                    GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
+                    GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, true, true);
+                }
+
+                Console.WriteLine("✓ 清理完成");
+            }
+
+            // 显示详细结果
+            Console.WriteLine($"\n=== 激进内存压力测试结果 ===");
+            Console.WriteLine($"测试时长: {testTimer.Elapsed.TotalSeconds:F1}秒");
+            Console.WriteLine($"连接测试次数: {testCount}次");
+            Console.WriteLine($"总分配内存: {totalAllocatedMB:F0}MB");
+            Console.WriteLine($"峰值对象数: {memoryHolders.Count}个");
+            Console.WriteLine($"内存异常: {(outOfMemory ? "是 ✓" : "否")}");
+            Console.WriteLine($"成功调用: {successCount}次");
+            Console.WriteLine($"连接断开: {disconnectCount}次");
+
+            if (testCount > 0)
+            {
+                double successRate = (double)successCount / testCount * 100;
+                double disconnectRate = (double)disconnectCount / testCount * 100;
+                Console.WriteLine($"\n成功率: {successRate:F1}%");
+                Console.WriteLine($"断开率: {disconnectRate:F1}%");
+
+                if (outOfMemory)
+                {
+                    Console.WriteLine($"OOM前成功率: {(double)successCount / testCount:P1}");
+                }
+            }
+
+            // 激进恢复测试
+            Console.WriteLine("\n=== 激进恢复测试 ===");
+            Console.WriteLine("等待系统完全恢复...");
+
+            for (int i = 0; i < 10; i++)
+            {
+                GC.Collect();
+                Thread.Sleep(500);
+                Console.Write(".");
+            }
+            Console.WriteLine();
+
+            ShowMemoryStatus(totalAllocatedMB, 0);
+
+            int recoverySuccess = 0;
+            for (int i = 0; i < 15; i++) // 更长时间的恢复测试
+            {
+                try
+                {
+                    int result = robot.GetRobotRealTimeState(ref statePkg);
+
+                    if (result == 0)
+                    {
+                        recoverySuccess++;
+                        Console.Write($"R{i + 1}:✓ ");
+
+                        if (recoverySuccess >= 5) // 需要连续5次成功
+                        {
+                            Console.WriteLine("\n✓ 连接已完全恢复");
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        Console.Write($"R{i + 1}:{result} ");
+                        recoverySuccess = 0;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.Write($"R{i + 1}:E ");
+                    recoverySuccess = 0;
+                }
+
+                Thread.Sleep(800);
+            }
+
+            if (recoverySuccess < 5)
+            {
+                Console.WriteLine("\n⚠️ 警告：连接恢复不完全");
+            }
+
+            Console.WriteLine("\n测试结束！");
+        }
+
+        private void TestConnectionExtreme(ref ROBOT_STATE_PKG statePkg, ref int successCount, ref int disconnectCount, ref int testCount)
+        {
+            testCount++;
+
+            try
+            {
+                int result = robot.GetRobotRealTimeState(ref statePkg);
+
+                if (result == 0)
+                {
+                    successCount++;
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.Write("✓");
+                    Console.ResetColor();
+                }
+                else if (result == -2)
+                {
+                    disconnectCount++;
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.Write("X");
+                    Console.ResetColor();
+                }
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.Write($"[{result}]");
+                    Console.ResetColor();
+                }
+            }
+            catch (OutOfMemoryException)
+            {
+                Console.ForegroundColor = ConsoleColor.Magenta;
+                Console.Write("!");
+                Console.ResetColor();
+            }
+            catch (Exception)
+            {
+                Console.Write("E");
+            }
+        }
+
+        // 修改ShowMemoryStatus方法，参数改为double
+        private void ShowMemoryStatus(double totalAllocatedMB, int objectCount)
+        {
+            long currentMemory = GC.GetTotalMemory(false) / 1024 / 1024;
+            long privateMemory = 0;
+
+            try
+            {
+                privateMemory = Process.GetCurrentProcess().PrivateMemorySize64 / 1024 / 1024;
+            }
+            catch { }
+
+            Console.WriteLine($"[内存状态] 当前: {currentMemory}MB | 私有: {privateMemory}MB | 累计分配: {totalAllocatedMB:F0}MB | 对象数: {objectCount}");
+        }
+
+        public void TestMixedStressImpact()
+        {
+            Console.WriteLine("=== 测试4：CPU+内存混合压力测试 ===");
+
+            // var robot = new fairino.Robot();
+            ROBOT_STATE_PKG statePkg = new ROBOT_STATE_PKG();
+
+            Console.WriteLine("开始混合压力测试（60秒）...");
+
+            // CPU压力线程
+            Thread cpuThread = new Thread(() =>
+            {
+                Stopwatch sw = Stopwatch.StartNew();
+                while (sw.ElapsedMilliseconds < 60000)
+                {
+                    // CPU密集型计算
+                    double result = 0;
+                    for (long i = 0; i < 3000000; i++)
+                    {
+                        result += Math.Pow(i, 0.33) * Math.Sin(i);
+                    }
+
+                    // 每100ms休息一下
+                    if (sw.ElapsedMilliseconds % 100 < 10)
+                    {
+                        Thread.Sleep(1);
+                    }
+                }
+            });
+
+            cpuThread.Priority = ThreadPriority.Highest;
+            cpuThread.Start();
+
+            // 内存压力
+            List<byte[]> memoryBlocks = new List<byte[]>();
+
+            int successCount = 0;
+            int disconnectCount = 0;
+            Stopwatch testTimer = Stopwatch.StartNew();
+
+            try
+            {
+                while (testTimer.ElapsedMilliseconds < 60000)
+                {
+                    // 周期性分配内存
+                    if (testTimer.ElapsedMilliseconds % 3000 < 100) // 每3秒分配一次
+                    {
+                        byte[] block = new byte[5 * 1024 * 1024]; // 5MB
+                        memoryBlocks.Add(block);
+
+                        // 定期清理
+                        if (memoryBlocks.Count > 20)
+                        {
+                            memoryBlocks.RemoveRange(0, 10);
+                            GC.Collect();
+                        }
+                    }
+
+                    // 测试SDK连接
+                    int result = robot.GetRobotRealTimeState(ref statePkg);
+
+                    if (result == 0)
+                    {
+                        successCount++;
+                        Console.Write(".");
+                    }
+                    else if (result == -2)
+                    {
+                        disconnectCount++;
+                        Console.Write("X");
+
+                        // 短暂清理内存
+                        memoryBlocks.Clear();
+                        GC.Collect();
+                        Thread.Sleep(100);
+                    }
+
+                    // 每30次换行
+                    if ((successCount + disconnectCount) % 30 == 0)
+                    {
+                        Console.WriteLine();
+                    }
+
+                    Thread.Sleep(500);
+                }
+            }
+            finally
+            {
+                // 清理
+                memoryBlocks.Clear();
+                cpuThread.Join();
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+            }
+
+            Console.WriteLine($"\n混合压力测试结果：");
+            Console.WriteLine($"成功调用：{successCount}次");
+            Console.WriteLine($"连接断开：{disconnectCount}次");
+
+            // 压力结束后测试
+            Console.WriteLine("\n压力结束后测试恢复...");
+            Thread.Sleep(2000);
+
+            int recoveryResult = robot.GetRobotRealTimeState(ref statePkg);
+            Console.WriteLine($"恢复测试：返回 {recoveryResult}");
+
+            Console.WriteLine();
+        }
+
+        public void MonitorSystemResources()
+        {
+            PerformanceCounter cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
+            PerformanceCounter memoryCounter = new PerformanceCounter("Memory", "Available MBytes");
+
+            cpuCounter.NextValue(); // 第一次调用需要初始化
+            Thread.Sleep(100);
+
+            float cpuUsage = cpuCounter.NextValue();
+            float availableMemory = memoryCounter.NextValue();
+
+            Console.WriteLine($"CPU使用率: {cpuUsage:F1}%");
+            Console.WriteLine($"可用内存: {availableMemory:F0}MB");
+        }
+        public void LaserSensorRecordandReplay()
+        {
+            int rtn = robot.LaserSensorRecordandReplay(0, 10, 1, 0, 0.1, 1, 1, 10, 100);
+            Console.WriteLine($"LaserSensorRecordandReplay rtn is {rtn}");
+            rtn = robot.MoveStationary();
+            Console.WriteLine($"MoveStationary rtn is {rtn}");
+            rtn = robot.LaserSensorRecord1(0, 10);
+            Console.WriteLine($"LaserSensorRecord1 rtn is {rtn}"); 
+        }
+
+        public void TestPhotoelectricSensorTCPCalib()
+        {
+            ROBOT_STATE_PKG pkg =new ROBOT_STATE_PKG();
+            DescTran offset = new DescTran( 10.0, 10.0, 3.0 );
+            DescPose TCP = new DescPose();
+            int rtn = robot.PhotoelectricSensorTCPCalibration("/fruser/FR_CalibrateTheToolTcp.lua", offset, out TCP);
+            Console.WriteLine($"PhotoelectricSensorTCPCalibration 返回值: {rtn}");
+            Console.WriteLine($"工具TCP坐标: X={TCP.tran.x:F3}, Y={TCP.tran.y:F3}, Z={TCP.tran.z:F3}");
+            Console.WriteLine($"工具RPY姿态: RX={TCP.rpy.rx:F3}, RY={TCP.rpy.ry:F3}, RZ={TCP.rpy.rz:F3}");
+        }
+        public void TestSegWeld1()
+        {
+            robot.WeldingSetCurrent(0, 230, 0, 0);
+            robot.WeldingSetVoltage(0, 24, 0, 1);
+
+            DescPose p2Desc = new DescPose(228.879, -503.594, 453.984, -175.580, 8.293, 171.267);
+            JointPos p2Joint = new JointPos(153.567, -78.601, 88.444, -88.802, -93.088, 124.632);
+
+            DescPose p1Desc = new DescPose(-333.302, -435.580, 449.866, -174.997, 2.017, 109.815);
+            JointPos p1Joint = new JointPos(112.528, -85.587, 94.358, -88.755, -98.871, 124.634);
+
+            ExaxisPos exaxisPos = new ExaxisPos(0, 0, 0, 0);
+            DescPose offdese = new DescPose(0, 0, 0, 0, 0, 0);
+
+            robot.GetForwardKin(p1Joint, ref p1Desc);
+            robot.GetForwardKin(p2Joint, ref p2Desc);
+
+            int rtn = robot.SegmentWeldStart(p1Desc, p2Desc, p1Joint, p2Joint, 20,
+                    20, 0, 0, 5000, false, 0,
+                    0, 0, 30, 100, 100, -1, exaxisPos, 0, 0,
+                    offdese);
+           
+        }
         public void TestMove()
         {
             int rtn;

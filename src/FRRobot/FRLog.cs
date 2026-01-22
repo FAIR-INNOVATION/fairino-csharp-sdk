@@ -284,10 +284,10 @@ namespace fairino
                 {
                     try
                     {
-                        Console.WriteLine($"Deleting old log file by date: {file.Name}, created: {file.CreationTime}");
+                      //  Console.WriteLine($"Deleting old log file by date: {file.Name}, created: {file.CreationTime}");
                         file.Delete();
                         sortedFiles.Remove(file);
-                        Console.WriteLine($"Successfully deleted: {file.Name}");
+                      //  Console.WriteLine($"Successfully deleted: {file.Name}");
                     }
                     catch (Exception ex)
                     {
