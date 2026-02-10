@@ -240,7 +240,7 @@ namespace testFrRobot
 
             while (count > 0)
             {
-                robot.ServoCart(mode, desc_pos_dt, pos_gain, acc, vel, cmdT, filterT, gain);
+                //robot.ServoCart(mode, desc_pos_dt, pos_gain, acc, vel, cmdT, filterT, gain);
                 count -= 1;
                 robot.WaitMs((int)(cmdT * 1000));
             }
@@ -343,30 +343,28 @@ namespace testFrRobot
 
         private void btnIOTest_Click(object sender, EventArgs e)
         {
-            int resetFlag = 0;
-            int rtn = robot.SetOutputResetCtlBoxDO(resetFlag);
-            robot.SetOutputResetCtlBoxAO(resetFlag);
-            robot.SetOutputResetAxleDO(resetFlag);
-            robot.SetOutputResetAxleAO(resetFlag);
-            robot.SetOutputResetExtDO(resetFlag);
-            robot.SetOutputResetExtAO(resetFlag);
-            robot.SetOutputResetSmartToolDO(resetFlag);
+            //int resetFlag = 0;
+            //int rtn = robot.SetOutputResetCtlBoxDO(resetFlag);
+            //robot.SetOutputResetCtlBoxAO(resetFlag);
+            //robot.SetOutputResetAxleDO(resetFlag);
+            //robot.SetOutputResetAxleAO(resetFlag);
+            //robot.SetOutputResetExtDO(resetFlag);
+            //robot.SetOutputResetExtAO(resetFlag);
+            //robot.SetOutputResetSmartToolDO(resetFlag);
 
-            //robot.SetDO(1, 1, 0, 0);
-            //robot.SetDO(3, 1, 0, 0);
-            //robot.SetAO(0, 50, 0);
-            //robot.SetAO(1, 70, 0);
-            //robot.SetToolDO(1, 1, 0, 0);
-            //robot.SetToolAO(0, 40, 0);
+            ////robot.SetDO(1, 1, 0, 0);
+            ////robot.SetDO(3, 1, 0, 0);
+            ////robot.SetAO(0, 50, 0);
+            ////robot.SetAO(1, 70, 0);
+            ////robot.SetToolDO(1, 1, 0, 0);
+            ////robot.SetToolAO(0, 40, 0);
 
-            robot.SetAuxDO(1, true, false, true);
-            robot.SetAuxDO(2, true, false, true);
+            //robot.SetAuxDO(1, true, false, true);
+            //robot.SetAuxDO(2, true, false, true);
 
-            robot.SetAuxAO(0, 1024, false);
-            robot.SetAuxAO(1, 2048, false);
-            return ;
-
-
+            //robot.SetAuxAO(0, 1024, false);
+            //robot.SetAuxAO(1, 2048, false);
+            //return ;
 
 
 
@@ -378,104 +376,106 @@ namespace testFrRobot
 
 
 
-            //int rtn = robot.WaitMultiDI(0, 768, 768, 10000, 0);
-            //Console.WriteLine(rtn);
 
-            //int[] DIConfig = new int[8] { 1, 26, 3, 4, 0, 0, 0, 0};
-            //int[] DILevelConfig = new int[8] { 0, 1, 0, 1, 0, 1, 0, 1};
-            //robot.SetDIConfigLevel(DILevelConfig);
-            //robot.SetDIConfig(DIConfig);
-            //robot.WaitAI(0, 0, 0.53f, 1000, 2);
-            //float fff = 0.0f;
-            //for (int j = 0; j < 100; j++)
+
+            ////int rtn = robot.WaitMultiDI(0, 768, 768, 10000, 0);
+            ////Console.WriteLine(rtn);
+
+            ////int[] DIConfig = new int[8] { 1, 26, 3, 4, 0, 0, 0, 0};
+            ////int[] DILevelConfig = new int[8] { 0, 1, 0, 1, 0, 1, 0, 1};
+            ////robot.SetDIConfigLevel(DILevelConfig);
+            ////robot.SetDIConfig(DIConfig);
+            ////robot.WaitAI(0, 0, 0.53f, 1000, 2);
+            ////float fff = 0.0f;
+            ////for (int j = 0; j < 100; j++)
+            ////{
+            ////    robot.GetAI(0, 0, ref fff);
+            ////    Console.WriteLine($"the ai is {fff}");
+            ////    Thread.Sleep(100);
+            ////}
+            ////return;
+
+            //byte status = 1;
+            //byte smooth = 0;
+            //byte block = 0;
+            //byte di = 0, tool_di = 0;
+            //float ai = 0.0f, tool_ai = 0.0f;
+            //float value = 0.0f;
+            //int doH = 0;
+            //int doL = 0;
+            //int i;
+            //rtn = 0;
+            //for (i = 0; i < 16; i++)//所有控制器IO输出置 1
             //{
-            //    robot.GetAI(0, 0, ref fff);
-            //    Console.WriteLine($"the ai is {fff}");
-            //    Thread.Sleep(100);
+            //    rtn = robot.SetDO(i, status, smooth, block);
+            //    robot.WaitMs(500);
+
+            //    robot.GetDO(ref doH, ref doL);
+            //    Console.WriteLine($"setDO  {i}: {rtn}  getDO {doH}  {doL}");
             //}
-            //return;
 
-            byte status = 1;
-            byte smooth = 0;
-            byte block = 0;
-            byte di = 0, tool_di = 0;
-            float ai = 0.0f, tool_ai = 0.0f;
-            float value = 0.0f;
-            int doH = 0;
-            int doL = 0;
-            int i;
-            rtn = 0;
-            for (i = 0; i < 16; i++)//所有控制器IO输出置 1
-            {
-                rtn = robot.SetDO(i, status, smooth, block);
-                robot.WaitMs(500);
+            //status = 0;
 
-                robot.GetDO(ref doH, ref doL);
-                Console.WriteLine($"setDO  {i}: {rtn}  getDO {doH}  {doL}");
-            }
+            //for (i = 0; i < 16; i++)//所有控制器IO输出置 0
+            //{
+            //    robot.SetDO(i, status, smooth, block);
+            //    robot.WaitMs(500);
+            //    robot.GetDO(ref doH, ref doL);
+            //    Console.WriteLine($"setDO  {i}: {rtn}  getDO {doH}  {doL}");
+            //}
 
-            status = 0;
+            //status = 1;
 
-            for (i = 0; i < 16; i++)//所有控制器IO输出置 0
-            {
-                robot.SetDO(i, status, smooth, block);
-                robot.WaitMs(500);
-                robot.GetDO(ref doH, ref doL);
-                Console.WriteLine($"setDO  {i}: {rtn}  getDO {doH}  {doL}");
-            }
+            //for (i = 0; i < 2; i++)//所有工具端IO输出置 1
+            //{
+            //    robot.SetToolDO(i, status, smooth, block);
+            //    robot.WaitMs(500);
+            //}
 
-            status = 1;
+            //status = 0;
 
-            for (i = 0; i < 2; i++)//所有工具端IO输出置 1
-            {
-                robot.SetToolDO(i, status, smooth, block);
-                robot.WaitMs(500);
-            }
+            //for (i = 0; i < 2; i++)//所有工具端IO输出置 0
+            //{
+            //    robot.SetToolDO(i, status, smooth, block);
+            //    robot.WaitMs(500);
+            //}
 
-            status = 0;
+            //value = 50.0f;
+            //robot.SetAO(0, value, block);//设置控制器0号模拟量输出50%
+            //value = 100.0f;
+            //robot.SetAO(1, value, block);//设置控制器1号模拟量输出100%
+            //robot.WaitMs(300);
+            //value = 0.0f;
+            //robot.SetAO(0, value, block);//设置控制器0号模拟量输出0%
+            //value = 0.0f;
+            //robot.SetAO(1, value, block);//设置控制器1号模拟量输出0%
 
-            for (i = 0; i < 2; i++)//所有工具端IO输出置 0
-            {
-                robot.SetToolDO(i, status, smooth, block);
-                robot.WaitMs(500);
-            }
+            //value = 100.0f;
+            //robot.SetToolAO(0, value, block);//设置工具端0号模拟量输出100%
+            //robot.WaitMs(1000);
+            //value = 0.0f;
+            //robot.SetToolAO(0, value, block);//设置工具端0号模拟量输出0%
 
-            value = 50.0f;
-            robot.SetAO(0, value, block);//设置控制器0号模拟量输出50%
-            value = 100.0f;
-            robot.SetAO(1, value, block);//设置控制器1号模拟量输出100%
-            robot.WaitMs(300);
-            value = 0.0f;
-            robot.SetAO(0, value, block);//设置控制器0号模拟量输出0%
-            value = 0.0f;
-            robot.SetAO(1, value, block);//设置控制器1号模拟量输出0%
-
-            value = 100.0f;
-            robot.SetToolAO(0, value, block);//设置工具端0号模拟量输出100%
-            robot.WaitMs(1000);
-            value = 0.0f;
-            robot.SetToolAO(0, value, block);//设置工具端0号模拟量输出0%
-
-            robot.GetDI(0, block, ref di);//获取数字输入
-            Console.WriteLine($"di0 : {di}");
-            robot.WaitDI(0, 1, 0, 2);       //等待0号端口数字量输入1，一直等待
-            Console.WriteLine("wait di success");
-            robot.WaitMultiDI(0, 3, 0, 10000, 2);   //等待多路与， 0和1端口，输入置1，等待时间10000ms， 一直等待
-            Console.WriteLine("wait multi di success");
-            robot.GetToolDI(1, block, ref tool_di);//获取工具端数字量输入
-            Console.WriteLine($"tool_di1 : {tool_di}");
-            robot.WaitToolDI(1, 0, 0, 2);          //一直等待
-            Console.WriteLine("wait tool di success");
-            robot.GetAI(0, block, ref ai);
-            Console.WriteLine($"ai0 : {ai}");
-            robot.GetAI(1, block, ref ai);
-            Console.WriteLine($"ai1 : {ai}");
-            robot.WaitAI(0, 1, 50.0f, 0, 2);           //等待0号口， 小于 ， %50， 一直等待
-            Console.WriteLine("wait ai success");
-            robot.WaitToolAI(0, 1, 50, 0, 2);       //一直等待
-            Console.WriteLine("wait tool ai success");
-            robot.GetToolAI(0, block, ref tool_ai);
-            Console.WriteLine($"tool_ai0 : {tool_ai}");
+            //robot.GetDI(0, block, ref di);//获取数字输入
+            //Console.WriteLine($"di0 : {di}");
+            //robot.WaitDI(0, 1, 0, 2);       //等待0号端口数字量输入1，一直等待
+            //Console.WriteLine("wait di success");
+            //robot.WaitMultiDI(0, 3, 0, 10000, 2);   //等待多路与， 0和1端口，输入置1，等待时间10000ms， 一直等待
+            //Console.WriteLine("wait multi di success");
+            //robot.GetToolDI(1, block, ref tool_di);//获取工具端数字量输入
+            //Console.WriteLine($"tool_di1 : {tool_di}");
+            //robot.WaitToolDI(1, 0, 0, 2);          //一直等待
+            //Console.WriteLine("wait tool di success");
+            //robot.GetAI(0, block, ref ai);
+            //Console.WriteLine($"ai0 : {ai}");
+            //robot.GetAI(1, block, ref ai);
+            //Console.WriteLine($"ai1 : {ai}");
+            //robot.WaitAI(0, 1, 50.0f, 0, 2);           //等待0号口， 小于 ， %50， 一直等待
+            //Console.WriteLine("wait ai success");
+            //robot.WaitToolAI(0, 1, 50, 0, 2);       //一直等待
+            //Console.WriteLine("wait tool ai success");
+            //robot.GetToolAI(0, block, ref tool_ai);
+            //Console.WriteLine($"tool_ai0 : {tool_ai}");
         }
 
         private void btnCommonSets_Click(object sender, EventArgs e)

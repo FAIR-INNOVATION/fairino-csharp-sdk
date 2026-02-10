@@ -609,23 +609,23 @@ namespace testFrRobot
 
         private void button17_Click(object sender, EventArgs e)
         {
-            for (int i = 0; i < 16; i++)
-            {
-                robot.SetDO(i, 1, 0, 0);
-                Thread.Sleep(300);
-            }
+            //for (int i = 0; i < 16; i++)
+            //{
+            //    robot.SetDO(i, 1, 0, 0);
+            //    Thread.Sleep(300);
+            //}
 
-            int resetFlag = 1;
-            int rtn = robot.SetOutputResetCtlBoxDO(resetFlag);
-            robot.SetOutputResetCtlBoxAO(resetFlag);
-            robot.SetOutputResetAxleDO(resetFlag);
-            robot.SetOutputResetAxleAO(resetFlag);
-            robot.SetOutputResetExtDO(resetFlag);
-            robot.SetOutputResetExtAO(resetFlag);
-            robot.SetOutputResetSmartToolDO(resetFlag);
+            //int resetFlag = 1;
+            //int rtn = robot.SetOutputResetCtlBoxDO(resetFlag);
+            //robot.SetOutputResetCtlBoxAO(resetFlag);
+            //robot.SetOutputResetAxleDO(resetFlag);
+            //robot.SetOutputResetAxleAO(resetFlag);
+            //robot.SetOutputResetExtDO(resetFlag);
+            //robot.SetOutputResetExtAO(resetFlag);
+            //robot.SetOutputResetSmartToolDO(resetFlag);
 
-            robot.ProgramLoad("/fruser/Text1.lua");
-            robot.ProgramRun();
+            //robot.ProgramLoad("/fruser/Text1.lua");
+            //robot.ProgramRun();
 
         }
 
@@ -4583,13 +4583,13 @@ namespace testFrRobot
             //TestSegWeld1();
             //  TestPhotoelectricSensorTCPCalib();
             //LaserSensorRecordandReplay();
-            Console.WriteLine("=== 机器人SDK连接断开测试 ===\n");
+            //Console.WriteLine("=== 机器人SDK连接断开测试 ===\n");
 
             // 测试1：正常连接测试
             //TestNormalConnection();
 
             // 测试2：CPU压力测试
-            // TestCPUStressImpactHigh();
+            //  TestCPUStressImpactHigh();
 
             // 测试3：内存压力测试
             //   TestMemoryStressImpact();
@@ -4603,10 +4603,102 @@ namespace testFrRobot
             //  TestMemoryStressImpactExtreme();
 
             //  Console.WriteLine("\n所有测试完成！");
-            TestRotInsert();
+            //TestRotInsert();
+
+            //TestInverseKinExaxis();
+            //TestServoCart();
+
+            TestDOReset();
+        }
+        public void TestDOReset()
+        {
+            for (int i = 0; i < 16; i++)
+            {
+                robot.SetDO(i, 1, 0, 0);
+                Thread.Sleep(200);
+            }
+
+            int resetFlag = 0;
+            int resumeReloadFlag = 0;
+            int rtn = robot.SetOutputResetCtlBoxDO(resetFlag, resumeReloadFlag);
+            robot.SetOutputResetCtlBoxAO(resetFlag, resumeReloadFlag);
+            robot.SetOutputResetAxleDO(resetFlag, resumeReloadFlag);
+            robot.SetOutputResetAxleAO(resetFlag, resumeReloadFlag);
+            robot.SetOutputResetExtDO(resetFlag, resumeReloadFlag);
+            robot.SetOutputResetExtAO(resetFlag, resumeReloadFlag);
+            robot.SetOutputResetSmartToolDO(resetFlag, resumeReloadFlag);
+
+            robot.ProgramLoad("/fruser/test.lua");
+            robot.ProgramRun();
+
+            Thread.Sleep(2000);
+            robot.PauseMotion();
+            Thread.Sleep(2000);
+            robot.ResumeMotion();
+            Thread.Sleep(2000);
+
+
+ 
+        }
+
+        public void TestInverseKinExaxis()
+        {
+            ROBOT_STATE_PKG pkg = new ROBOT_STATE_PKG();
+       
+
+            DescPose desc = new DescPose(99.957f, -0.002f, 29.994f, -176.569f, -6.757f, -167.462f);
+            ExaxisPos exaxis = new ExaxisPos(100.0f, 0.0f, 0.0f, 0.0f);
+            JointPos jointPos = new JointPos(0,0,0,0,0,0);
+            DescPose offsetPos = new DescPose(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+            int rtn;
+            robot.GetRobotRealTimeState(ref pkg);
+            int toolnum = pkg.tool;
+            int workPcsNum = pkg.user;
+
+            robot.GetInverseKinExaxis(0, desc, exaxis, toolnum, workPcsNum, ref jointPos);
+            Console.WriteLine($"GetInverseKinExaxis joint is {jointPos.jPos[0]}, {jointPos.jPos[1]}, {jointPos.jPos[2]}, {jointPos.jPos[3]}, {jointPos.jPos[4]}, {jointPos.jPos[5]}");
+
+            robot.ExtAxisMove(exaxis, 100, -1);
+
+            int blendMode = 0;
+            int velAccMode = 0;
+            float oacc = 100.0f;
+            byte flag = 0;
+            robot.MoveJ(jointPos, desc, toolnum, workPcsNum, (float)100.0, (float)100.0, (float)100.0, exaxis, -1, 0, offsetPos);
+
 
         }
 
+        public void TestServoCart()
+        {
+            ROBOT_STATE_PKG pkg = new ROBOT_STATE_PKG();
+
+            int rtn;
+            DescPose desc_pos_dt = new DescPose(83.00800f, 50.525000f, 29.246f, 179.629f, -7.138f, -166.975f);
+            ExaxisPos exaxis = new ExaxisPos(100.0f, 0.0f, 0.0f, 0.0f);
+            double[] pos_gain = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+            int mode = 0;
+            float vel = 0.0f;
+            float acc = 0.0f;
+            float cmdT = 0.001f;
+            float filterT = 0.0f;
+            float gain = 0.0f;
+            byte flag = 0;
+            int count = 5000;
+
+            robot.SetSpeed(20);
+
+            while (count > 0)
+            {
+                rtn = robot.ServoCart(mode, desc_pos_dt, exaxis, pos_gain, acc, vel, cmdT, filterT, gain);
+                Console.WriteLine($"ServoCart rtn is {rtn}");
+                count -= 1;
+                desc_pos_dt.tran.x += 0.01f;
+                exaxis.ePos[0] += 0.01f;
+            }
+
+
+        }
         public void TestRotInsert()
         {
             int rtn;
@@ -4681,6 +4773,50 @@ namespace testFrRobot
 
             int coreCount = Environment.ProcessorCount;
 
+
+            // 修改监控任务的启动时机和逻辑
+            Task monitoringTask = Task.Run(() =>
+            {
+                Console.WriteLine("[监控] 监控线程启动");
+
+                PerformanceCounter cpuCounter = null;
+                try
+                {
+                    // 先初始化性能计数器
+                    cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
+                    cpuCounter.NextValue(); // 第一次调用需要初始化
+
+                    Console.WriteLine("[监控] 性能计数器初始化完成");
+
+                    while (!cts.Token.IsCancellationRequested)
+                    {
+                        // 先休眠再读取，确保有足够的采样间隔
+                        Thread.Sleep(1000);
+
+                        if (cts.Token.IsCancellationRequested)
+                            break;
+
+                        float cpuUsage = cpuCounter.NextValue();
+                        Console.WriteLine($"[监控] CPU使用率: {cpuUsage:F1}%");
+
+                        // 再休眠1秒，形成2秒间隔
+                        Thread.Sleep(1000);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[监控] 错误: {ex.GetType().Name}: {ex.Message}");
+                }
+                finally
+                {
+                    cpuCounter?.Dispose();
+                    Console.WriteLine("[监控] 监控线程结束");
+                }
+            });
+
+            // 等待监控任务完全启动
+            Thread.Sleep(1000);
+            Console.WriteLine("监控任务已启动，开始创建压力线程...");
             // 高强度：4倍核心数，每个线程100%占用
             int threadCount = coreCount * 4;
 
@@ -4779,31 +4915,8 @@ namespace testFrRobot
             Console.WriteLine("等待压力线程启动...");
             Thread.Sleep(2000);
 
-            // 监控CPU使用率
-            Task monitoringTask = Task.Run(() =>
-            {
-                PerformanceCounter cpuCounter = null;
-                try
-                {
-                    cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
-                    cpuCounter.NextValue(); // 第一次调用需要初始化
-
-                    while (!cts.Token.IsCancellationRequested)
-                    {
-                        Thread.Sleep(2000);
-                        float cpuUsage = cpuCounter.NextValue();
-                        Console.WriteLine($"[监控] CPU使用率: {cpuUsage:F1}%");
-                    }
-                }
-                catch
-                {
-                    Console.WriteLine("[监控] 无法获取CPU使用率");
-                }
-                finally
-                {
-                    cpuCounter?.Dispose();
-                }
-            });
+     
+  
 
             // 在CPU压力下测试SDK连接
             Console.WriteLine("\n在高强度CPU压力下测试SDK连接...");
