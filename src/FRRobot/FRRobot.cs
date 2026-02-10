@@ -41,7 +41,7 @@ namespace fairino
     {
         ICallSupervisor proxy = null;
 
-        const string SDK_VERSION = " C#SDK-V1.2.3  Web-3.9.2";
+        const string SDK_VERSION = " C#SDK-V1.2.4  Web-3.9.3";
 
         private string robot_ip = "192.168.57.2";//机器人ip
         private int g_sock_com_err = (int)RobotError.ERR_SUCCESS;
@@ -1831,18 +1831,19 @@ namespace fairino
         }
 
         /**
-         * @brief  笛卡尔空间伺服模式运动
-         * @param  [in]  mode  0-绝对运动(基坐标系)，1-增量运动(基坐标系)，2-增量运动(工具坐标系)
-         * @param  [in]  desc_pos  目标笛卡尔位姿或位姿增量
-         * @param  [in]  pos_gain  位姿增量比例系数，仅在增量运动下生效，范围[0~1]
-         * @param  [in] acc  加速度百分比，范围[0~100],暂不开放，默认为0
-         * @param  [in] vel  速度百分比，范围[0~100]，暂不开放，默认为0
-         * @param  [in] cmdT  指令下发周期，单位s，建议范围[0.001~0.0016]
-         * @param  [in] filterT 滤波时间，单位s，暂不开放，默认为0
-         * @param  [in] gain  目标位置的比例放大器，暂不开放，默认为0
-         * @return  错误码
-         */
-        public int ServoCart(int mode, DescPose desc_pose, double[] pos_gain, float acc, float vel, float cmdT, float filterT, float gain)
+        * @brief  笛卡尔空间伺服模式运动
+        * @param  [in]  mode  0-绝对运动(基坐标系)，1-增量运动(基坐标系)，2-增量运动(工具坐标系)
+        * @param  [in]  desc_pos  目标笛卡尔位姿或位姿增量
+        * @param  [in]  exaxis  扩展轴位置
+        * @param  [in]  pos_gain  位姿增量比例系数，仅在增量运动下生效，范围[0~1]
+        * @param  [in] acc  加速度百分比，范围[0~100],暂不开放，默认为0
+        * @param  [in] vel  速度百分比，范围[0~100]，暂不开放，默认为0
+        * @param  [in] cmdT  指令下发周期，单位s，建议范围[0.001~0.016]
+        * @param  [in] filterT 滤波时间，单位s，暂不开放，默认为0
+        * @param  [in] gain  目标位置的比例放大器，暂不开放，默认为0
+        * @return  错误码
+        */
+        public int ServoCart(int mode, DescPose desc_pose, ExaxisPos exaxis, double[] pos_gain, double acc, double vel, double cmdT, double filterT, double gain)
         {
             if (IsSockComError())
             {
@@ -1850,16 +1851,37 @@ namespace fairino
             }
             if (GetSafetyCode() != 0)
             {
-
                 return GetSafetyCode();
             }
+
             try
             {
-                double[] descPos = new double[6] { desc_pose.tran.x, desc_pose.tran.y, desc_pose.tran.z, desc_pose.rpy.rx, desc_pose.rpy.ry, desc_pose.rpy.rz };
-                int rtn = proxy.ServoCart(mode, descPos, pos_gain, acc, vel, cmdT, filterT, gain);
+                double[] descPos = new double[6] {
+            desc_pose.tran.x,
+            desc_pose.tran.y,
+            desc_pose.tran.z,
+            desc_pose.rpy.rx,
+            desc_pose.rpy.ry,
+            desc_pose.rpy.rz
+        };
+
+                double[] exaxisPos = new double[4] {
+            exaxis.ePos[0],
+            exaxis.ePos[1],
+            exaxis.ePos[2],
+            exaxis.ePos[3]
+        };
+
+   
+                int rtn = proxy.ServoCart(mode, descPos, pos_gain, exaxisPos, acc, vel, cmdT, filterT, gain);
+
                 if (log != null)
                 {
-                    log.LogInfo($"ServoCart({mode},{descPos[0]},{descPos[1]},{descPos[2]},{descPos[3]},{descPos[4]},{descPos[5]},{pos_gain[0]},{pos_gain[1]},{pos_gain[2]},{pos_gain[3]},{pos_gain[4]},{pos_gain[5]},{acc},{vel},{cmdT},{filterT},{gain} : {rtn}");
+                    log.LogInfo($"ServoCart({mode}," +
+                               $"{descPos[0]},{descPos[1]},{descPos[2]},{descPos[3]},{descPos[4]},{descPos[5]}," +
+                               $"{pos_gain[0]},{pos_gain[1]},{pos_gain[2]},{pos_gain[3]},{pos_gain[4]},{pos_gain[5]}," +
+                               $"{exaxisPos[0]},{exaxisPos[1]},{exaxisPos[2]},{exaxisPos[3]}," +
+                               $"{acc},{vel},{cmdT},{filterT},{gain} : {rtn}");
                 }
                 return rtn;
             }
@@ -14793,11 +14815,12 @@ namespace fairino
         }
 
         /**
-         * @brief  设置控制箱DO停止/暂停后输出是否复位
-         * @param  [in] resetFlag  0-不复位；1-复位
-         * @return  错误码
-         */
-        public int SetOutputResetCtlBoxDO(int resetFlag)
+  * @brief  设置控制箱DO停止/暂停后输出是否复位
+  * @param  [in] resetFlag  0-不复位；1-复位
+  * @param  [in] reloadFlag 暂停恢复后是否重加载，0-不加载；1-加载
+  * @return  错误码
+  */
+        public int SetOutputResetCtlBoxDO(int resetFlag, int reloadFlag)
         {
             if (IsSockComError())
             {
@@ -14805,10 +14828,10 @@ namespace fairino
             }
             try
             {
-                int rtn = proxy.SetOutputResetCtlBoxDO(resetFlag);
+                int rtn = proxy.SetOutputResetCtlBoxDO(resetFlag, reloadFlag);
                 if (log != null)
                 {
-                    log.LogInfo($"SetOutputResetCtlBoxDO({resetFlag}) : {rtn}");
+                    log.LogInfo($"SetOutputResetCtlBoxDO({resetFlag}, {reloadFlag}) : {rtn}");
                 }
                 return rtn;
             }
@@ -14821,7 +14844,6 @@ namespace fairino
                         log.LogError($"RPC exception");
                     }
                     return g_sock_com_err;
-
                 }
                 else
                 {
@@ -14833,9 +14855,10 @@ namespace fairino
         /**
          * @brief  设置控制箱AO停止/暂停后输出是否复位
          * @param  [in] resetFlag  0-不复位；1-复位
+         * @param  [in] reloadFlag 暂停恢复后是否重加载，0-不加载；1-加载
          * @return  错误码
          */
-        public int SetOutputResetCtlBoxAO(int resetFlag)
+        public int SetOutputResetCtlBoxAO(int resetFlag, int reloadFlag)
         {
             if (IsSockComError())
             {
@@ -14843,10 +14866,10 @@ namespace fairino
             }
             try
             {
-                int rtn = proxy.SetOutputResetCtlBoxAO(resetFlag);
+                int rtn = proxy.SetOutputResetCtlBoxAO(resetFlag, reloadFlag);
                 if (log != null)
                 {
-                    log.LogInfo($"SetOutputResetCtlBoxAO({resetFlag}) : {rtn}");
+                    log.LogInfo($"SetOutputResetCtlBoxAO({resetFlag}, {reloadFlag}) : {rtn}");
                 }
                 return rtn;
             }
@@ -14859,7 +14882,6 @@ namespace fairino
                         log.LogError($"RPC exception");
                     }
                     return g_sock_com_err;
-
                 }
                 else
                 {
@@ -14871,9 +14893,10 @@ namespace fairino
         /**
          * @brief  设置末端工具DO停止/暂停后输出是否复位
          * @param  [in] resetFlag  0-不复位；1-复位
+         * @param  [in] reloadFlag 暂停恢复后是否重加载，0-不加载；1-加载
          * @return  错误码
          */
-        public int SetOutputResetAxleDO(int resetFlag)
+        public int SetOutputResetAxleDO(int resetFlag, int reloadFlag)
         {
             if (IsSockComError())
             {
@@ -14881,10 +14904,10 @@ namespace fairino
             }
             try
             {
-                int rtn = proxy.SetOutputResetAxleDO(resetFlag);
+                int rtn = proxy.SetOutputResetAxleDO(resetFlag, reloadFlag);
                 if (log != null)
                 {
-                    log.LogInfo($"SetOutputResetAxleDO({resetFlag}) : {rtn}");
+                    log.LogInfo($"SetOutputResetAxleDO({resetFlag}, {reloadFlag}) : {rtn}");
                 }
                 return rtn;
             }
@@ -14897,7 +14920,6 @@ namespace fairino
                         log.LogError($"RPC exception");
                     }
                     return g_sock_com_err;
-
                 }
                 else
                 {
@@ -14909,9 +14931,10 @@ namespace fairino
         /**
          * @brief  设置末端工具AO停止/暂停后输出是否复位
          * @param  [in] resetFlag  0-不复位；1-复位
+         * @param  [in] reloadFlag 暂停恢复后是否重加载，0-不加载；1-加载
          * @return  错误码
          */
-        public int SetOutputResetAxleAO(int resetFlag)
+        public int SetOutputResetAxleAO(int resetFlag, int reloadFlag)
         {
             if (IsSockComError())
             {
@@ -14919,10 +14942,10 @@ namespace fairino
             }
             try
             {
-                int rtn = proxy.SetOutputResetAxleAO(resetFlag);
+                int rtn = proxy.SetOutputResetAxleAO(resetFlag, reloadFlag);
                 if (log != null)
                 {
-                    log.LogInfo($"SetOutputResetAxleAO({resetFlag}) : {rtn}");
+                    log.LogInfo($"SetOutputResetAxleAO({resetFlag}, {reloadFlag}) : {rtn}");
                 }
                 return rtn;
             }
@@ -14935,7 +14958,6 @@ namespace fairino
                         log.LogError($"RPC exception");
                     }
                     return g_sock_com_err;
-
                 }
                 else
                 {
@@ -14947,9 +14969,10 @@ namespace fairino
         /**
          * @brief  设置扩展DO停止/暂停后输出是否复位
          * @param  [in] resetFlag  0-不复位；1-复位
+         * @param  [in] reloadFlag 暂停恢复后是否重加载，0-不加载；1-加载
          * @return  错误码
          */
-        public int SetOutputResetExtDO(int resetFlag)
+        public int SetOutputResetExtDO(int resetFlag, int reloadFlag)
         {
             if (IsSockComError())
             {
@@ -14957,10 +14980,10 @@ namespace fairino
             }
             try
             {
-                int rtn = proxy.SetOutputResetExtDO(resetFlag);
+                int rtn = proxy.SetOutputResetExtDO(resetFlag, reloadFlag);
                 if (log != null)
                 {
-                    log.LogInfo($"SetOutputResetExtDO({resetFlag}) : {rtn}");
+                    log.LogInfo($"SetOutputResetExtDO({resetFlag}, {reloadFlag}) : {rtn}");
                 }
                 return rtn;
             }
@@ -14973,7 +14996,6 @@ namespace fairino
                         log.LogError($"RPC exception");
                     }
                     return g_sock_com_err;
-
                 }
                 else
                 {
@@ -14982,13 +15004,13 @@ namespace fairino
             }
         }
 
-
         /**
          * @brief  设置扩展AO停止/暂停后输出是否复位
          * @param  [in] resetFlag  0-不复位；1-复位
+         * @param  [in] reloadFlag 暂停恢复后是否重加载，0-不加载；1-加载
          * @return  错误码
          */
-        public int SetOutputResetExtAO(int resetFlag)
+        public int SetOutputResetExtAO(int resetFlag, int reloadFlag)
         {
             if (IsSockComError())
             {
@@ -14996,10 +15018,10 @@ namespace fairino
             }
             try
             {
-                int rtn = proxy.SetOutputResetExtAO(resetFlag);
+                int rtn = proxy.SetOutputResetExtAO(resetFlag, reloadFlag);
                 if (log != null)
                 {
-                    log.LogInfo($"SetOutputResetExtAO({resetFlag}) : {rtn}");
+                    log.LogInfo($"SetOutputResetExtAO({resetFlag}, {reloadFlag}) : {rtn}");
                 }
                 return rtn;
             }
@@ -15012,7 +15034,6 @@ namespace fairino
                         log.LogError($"RPC exception");
                     }
                     return g_sock_com_err;
-
                 }
                 else
                 {
@@ -15024,9 +15045,10 @@ namespace fairino
         /**
          * @brief  设置SmartTool停止/暂停后输出是否复位
          * @param  [in] resetFlag  0-不复位；1-复位
+         * @param  [in] reloadFlag 暂停恢复后是否重加载，0-不加载；1-加载
          * @return  错误码
          */
-        public int SetOutputResetSmartToolDO(int resetFlag)
+        public int SetOutputResetSmartToolDO(int resetFlag, int reloadFlag)
         {
             if (IsSockComError())
             {
@@ -15034,10 +15056,10 @@ namespace fairino
             }
             try
             {
-                int rtn = proxy.SetOutputResetSmartToolDO(resetFlag);
+                int rtn = proxy.SetOutputResetSmartToolDO(resetFlag, reloadFlag);
                 if (log != null)
                 {
-                    log.LogInfo($"SetOutputResetSmartToolDO({resetFlag}) : {rtn}");
+                    log.LogInfo($"SetOutputResetSmartToolDO({resetFlag}, {reloadFlag}) : {rtn}");
                 }
                 return rtn;
             }
@@ -15050,7 +15072,6 @@ namespace fairino
                         log.LogError($"RPC exception");
                     }
                     return g_sock_com_err;
-
                 }
                 else
                 {
@@ -23504,6 +23525,93 @@ namespace fairino
                     log.LogError("RPC exception");
                 }
                 return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+
+        /**
+        * @brief  逆运动学求解，笛卡尔空间包含扩展轴位置
+        * @param  [in] type 0-绝对位姿(基坐标系)，1-增量位姿(基坐标系)，2-增量位姿(工具坐标系)
+        * @param  [in] desc_pos 笛卡尔位姿
+        * @param  [in] exaxis 扩展轴位置
+        * @param  [in] tool 工具号
+        * @param  [in] workPiece 工件号
+        * @param  [out] joint_pos 关节位置
+        * @return  错误码
+        */
+        public int GetInverseKinExaxis(int type, DescPose desc_pos, ExaxisPos exaxis, int tool, int workPiece, ref JointPos joint_pos)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            try
+            {
+
+                double[] descPos = new double[6] {
+            desc_pos.tran.x,
+            desc_pos.tran.y,
+            desc_pos.tran.z,
+            desc_pos.rpy.rx,
+            desc_pos.rpy.ry,
+            desc_pos.rpy.rz
+             };
+
+                double[] exaxisPos = new double[4] {
+            exaxis.ePos[0],
+            exaxis.ePos[1],
+            exaxis.ePos[2],
+            exaxis.ePos[3]
+        };
+                object[] result = proxy.GetInverseKinExaxis(type, descPos, exaxisPos, tool, workPiece);
+
+                int errcode = (int)result[0];
+
+                if (errcode == 0)
+                {
+
+                    joint_pos.jPos[0] = (double)result[1];
+                    joint_pos.jPos[1] = (double)result[2];
+                    joint_pos.jPos[2] = (double)result[3];
+                    joint_pos.jPos[3] = (double)result[4];
+                    joint_pos.jPos[4] = (double)result[5];
+                    joint_pos.jPos[5] = (double)result[6];
+                }
+                else
+                {
+                    if (log != null)
+                    {
+                        log.LogError($"execute GetInverseKinExaxis fail {errcode}");
+                    }
+                }
+
+                if (log != null)
+                {
+                    log.LogInfo($"GetInverseKinExaxis({type}," +
+                               $"{descPos[0]},{descPos[1]},{descPos[2]},{descPos[3]},{descPos[4]},{descPos[5]}," +
+                               $"{exaxisPos[0]},{exaxisPos[1]},{exaxisPos[2]},{exaxisPos[3]}," +
+                               $"{tool},{workPiece}," +
+                               $"ref {joint_pos.jPos[0]},ref {joint_pos.jPos[1]},ref {joint_pos.jPos[2]}," +
+                               $"ref {joint_pos.jPos[3]},ref {joint_pos.jPos[4]},ref {joint_pos.jPos[5]}) : {errcode}");
+                }
+
+                return errcode;
+            }
+            catch
+            {
+                if (IsSockComError())
+                {
+                    if (log != null)
+                    {
+                        log.LogError($"RPC exception");
+                    }
+                    return g_sock_com_err;
+                }
+                else
+                {
+                    return (int)RobotError.ERR_SUCCESS;
+                }
             }
         }
     }

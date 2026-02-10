@@ -234,16 +234,17 @@ namespace fairino
         * @brief  笛卡尔空间伺服模式运动
         * @param  [in]  mode  0-绝对运动(基坐标系)，1-增量运动(基坐标系)，2-增量运动(工具坐标系)
         * @param  [in]  desc_pos  目标笛卡尔位姿或位姿增量
+        * @param  [in]  exaxis  扩展轴位置
         * @param  [in]  pos_gain  位姿增量比例系数，仅在增量运动下生效，范围[0~1]
         * @param  [in] acc  加速度百分比，范围[0~100],暂不开放，默认为0
         * @param  [in] vel  速度百分比，范围[0~100]，暂不开放，默认为0
-        * @param  [in] cmdT  指令下发周期，单位s，建议范围[0.001~0.0016]
+        * @param  [in] cmdT  指令下发周期，单位s，建议范围[0.001~0.016]
         * @param  [in] filterT 滤波时间，单位s，暂不开放，默认为0
         * @param  [in] gain  目标位置的比例放大器，暂不开放，默认为0
         * @return  错误码
-        */[XmlRpcMethod("ServoCart")]
-        int ServoCart(int mode, double[] desc_pose, double[] pos_gain, double acc, double vel, double cmdT, double filterT, double gain);
-
+        */
+        [XmlRpcMethod("ServoCart")]
+        int ServoCart(int mode, double[] desc_pose, double[] pos_gain, double[] exaxis, double acc, double vel, double cmdT, double filterT, double gain);
         /**
         * @brief  笛卡尔空间点到点运动
         * @param  [in]  desc_pos  目标笛卡尔位姿或位姿增量
@@ -255,7 +256,8 @@ namespace fairino
         * @param  [in] blendT [-1.0]-运动到位(阻塞)，[0~500.0]-平滑时间(非阻塞)，单位ms	
         * @param  [in] config  关节空间配置，[-1]-参考当前关节位置解算，[0~7]-参考特定关节空间配置解算，默认为-1	 
         * @return  错误码
-        */[XmlRpcMethod("MoveCart")]
+        */
+        [XmlRpcMethod("MoveCart")]
         int MoveCart(double[] desc_pos, int tool, int user, double vel, double acc, double ovl, double blendT, int config);
 
         /**
@@ -1707,24 +1709,25 @@ namespace fairino
         int AxleSensorRegWrite(int devAddr, int regHAddr, int regLAddr, int regNum, int data1, int data2, int isNoBlock);
 
         [XmlRpcMethod("SetOutputResetCtlBoxDO")]
-        int SetOutputResetCtlBoxDO(int resetFlag);
+        int SetOutputResetCtlBoxDO(int resetFlag, int reloadFlag);
 
         [XmlRpcMethod("SetOutputResetCtlBoxAO")]
-        int SetOutputResetCtlBoxAO(int resetFlag);
+        int SetOutputResetCtlBoxAO(int resetFlag, int reloadFlag);
 
         [XmlRpcMethod("SetOutputResetAxleDO")]
-        int SetOutputResetAxleDO(int resetFlag);
+        int SetOutputResetAxleDO(int resetFlag, int reloadFlag);
 
         [XmlRpcMethod("SetOutputResetAxleAO")]
-        int SetOutputResetAxleAO(int resetFlag);
+        int SetOutputResetAxleAO(int resetFlag, int reloadFlag);
 
         [XmlRpcMethod("SetOutputResetExtDO")]
-        int SetOutputResetExtDO(int resetFlag);
+        int SetOutputResetExtDO(int resetFlag, int reloadFlag);
+
         [XmlRpcMethod("SetOutputResetExtAO")]
-        int SetOutputResetExtAO(int resetFlag);
+        int SetOutputResetExtAO(int resetFlag, int reloadFlag);
 
         [XmlRpcMethod("SetOutputResetSmartToolDO")]
-        int SetOutputResetSmartToolDO(int resetFlag);
+        int SetOutputResetSmartToolDO(int resetFlag, int reloadFlag);
 
         [XmlRpcMethod("WeaveStartSim")]
         int WeaveStartSim(int weaveNum);
@@ -2259,7 +2262,8 @@ namespace fairino
         [XmlRpcMethod("FT_RotInsertion")]
         int FT_RotInsertion(int rcs, double angVelRot, double ft, double max_angle, int orn, double max_angAcc, int rotorn, int strategy);
 
-
+        [XmlRpcMethod("GetInverseKinExaxis")]
+        object[] GetInverseKinExaxis(int type, double[] desc_pos, double[] exaxis, int tool, int workPiece);
     }
     internal class RPCHandle
     {
