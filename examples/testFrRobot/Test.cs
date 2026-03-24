@@ -2458,9 +2458,9 @@ namespace testFrRobot
         {
             int rtn = robot.ExtDevSetUDPComParam("192.168.58.88", 2021, 2, 100, 3, 200, 1, 100, 5, 1);
             Console.WriteLine("ExtDevSetUDPComParam rtn is " + rtn);
-            string ip = ""; int port = 0; int period = 0; int lossPkgTime = 0; int lossPkgNum = 0; int disconnectTime = 0; int reconnectEnable = 0; int reconnectPeriod = 0; int reconnectNum = 0;
-            rtn = robot.ExtDevGetUDPComParam(ref ip, ref port, ref period, ref lossPkgTime, ref lossPkgNum, ref disconnectTime, ref reconnectEnable, ref reconnectPeriod, ref reconnectNum);
-            string param = "\nip " + ip + "\nport " + port.ToString() + "\nperiod  " + period.ToString() + "\nlossPkgTime " + lossPkgTime.ToString() + "\nlossPkgNum  " + lossPkgNum.ToString() + "\ndisConntime  " + disconnectTime.ToString() + "\nreconnecable  " + reconnectEnable.ToString() + "\nreconnperiod  " + reconnectPeriod.ToString() + "\nreconnnun  " + reconnectNum.ToString();
+            string ip = ""; int port = 0; int period = 0; int lossPkgTime = 0; int lossPkgNum = 0; int disconnectTime = 0; int reconnectEnable = 0; int reconnectPeriod = 0; int reconnectNum = 0; int selfConnect = 0;
+            rtn = robot.ExtDevGetUDPComParam(ref ip, ref port, ref period, ref lossPkgTime, ref lossPkgNum, ref disconnectTime, ref reconnectEnable, ref reconnectPeriod, ref reconnectNum, ref selfConnect);
+            string param = "\nip " + ip + "\nport " + port.ToString() + "\nperiod  " + period.ToString() + "\nlossPkgTime " + lossPkgTime.ToString() + "\nlossPkgNum  " + lossPkgNum.ToString() + "\ndisConntime  " + disconnectTime.ToString() + "\nreconnecable  " + reconnectEnable.ToString() + "\nreconnperiod  " + reconnectPeriod.ToString() + "\nreconnnun  " + reconnectNum.ToString() + "\nselfConnect  " + selfConnect.ToString();
             Console.WriteLine("ExtDevGetUDPComParam rtn is " + rtn + param);
 
             robot.ExtDevLoadUDPDriver();
@@ -2509,9 +2509,9 @@ namespace testFrRobot
         {
             int rtn = robot.ExtDevSetUDPComParam("192.168.58.88", 2021, 2, 100, 3, 200, 1, 100, 5, 1);
             Console.WriteLine("ExtDevSetUDPComParam rtn is " + rtn);
-            string ip = ""; int port = 0; int period = 0; int lossPkgTime = 0; int lossPkgNum = 0; int disconnectTime = 0; int reconnectEnable = 0; int reconnectPeriod = 0; int reconnectNum = 0;
-            rtn = robot.ExtDevGetUDPComParam(ref ip, ref port, ref period, ref lossPkgTime, ref lossPkgNum, ref disconnectTime, ref reconnectEnable, ref reconnectPeriod, ref reconnectNum);
-            string param = "\nip " + ip + "\nport " + port.ToString() + "\nperiod  " + period.ToString() + "\nlossPkgTime " + lossPkgTime.ToString() + "\nlossPkgNum  " + lossPkgNum.ToString() + "\ndisConntime  " + disconnectTime.ToString() + "\nreconnecable  " + reconnectEnable.ToString() + "\nreconnperiod  " + reconnectPeriod.ToString() + "\nreconnnun  " + reconnectNum.ToString();
+            string ip = ""; int port = 0; int period = 0; int lossPkgTime = 0; int lossPkgNum = 0; int disconnectTime = 0; int reconnectEnable = 0; int reconnectPeriod = 0; int reconnectNum = 0; int selfConnect = 0;
+            rtn = robot.ExtDevGetUDPComParam(ref ip, ref port, ref period, ref lossPkgTime, ref lossPkgNum, ref disconnectTime, ref reconnectEnable, ref reconnectPeriod, ref reconnectNum, ref selfConnect);
+            string param = "\nip " + ip + "\nport " + port.ToString() + "\nperiod  " + period.ToString() + "\nlossPkgTime " + lossPkgTime.ToString() + "\nlossPkgNum  " + lossPkgNum.ToString() + "\ndisConntime  " + disconnectTime.ToString() + "\nreconnecable  " + reconnectEnable.ToString() + "\nreconnperiod  " + reconnectPeriod.ToString() + "\nreconnnun  " + reconnectNum.ToString() + "\nselfConnect" + selfConnect.ToString();
             Console.WriteLine("ExtDevGetUDPComParam rtn is " + rtn + param);
 
             robot.ExtDevLoadUDPDriver();
@@ -4548,10 +4548,27 @@ namespace testFrRobot
             }
         }
 
+
+
+
         private void button104_Click(object sender, EventArgs e)
         {
+
             // 依次调用所有测试函数
-            //testLaserConfig();
+            TestCtrlOpenLuaOperate();
+            //TestUDPAxis();
+            //testled();
+            //TestSetVelReducePara();
+            //TestOriginPointWeave();
+            //TestServoJUDP();
+            //ServoJTWithSafetyUDP();
+
+            //testTPDmove();
+            //testAxleGenCom();
+            //TestRobotStopOnComDisc();
+            //TestRobotUDP();
+            //TestIOConfig();
+            //TestImpedanceControl1();
             //testGetLaserPoint();
             // testMoveToLaserRecordStart();
             // testMoveToLaserRecordEnd();
@@ -4570,7 +4587,7 @@ namespace testFrRobot
             // TestLaserRecordAndReplayMoveC();
             // TestLaserTrackMoveC();
             //TestSensitivityCalib();
-            // TestServoJ();
+            //TestServoJ();
             //  TestSlavePortErr();
             //  TestSpiral();
             //TestFTControlWithDamping();
@@ -4608,7 +4625,7 @@ namespace testFrRobot
             //TestInverseKinExaxis();
             //TestServoCart();
 
-            TestDOReset();
+            //TestDOReset();
         }
         public void TestDOReset()
         {
@@ -4674,7 +4691,8 @@ namespace testFrRobot
             ROBOT_STATE_PKG pkg = new ROBOT_STATE_PKG();
 
             int rtn;
-            DescPose desc_pos_dt = new DescPose(83.00800f, 50.525000f, 29.246f, 179.629f, -7.138f, -166.975f);
+            DescPose desc_pos_dt = new DescPose(0, -90, 90, 0, 0, 0);
+
             ExaxisPos exaxis = new ExaxisPos(100.0f, 0.0f, 0.0f, 0.0f);
             double[] pos_gain = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
             int mode = 0;
@@ -6141,7 +6159,7 @@ namespace testFrRobot
             Thread.Sleep(2000);
         }
 
-  
+
         public int ServoJTWithSafety()
         {
             robot.ResetAllError();
@@ -6150,28 +6168,28 @@ namespace testFrRobot
             double[] torques = new double[6] { 0, 0, 0, 0, 0, 0 };
             robot.GetJointTorques(1, torques);
 
-            robot.ServoJTStart();
+            robot.ServoJTStart(1);
             ROBOT_STATE_PKG pkg = new ROBOT_STATE_PKG();
             robot.DragTeachSwitch(1);
 
             int checkFlag = 0;
             double[] jPowerLimit = new double[6] { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
             //double[] jPowerLimit = new double[6] { 10.0, 10.0, 10.0, 10.0, 10.0, 10.0 };
-             // double[] jVelLimit = new double[6] { 10.0, 10.0, 10.0, 10.0, 10.0, 10.0 };
-            double[] jVelLimit = new double[6] {50, 50, 50, 50, 50, 50 };
-            int count = 80000;
+            // double[] jVelLimit = new double[6] { 10.0, 10.0, 10.0, 10.0, 10.0, 10.0 };
+            double[] jVelLimit = new double[6] { 50, 50, 50, 50, 50, 50 };
+            int count = 20;
             int errorNum = 0;
             int error = 0;
             while (count > 0)
             {
-           
-                torques[2] = torques[2] + 0.01; 
-                error = robot.ServoJT(torques, 0.008, checkFlag, jPowerLimit, jVelLimit); 
+
+                torques[0] = torques[0] + 0.01;
+                error = robot.ServoJT(torques, 0.008, checkFlag, jPowerLimit, jVelLimit, 1);
 
                 Console.WriteLine($"ServoJT rtn is {error}");
                 count = count - 1;
                 Thread.Sleep(1);
-             
+
                 robot.GetRobotRealTimeState(ref pkg);
                 Console.WriteLine($"maincode {pkg.main_code}, subcode {pkg.sub_code}");
                 if (error != 0)
@@ -6186,8 +6204,76 @@ namespace testFrRobot
             }
 
             robot.DragTeachSwitch(0);
-            error = robot.ServoJTEnd();
+            error = robot.ServoJTEnd(1);
 
+            return 0;
+        }
+
+        public int ServoJTWithSafetyUDP()
+        {
+            // 订阅回调
+            robot.OnUdpFrameReceived += (comType, frameCount, frameCmdID, contentLen, content) =>
+            {
+                Console.WriteLine($"[UDP响应] comType={comType}, count={frameCount}, cmdID={frameCmdID}, content={content}");
+            };
+            while (true)
+            {
+                robot.ResetAllError();
+                Thread.Sleep(500);
+
+                JointPos j = new JointPos(7.053, -89.699, 156.141, -72.751, 7.829, 1.889);
+                ExaxisPos epos = new ExaxisPos(0, 0, 0, 0);
+                DescPose offset_pos = new DescPose(-151.288, -321.186, 221.989, 89.140, 4.361, -0.795);
+                robot.MoveJ(j, 0, 0, 100, 100, 100, epos, -1, 0, offset_pos);
+
+                double[] torques = new double[6] { 0, 0, 0, 0, 0, 0 };
+                robot.GetJointTorques(1, torques);
+
+                robot.ServoJTStart(1);
+                ROBOT_STATE_PKG pkg = new ROBOT_STATE_PKG();
+                robot.DragTeachSwitch(1);
+
+                int checkFlag = 0;
+                double[] jPowerLimit = new double[6] { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
+                double[] jVelLimit = new double[6] { 50, 50, 50, 50, 50, 50 };
+                int error = 0;
+                while (true)
+                {
+
+                    torques[0] = 0.1;
+                    error = robot.ServoJT(torques, 0.008, checkFlag, jPowerLimit, jVelLimit, 1);
+
+                    Console.WriteLine($"ServoJT rtn is {error}");
+                    Thread.Sleep(1);
+
+                    robot.GetRobotRealTimeState(ref pkg);
+                    Console.WriteLine($"maincode {pkg.main_code}, subcode {pkg.sub_code}");
+                    if (pkg.jt_cur_pos[0] > 30)
+                    {
+                        break;
+                    }
+                }
+
+                while (true)
+                {
+
+                    torques[0] = -0.1;
+                    error = robot.ServoJT(torques, 0.008, checkFlag, jPowerLimit, jVelLimit, 1);
+
+                    Console.WriteLine($"ServoJT rtn is {error}");
+                    Thread.Sleep(1);
+
+                    robot.GetRobotRealTimeState(ref pkg);
+                    Console.WriteLine($"maincode {pkg.main_code}, subcode {pkg.sub_code}");
+                    if (pkg.jt_cur_pos[0] < 0)
+                    {
+                        break;
+                    }
+                }
+
+                robot.DragTeachSwitch(0);
+                error = robot.ServoJTEnd(1);
+            }
             return 0;
         }
 
@@ -6381,7 +6467,7 @@ namespace testFrRobot
             float filterT = 0.0f;
             float gain = 0.0f;
             byte flag = 0;
-            int count = 500;
+            int count = 300;
             float dt = 0.1f;
             int cmdID = 0;
 
@@ -6389,10 +6475,11 @@ namespace testFrRobot
             if (ret == 0)
             {
                 cmdID += 1;
-                robot.ServoMoveStart();
+                robot.ServoMoveStart(0);
                 while (count > 0)
                 {
-                    robot.ServoJ( j,  epos, acc, vel, cmdT, filterT, gain, cmdID);
+                    robot.ServoJ( j,  epos, acc, vel, cmdT, filterT, gain, cmdID, 0);
+
                     j.jPos[4] += dt;
                     count -= 1;
                     robot.WaitMs((int)(cmdT * 1000));
@@ -6406,15 +6493,96 @@ namespace testFrRobot
                         break;
                     }
                 }
-                robot.ServoMoveEnd();
+                robot.ServoMoveEnd(0);
+
+
             }
             else
             {
                 Console.WriteLine($"GetActualJointPosDegree errcode:{ret}");
             }
 
-            robot.CloseRPC();
+            //robot.CloseRPC();
         }
+
+        public void TestServoJUDP()
+        {
+            // 订阅回调
+            robot.OnUdpFrameReceived += (comType, frameCount, frameCmdID, contentLen, content) =>
+            {
+                Console.WriteLine($"[] comType={comType}, count={frameCount}, cmdID={frameCmdID}, content={content}");
+            };
+
+            ROBOT_STATE_PKG pkg = new ROBOT_STATE_PKG();
+
+            float vel = 0.0f;
+            float acc = 0.0f;
+            float cmdT = 0.008f;
+            float filterT = 0.0f;
+            float gain = 0.0f;
+            byte flag = 0;
+            int count = 300;
+            float dt = 0.1f;
+            int cmdID = 0;
+
+            while (true)
+            {
+                JointPos j = new JointPos(0, -90, 90, 0, 0, 0);
+                ExaxisPos epos = new ExaxisPos(0, 0, 0, 0);
+                DescPose offset_pos = new DescPose(0, -90, 90, 0, 0, 0);
+                robot.MoveJ(j, 0, 0, 100, 100, 100, epos, -1, 0, offset_pos);
+                int ret = robot.GetActualJointPosDegree(flag, ref j);
+                if (ret == 0)
+                {
+                    count = 300;
+                    cmdID += 1;
+                    robot.ServoMoveStart(1);
+
+                    while (count > 0)
+                    {
+                        robot.ServoJ(j, epos, acc, vel, cmdT, filterT, gain, cmdID, 1);
+                        j.jPos[0] += dt;
+                        j.jPos[1] += dt;
+                        j.jPos[3] += dt;
+                        j.jPos[4] += dt;
+                        j.jPos[5] += dt;
+                        epos.ePos[0] += dt;
+                        count -= 1;
+                        Thread.Sleep(1);
+                        robot.GetRobotRealTimeState(ref pkg);
+                        Console.WriteLine($"Servoj Count {pkg.servoJCmdNum}; last pos is {pkg.lastServoTarget[0]} {pkg.lastServoTarget[1]} {pkg.lastServoTarget[2]} {pkg.lastServoTarget[3]} {pkg.lastServoTarget[4]} {pkg.lastServoTarget[5]}");
+
+                    }
+                    robot.ServoMoveEnd(1);
+
+                    Thread.Sleep(1000);
+                    count = 300;
+                    robot.ServoMoveStart(1);
+                    while (count > 0)
+                    {
+                        robot.ServoJ(j, epos, acc, vel, cmdT, filterT, gain, cmdID, 1);
+                        j.jPos[0] -= dt;
+                        j.jPos[1] -= dt;
+                        j.jPos[3] -= dt;
+                        j.jPos[4] -= dt;
+                        j.jPos[5] -= dt;
+                        epos.ePos[0] -= dt;
+                        count -= 1;
+                        Thread.Sleep(1);
+                        robot.GetRobotRealTimeState(ref pkg);
+                        Console.WriteLine($"Servoj Count {pkg.servoJCmdNum}; last pos is {pkg.lastServoTarget[0]} {pkg.lastServoTarget[1]} {pkg.lastServoTarget[2]} {pkg.lastServoTarget[3]} {pkg.lastServoTarget[4]} {pkg.lastServoTarget[5]}");
+                    }
+                    robot.ServoMoveEnd(1);
+                }
+                else
+                {
+                    Console.WriteLine($"GetActualJointPosDegree errcode:{ret}");
+                }
+            }
+        }
+
+        //robot.CloseRPC();
+
         //public void TestSensitivityCalib()
         //{
         //   int rtn = robot.JointSensitivityEnable(1);
@@ -6476,7 +6644,7 @@ namespace testFrRobot
         /// <summary>
         /// 测试从站端口错误计数器：读取并清零所有从站的通信错误帧
         /// </summary>
-      
+
         public void TestLaserTrackMoveC()
         {
 
@@ -6999,116 +7167,228 @@ namespace testFrRobot
                 Thread.Sleep(100);
 
         }
-            public void TestImpedanceControl()
+        public void TestImpedanceControl()
+        {
+            int[] ctrl = new int[20];
+            int state;
+            int pressValue;
+            int error;
+            int rtn;
+            JointPos j1 = new JointPos(102.622, -135.990, 120.769, -73.950, -90.848, 35.507);
+            JointPos j2 = new JointPos(93.674, -80.062, 82.947, -92.199, -90.967, 26.559);
+            DescPose desc_pos1 = new DescPose(136.552, -149.799, 449.532, 179.817, -1.172, 157.123);
+            DescPose desc_pos2 = new DescPose(136.540, -561.048, 449.542, 179.819, -1.172, 157.122);
+
+            DescPose offset_pos = new DescPose(0, 0, 0, 0, 0, 0);
+            ExaxisPos epos = new ExaxisPos(0, 0, 0, 0);
+
+            int tool = 0;
+            int user = 0;
+            float vel = 100.0f;
+            float acc = 200.0f;
+            float ovl = 100.0f;
+            float blendT = -1.0f;
+            float blendR = -1.0f;
+
+            byte flag = 0;
+
+            byte search = 0;
+            robot.SetSpeed(20);
+            int company = 17;
+            int device = 0;
+            int softversion = 0;
+            int bus = 1;
+            robot.FT_SetConfig(company, device, softversion, bus);
+            Thread.Sleep(1000);
+            robot.FT_GetConfig(ref company, ref device, ref softversion, ref bus);
+            Console.WriteLine($"FT config:{company},{device},{softversion},{bus}");
+            Thread.Sleep(1000);
+
+            robot.FT_Activate(0);
+            Thread.Sleep(1000);
+            robot.FT_Activate(1);
+            Thread.Sleep(1000);
+
+            Thread.Sleep(1000);
+            robot.FT_SetZero(0);
+            Thread.Sleep(1000);
+            robot.FT_SetZero(1);
+            Thread.Sleep(1000);
+
+            double[] forceThreshold = new double[] { 30, 30, 30, 5, 5, 5 };
+            double[] m = new double[] { 0.1, 0.1, 0.1, 0.02, 0.02, 0.02 };
+            double[] b = new double[] { 1, 1, 1, 0.08, 0.08, 0.08 };
+            double[] k = new double[] { 0, 0, 0, 0, 0, 0 };
+
+            rtn = robot.ImpedanceControlStartStop(1, 1, forceThreshold, m, b, k, 1000, 500, 100, 100);
+            Console.WriteLine($"ImpedanceControlStartStop errcode:{rtn}");
+            rtn = robot.MoveL(desc_pos1, tool, user, vel, acc, ovl, blendR, 0, epos, search, flag, offset_pos, -1, 0);
+            rtn = robot.MoveL(desc_pos2, tool, user, vel, acc, ovl, blendR, 0, epos, search, flag, offset_pos, -1, 0);
+            rtn = robot.MoveL(desc_pos1, tool, user, vel, acc, ovl, blendR, 0, epos, search, flag, offset_pos, -1, 0);
+            rtn = robot.MoveL(desc_pos2, tool, user, vel, acc, ovl, blendR, 0, epos, search, flag, offset_pos, -1, 0);
+            rtn = robot.MoveL(desc_pos1, tool, user, vel, acc, ovl, blendR, 0, epos, search, flag, offset_pos, -1, 0);
+            rtn = robot.MoveL(desc_pos2, tool, user, vel, acc, ovl, blendR, 0, epos, search, flag, offset_pos, -1, 0);
+
+            Console.WriteLine($"movel errcode:{rtn}");
+            robot.ImpedanceControlStartStop(0, 1, forceThreshold, m, b, k, 1000, 500, 100, 100);
+        }
+        void testLaserConfig()
+        {
+            int[] ctrl = new int[20];
+            int state;
+            int pressValue;
+            int error;
+            robot.LaserTrackingSensorConfig("192.168.58.20", 5020);
+            robot.LaserTrackingSensorSamplePeriod(20);
+            robot.LoadPosSensorDriver(101);
+            robot.LaserTrackingLaserOnOff(0, 0);
+
+            System.Threading.Thread.Sleep(3000);
+
+            robot.LaserTrackingLaserOnOff(1, 0);
+        }
+
+        void testGetLaserPoint()
+        {
+            int[] ctrl = new int[20];
+            int state;
+            int pressValue;
+            int error;
+            string name = "laserPoint";
+            double[] data = new double[20];
+            robot.GetRobotTeachingPoint(name, ref data);
+            Console.WriteLine("GetRobotTeachingPoint :{0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11}",
+                data[0], data[1], data[2], data[3], data[4], data[5],
+                data[6], data[7], data[8], data[9], data[10], data[11]);
+            JointPos startjointPos = new JointPos(data[6], data[7], data[8], data[9], data[10], data[11]);
+            DescPose startdescPose = new DescPose(data[0], data[1], data[2], data[3], data[4], data[5]);
+            ExaxisPos exaxisPos = new ExaxisPos(0, 0, 0, 0);
+            DescPose offdese = new DescPose(0, 0, 0, 0, 0, 0);
+
+            robot.MoveL(startjointPos, startdescPose, 1, 0, 100, 100, 100, -1, exaxisPos, 0, 0, offdese, 0);
+        }
+
+        void testMoveToLaserRecordStart()
+        {
+            int[] ctrl = new int[20];
+            int state;
+            int pressValue;
+            int error;
+
+
+
+            JointPos startjointPos = new JointPos(56.205, -117.951, 141.872, -118.149, -94.217, -122.176);
+            DescPose startdescPose = new DescPose(-97.552, -282.855, 26.675, 174.182, -1.338, -91.707);
+            ExaxisPos exaxisPos = new ExaxisPos(0, 0, 0, 0);
+            DescPose offdese = new DescPose(0, 0, 0, 0, 0, 0);
+
+            robot.MoveL(startjointPos, startdescPose, 1, 0, 100, 100, 100, -1, exaxisPos, 0, 0, offdese, 0);
+            robot.LaserSensorRecord1(2, 10);
+
+            JointPos endjointPos = new JointPos(68.809, -87.100, 121.120, -127.233, -95.038, -109.555);
+            DescPose enddescPose = new DescPose(-103.555, -464.234, 13.076, 174.179, -1.344, -91.709);
+            robot.MoveL(endjointPos, enddescPose, 1, 0, 50, 100, 100, -1, exaxisPos, 0, 0, offdese, 0);
+
+            robot.LaserSensorRecord1(0, 10);
+            robot.MoveToLaserRecordStart(1, 30);
+        }
+
+        void testMoveToLaserRecordEnd()
+        {
+            int[] ctrl = new int[20];
+            int state;
+            int pressValue;
+            int error;
+
+
+
+            JointPos startjointPos = new JointPos(56.205, -117.951, 141.872, -118.149, -94.217, -122.176);
+            DescPose startdescPose = new DescPose(-97.552, -282.855, 26.675, 174.182, -1.338, -91.707);
+            ExaxisPos exaxisPos = new ExaxisPos(0, 0, 0, 0);
+            DescPose offdese = new DescPose(0, 0, 0, 0, 0, 0);
+
+            robot.MoveL(startjointPos, startdescPose, 1, 0, 100, 100, 100, -1, exaxisPos, 0, 0, offdese, 0);
+            robot.LaserSensorRecord1(2, 10);
+
+            JointPos endjointPos = new JointPos(68.809, -87.100, 121.120, -127.233, -95.038, -109.555);
+            DescPose enddescPose = new DescPose(-103.555, -464.234, 13.076, 174.179, -1.344, -91.709);
+            robot.MoveL(endjointPos, enddescPose, 1, 0, 50, 100, 100, -1, exaxisPos, 0, 0, offdese, 0);
+
+            robot.LaserSensorRecord1(0, 10);
+            robot.MoveToLaserRecordEnd(1, 30);
+        }
+
+        void testLasertrack_xyz()
+        {
+            int[] ctrl = new int[20];
+            int state;
+            int pressValue;
+            int error;
+
+
+
+            JointPos startjointPos = new JointPos(56.205, -117.951, 141.872, -118.149, -94.217, -122.176);
+            DescPose startdescPose = new DescPose(-97.552, -282.855, 26.675, 174.182, -1.338, -91.707);
+            ExaxisPos exaxisPos = new ExaxisPos(0, 0, 0, 0);
+            DescPose offdese = new DescPose(0, 0, 0, 0, 0, 0);
+            DescTran directionPoint = new DescTran();
+
+            robot.MoveL(startjointPos, startdescPose, 1, 0, 100, 100, 100, -1, exaxisPos, 0, 0, offdese, 0);
+            robot.LaserTrackingSearchStart_xyz(3, 100, 300, 1000, 3);
+            robot.LaserTrackingSearchStop();
+            robot.MoveToLaserSeamPos(1, 30, 0, 0, 0, offdese);
+        }
+
+        void testLasertrack_point()
+        {
+            int[] ctrl = new int[20];
+            int state;
+            int pressValue;
+            int error;
+
+            string name = "laserEnd";
+            double[] data = new double[20];
+
+
+
+            JointPos startjointPos = new JointPos(56.205, -117.951, 141.872, -118.149, -94.217, -122.176);
+            DescPose startdescPose = new DescPose(-97.552, -282.855, 26.675, 174.182, -1.338, -91.707);
+            ExaxisPos exaxisPos = new ExaxisPos(0, 0, 0, 0);
+            DescPose offdese = new DescPose(0, 0, 0, 0, 0, 0);
+            DescTran directionPoint = new DescTran();
+
+            robot.MoveL(startjointPos, startdescPose, 1, 0, 100, 100, 100, -1, exaxisPos, 0, 0, offdese, 0);
+            robot.GetRobotTeachingPoint(name, ref data);
+
+            Console.WriteLine("{0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11}",
+                data[0], data[1], data[2], data[3], data[4], data[5],
+                data[6], data[7], data[8], data[9], data[10], data[11]);
+
+            directionPoint.x = data[0];
+            directionPoint.y = data[1];
+            directionPoint.z = data[2];
+
+            Console.WriteLine("{0}, {1}, {2}", directionPoint.x, directionPoint.y, directionPoint.z);
+
+            robot.LaserTrackingSearchStart_point(directionPoint, 100, 500, 1000, 3);
+            robot.LaserTrackingSearchStop();
+            robot.MoveToLaserSeamPos(1, 30, 0, 0, 0, offdese);
+        }
+
+        void testLaserRecordAndReplay()
+        {
+            int[] ctrl = new int[20];
+            int state;
+            int pressValue;
+            int error;
+            robot.OpenLuaUpload("D://zUP/CtrlDev_laser_ruiniu-0117.lua");
+            System.Threading.Thread.Sleep(2000);
+            robot.SetCtrlOpenLUAName(0, "CtrlDev_laser_ruiniu-0117.lua");
+            robot.UnloadCtrlOpenLUA(0);
+            robot.LoadCtrlOpenLUA(0);
+            System.Threading.Thread.Sleep(8000);
+            for (int i = 0; i < 10; ++i)
             {
-                int[] ctrl = new int[20];
-                int state;
-                int pressValue;
-                int error;
-                int rtn;
-                JointPos j1 = new JointPos(102.622, -135.990, 120.769, -73.950, -90.848, 35.507);
-                JointPos j2 = new JointPos(93.674, -80.062, 82.947, -92.199, -90.967, 26.559);
-                DescPose desc_pos1 = new DescPose(136.552, -149.799, 449.532, 179.817, -1.172, 157.123);
-                DescPose desc_pos2 = new DescPose(136.540, -561.048, 449.542, 179.819, -1.172, 157.122);
-
-                DescPose offset_pos = new DescPose(0, 0, 0, 0, 0, 0);
-                ExaxisPos epos = new ExaxisPos(0, 0, 0, 0);
-
-                int tool = 0;
-                int user = 0;
-                float vel = 100.0f;
-                float acc = 200.0f;
-                float ovl = 100.0f;
-                float blendT = -1.0f;
-                float blendR = -1.0f;
-
-                byte flag = 0;
-
-                byte search = 0;
-                robot.SetSpeed(20);
-                int company = 17;
-                int device = 0;
-                int softversion = 0;
-                int bus = 1;
-                robot.FT_SetConfig(company, device, softversion, bus);
-                Thread.Sleep(1000);
-                robot.FT_GetConfig(ref company, ref device, ref softversion, ref bus);
-                Console.WriteLine($"FT config:{company},{device},{softversion},{bus}");
-                Thread.Sleep(1000);
-
-                robot.FT_Activate(0);
-                Thread.Sleep(1000);
-                robot.FT_Activate(1);
-                Thread.Sleep(1000);
-
-                Thread.Sleep(1000);
-                robot.FT_SetZero(0);
-                Thread.Sleep(1000);
-                robot.FT_SetZero(1);
-                Thread.Sleep(1000);
-
-                double[] forceThreshold = new double[] { 30, 30, 30, 5, 5, 5 };
-                double[] m = new double[] { 0.1, 0.1, 0.1, 0.02, 0.02, 0.02 };
-                double[] b = new double[] { 1, 1, 1, 0.08, 0.08, 0.08 };
-                double[] k = new double[] { 0, 0, 0, 0, 0, 0 };
-
-                rtn = robot.ImpedanceControlStartStop(1, 1, forceThreshold, m, b, k, 1000, 500, 100, 100);
-                Console.WriteLine($"ImpedanceControlStartStop errcode:{rtn}");
-                rtn = robot.MoveL(desc_pos1, tool, user, vel, acc, ovl, blendR, 0, epos, search, flag, offset_pos, -1, 0);
-                rtn = robot.MoveL(desc_pos2, tool, user, vel, acc, ovl, blendR, 0, epos, search, flag, offset_pos, -1, 0);
-                rtn = robot.MoveL(desc_pos1, tool, user, vel, acc, ovl, blendR, 0, epos, search, flag, offset_pos, -1, 0);
-                rtn = robot.MoveL(desc_pos2, tool, user, vel, acc, ovl, blendR, 0, epos, search, flag, offset_pos, -1, 0);
-                rtn = robot.MoveL(desc_pos1, tool, user, vel, acc, ovl, blendR, 0, epos, search, flag, offset_pos, -1, 0);
-                rtn = robot.MoveL(desc_pos2, tool, user, vel, acc, ovl, blendR, 0, epos, search, flag, offset_pos, -1, 0);
-
-                Console.WriteLine($"movel errcode:{rtn}");
-                robot.ImpedanceControlStartStop(0, 1, forceThreshold, m, b, k, 1000, 500, 100, 100);
-            }
-            void testLaserConfig()
-            {
-                int[] ctrl = new int[20];
-                int state;
-                int pressValue;
-                int error;
-                robot.LaserTrackingSensorConfig("192.168.58.20", 5020);
-                robot.LaserTrackingSensorSamplePeriod(20);
-                robot.LoadPosSensorDriver(101);
-                robot.LaserTrackingLaserOnOff(0, 0);
-
-                System.Threading.Thread.Sleep(3000);
-
-                robot.LaserTrackingLaserOnOff(1, 0);
-            }
-
-            void testGetLaserPoint()
-            {
-                int[] ctrl = new int[20];
-                int state;
-                int pressValue;
-                int error;
-                string name = "laserPoint";
-                double[] data = new double[20];
-                robot.GetRobotTeachingPoint(name, ref data);
-                Console.WriteLine("GetRobotTeachingPoint :{0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11}",
-                    data[0], data[1], data[2], data[3], data[4], data[5],
-                    data[6], data[7], data[8], data[9], data[10], data[11]);
-                JointPos startjointPos = new JointPos(data[6], data[7], data[8], data[9], data[10], data[11]);
-                DescPose startdescPose = new DescPose(data[0], data[1], data[2], data[3], data[4], data[5]);
-                ExaxisPos exaxisPos = new ExaxisPos(0, 0, 0, 0);
-                DescPose offdese = new DescPose(0, 0, 0, 0, 0, 0);
-
-                robot.MoveL(startjointPos, startdescPose, 1, 0, 100, 100, 100, -1, exaxisPos, 0, 0, offdese, 0);
-            }
-
-            void testMoveToLaserRecordStart()
-            {
-                int[] ctrl = new int[20];
-                int state;
-                int pressValue;
-                int error;
-
-
-
                 JointPos startjointPos = new JointPos(56.205, -117.951, 141.872, -118.149, -94.217, -122.176);
                 DescPose startdescPose = new DescPose(-97.552, -282.855, 26.675, 174.182, -1.338, -91.707);
                 ExaxisPos exaxisPos = new ExaxisPos(0, 0, 0, 0);
@@ -7123,42 +7403,28 @@ namespace testFrRobot
 
                 robot.LaserSensorRecord1(0, 10);
                 robot.MoveToLaserRecordStart(1, 30);
-            }
-
-            void testMoveToLaserRecordEnd()
-            {
-                int[] ctrl = new int[20];
-                int state;
-                int pressValue;
-                int error;
-
-
-
-                JointPos startjointPos = new JointPos(56.205, -117.951, 141.872, -118.149, -94.217, -122.176);
-                DescPose startdescPose = new DescPose(-97.552, -282.855, 26.675, 174.182, -1.338, -91.707);
-                ExaxisPos exaxisPos = new ExaxisPos(0, 0, 0, 0);
-                DescPose offdese = new DescPose(0, 0, 0, 0, 0, 0);
-
-                robot.MoveL(startjointPos, startdescPose, 1, 0, 100, 100, 100, -1, exaxisPos, 0, 0, offdese, 0);
-                robot.LaserSensorRecord1(2, 10);
-
-                JointPos endjointPos = new JointPos(68.809, -87.100, 121.120, -127.233, -95.038, -109.555);
-                DescPose enddescPose = new DescPose(-103.555, -464.234, 13.076, 174.179, -1.344, -91.709);
-                robot.MoveL(endjointPos, enddescPose, 1, 0, 50, 100, 100, -1, exaxisPos, 0, 0, offdese, 0);
-
+                robot.LaserSensorReplay(10, 100);
+                robot.MoveLTR();
                 robot.LaserSensorRecord1(0, 10);
-                robot.MoveToLaserRecordEnd(1, 30);
+                Console.WriteLine($"完成次数 : {i + 1} 次");
             }
 
-            void testLasertrack_xyz()
+        }
+
+        void testLasertrack()
+        {
+            int[] ctrl = new int[20];
+            int state;
+            int pressValue;
+            int error;
+            robot.OpenLuaUpload("D://zUP/CtrlDev_laser_ruiniu-0117.lua");
+            System.Threading.Thread.Sleep(2000);
+            robot.SetCtrlOpenLUAName(0, "CtrlDev_laser_ruiniu-0117.lua");
+            robot.UnloadCtrlOpenLUA(0);
+            robot.LoadCtrlOpenLUA(0);
+            System.Threading.Thread.Sleep(8000);
+            for (int i = 0; i < 10; ++i)
             {
-                int[] ctrl = new int[20];
-                int state;
-                int pressValue;
-                int error;
-
-
-
                 JointPos startjointPos = new JointPos(56.205, -117.951, 141.872, -118.149, -94.217, -122.176);
                 DescPose startdescPose = new DescPose(-97.552, -282.855, 26.675, 174.182, -1.338, -91.707);
                 ExaxisPos exaxisPos = new ExaxisPos(0, 0, 0, 0);
@@ -7169,177 +7435,575 @@ namespace testFrRobot
                 robot.LaserTrackingSearchStart_xyz(3, 100, 300, 1000, 3);
                 robot.LaserTrackingSearchStop();
                 robot.MoveToLaserSeamPos(1, 30, 0, 0, 0, offdese);
+
+                robot.LaserTrackingTrackOnOff(1, 3);
+
+                JointPos endjointPos = new JointPos(68.809, -87.100, 121.120, -127.233, -95.038, -109.555);
+                DescPose enddescPose = new DescPose(-103.555, -464.234, 13.076, 174.179, -1.344, -91.709);
+                robot.MoveL(endjointPos, enddescPose, 1, 0, 20, 100, 100, -1, exaxisPos, 0, 0, offdese, 0);
+
+                robot.LaserTrackingTrackOnOff(0, 3);
+                Console.WriteLine($"完成次数 : {i + 1} 次");
+            }
+        }
+
+        void testTPDmove()
+        {
+            string name = "tpd2025";
+            int type = 1;
+            int period_ms = 4;
+            int rtn = 0;
+            UInt16 di_choose = 0;
+            UInt16 do_choose = 0;
+
+            robot.SetTPDParam(type, name, period_ms, di_choose, do_choose);
+
+            robot.Mode(1);
+            Thread.Sleep(3000);
+            robot.DragTeachSwitch(1);
+            robot.SetTPDStart(type, name, period_ms, di_choose, do_choose);
+            Thread.Sleep(3000);
+            robot.SetWebTPDStop();
+            robot.DragTeachSwitch(0);
+
+            Thread.Sleep(1000);
+            float ovl = 100.0f;
+            byte blend = 0;
+            DescPose start_pose = new DescPose();
+            rtn = robot.LoadTPD(name);
+            Console.WriteLine($"LoadTPD rtn is:{rtn}\n");
+
+            robot.GetTPDStartPose(name, ref start_pose);
+            Console.WriteLine($"start pose, xyz is: %f %f %f. rpy is: {start_pose.tran.x},{start_pose.tran.y}, {start_pose.tran.z}, {start_pose.rpy.rx}, {start_pose.rpy.ry}, {start_pose.rpy.rz}");
+
+            rtn = robot.MoveToTPDStart(name, 0, 100.0);
+
+            rtn = robot.MoveTPD(name, blend, ovl);
+            Thread.Sleep(5000*5);
+
+            robot.SetTPDDelete(name);
+        }
+
+        void testAxleGenCom()
+        {
+            int[] led_on = new int[6] { 0xAB, 0xBA, 0x12, 0x01, 0x01, 0x79 };
+            int[] led_off = new int[6] { 0xAB, 0xBA, 0x12, 0x01, 0x00, 0x78 };
+            int[] version = new int[5]{ 0xAB, 0xBA, 0x11, 0x00, 0x76 };
+            int[] state = new int[6] { 0xAB, 0xBA, 0x1B,0x01, 0xAA, 0x2B };
+            int[] cycleState = new int[6] { 0xAB, 0xBA, 0x12, 0x01, 0x00, 0x78 };
+
+            int[] rcvdata = new int[16];
+            int ret = 0;
+            int cnt = 1;
+
+            JointPos p1Joint = new JointPos(88.708, -86.178, 140.989, -141.825, -89.162, -49.879);
+            DescPose p1Desc = new DescPose(188.007, -377.850, 260.207, 178.715, 2.823, -131.466);
+
+            JointPos p2Joint = new JointPos(112.131, -75.554, 126.989, -139.027, -88.044, -26.477);
+            DescPose p2Desc = new DescPose(368.003, -377.848, 260.211, 178.715, 2.823, -131.465);
+
+            //JointPos p1Joint = new JointPos(100.616, -81.541, 135.364, -141.072, -88.565, -37.984);
+            //DescPose p1Desc = new DescPose(271.904, -377.763, 260.153, 178.714, 2.823, -131.466);
+
+            //JointPos p2Joint = new JointPos(104.460, -79.729, 132.954, -140.578, -88.383, -34.144);
+            //DescPose p2Desc = new DescPose(301.885, -377.759, 260.165, 178.716, 2.822, -131.465);
+
+            ExaxisPos exaxisPos = new ExaxisPos(0, 0, 0, 0);
+            DescPose offdese = new DescPose(0, 0, 0, 0, 0, 0);
+
+            //开启末端透传功能
+            robot.SetAxleGenComEnable(1);
+            robot.SetAxleLuaEnable(1);
+
+            while(cnt<=1300)
+            { 
+                //读取版本号
+                ret = robot.SndRcvAxleGenComCmdData(5, version, 10, ref rcvdata);
+                Console.WriteLine($" hard version : {rcvdata[4]},hard code:{rcvdata[5]}, soft version:{rcvdata[6]} {rcvdata[7]}, soft code:{rcvdata[8]}");
+                if (ret != 0)
+                {
+                    break;
+                }
+                Thread.Sleep(1000);
+                //读取艾灸头在位状态
+                ret = robot.SndRcvAxleGenComCmdData(6, state, 6, ref rcvdata);
+                Console.WriteLine($" state : {rcvdata[4]}");
+                Thread.Sleep(1000);
+                //开启艾灸头激光
+                ret = robot.SndRcvAxleGenComCmdData(6, led_on, 6, ref rcvdata);
+                Console.WriteLine($"led on rcv data is: {rcvdata[0]},{rcvdata[1]}, {rcvdata[2]}, {rcvdata[3]}, {rcvdata[4]}, {rcvdata[5]}");
+                robot.MoveJ(p1Joint, p1Desc, 0, 0, 100, 100, 100, exaxisPos, -1, 0, offdese);
+                Thread.Sleep(4000);
+                //关闭艾灸头激光
+                ret = robot.SndRcvAxleGenComCmdData(6, led_off, 6, ref rcvdata);
+                Console.WriteLine($"led off rcv data is: {rcvdata[0]},{rcvdata[1]}, {rcvdata[2]}, {rcvdata[3]}, {rcvdata[4]}, {rcvdata[5]}");
+                robot.MoveJ(p2Joint, p2Desc, 0, 0, 100, 100, 100, exaxisPos, -1, 0, offdese);
+                Thread.Sleep(1000);
+                Console.WriteLine($"***********************complate No. {cnt}  SDK test*****************************");
+                cnt++;
             }
 
-            void testLasertrack_point()
+        }
+
+       void TestRobotStopOnComDisc()
+        {
+            int rtn = 0;
+
+            // 设置四个端口的参数
+            rtn = robot.SetRobotStopOnComDisc(0, true, 330);
+            rtn = robot.SetRobotStopOnComDisc(1, true, 550);
+            rtn = robot.SetRobotStopOnComDisc(2, true, 110);
+            rtn = robot.SetRobotStopOnComDisc(3, true, 220);
+            Console.WriteLine($"SetRobotStopOnComDisc {rtn}");
+
+            bool enable = false;
+            int confirmTime = 0;
+
+            // 获取并打印每个端口的设置
+            robot.GetRobotStopOnComDisc(0, ref enable, ref confirmTime);
+            Console.WriteLine($"GetRobotStopOnComDisc 8080 rtn {rtn}; enable is {(enable ? 1 : 0)}; confirm time is {confirmTime}");
+
+            robot.GetRobotStopOnComDisc(1, ref enable, ref confirmTime);
+            Console.WriteLine($"GetRobotStopOnComDisc 8083 rtn {rtn}; enable is {(enable ? 1 : 0)}; confirm time is {confirmTime}");
+
+            robot.GetRobotStopOnComDisc(2, ref enable, ref confirmTime);
+            Console.WriteLine($"GetRobotStopOnComDisc 20002 rtn {rtn}; enable is {(enable ? 1 : 0)}; confirm time is {confirmTime}");
+
+            robot.GetRobotStopOnComDisc(3, ref enable, ref confirmTime);
+            Console.WriteLine($"GetRobotStopOnComDisc 20004 rtn {rtn}; enable is {(enable ? 1 : 0)}; confirm time is {confirmTime}");
+
+        }
+
+        void TestRobotUDP()
+        {
+            robot.OnUdpFrameReceived += (comType, frameCount, frameCmdID, contentLen, content) =>
             {
-                int[] ctrl = new int[20];
-                int state;
-                int pressValue;
-                int error;
-
-                string name = "laserEnd";
-                double[] data = new double[20];
+                Console.WriteLine($"[UDP响应] comType={comType}, count={frameCount}, cmdID={frameCmdID}, content={content}");
+            };
 
 
+            //发送帧
+            string frameToSend = "/f/bIII52III236III7IIIMode(1)III/b/f";
+            robot.SendUDPFrame(frameToSend);
+            Thread.Sleep(2000);
+            frameToSend = "/f/bIII52III236III7IIIMode(0)III/b/f";
+            robot.SendUDPFrame(frameToSend);
+            Thread.Sleep(2000);
+            frameToSend = "/f/bIII41III201III153IIIMoveJ(53.857,-89.441,119.453,-22.664,61.059,3.369,-54.249,-491.930,375.396,96.474,-6.896,-7.783,0,0,100,100,100,0.000,0.000,0.000,0.000,-1,0,0,0,0,0,0,0)III/b/f";
+            robot.SendUDPFrame(frameToSend);
+            Thread.Sleep(2000);
+            frameToSend = "/f/bIII42III203III163IIIMoveL(81.736,-85.284,114.974,-23.261,88.746,6.799,125.744,-506.570,375.396,96.474,-6.896,-7.783,0,0,100,100,100,-1,0,0.000,0.000,0.000,0.000,0,0,0,0,0,0,0,0,100,0)III/b/f";
+            robot.SendUDPFrame(frameToSend);
+            Thread.Sleep(2000);
+            frameToSend = "/f/bIII47III400III15IIIGetMCVersion(1)III/b/f/f/bIII48III424III21IIIGetSlaveFirmVersion()III/b/f";
+            robot.SendUDPFrame(frameToSend);
+            Thread.Sleep(2000);
 
-                JointPos startjointPos = new JointPos(56.205, -117.951, 141.872, -118.149, -94.217, -122.176);
-                DescPose startdescPose = new DescPose(-97.552, -282.855, 26.675, 174.182, -1.338, -91.707);
-                ExaxisPos exaxisPos = new ExaxisPos(0, 0, 0, 0);
-                DescPose offdese = new DescPose(0, 0, 0, 0, 0, 0);
-                DescTran directionPoint = new DescTran();
+        }
 
-                robot.MoveL(startjointPos, startdescPose, 1, 0, 100, 100, 100, -1, exaxisPos, 0, 0, offdese, 0);
-                robot.GetRobotTeachingPoint(name, ref data);
+        public void TestIOConfig()
+        {
+            int rtn = 0;
 
-                Console.WriteLine("{0}, {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11}",
-                    data[0], data[1], data[2], data[3], data[4], data[5],
-                    data[6], data[7], data[8], data[9], data[10], data[11]);
+            // ---------- 测试可配置CI端口功能 ----------
+            int[] setDIConfig = new int[] { 3, 9, 1, 4, 5, 6, 7, 8 };
+            rtn = robot.SetDIConfig(setDIConfig);
+            Console.WriteLine($"SetDIConfig rtn is {rtn}");
 
-                directionPoint.x = data[0];
-                directionPoint.y = data[1];
-                directionPoint.z = data[2];
+            // 使用 out 参数接收获取到的配置数组
+            int[] getDIConfig;
+            rtn = robot.GetDIConfig(out getDIConfig);  
+            Console.WriteLine($"GetDIConfig rtn is {rtn}, value is {string.Join(" ", getDIConfig)}");
 
-                Console.WriteLine("{0}, {1}, {2}", directionPoint.x, directionPoint.y, directionPoint.z);
+            // ---------- 测试可配置CO端口功能 ----------
+            int[] setDOConfig = new int[] { 9, 10, 11, 12, 13, 14, 15, 16 };
+            rtn = robot.SetDOConfig(setDOConfig);
+            Console.WriteLine($"SetDOConfig rtn is {rtn}");
 
-                robot.LaserTrackingSearchStart_point(directionPoint, 100, 500, 1000, 3);
+            int[] getDOConfig;
+            rtn = robot.GetDOConfig(out getDOConfig);
+            Console.WriteLine($"GetDOConfig rtn is {rtn}, value is {string.Join(" ", getDOConfig)}");
+
+            // ---------- 测试末端可配置CI端口功能 ----------
+            int[] setToolDIConfig = new int[] { 17, 18 };
+            rtn = robot.SetToolDIConfig(setToolDIConfig);
+            Console.WriteLine($"SetToolDIConfig rtn is {rtn}");
+
+            int[] getToolDIConfig;
+            rtn = robot.GetToolDIConfig(out getToolDIConfig);
+            Console.WriteLine($"GetToolDIConfig rtn is {rtn}, value is {string.Join(" ", getToolDIConfig)}");
+
+            // ---------- 测试控制箱可配置CI有效状态 ----------
+            int[] setDIConfigLevel = new int[] { 1, 1, 1, 1, 0, 0, 0, 0 };
+            rtn = robot.SetDIConfigLevel(setDIConfigLevel);
+            Console.WriteLine($"SetDIConfigLevel rtn is {rtn}");
+
+            int[] getDIConfigLevel;
+            rtn = robot.GetDIConfigLevel(out getDIConfigLevel);
+            Console.WriteLine($"GetDIConfigLevel rtn is {rtn}, value is {string.Join(" ", getDIConfigLevel)}");
+
+            // ---------- 测试控制箱可配置CO有效状态 ----------
+            int[] setDOConfigLevel = new int[] { 0, 0, 0, 0, 1, 1, 1, 1 };
+            rtn = robot.SetDIConfigLevel(setDOConfigLevel);
+            Console.WriteLine($"SetDOConfigLevel rtn is {rtn}");
+
+            int[] getDOConfigLevel;
+            rtn = robot.GetDOConfigLevel(out getDOConfigLevel);
+            Console.WriteLine($"GetDOConfigLevel rtn is {rtn}, value is {string.Join(" ", getDOConfigLevel)}");
+
+            // ---------- 测试末端可配置CI有效状态 ----------
+            int[] setToolDIConfigLevel = new int[] { 1, 0 };
+            rtn = robot.SetToolDIConfigLevel(setToolDIConfigLevel);
+            Console.WriteLine($"SetToolDIConfigLevel rtn is {rtn}");
+
+            int[] getToolDIConfigLevel;
+            rtn = robot.GetToolDIConfigLevel(out getToolDIConfigLevel);
+            Console.WriteLine($"GetToolDIConfigLevel rtn is {rtn}, value is {string.Join(" ", getToolDIConfigLevel)}");
+
+            // ---------- 测试控制箱标准DI有效状态 ----------
+            int[] setStandardDILevel = new int[] { 1, 1, 1, 1, 0, 0, 0, 0 };
+            rtn = robot.SetStandardDILevel(setStandardDILevel);
+            Console.WriteLine($"SetStandardDILevel rtn is {rtn}");
+
+            int[] getStandardDILevel;
+            rtn = robot.GetStandardDILevel(out getStandardDILevel);
+            Console.WriteLine($"GetStandardDILevel rtn is {rtn}, value is {string.Join(" ", getStandardDILevel)}");
+
+            // ---------- 测试控制箱标准DO有效状态 ----------
+            int[] setStandardDOLevel = new int[] { 0, 0, 0, 0, 1, 1, 1, 1 };
+            rtn = robot.SetStandardDOLevel(setStandardDOLevel);
+            Console.WriteLine($"SetStandardDOLevel rtn is {rtn}");
+
+            int[] getStandardDOLevel;
+            rtn = robot.GetStandardDOLevel(out getStandardDOLevel);
+            Console.WriteLine($"GetStandardDOLevel rtn is {rtn}, value is {string.Join(" ", getStandardDOLevel)}");
+
+        }
+
+        void TestImpedanceControl1()
+        {
+            JointPos j1 = new JointPos(102.622, -135.990, 120.769, -73.950, -90.848, 35.507);
+            JointPos j2 = new JointPos(93.674, -80.062, 82.947, -92.199, -90.967, 26.559);
+
+            DescPose desc_pos1 = new DescPose(136.552, -149.799, 449.532, 179.817, -1.172, 157.123);
+            DescPose desc_pos2 = new DescPose(136.540, -561.048, 449.542, 179.819, -1.172, 157.122);
+
+            DescPose offset_pos = new DescPose(0, 0, 0, 0, 0, 0);
+            ExaxisPos epos =new ExaxisPos(0, 0, 0, 0);
+
+            int tool = 0;
+            int user = 0;
+            float vel = 100.0f;
+            float acc = 200.0f;
+            float ovl = 100.0f;
+            double blendT = -1.0;
+            double blendR = -1.0;
+            int flag = 0;
+            int search = 0;
+
+            robot.SetSpeed(20);
+
+            double[] forceThreshold = new double[6] { 10, 10, 10, 1, 1, 1 };
+            double[] m = new double[6] { 0.04, 0.04, 0.04, 0.01, 0.01, 0.01 };
+            double[] b = new double[6] { 0.1, 0.1, 0.1, 0.08, 0.08, 0.08 };
+            double[] k = new double[6] { 0, 0, 0, 0, 0, 0 };
+            int rtn = 0;
+            rtn = robot.ImpedanceControlStartStop(1, 0, forceThreshold, m, b, k, 50, 50, 100, 100);
+            //printf("ImpedanceControlStartStop errcode:%d\n", rtn);
+            robot.MoveJ(j1, tool, user, vel, acc, ovl, epos, -1, 0, offset_pos);
+            robot.MoveJ(j2, tool, user, vel, acc, ovl, epos, -1, 0, offset_pos);
+            robot.MoveJ(j1, tool, user, vel, acc, ovl, epos, -1, 0, offset_pos);
+            robot.MoveJ(j2, tool, user, vel, acc, ovl, epos, -1, 0, offset_pos);
+
+            //printf("moveJ errcode:%d\n", rtn);
+
+            robot.ImpedanceControlStartStop(0, 0, forceThreshold, m, b, k, 50, 50, 100, 100);
+        }
+
+        public void TestLaserTrackAndExitAxis()
+        {
+
+            ExaxisPos startexaxisPos = new ExaxisPos(0, 0, 0, 0);
+            ExaxisPos seamexaxisPos = new ExaxisPos(-10, 0, 0, 0);
+            ExaxisPos endexaxisPos = new ExaxisPos(-30, 0, 0, 0);
+
+
+            DescPose offdese = new DescPose(0, 0, 0, 0, 0, 0);
+
+
+            JointPos startjointPos = new JointPos(58.337, -119.628, 146.037, -116.358, -92.224, -117.654);
+            DescPose startdescPose = new DescPose(-53.375, -255.363, 0.919, 178.054, 1.077, -94.026);
+
+            for (int i = 0; i < 10; ++i)
+            {
+                robot.ExtAxisSyncMoveJ(startjointPos, startdescPose, 1, 0, 100, 100, 100, startexaxisPos, -1, 0, offdese);
+
+                Console.WriteLine("11111");
+
+
+                int ret = robot.LaserTrackingSearchStart_xyz(3, 100, 300, 1000, 2);
                 robot.LaserTrackingSearchStop();
-                robot.MoveToLaserSeamPos(1, 30, 0, 0, 0, offdese);
-            }
 
-            void testLaserRecordAndReplay()
-            {
-                int[] ctrl = new int[20];
-                int state;
-                int pressValue;
-                int error;
-                robot.OpenLuaUpload("D://zUP/CtrlDev_laser_ruiniu-0117.lua");
-                System.Threading.Thread.Sleep(2000);
-                robot.SetCtrlOpenLUAName(0, "CtrlDev_laser_ruiniu-0117.lua");
-                robot.UnloadCtrlOpenLUA(0);
-                robot.LoadCtrlOpenLUA(0);
-                System.Threading.Thread.Sleep(8000);
-                for (int i = 0; i < 10; ++i)
+                Console.WriteLine("2222");
+
+
+                int tool = 0;
+                int user = 0;
+                JointPos seamjointPos = new JointPos();
+                DescPose seamdescPose = new DescPose();
+
+                robot.GetLaserSeamPos(0, offdese, ref seamjointPos, ref seamdescPose, ref tool, ref user, ref startexaxisPos);
+
+                Console.WriteLine($"{seamjointPos.jPos[0]}, {seamjointPos.jPos[1]}, {seamjointPos.jPos[2]}, " +
+                                    $"{seamjointPos.jPos[3]}, {seamjointPos.jPos[4]}, {seamjointPos.jPos[5]}, " +
+                                    $"{seamdescPose.tran.x}, {seamdescPose.tran.y}, {seamdescPose.tran.z}, " +
+                                    $"{seamdescPose.rpy.rx}, {seamdescPose.rpy.ry}, {seamdescPose.rpy.rz}");
+
+
+                if (ret == 0)
                 {
-                    JointPos startjointPos = new JointPos(56.205, -117.951, 141.872, -118.149, -94.217, -122.176);
-                    DescPose startdescPose = new DescPose(-97.552, -282.855, 26.675, 174.182, -1.338, -91.707);
-                    ExaxisPos exaxisPos = new ExaxisPos(0, 0, 0, 0);
-                    DescPose offdese = new DescPose(0, 0, 0, 0, 0, 0);
 
-                    robot.MoveL(startjointPos, startdescPose, 1, 0, 100, 100, 100, -1, exaxisPos, 0, 0, offdese, 0);
-                    robot.LaserSensorRecord1(2, 10);
+                    robot.ExtAxisSyncMoveJ(seamjointPos, seamdescPose, 1, 0, 100, 100, 100, seamexaxisPos, -1, 0, offdese);
 
-                    JointPos endjointPos = new JointPos(68.809, -87.100, 121.120, -127.233, -95.038, -109.555);
-                    DescPose enddescPose = new DescPose(-103.555, -464.234, 13.076, 174.179, -1.344, -91.709);
-                    robot.MoveL(endjointPos, enddescPose, 1, 0, 50, 100, 100, -1, exaxisPos, 0, 0, offdese, 0);
 
-                    robot.LaserSensorRecord1(0, 10);
-                    robot.MoveToLaserRecordStart(1, 30);
-                    robot.LaserSensorReplay(10, 100);
-                    robot.MoveLTR();
-                    robot.LaserSensorRecord1(0, 10);
-                    Console.WriteLine($"完成次数 : {i + 1} 次");
+                    Console.WriteLine("3333");
+                    robot.LaserTrackingTrackOnOff(1, 2);
+
+                    JointPos endjointPos = new JointPos(70.580, -90.918, 126.593, -125.154, -92.162, -105.403);
+                    DescPose enddescPose = new DescPose(-53.375, -419.020, 0.920, 178.054, 1.076, -94.026);
+
+                    robot.ExtAxisSyncMoveL(endjointPos, enddescPose, 1, 0, 20, 100, 100, -1, endexaxisPos, 0, offdese);
+
+                    // 停止跟踪
+                    robot.LaserTrackingTrackOnOff(0, 2);
+
                 }
-
+                Console.WriteLine($"完成次数 : {i + 1} 次");
             }
 
-            void testLasertrack()
-            {
-                int[] ctrl = new int[20];
-                int state;
-                int pressValue;
-                int error;
-                robot.OpenLuaUpload("D://zUP/CtrlDev_laser_ruiniu-0117.lua");
-                System.Threading.Thread.Sleep(2000);
-                robot.SetCtrlOpenLUAName(0, "CtrlDev_laser_ruiniu-0117.lua");
-                robot.UnloadCtrlOpenLUA(0);
-                robot.LoadCtrlOpenLUA(0);
-                System.Threading.Thread.Sleep(8000);
-                for (int i = 0; i < 10; ++i)
-                {
-                    JointPos startjointPos = new JointPos(56.205, -117.951, 141.872, -118.149, -94.217, -122.176);
-                    DescPose startdescPose = new DescPose(-97.552, -282.855, 26.675, 174.182, -1.338, -91.707);
-                    ExaxisPos exaxisPos = new ExaxisPos(0, 0, 0, 0);
-                    DescPose offdese = new DescPose(0, 0, 0, 0, 0, 0);
-                    DescTran directionPoint = new DescTran();
+        }
 
-                    robot.MoveL(startjointPos, startdescPose, 1, 0, 100, 100, 100, -1, exaxisPos, 0, 0, offdese, 0);
-                    robot.LaserTrackingSearchStart_xyz(3, 100, 300, 1000, 3);
-                    robot.LaserTrackingSearchStop();
-                    robot.MoveToLaserSeamPos(1, 30, 0, 0, 0, offdese);
+        public int TestSetVelReducePara()
+        {
+            int rtn = 0;
+            JointPos j1 = new JointPos(0, -90, 90, 0, 0, 0);
+            JointPos j2 = new JointPos(90, -90, 90, 0, 0, 0);
+            ExaxisPos epos = new ExaxisPos(0, 0, 0, 0);
+            DescPose offset_pos = new DescPose(0, 0, 0, 0, 0, 0);
 
-                    robot.LaserTrackingTrackOnOff(1, 3);
+            robot.SetSpeed(80);
 
-                    JointPos endjointPos = new JointPos(68.809, -87.100, 121.120, -127.233, -95.038, -109.555);
-                    DescPose enddescPose = new DescPose(-103.555, -464.234, 13.076, 174.179, -1.344, -91.709);
-                    robot.MoveL(endjointPos, enddescPose, 1, 0, 20, 100, 100, -1, exaxisPos, 0, 0, offdese, 0);
+            // 测试参数错误
+            rtn = robot.SetVelReducePara(2, 30, 1);
+            Console.WriteLine($"SetVelReducePara param error rtn is {rtn}");
 
-                    robot.LaserTrackingTrackOnOff(0, 3);
-                    Console.WriteLine($"完成次数 : {i + 1} 次");
-                }
-            }
-            public void TestLaserTrackAndExitAxis()
-            {
+            // 禁用减速
+            rtn = robot.SetVelReducePara(0, 30, 1);
+            Console.WriteLine($"SetVelReducePara disable reduce vel rtn is {rtn}");
+            robot.MoveJ(j1, 0, 0, 100, 100, 100, epos, -1, 0, offset_pos);
+            robot.MoveJ(j2, 0, 0, 100, 100, 100, epos, -1, 0, offset_pos);
 
-                ExaxisPos startexaxisPos = new ExaxisPos(0, 0, 0, 0);
-                ExaxisPos seamexaxisPos = new ExaxisPos(-10, 0, 0, 0);
-                ExaxisPos endexaxisPos = new ExaxisPos(-30, 0, 0, 0);
+            // 启用减速（手动模式）
+            rtn = robot.SetVelReducePara(1, 30, 1);
+            Console.WriteLine($"SetVelReducePara reduce vel rtn is {rtn}");
+            robot.MoveJ(j1, 0, 0, 100, 100, 100, epos, -1, 0, offset_pos);
+            robot.MoveJ(j2, 0, 0, 100, 100, 100, epos, -1, 0, offset_pos);
+
+            // 所有模式启用，策略为停止报警并去使能
+            rtn = robot.SetVelReducePara(2, 30, 2);
+            Console.WriteLine($"SetVelReducePara disable robot rtn is {rtn}");
+            robot.MoveJ(j1, 0, 0, 100, 100, 100, epos, -1, 0, offset_pos);
+            robot.MoveJ(j2, 0, 0, 100, 100, 100, epos, -1, 0, offset_pos);
+
+            Thread.Sleep(2000);
+            robot.ResetAllError();
+            robot.RobotEnable(1);
+            Thread.Sleep(1000);
+
+            // 所有模式启用，策略为停止报警（正常参数）
+            rtn = robot.SetVelReducePara(2, 30, 0);
+            Console.WriteLine($"SetVelReducePara report error rtn is {rtn}");
+            robot.MoveJ(j1, 0, 0, 100, 100, 100, epos, -1, 0, offset_pos);
+            robot.MoveJ(j2, 0, 0, 100, 100, 100, epos, -1, 0, offset_pos);
+
+            Thread.Sleep(1000);
+            return 0;
+        }
+
+        void TestOriginPointWeave()
+        {
+            // 创建关节位置对象
+            JointPos j = new JointPos(39.886, -98.580, -124.032, -47.393, 90.000, 40.842);
+            ExaxisPos epos = new ExaxisPos(0, 0, 0, 0);
+            DescPose offset_pos = new DescPose(0, 0, 0, 0, 0, 0);
+
+            // 参考点坐标
+            DescPose refPoint = new DescPose(400.021, 300.022, 299.996, 179.997, -0.003, -90.956);
+
+            //// 第一次运动
+            robot.MoveJ(j, 1, 0, 100, 100, 100, epos, -1, 0, offset_pos);
+
+            // 启动定点摆动（模式0）
+            robot.OriginPointWeaveStart(0, 0, refPoint, 3);
+            robot.MoveStationary();   // 执行固定运动（假设该方法存在）
+            robot.OriginPointWeaveEnd();
+
+            Thread.Sleep(2000);         // 等待2秒
+
+            // 第二次运动
+            robot.MoveJ(j, 1, 0, 100, 100, 100, epos, -1, 0, offset_pos);
+
+            // 启动定点摆动（模式1）
+            robot.OriginPointWeaveStart(0, 1, refPoint, 3);
+            robot.MoveStationary();
+            robot.OriginPointWeaveEnd();
+
+        }
+
+        public int TestUDPAxis()
+        {
+            int rtn = 0;
+
+            // 设置 UDP 通信参数
+            rtn = robot.ExtDevSetUDPComParam("192.168.58.88", 2021, 2, 100, 3, 200, 1, 100, 5, 1);
+            Console.WriteLine("ExtDevSetUDPComParam rtn is " + rtn);
+
+            // 获取 UDP 通信参数（使用 out 参数）
+            string ip = "";
+            int port = 0, period = 0, lossPkgTime = 0, lossPkgNum = 0, disconnectTime = 0;
+            int reconnectEnable = 0, reconnectPeriod = 0, reconnectNum = 0, selfConnect = 0;
+            rtn = robot.ExtDevGetUDPComParam(ref ip, ref port, ref period, ref lossPkgTime, ref lossPkgNum,
+                                             ref disconnectTime, ref reconnectEnable, ref reconnectPeriod, ref reconnectNum, ref selfConnect);
+            string patam = "\nip " + ip +
+                           "\nport " + port +
+                           "\nperiod  " + period +
+                           "\nlossPkgTime " + lossPkgTime +
+                           "\nlossPkgNum  " + lossPkgNum +
+                           "\ndisConntime  " + disconnectTime +
+                           "\nreconnecable  " + reconnectEnable +
+                           "\nreconnperiod  " + reconnectPeriod +
+                           "\nreconnnun  " + reconnectNum +
+                           "\nselfConnect  " + selfConnect;
+            Console.WriteLine("ExtDevGetUDPComParam rtn is " + rtn + patam);
+
+            // 加载 UDP 驱动
+            robot.ExtDevLoadUDPDriver();
+
+            // 设置外部轴命令完成时间
+            rtn = robot.SetExAxisCmdDoneTime(5000.0);
+            Console.WriteLine("SetExAxisCmdDoneTime rtn is " + rtn);
 
 
-                DescPose offdese = new DescPose(0, 0, 0, 0, 0, 0);
+
+            // 使能外部轴 1 和 2
+            rtn = robot.ExtAxisServoOn(1, 1);
+            Console.WriteLine("ExtAxisServoOn axis id 1 rtn is " + rtn);
+            rtn = robot.ExtAxisServoOn(2, 1);
+            Console.WriteLine("ExtAxisServoOn axis id 2 rtn is " + rtn);
+            Thread.Sleep(2000);
 
 
-                JointPos startjointPos = new JointPos(58.337, -119.628, 146.037, -116.358, -92.224, -117.654);
-                DescPose startdescPose = new DescPose(-53.375, -255.363, 0.919, 178.054, 1.077, -94.026);
+            // 设置外部轴回零
+            robot.ExtAxisSetHoming(1, 0, 10, 2);
+            //Thread.Sleep(2000);
+            Console.WriteLine("ExtAxisSetHoming11111111111 rtnn is  ");
+            rtn = robot.ExtAxisSetHoming(2, 0, 10, 2);
+            Console.WriteLine("ExtAxisSetHoming rtnn is  " + rtn);
+            Thread.Sleep(4000);
 
-                for (int i = 0; i < 10; ++i)
-                {
-                    robot.ExtAxisSyncMoveJ(startjointPos, startdescPose, 1, 0, 100, 100, 100, startexaxisPos, -1, 0, offdese);
+            // 配置机器人位置到轴
+            rtn = robot.SetRobotPosToAxis(1);
+            Console.WriteLine("SetRobotPosToAxis rtn is " + rtn);
 
-                    Console.WriteLine("11111");
+            // 配置 DH 参数
+            rtn = robot.SetAxisDHParaConfig(10, 20, 0, 0, 0, 0, 0, 0, 0);
+            Console.WriteLine("SetAxisDHParaConfig rtn is " + rtn);
 
+            // 配置外部轴参数（轴 1）
+            rtn = robot.ExtAxisParamConfig(1, 1, 1, 1000, -1000, 1000, 1000, 1.905, 262144, 200, 1, 0, 0);
+            Console.WriteLine("ExtAxisParamConfig axis 1 rtn is " + rtn);
 
-                    int ret = robot.LaserTrackingSearchStart_xyz(3, 100, 300, 1000, 2);
-                    robot.LaserTrackingSearchStop();
+            // 配置外部轴参数（轴 2）
+            rtn = robot.ExtAxisParamConfig(2, 1, 1, 1000, -1000, 1000, 1000, 4.444, 262144, 200, 1, 0, 0);
+            Console.WriteLine("ExtAxisParamConfig axis 1 rtn is " + rtn); // 原 C++ 输出文字为 "axis 1"，保持原样
 
-                    Console.WriteLine("2222");
+            // 轴 1 点动测试
+            Thread.Sleep(3000);
+            robot.ExtAxisStartJog(1, 0, 10, 10, 30);
+            Thread.Sleep(1000);
+            robot.ExtAxisStopJog(1);
+            Thread.Sleep(3000);
+            robot.ExtAxisServoOn(1, 0);
 
+            // 轴 2 点动测试
+            Thread.Sleep(3000);
+            robot.ExtAxisStartJog(2, 0, 10, 10, 30);
+            Thread.Sleep(1000);
+            robot.ExtAxisStopJog(2);
+            Thread.Sleep(3000);
+            robot.ExtAxisServoOn(2, 0);
 
-                    int tool = 0;
-                    int user = 0;
-                    JointPos seamjointPos = new JointPos();
-                    DescPose seamdescPose = new DescPose();
+            // 卸载 UDP 驱动
+            robot.ExtDevUnloadUDPDriver();
 
-                    robot.GetLaserSeamPos(0, offdese, ref seamjointPos, ref seamdescPose, ref tool, ref user, ref startexaxisPos);
+            return 0;
+        }
 
-                    Console.WriteLine($"{seamjointPos.jPos[0]}, {seamjointPos.jPos[1]}, {seamjointPos.jPos[2]}, " +
-                                     $"{seamjointPos.jPos[3]}, {seamjointPos.jPos[4]}, {seamjointPos.jPos[5]}, " +
-                                     $"{seamdescPose.tran.x}, {seamdescPose.tran.y}, {seamdescPose.tran.z}, " +
-                                     $"{seamdescPose.rpy.rx}, {seamdescPose.rpy.ry}, {seamdescPose.rpy.rz}");
+        public void testled()
+        {
+            robot.SetUserLEDColor(true, true, true);
+            robot.Sleep(1000);
+            robot.SetUserLEDColor(false, false, false);
+            robot.Sleep(1000);
+            robot.SetUserLEDColor(true, false, false);
+            robot.Sleep(1000);
+            robot.SetUserLEDColor(false, true, false);
+            robot.Sleep(1000);
+            robot.SetUserLEDColor(false, false, true);
+        }
 
+        public int TestCtrlOpenLuaOperate()
+        {
+            int rtn;
 
-                    if (ret == 0)
-                    {
+            // 上传 Lua 文件到机器人
+            rtn = robot.OpenLuaUpload("D://zUP/openlua/CtrlDev_WELDING_A.lua");
+            Console.WriteLine($"OpenLuaUpload rtn is {rtn}");
+            rtn = robot.OpenLuaUpload("D://zUP/openlua/CtrlDev_SWDPOLISH.lua");
+            Console.WriteLine($"OpenLuaUpload rtn is {rtn}");
 
-                        robot.ExtAxisSyncMoveJ(seamjointPos, seamdescPose, 1, 0, 100, 100, 100, seamexaxisPos, -1, 0, offdese);
+            // 从机器人下载 Lua 文件
+            rtn = robot.OpenLuaDownload("CtrlDev_WELDING_A.lua", "D://zDOWN/");
+            Console.WriteLine($"OpenLuaDownload rtn is {rtn}");
+            rtn = robot.OpenLuaDownload("CtrlDev_SWDPOLISH.lua", "D://zDOWN/");
+            Console.WriteLine($"OpenLuaDownload rtn is {rtn}");
 
+            // 设置控制开放协议 Lua 名称
+            rtn = robot.SetCtrlOpenLUAName(0, "CtrlDev_WELDING_A.lua");
+            Console.WriteLine($"SetCtrlOpenLUAName rtn is {rtn}");
+            rtn = robot.SetCtrlOpenLUAName(1, "CtrlDev_SWDPOLISH.lua");
+            Console.WriteLine($"SetCtrlOpenLUAName rtn is {rtn}");
 
-                        Console.WriteLine("3333");
-                        robot.LaserTrackingTrackOnOff(1, 2);
+            // 获取控制开放协议 Lua 名称
+            string[] name = new string[4];
+            rtn = robot.GetCtrlOpenLUAName(ref name);
+            Console.WriteLine($"ctrl open lua names : {name[0]}, {name[1]}, {name[2]}, {name[3]}");
 
-                        JointPos endjointPos = new JointPos(70.580, -90.918, 126.593, -125.154, -92.162, -105.403);
-                        DescPose enddescPose = new DescPose(-53.375, -419.020, 0.920, 178.054, 1.076, -94.026);
+            // 加载和卸载开放协议 Lua
+            rtn = robot.LoadCtrlOpenLUA(1);
+            Console.WriteLine($"LoadCtrlOpenLUA rtn is {rtn}");
+            robot.Sleep(2000);
+            rtn = robot.UnloadCtrlOpenLUA(1);
+            Console.WriteLine($"UnloadCtrlOpenLUA rtn is {rtn}");
 
-                        robot.ExtAxisSyncMoveL(endjointPos, enddescPose, 1, 0, 20, 100, 100, -1, endexaxisPos, 0, offdese);
+            // 删除指定 Lua 文件和所有 Lua 文件
+            rtn = robot.OpenLuaDelete("CtrlDev_WELDING_A.lua");
+            Console.WriteLine($"OpenLuaDelete rtn is {rtn}");
+            rtn = robot.AllOpenLuaDelete();
+            Console.WriteLine($"AllOpenLuaDelete rtn is {rtn}");
 
-                        // 停止跟踪
-                        robot.LaserTrackingTrackOnOff(0, 2);
-
-                    }
-                    Console.WriteLine($"完成次数 : {i + 1} 次");
-                }
-
-            }
+            return 0;
+        }
 
         private void flowLayoutPanel8_Paint(object sender, PaintEventArgs e)
         {

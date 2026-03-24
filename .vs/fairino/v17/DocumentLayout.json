@@ -1,28 +1,58 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "E:\\\u9879\u76EE\\sdk\\fairino-csharp_-sdk-3.8.6\\",
+  "WorkspaceRootPath": "D:\\C#SDK\\github\\fairino-csharp-sdk\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{5E46AB9F-7723-4612-B951-7612FE5DF20A}|src{5E46AB9F-7723-4612-B951-7612FE5DF20A}|FRRobot||{04B8AB82-A572-4FEF-95CE-5222444B6B64}|"
+      "AbsoluteMoniker": "D:0:0:{F5B4D9E2-DA4A-4642-BCF1-786DCADD49D0}|examples\\testFrRobot\\testFrRobot.csproj|d:\\c#sdk\\github\\fairino-csharp-sdk\\examples\\testfrrobot\\test.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F5B4D9E2-DA4A-4642-BCF1-786DCADD49D0}|examples\\testFrRobot\\testFrRobot.csproj|solutionrelative:examples\\testfrrobot\\test.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{F5B4D9E2-DA4A-4642-BCF1-786DCADD49D0}|examples\\testFrRobot\\testFrRobot.csproj|e:\\\u9879\u76EE\\sdk\\fairino-csharp_-sdk-3.8.6\\examples\\testfrrobot\\app.config||{FA3CD31E-987B-443A-9B81-186104E8DAC1}",
-      "RelativeMoniker": "D:0:0:{F5B4D9E2-DA4A-4642-BCF1-786DCADD49D0}|examples\\testFrRobot\\testFrRobot.csproj|solutionrelative:examples\\testfrrobot\\app.config||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{F5B4D9E2-DA4A-4642-BCF1-786DCADD49D0}|examples\\testFrRobot\\testFrRobot.csproj|e:\\\u9879\u76EE\\sdk\\fairino-csharp_-sdk-3.8.6\\examples\\testfrrobot\\properties\\settings.settings||{6D2695F9-5365-4A78-89ED-F205C045BFE6}",
-      "RelativeMoniker": "D:0:0:{F5B4D9E2-DA4A-4642-BCF1-786DCADD49D0}|examples\\testFrRobot\\testFrRobot.csproj|solutionrelative:examples\\testfrrobot\\properties\\settings.settings||{6D2695F9-5365-4A78-89ED-F205C045BFE6}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A50C0309-4334-4BED-9372-BD8B7D4D4654}|src\\FRRobot\\FRRobot.csproj|E:\\\u9879\u76EE\\sdk\\fairino-csharp_-sdk-3.8.6\\src\\frrobot\\frrobot.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{A50C0309-4334-4BED-9372-BD8B7D4D4654}|src\\FRRobot\\FRRobot.csproj|D:\\C#SDK\\github\\fairino-csharp-sdk\\src\\frrobot\\frrobot.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{A50C0309-4334-4BED-9372-BD8B7D4D4654}|src\\FRRobot\\FRRobot.csproj|solutionrelative:src\\frrobot\\frrobot.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A50C0309-4334-4BED-9372-BD8B7D4D4654}|src\\FRRobot\\FRRobot.csproj|E:\\\u9879\u76EE\\sdk\\fairino-csharp_-sdk-3.8.6\\src\\frrobot\\frlog.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A50C0309-4334-4BED-9372-BD8B7D4D4654}|src\\FRRobot\\FRRobot.csproj|solutionrelative:src\\frrobot\\frlog.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{A50C0309-4334-4BED-9372-BD8B7D4D4654}|src\\FRRobot\\FRRobot.csproj|D:\\C#SDK\\github\\fairino-csharp-sdk\\src\\frrobot\\rpchandle.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A50C0309-4334-4BED-9372-BD8B7D4D4654}|src\\FRRobot\\FRRobot.csproj|solutionrelative:src\\frrobot\\rpchandle.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A50C0309-4334-4BED-9372-BD8B7D4D4654}|src\\FRRobot\\FRRobot.csproj|e:\\\u9879\u76EE\\sdk\\fairino-csharp_-sdk-3.8.6\\src\\frrobot\\||{B270807C-D8C6-49EB-8EBE-8E8D566637A1}|a54ad834-9219-4aa6-b589-607af21c3e26"
+      "AbsoluteMoniker": "D:0:0:{A50C0309-4334-4BED-9372-BD8B7D4D4654}|src\\FRRobot\\FRRobot.csproj|D:\\C#SDK\\github\\fairino-csharp-sdk\\src\\frrobot\\statustcpclient.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A50C0309-4334-4BED-9372-BD8B7D4D4654}|src\\FRRobot\\FRRobot.csproj|solutionrelative:src\\frrobot\\statustcpclient.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A50C0309-4334-4BED-9372-BD8B7D4D4654}|src\\FRRobot\\FRRobot.csproj|D:\\C#SDK\\github\\fairino-csharp-sdk\\src\\frrobot\\frudpclient.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A50C0309-4334-4BED-9372-BD8B7D4D4654}|src\\FRRobot\\FRRobot.csproj|solutionrelative:src\\frrobot\\frudpclient.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A50C0309-4334-4BED-9372-BD8B7D4D4654}|src\\FRRobot\\FRRobot.csproj|D:\\C#SDK\\github\\fairino-csharp-sdk\\src\\frrobot\\robottypes.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A50C0309-4334-4BED-9372-BD8B7D4D4654}|src\\FRRobot\\FRRobot.csproj|solutionrelative:src\\frrobot\\robottypes.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F5B4D9E2-DA4A-4642-BCF1-786DCADD49D0}|examples\\testFrRobot\\testFrRobot.csproj|D:\\C#SDK\\github\\fairino-csharp-sdk\\examples\\testfrrobot\\frmudp.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F5B4D9E2-DA4A-4642-BCF1-786DCADD49D0}|examples\\testFrRobot\\testFrRobot.csproj|solutionrelative:examples\\testfrrobot\\frmudp.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F5B4D9E2-DA4A-4642-BCF1-786DCADD49D0}|examples\\testFrRobot\\testFrRobot.csproj|D:\\C#SDK\\github\\fairino-csharp-sdk\\examples\\testfrrobot\\test.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F5B4D9E2-DA4A-4642-BCF1-786DCADD49D0}|examples\\testFrRobot\\testFrRobot.csproj|solutionrelative:examples\\testfrrobot\\test.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A50C0309-4334-4BED-9372-BD8B7D4D4654}|src\\FRRobot\\FRRobot.csproj|D:\\C#SDK\\github\\fairino-csharp-sdk\\src\\frrobot\\framehandle.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A50C0309-4334-4BED-9372-BD8B7D4D4654}|src\\FRRobot\\FRRobot.csproj|solutionrelative:src\\frrobot\\framehandle.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F5B4D9E2-DA4A-4642-BCF1-786DCADD49D0}|examples\\testFrRobot\\testFrRobot.csproj|D:\\C#SDK\\github\\fairino-csharp-sdk\\examples\\testfrrobot\\test.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{F5B4D9E2-DA4A-4642-BCF1-786DCADD49D0}|examples\\testFrRobot\\testFrRobot.csproj|solutionrelative:examples\\testfrrobot\\test.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F5B4D9E2-DA4A-4642-BCF1-786DCADD49D0}|examples\\testFrRobot\\testFrRobot.csproj|D:\\C#SDK\\github\\fairino-csharp-sdk\\examples\\testfrrobot\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F5B4D9E2-DA4A-4642-BCF1-786DCADD49D0}|examples\\testFrRobot\\testFrRobot.csproj|solutionrelative:examples\\testfrrobot\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F5B4D9E2-DA4A-4642-BCF1-786DCADD49D0}|examples\\testFrRobot\\testFrRobot.csproj|D:\\C#SDK\\github\\fairino-csharp-sdk\\examples\\testfrrobot\\form1.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F5B4D9E2-DA4A-4642-BCF1-786DCADD49D0}|examples\\testFrRobot\\testFrRobot.csproj|solutionrelative:examples\\testfrrobot\\form1.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F5B4D9E2-DA4A-4642-BCF1-786DCADD49D0}|examples\\testFrRobot\\testFrRobot.csproj|D:\\C#SDK\\github\\fairino-csharp-sdk\\examples\\testfrrobot\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{F5B4D9E2-DA4A-4642-BCF1-786DCADD49D0}|examples\\testFrRobot\\testFrRobot.csproj|solutionrelative:examples\\testfrrobot\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
     }
   ],
   "DocumentGroupContainers": [
@@ -32,71 +62,163 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 2,
+          "SelectedChildIndex": 1,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "FRLog.cs",
-              "DocumentMoniker": "E:\\\u9879\u76EE\\sdk\\fairino-csharp_-sdk-3.8.6\\src\\FRRobot\\FRLog.cs",
-              "RelativeDocumentMoniker": "src\\FRRobot\\FRLog.cs",
-              "ToolTip": "E:\\\u9879\u76EE\\sdk\\fairino-csharp_-sdk-3.8.6\\src\\FRRobot\\FRLog.cs",
-              "RelativeToolTip": "src\\FRRobot\\FRLog.cs",
-              "ViewState": "AgIAAOwAAAAAAAAAAAAgwPgAAAAJAAAAAAAAAA==",
+              "DocumentIndex": 1,
+              "Title": "FRRobot.cs",
+              "DocumentMoniker": "D:\\C#SDK\\github\\fairino-csharp-sdk\\src\\FRRobot\\FRRobot.cs",
+              "RelativeDocumentMoniker": "src\\FRRobot\\FRRobot.cs",
+              "ToolTip": "D:\\C#SDK\\github\\fairino-csharp-sdk\\src\\FRRobot\\FRRobot.cs",
+              "RelativeToolTip": "src\\FRRobot\\FRRobot.cs",
+              "ViewState": "AgIAAGFhAAAAAAAAAAAWwG5hAABBAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-02-24T09:27:50.052Z",
+              "WhenOpened": "2026-03-13T02:49:12.429Z",
               "IsPinned": true
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "FRRobot.cs",
-              "DocumentMoniker": "E:\\\u9879\u76EE\\sdk\\fairino-csharp_-sdk-3.8.6\\src\\FRRobot\\FRRobot.cs",
-              "RelativeDocumentMoniker": "src\\FRRobot\\FRRobot.cs",
-              "ToolTip": "E:\\\u9879\u76EE\\sdk\\fairino-csharp_-sdk-3.8.6\\src\\FRRobot\\FRRobot.cs",
-              "RelativeToolTip": "src\\FRRobot\\FRRobot.cs",
-              "ViewState": "AgIAAHFQAAAAAAAAAAAAwGtQAAAZAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-02-24T08:52:07.51Z",
-              "IsPinned": true,
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "FRRobot",
-              "DocumentMoniker": "E:\\\u9879\u76EE\\sdk\\fairino-csharp_-sdk-3.8.6\\src\\FRRobot\\FRRobot.csproj",
-              "RelativeDocumentMoniker": "src\\FRRobot\\FRRobot.csproj",
-              "ToolTip": "E:\\\u9879\u76EE\\sdk\\fairino-csharp_-sdk-3.8.6\\src\\FRRobot\\FRRobot.csproj",
-              "RelativeToolTip": "src\\FRRobot\\FRRobot.csproj",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2025-09-10T03:09:23.87Z",
+              "Title": "Test.cs",
+              "DocumentMoniker": "D:\\C#SDK\\github\\fairino-csharp-sdk\\examples\\testFrRobot\\Test.cs",
+              "RelativeDocumentMoniker": "examples\\testFrRobot\\Test.cs",
+              "ToolTip": "D:\\C#SDK\\github\\fairino-csharp-sdk\\examples\\testFrRobot\\Test.cs",
+              "RelativeToolTip": "examples\\testFrRobot\\Test.cs",
+              "ViewState": "AgIAABwfAAAAAAAAAAAswBwfAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-13T06:00:04.413Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "App.config",
-              "DocumentMoniker": "E:\\\u9879\u76EE\\sdk\\fairino-csharp_-sdk-3.8.6\\examples\\testFrRobot\\App.config",
-              "RelativeDocumentMoniker": "examples\\testFrRobot\\App.config",
-              "ToolTip": "E:\\\u9879\u76EE\\sdk\\fairino-csharp_-sdk-3.8.6\\examples\\testFrRobot\\App.config",
-              "RelativeToolTip": "examples\\testFrRobot\\App.config",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000601|",
-              "WhenOpened": "2025-09-10T03:06:26.076Z",
-              "EditorCaption": ""
+              "DocumentIndex": 4,
+              "Title": "FRUdpClient.cs",
+              "DocumentMoniker": "D:\\C#SDK\\github\\fairino-csharp-sdk\\src\\FRRobot\\FRUdpClient.cs",
+              "RelativeDocumentMoniker": "src\\FRRobot\\FRUdpClient.cs",
+              "ToolTip": "D:\\C#SDK\\github\\fairino-csharp-sdk\\src\\FRRobot\\FRUdpClient.cs",
+              "RelativeToolTip": "src\\FRRobot\\FRUdpClient.cs",
+              "ViewState": "AgIAAHkAAAAAAAAAAAAkwIQAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-17T02:55:29.567Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 2,
-              "Title": "Settings.settings",
-              "DocumentMoniker": "E:\\\u9879\u76EE\\sdk\\fairino-csharp_-sdk-3.8.6\\examples\\testFrRobot\\Properties\\Settings.settings",
-              "RelativeDocumentMoniker": "examples\\testFrRobot\\Properties\\Settings.settings",
-              "ToolTip": "E:\\\u9879\u76EE\\sdk\\fairino-csharp_-sdk-3.8.6\\examples\\testFrRobot\\Properties\\Settings.settings",
-              "RelativeToolTip": "examples\\testFrRobot\\Properties\\Settings.settings",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002767|",
-              "WhenOpened": "2025-09-10T03:02:32.975Z",
-              "EditorCaption": ""
+              "Title": "RPCHandle.cs",
+              "DocumentMoniker": "D:\\C#SDK\\github\\fairino-csharp-sdk\\src\\FRRobot\\RPCHandle.cs",
+              "RelativeDocumentMoniker": "src\\FRRobot\\RPCHandle.cs",
+              "ToolTip": "D:\\C#SDK\\github\\fairino-csharp-sdk\\src\\FRRobot\\RPCHandle.cs",
+              "RelativeToolTip": "src\\FRRobot\\RPCHandle.cs",
+              "ViewState": "AgIAABYJAAAAAAAAAAA6wCIJAAAMAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-13T02:49:42.384Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "RobotTypes.cs",
+              "DocumentMoniker": "D:\\C#SDK\\github\\fairino-csharp-sdk\\src\\FRRobot\\RobotTypes.cs",
+              "RelativeDocumentMoniker": "src\\FRRobot\\RobotTypes.cs",
+              "ToolTip": "D:\\C#SDK\\github\\fairino-csharp-sdk\\src\\FRRobot\\RobotTypes.cs",
+              "RelativeToolTip": "src\\FRRobot\\RobotTypes.cs",
+              "ViewState": "AgIAAN8AAAAAAAAAAAAMwOsAAAAWAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-13T02:49:46.435Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "FrameHandle.cs",
+              "DocumentMoniker": "D:\\C#SDK\\github\\fairino-csharp-sdk\\src\\FRRobot\\FrameHandle.cs",
+              "RelativeDocumentMoniker": "src\\FRRobot\\FrameHandle.cs",
+              "ToolTip": "D:\\C#SDK\\github\\fairino-csharp-sdk\\src\\FRRobot\\FrameHandle.cs",
+              "RelativeToolTip": "src\\FRRobot\\FrameHandle.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAAAkAAAAXAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-13T03:25:48.772Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "Test.cs [\u8BBE\u8BA1]",
+              "DocumentMoniker": "D:\\C#SDK\\github\\fairino-csharp-sdk\\examples\\testFrRobot\\Test.cs",
+              "RelativeDocumentMoniker": "examples\\testFrRobot\\Test.cs",
+              "ToolTip": "D:\\C#SDK\\\u5404\u7248\u672Csdk\\fairino-csharp_-sdk-3.9.4\\examples\\testFrRobot\\Test.cs [\u8BBE\u8BA1]",
+              "RelativeToolTip": "..\\..\\\u5404\u7248\u672Csdk\\fairino-csharp_-sdk-3.9.4\\examples\\testFrRobot\\Test.cs [\u8BBE\u8BA1]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-13T05:59:58.495Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "FrmUDP.cs",
+              "DocumentMoniker": "D:\\C#SDK\\github\\fairino-csharp-sdk\\examples\\testFrRobot\\FrmUDP.cs",
+              "RelativeDocumentMoniker": "examples\\testFrRobot\\FrmUDP.cs",
+              "ToolTip": "D:\\C#SDK\\github\\fairino-csharp-sdk\\examples\\testFrRobot\\FrmUDP.cs",
+              "RelativeToolTip": "examples\\testFrRobot\\FrmUDP.cs",
+              "ViewState": "AgIAAAMFAAAAAAAAAAAAwBQFAAAsAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-16T02:29:14.038Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "StatusTCPClient.cs",
+              "DocumentMoniker": "D:\\C#SDK\\github\\fairino-csharp-sdk\\src\\FRRobot\\StatusTCPClient.cs",
+              "RelativeDocumentMoniker": "src\\FRRobot\\StatusTCPClient.cs",
+              "ToolTip": "D:\\C#SDK\\github\\fairino-csharp-sdk\\src\\FRRobot\\StatusTCPClient.cs",
+              "RelativeToolTip": "src\\FRRobot\\StatusTCPClient.cs",
+              "ViewState": "AgIAAAsAAAAAAAAAAAAAwA0AAAAaAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-13T02:48:08.789Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "Test.Designer.cs",
+              "DocumentMoniker": "D:\\C#SDK\\github\\fairino-csharp-sdk\\examples\\testFrRobot\\Test.Designer.cs",
+              "RelativeDocumentMoniker": "examples\\testFrRobot\\Test.Designer.cs",
+              "ToolTip": "D:\\C#SDK\\github\\fairino-csharp-sdk\\examples\\testFrRobot\\Test.Designer.cs",
+              "RelativeToolTip": "examples\\testFrRobot\\Test.Designer.cs",
+              "ViewState": "AgIAAMIEAAAAAAAAAAAhwNAEAABbAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-16T02:54:56.255Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "Form1.cs",
+              "DocumentMoniker": "D:\\C#SDK\\github\\fairino-csharp-sdk\\examples\\testFrRobot\\Form1.cs",
+              "RelativeDocumentMoniker": "examples\\testFrRobot\\Form1.cs",
+              "ToolTip": "D:\\C#SDK\\github\\fairino-csharp-sdk\\examples\\testFrRobot\\Form1.cs",
+              "RelativeToolTip": "examples\\testFrRobot\\Form1.cs",
+              "ViewState": "AgIAABAAAAAAAAAAAAAUwCUAAAA9AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-13T08:45:25.797Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "Form1.Designer.cs",
+              "DocumentMoniker": "D:\\C#SDK\\github\\fairino-csharp-sdk\\examples\\testFrRobot\\Form1.Designer.cs",
+              "RelativeDocumentMoniker": "examples\\testFrRobot\\Form1.Designer.cs",
+              "ToolTip": "D:\\C#SDK\\github\\fairino-csharp-sdk\\examples\\testFrRobot\\Form1.Designer.cs",
+              "RelativeToolTip": "examples\\testFrRobot\\Form1.Designer.cs",
+              "ViewState": "AgIAAEoAAAAAAAAAAAArwIUAAAAbAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-16T02:28:26.172Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "Form1.cs [\u8BBE\u8BA1]",
+              "DocumentMoniker": "D:\\C#SDK\\github\\fairino-csharp-sdk\\examples\\testFrRobot\\Form1.cs",
+              "RelativeDocumentMoniker": "examples\\testFrRobot\\Form1.cs",
+              "ToolTip": "D:\\C#SDK\\\u5404\u7248\u672Csdk\\fairino-csharp_-sdk-3.9.4\\examples\\testFrRobot\\Form1.cs [\u8BBE\u8BA1]",
+              "RelativeToolTip": "..\\..\\\u5404\u7248\u672Csdk\\fairino-csharp_-sdk-3.9.4\\examples\\testFrRobot\\Form1.cs [\u8BBE\u8BA1]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-03-13T02:40:20.646Z"
             }
           ]
         }

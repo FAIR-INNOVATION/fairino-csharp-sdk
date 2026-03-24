@@ -360,8 +360,9 @@ namespace testFrRobot
             int reconnenable = 0;
             int reconntime = 0;
             int reconnnum = 0;
-            robot.ExtDevGetUDPComParam(ref ip, ref port, ref period, ref checktime, ref checknum, ref disconntime, ref reconntime, ref reconnenable, ref reconnnum);
-            lblgetUDP.Text = $"{ip}  {port}  {period} {checktime}  {checknum}  {disconntime}  {reconnenable}  {reconntime}  {reconnnum}";
+            int selfConnect = 0;
+            robot.ExtDevGetUDPComParam(ref ip, ref port, ref period, ref checktime, ref checknum, ref disconntime, ref reconntime, ref reconnenable, ref reconnnum, ref selfConnect);
+            lblgetUDP.Text = $"{ip}  {port}  {period} {checktime}  {checknum}  {disconntime}  {reconnenable}  {reconntime}  {reconnnum}  {selfConnect}";
         }
 
         private void lblgetUDP_Click(object sender, EventArgs e)
@@ -1074,8 +1075,9 @@ namespace testFrRobot
             int reconnenable = 0;
             int reconntime = 0;
             int reconnnum = 0;
-            robot.ExtDevGetUDPComParam(ref ip, ref port, ref period, ref checktime, ref checknum, ref disconntime, ref reconntime, ref reconnenable, ref reconnnum);
-            lblgetUDP.Text = $"{ip}  {port}  {period} {checktime}  {checknum}  {disconntime}  {reconnenable}  {reconntime}  {reconnnum}";
+            int selfConnect = 0;
+            robot.ExtDevGetUDPComParam(ref ip, ref port, ref period, ref checktime, ref checknum, ref disconntime, ref reconntime, ref reconnenable, ref reconnnum, ref selfConnect);
+            lblgetUDP.Text = $"{ip}  {port}  {period} {checktime}  {checknum}  {disconntime}  {reconnenable}  {reconntime}  {reconnnum} {selfConnect}";
 
             //***********************************************UPD扩展轴参数配置与获取 end **************************************
 

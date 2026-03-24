@@ -7,6 +7,7 @@ using System.Text;
 using System.Windows.Forms;
 //using System.Threading.Tasks;
 using CookComputing.XmlRpc;
+using fairino;
 
 namespace fairino
 {
@@ -1564,7 +1565,7 @@ namespace fairino
         int SetWeldMachineCtrlModeExtDoNum(int DONum);
 
         [XmlRpcMethod("SetWeldMachineCtrlMode")]
-        int SetWeldMachineCtrlMode(int mode);
+        int SetWeldMachineCtrlMode(object[] param);
 
         [XmlRpcMethod("ExtAxisMoveJ")]
         int ExtAxisMoveJ(int syncFlag, double pos1, double pos2, double pos3, double pos4, double ovl, double blendT);
@@ -2264,6 +2265,89 @@ namespace fairino
 
         [XmlRpcMethod("GetInverseKinExaxis")]
         object[] GetInverseKinExaxis(int type, double[] desc_pos, double[] exaxis, int tool, int workPiece);
+
+        [XmlRpcMethod("MoveToTPDStart")]
+        int MoveToTPDStart(string name, int moveType, double ovl);
+
+        [XmlRpcMethod("SetAxleGenComEnable")]
+        int SetAxleGenComEnable(int mode);
+
+        [XmlRpcMethod("GetAxleGenComCycleData")]
+        object[] GetAxleGenComCycleData(int len);
+
+        [XmlRpcMethod("SndRcvAxleGenComCmdData")]
+        object[] SndRcvAxleGenComCmdData(int len_snd, int[] sndBuff, int len_rcv);
+
+        [XmlRpcMethod("SetRobotStopOnComDisc")]
+        int SetRobotStopOnComDisc(int[] input);
+
+        [XmlRpcMethod("GetRobotStopOnComDisc")]
+        object[] GetRobotStopOnComDisc(int[] input);
+
+        [XmlRpcMethod("SetDIConfig")]
+        int SetDIConfig(int[] config);
+
+        [XmlRpcMethod("GetDIConfig")]
+        object[] GetDIConfig(int[] param);
+
+        [XmlRpcMethod("SetDOConfig")]
+        int SetDOConfig(int[] config);
+
+        [XmlRpcMethod("GetDOConfig")]
+        object[] GetDOConfig(int[] param);
+
+        [XmlRpcMethod("SetToolDIConfig")]
+        int SetToolDIConfig(int[] config);
+
+        [XmlRpcMethod("GetToolDIConfig")]
+        object[] GetToolDIConfig(int[] param);
+
+        [XmlRpcMethod("SetDIConfigLevel")]
+        int SetDIConfigLevel(int[] config);
+
+        [XmlRpcMethod("GetDIConfigLevel")]
+        object[] GetDIConfigLevel(int[] param);
+
+        [XmlRpcMethod("SetDOConfigLevel")]
+        int SetDOConfigLevel(int[] config);
+
+        [XmlRpcMethod("GetDOConfigLevel")]
+        object[] GetDOConfigLevel(int[] param);
+
+        [XmlRpcMethod("SetToolDIConfigLevel")]
+        int SetToolDIConfigLevel(int[] config);
+
+        [XmlRpcMethod("GetToolDIConfigLevel")]
+        object[] GetToolDIConfigLevel(int[] param);
+
+        [XmlRpcMethod("SetStandardDILevel")]
+        int SetStandardDILevel(int[] config);
+
+        [XmlRpcMethod("GetStandardDILevel")]
+        object[] GetStandardDILevel(int[] param);
+
+        [XmlRpcMethod("SetStandardDOLevel")]
+        int SetStandardDOLevel(int[] config);
+
+        [XmlRpcMethod("GetStandardDOLevel")]
+        object[] GetStandardDOLevel(int[] param);
+
+        [XmlRpcMethod("SetExAxisCmdDoneTime")]
+        int SetExAxisCmdDoneTime(double[] time);
+
+        [XmlRpcMethod("OpenLuaDownload")]
+        int OpenLuaDownload(string[] param); // 参数：fileName, savePath
+
+        [XmlRpcMethod("SetVelReducePara")]
+        int SetVelReducePara(object[] param);
+
+        [XmlRpcMethod("OriginPointWeaveStart")]
+        int OriginPointWeaveStart(object[] param);
+
+        [XmlRpcMethod("OriginPointWeaveEnd")]
+        int OriginPointWeaveEnd();
+        [XmlRpcMethod("SetUserLEDColor")]
+        int SetUserLEDColor(int param1, int param2, int param3);
     }
     internal class RPCHandle
     {
