@@ -4555,7 +4555,8 @@ namespace testFrRobot
         {
 
             // 依次调用所有测试函数
-            TestCtrlOpenLuaOperate();
+            TestOriginPointWeave();
+            //TestCtrlOpenLuaOperate();
             //TestUDPAxis();
             //testled();
             //TestSetVelReducePara();
@@ -7845,7 +7846,7 @@ namespace testFrRobot
 
             // 启动定点摆动（模式0）
             robot.OriginPointWeaveStart(0, 0, refPoint, 3);
-            robot.MoveStationary();   // 执行固定运动（假设该方法存在）
+            robot.MoveStationary();   // 执行固定运动
             robot.OriginPointWeaveEnd();
 
             Thread.Sleep(2000);         // 等待2秒
@@ -7858,6 +7859,61 @@ namespace testFrRobot
             robot.MoveStationary();
             robot.OriginPointWeaveEnd();
 
+        }
+
+        void TestOriginPointWeave2()
+        {
+            // 创建关节位置对象
+            JointPos j = new JointPos(39.886, -98.580, -124.032, -47.393, 90.000, 40.842);
+            ExaxisPos epos1 = new ExaxisPos(0, 0, 0, 0);
+            DescPose offset_pos = new DescPose(0, 0, 0, 0, 0, 0);
+            ExaxisPos epos2 = new ExaxisPos(5, 0.000, 0.000, 0.000);
+
+            // 参考点坐标
+            DescPose refPoint = new DescPose(400.021, 300.022, 299.996, 179.997, -0.003, -90.956);
+
+            int rtn = 0;
+            robot.LaserTrackingSensorConfig("192.168.58.20", 5020);
+            robot.LaserTrackingSensorSamplePeriod(20);
+            robot.LoadPosSensorDriver(101);
+
+            // 加载 UDP 驱动
+            robot.ExtDevLoadUDPDriver();
+
+            // 设置外部轴命令完成时间
+            rtn = robot.SetExAxisCmdDoneTime(5000.0);
+            Console.WriteLine("SetExAxisCmdDoneTime rtn is " + rtn);
+
+            // 使能外部轴 1 和 2
+            rtn = robot.ExtAxisServoOn(1, 1);
+            Console.WriteLine("ExtAxisServoOn axis id 1 rtn is " + rtn);
+            rtn = robot.ExtAxisServoOn(2, 1);
+            Console.WriteLine("ExtAxisServoOn axis id 2 rtn is " + rtn);
+            Thread.Sleep(2000);
+
+            // 设置外部轴回零
+            robot.ExtAxisSetHoming(1, 0, 10, 2);
+            robot.LaserTrackingLaserOnOff(1);
+
+            //// 1---不带扩展轴
+            robot.LaserTrackingTrackOnOff(1, 4);
+            robot.Sleep(200);
+            // 启动定点摆动
+            robot.OriginPointWeaveStart(0, 0, refPoint, 10);
+            robot.MoveStationary();   // 执行固定运动（假设该方法存在）
+            robot.OriginPointWeaveEnd();
+            robot.LaserTrackingTrackOnOff(0, 4);
+
+            Thread.Sleep(2000);         // 等待2秒
+
+            //// 2----带扩展轴
+            robot.ExtAxisMove(epos1, 100, -1);
+            robot.LaserTrackingTrackOnOff(1, 4);
+            // 启动定点摆动
+            robot.OriginPointWeaveStart(0, 0, refPoint, 20);
+            robot.ExtAxisMove(epos2, 100, -1);
+            robot.OriginPointWeaveEnd();
+            robot.LaserTrackingTrackOnOff(0, 4);
         }
 
         public int TestUDPAxis()
