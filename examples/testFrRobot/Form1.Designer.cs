@@ -136,6 +136,7 @@
             this.btnUpgrade = new System.Windows.Forms.Button();
             this.btnGetSysTime = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
+            this.button3 = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.groupStandard.SuspendLayout();
             this.groupMove.SuspendLayout();
@@ -538,7 +539,7 @@
             // 
             // btnGetSpeeds
             // 
-            this.btnGetSpeeds.Location = new System.Drawing.Point(32, 183);
+            this.btnGetSpeeds.Location = new System.Drawing.Point(32, 160);
             this.btnGetSpeeds.Name = "btnGetSpeeds";
             this.btnGetSpeeds.Size = new System.Drawing.Size(131, 39);
             this.btnGetSpeeds.TabIndex = 36;
@@ -548,7 +549,7 @@
             // 
             // btnInverse
             // 
-            this.btnInverse.Location = new System.Drawing.Point(32, 131);
+            this.btnInverse.Location = new System.Drawing.Point(32, 119);
             this.btnInverse.Name = "btnInverse";
             this.btnInverse.Size = new System.Drawing.Size(131, 39);
             this.btnInverse.TabIndex = 37;
@@ -851,6 +852,7 @@
             // groupStates
             // 
             this.groupStates.Controls.Add(this.btnRobotState);
+            this.groupStates.Controls.Add(this.button3);
             this.groupStates.Controls.Add(this.btnRobotState2);
             this.groupStates.Controls.Add(this.btnInverse);
             this.groupStates.Controls.Add(this.btnGetSpeeds);
@@ -1283,6 +1285,16 @@
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
+            // button3
+            // 
+            this.button3.Location = new System.Drawing.Point(32, 199);
+            this.button3.Name = "button3";
+            this.button3.Size = new System.Drawing.Size(131, 39);
+            this.button3.TabIndex = 30;
+            this.button3.Text = "配置CNDE状态";
+            this.button3.UseVisualStyleBackColor = true;
+            this.button3.Click += new System.EventHandler(this.btnGetcnde_Click);
+            // 
             // Form1
             // 
             this.ClientSize = new System.Drawing.Size(1561, 746);
@@ -1453,6 +1465,7 @@
         private System.Windows.Forms.Button btnGetSysTime;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Button button3;
     }
 }
 

@@ -1,0 +1,102 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace fairino
+{
+    /// <summary>CNDE数据包结构</summary>
+    public class CNDE_PKG
+    {
+        public ushort Head { get; set; } = 0x5A5A;
+        public byte Count { get; set; }
+        public byte Type { get; set; }
+        public ushort Len { get; set; }
+        public List<byte> Data { get; set; } = new List<byte>();
+        public ushort End { get; set; } = 0xA5A5;
+
+        public void Clear()
+        {
+            Count = 0;
+            Type = 0;
+            Len = 0;
+            Data.Clear();
+        }
+    }
+
+    /// <summary>CNDE帧类型常量</summary>
+    public static class CNDEFrameType
+    {
+        public const byte START = 2;
+        public const byte STOP = 3;
+        public const byte OUTPUT_STATE = 4;
+        public const byte MESSAGE = 6;
+        public const byte OUTPUT_CONFIG = 7;      // 新增：配置帧类型
+    }
+
+    /// <summary>机器人可配置状态枚举（与C++严格对应）</summary>
+    public enum RobotState
+    {
+        FrameHead = 0, FrameCnt = 1, DataLen = 2, ProgramState = 3, RobotState = 4,
+        MainCode = 5, SubCode = 6, RobotMode = 7, JointCurPos = 8, ToolCurPos = 9,
+        FlangeCurPos = 10, ActualJointVel = 11, ActualJointAcc = 12, TargetTCPCmpSpeed = 13,
+        TargetTCPSpeed = 14, ActualTCPCmpSpeed = 15, ActualTCPSpeed = 16, ActualJointTorque = 17,
+        Tool = 18, User = 19, ClDgtOutputH = 20, ClDgtOutputL = 21, TlDgtOutputL = 22,
+        ClDgtInputH = 23, ClDgtInputL = 24, TlDgtInputL = 25, ClAnalogInput = 26,
+        TlAnglogInput = 27, FtSensorRawData = 28, FtSensorData = 29, FtSensorActive = 30,
+        EmergencyStop = 31, MotionDone = 32, GripperMotiondone = 33, McQueueLen = 34,
+        CollisionState = 35, TrajectoryPnum = 36, SafetyStop0State = 37, SafetyStop1State = 38,
+        GripperFaultId = 39, GripperFault = 40, GripperActive = 41, GripperPosition = 42,
+        GripperSpeed = 43, GripperCurrent = 44, GripperTemp = 45, GripperVoltage = 46,
+        AuxState = 47, ExtAxisStatus = 48, ExtDIState = 49, ExtDOState = 50, ExtAIState = 51,
+        ExtAOState = 52, RbtEnableState = 53, JointDriverTorque = 54, JointDriverTemperature = 55,
+        RobotTime = 56, SoftwareUpgradeState = 57, EndLuaErrCode = 58, ClAnalogOutput = 59,
+        TlAnalogOutput = 60, GripperRotNum = 61, GripperRotSpeed = 62, GripperRotTorque = 63,
+        WeldingBreakOffState = 64, TargetJointTorque = 65, SmartToolState = 66,
+        WideVoltageCtrlBoxTemp = 67, WideVoltageCtrlBoxFanCurrent = 68, ToolCoord = 69,
+        WobjCoord = 70, ExtoolCoord = 71, ExAxisCoord = 72, Load = 73, LoadCog = 74,
+        LastServoTarget = 75, ServoJCmdNum = 76, TargetJointPos = 77, TargetJointVel = 78,
+        TargetJointAcc = 79, TargetJointCurrent = 80, ActualJointCurrent = 81, ActualTCPForce = 82,
+        TargetTCPPos = 83, CollisionLevel = 84, SpeedScaleManual = 85, SpeedScaleAuto = 86,
+        LuaLineNum = 87, AbnomalStop = 88, CurrentLuaFileName = 89, ProgramTotalLine = 90,
+        SafetyBoxSingal = 91, WeldVoltage = 92, WeldCurrent = 93, WeldTrackVel = 94,
+        TpdException = 95, AlarmRebootRobot = 96, ModbusMasterConnect = 97, ModbusSlaveConnect = 98,
+        BtnBoxStopSignal = 99, DragAlarm = 100, SafetyDoorAlarm = 101, SafetyPlaneAlarm = 102,
+        MotonAlarm = 103, InterfaceAlarm = 104, UdpCmdState = 105, WeldReadyState = 106,
+        AlarmCheckEmergStopBtn = 107, TsTmCmdComError = 108, TsTmStateComError = 109,
+        CtrlBoxError = 110, SafetyDataState = 111, ForceSensorErrState = 112,
+        CtrlOpenLuaErrCode = 113, StrangePosFlag = 114, Alarm = 115, DriverAlarm = 116,
+        AliveSlaveNumError = 117, SlaveComError = 118, CmdPointError = 119, IOError = 120,
+        GripperError = 121, FileError = 122, ParaError = 123, ExaxisOutLimitError = 124,
+        DriverComError = 125, DriverError = 126, OutSoftLimitError = 127, AxleGenComData = 128,
+        CheckSum = 129
+    }
+
+    public static class CNDEFrameHandle
+    {
+        public static byte[] CNDEPkgToFrame(CNDE_PKG pkg)
+        {
+            var frame = new List<byte> { 0x5A, 0x5A, pkg.Count, pkg.Type };
+            frame.AddRange(BitConverter.GetBytes(pkg.Len));
+            frame.AddRange(pkg.Data);
+            frame.Add(0xA5); frame.Add(0xA5);
+            return frame.ToArray();
+        }
+
+        public static int FrameToCNDEPkg(byte[] frame, out CNDE_PKG pkg)
+        {
+            pkg = new CNDE_PKG();
+            if (frame.Length < 8) return -1;
+            pkg.Head = (ushort)(frame[0] | (frame[1] << 8));
+            if (pkg.Head != 0x5A5A) return -3;
+            pkg.Count = frame[2];
+            pkg.Type = frame[3];
+            pkg.Len = (ushort)(frame[4] | (frame[5] << 8));
+            if (pkg.Len != frame.Length - 8) return -2;
+            pkg.Data.AddRange(frame.Skip(6).Take(pkg.Len));
+            ushort tail = (ushort)(frame[frame.Length - 2] | (frame[frame.Length - 1] << 8));
+            if (tail != 0xA5A5) return -4;
+            pkg.End = tail;
+            return 0;
+        }
+    }
+}

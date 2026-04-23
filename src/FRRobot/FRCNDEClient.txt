@@ -1,0 +1,592 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Threading;
+using fairino;
+
+public class FRCNDEClient
+{
+    public const int ERR_SUCCESS = 0;
+    public const int ERR_NEED_AT_LEAST_ONE_STATE = 1001;
+    public const int ERR_STATE_ALREADY_EXISTS = 1002;
+    public const int ERR_STATE_INVALID = 1003;
+    public const int ERR_PARAM_VALUE = 4;
+
+    private StatusTCPClient _rtClient;
+    private bool _robotStateRunFlag = false;
+    private byte _sendCount = 0;
+    private int _robotStatePeriod = 500;   // 默认500ms，与C++一致
+    private readonly object _recvLock = new object();
+    private ROBOT_STATE_PKG _robotStatePkg;
+
+    private List<RobotState> _configStates = new List<RobotState>();
+    private static Dictionary<RobotState, (string FieldName, int Offset, string StructType, string CndeType)> _allStates;
+
+    static FRCNDEClient()
+    {
+        InitAllStates();
+    }
+
+    private static void InitAllStates()
+    {
+        _allStates = new Dictionary<RobotState, (string, int, string, string)>();
+        var pkgType = typeof(ROBOT_STATE_PKG);
+
+        // 与C++ InitAllStates() 完全对应，注意字段名与结构体匹配
+        AddState(RobotState.FrameHead, "frame_head", "UINT16", "UINT16");
+        AddState(RobotState.FrameCnt, "frame_cnt", "UINT8", "UINT8");
+        AddState(RobotState.DataLen, "data_len", "UINT16", "UINT16");
+        AddState(RobotState.ProgramState, "program_state", "UINT8", "UINT8");
+        AddState(RobotState.RobotState, "robot_state", "UINT8", "UINT8");
+        AddState(RobotState.MainCode, "main_code", "INT32", "INT32");
+        AddState(RobotState.SubCode, "sub_code", "INT32", "INT32");
+        AddState(RobotState.RobotMode, "robot_mode", "UINT8", "UINT8");
+        AddState(RobotState.JointCurPos, "jt_cur_pos", "DOUBLE_6", "DOUBLE_6");
+        AddState(RobotState.ToolCurPos, "tl_cur_pos", "DOUBLE_6", "DOUBLE_6");
+        AddState(RobotState.FlangeCurPos, "flange_cur_pos", "DOUBLE_6", "DOUBLE_6");
+        AddState(RobotState.ActualJointVel, "actual_qd", "DOUBLE_6", "DOUBLE_6");
+        AddState(RobotState.ActualJointAcc, "actual_qdd", "DOUBLE_6", "DOUBLE_6");
+        AddState(RobotState.TargetTCPCmpSpeed, "target_TCP_CmpSpeed", "DOUBLE_2", "DOUBLE_2");
+        AddState(RobotState.TargetTCPSpeed, "target_TCP_Speed", "DOUBLE_6", "DOUBLE_6");
+        AddState(RobotState.ActualTCPCmpSpeed, "actual_TCP_CmpSpeed", "DOUBLE_2", "DOUBLE_2");
+        AddState(RobotState.ActualTCPSpeed, "actual_TCP_Speed", "DOUBLE_6", "DOUBLE_6");
+        AddState(RobotState.ActualJointTorque, "jt_cur_tor", "DOUBLE_6", "DOUBLE_6");
+        AddState(RobotState.Tool, "tool", "INT32", "INT32");
+        AddState(RobotState.User, "user", "INT32", "INT32");
+        AddState(RobotState.ClDgtOutputH, "cl_dgt_output_h", "UINT8", "UINT8");
+        AddState(RobotState.ClDgtOutputL, "cl_dgt_output_l", "UINT8", "UINT8");
+        AddState(RobotState.TlDgtOutputL, "tl_dgt_output_l", "UINT8", "UINT8");
+        AddState(RobotState.ClDgtInputH, "cl_dgt_input_h", "UINT8", "UINT8");
+        AddState(RobotState.ClDgtInputL, "cl_dgt_input_l", "UINT8", "UINT8");
+        AddState(RobotState.TlDgtInputL, "tl_dgt_input_l", "UINT8", "UINT8");
+        AddState(RobotState.ClAnalogInput, "cl_analog_input", "UINT16_2", "DOUBLE,DOUBLE");
+        AddState(RobotState.TlAnglogInput, "tl_anglog_input", "UINT16", "DOUBLE");
+        AddState(RobotState.FtSensorRawData, "ft_sensor_raw_data", "DOUBLE_6", "DOUBLE_6");
+        AddState(RobotState.FtSensorData, "ft_sensor_data", "DOUBLE_6", "DOUBLE_6");
+        AddState(RobotState.FtSensorActive, "ft_sensor_active", "UINT8", "UINT8");
+        AddState(RobotState.EmergencyStop, "EmergencyStop", "UINT8", "UINT8");
+        AddState(RobotState.MotionDone, "motion_done", "INT32", "INT32");
+        AddState(RobotState.GripperMotiondone, "gripper_motiondone", "UINT8", "UINT8");
+        AddState(RobotState.McQueueLen, "mc_queue_len", "INT32", "INT32");
+        AddState(RobotState.CollisionState, "collisionState", "UINT8", "UINT8");
+        AddState(RobotState.TrajectoryPnum, "trajectory_pnum", "INT32", "INT32");
+        AddState(RobotState.SafetyStop0State, "safety_stop0_state", "UINT8", "UINT8");
+        AddState(RobotState.SafetyStop1State, "safety_stop1_state", "UINT8", "UINT8");
+        AddState(RobotState.GripperFaultId, "gripper_fault_id", "UINT8", "UINT8");
+        AddState(RobotState.GripperFault, "gripper_fault", "UINT16", "INT32");
+        AddState(RobotState.GripperActive, "gripper_active", "UINT16", "INT32");
+        AddState(RobotState.GripperPosition, "gripper_position", "UINT8", "UINT8");
+        AddState(RobotState.GripperSpeed, "gripper_speed", "INT8", "INT32");
+        AddState(RobotState.GripperCurrent, "gripper_current", "INT8", "INT32");
+        AddState(RobotState.GripperTemp, "gripper_temp", "INT32", "INT32");
+        AddState(RobotState.GripperVoltage, "gripper_voltage", "INT32", "INT32");
+        // 注意：C++中AuxState的structType为"UINT8_25"，但实际结构体大小需确认，这里暂用复合类型
+        AddState(RobotState.AuxState, "auxState", "UINT8,INT32,INT32,DOUBLE,FLOAT,FLOAT", "UINT8,INT32,INT32,DOUBLE,FLOAT,FLOAT");
+        AddState(RobotState.ExtAxisStatus, "extAxisStatus", "UINT8_29", "UINT8_29");
+        AddState(RobotState.ExtDIState, "extDIState", "UINT16_8", "UINT8_16");
+        AddState(RobotState.ExtDOState, "extDOState", "UINT16_8", "UINT8_16");
+        AddState(RobotState.ExtAIState, "extAIState", "UINT16_4", "INT32_4");
+        AddState(RobotState.ExtAOState, "extAOState", "UINT16_4", "INT32_4");
+        AddState(RobotState.RbtEnableState, "rbtEnableState", "INT32", "INT32");
+        AddState(RobotState.JointDriverTorque, "jointDriverTorque", "DOUBLE_6", "DOUBLE_6");
+        AddState(RobotState.JointDriverTemperature, "jointDriverTemperature", "DOUBLE_6", "DOUBLE_6");
+        AddState(RobotState.RobotTime, "robotTime", "UINT16,UINT8,UINT8,UINT8,UINT8,UINT8,UINT16", "INT32_7");
+        AddState(RobotState.SoftwareUpgradeState, "softwareUpgradeState", "INT32", "INT32");
+        AddState(RobotState.EndLuaErrCode, "endLuaErrCode", "UINT16", "INT32");
+        AddState(RobotState.ClAnalogOutput, "cl_analog_output", "UINT16_2", "DOUBLE,DOUBLE");
+        AddState(RobotState.TlAnalogOutput, "tl_analog_output", "UINT16", "DOUBLE");
+        AddState(RobotState.GripperRotNum, "gripperRotNum", "FLOAT", "DOUBLE");
+        AddState(RobotState.GripperRotSpeed, "gripperRotSpeed", "UINT8", "UINT8");
+        AddState(RobotState.GripperRotTorque, "gripperRotTorque", "UINT8", "UINT8");
+        AddState(RobotState.WeldingBreakOffState, "weldingBreakOffState", "UINT8,UINT8", "UINT8,UINT8");
+        AddState(RobotState.TargetJointTorque, "jt_tgt_tor", "DOUBLE_6", "DOUBLE_6");
+        AddState(RobotState.SmartToolState, "smartToolState", "INT32", "UINT32");
+        AddState(RobotState.WideVoltageCtrlBoxTemp, "wideVoltageCtrlBoxTemp", "FLOAT", "DOUBLE");
+        AddState(RobotState.WideVoltageCtrlBoxFanCurrent, "wideVoltageCtrlBoxFanVel", "UINT16", "INT32");
+        AddState(RobotState.ToolCoord, "toolCoord", "DOUBLE_6", "DOUBLE_6");
+        AddState(RobotState.WobjCoord, "wobjCoord", "DOUBLE_6", "DOUBLE_6");
+        AddState(RobotState.ExtoolCoord, "extoolCoord", "DOUBLE_6", "DOUBLE_6");
+        AddState(RobotState.ExAxisCoord, "exAxisCoord", "DOUBLE_6", "DOUBLE_6");
+        AddState(RobotState.Load, "load", "DOUBLE", "DOUBLE");
+        AddState(RobotState.LoadCog, "loadCog", "DOUBLE_3", "DOUBLE_3");
+        AddState(RobotState.LastServoTarget, "lastServoTarget", "DOUBLE_6", "DOUBLE_6");
+        AddState(RobotState.ServoJCmdNum, "servoJCmdNum", "INT32", "INT32");
+        AddState(RobotState.TargetJointPos, "target_joint_pos", "DOUBLE_6", "DOUBLE_6");
+        AddState(RobotState.TargetJointVel, "target_joint_vel", "DOUBLE_6", "DOUBLE_6");
+        AddState(RobotState.TargetJointAcc, "target_joint_acc", "DOUBLE_6", "DOUBLE_6");
+        AddState(RobotState.TargetJointCurrent, "target_joint_current", "DOUBLE_6", "DOUBLE_6");
+        AddState(RobotState.ActualJointCurrent, "actual_joint_current", "DOUBLE_6", "DOUBLE_6");
+        AddState(RobotState.ActualTCPForce, "actual_TCP_force", "DOUBLE_6", "DOUBLE_6");
+        AddState(RobotState.TargetTCPPos, "target_TCP_pos", "DOUBLE_6", "DOUBLE_6");
+        AddState(RobotState.CollisionLevel, "collision_level", "UINT8_6", "UINT8_6");
+        AddState(RobotState.SpeedScaleManual, "speed_scaling_man", "DOUBLE", "DOUBLE");
+        AddState(RobotState.SpeedScaleAuto, "speed_scaling_auto", "DOUBLE", "DOUBLE");
+        AddState(RobotState.LuaLineNum, "line_number", "INT32", "INT32");
+        AddState(RobotState.AbnomalStop, "abnormal_stop", "UINT8", "UINT8");
+        AddState(RobotState.CurrentLuaFileName, "cur_lua_file_name", "UINT8_256", "UINT8_256");
+        AddState(RobotState.ProgramTotalLine, "prog_total_line", "UINT8", "UINT8");
+        AddState(RobotState.SafetyBoxSingal, "safety_box_signal", "UINT8_6", "UINT8_6");
+        AddState(RobotState.WeldVoltage, "welding_voltage", "DOUBLE", "DOUBLE");
+        AddState(RobotState.WeldCurrent, "welding_current", "DOUBLE", "DOUBLE");
+        AddState(RobotState.WeldTrackVel, "welding_track_speed", "DOUBLE", "DOUBLE");
+        AddState(RobotState.TpdException, "tpd_exception", "UINT8", "UINT8");
+        AddState(RobotState.AlarmRebootRobot, "alarm_reboot_robot", "UINT8", "UINT8");
+        AddState(RobotState.ModbusMasterConnect, "modbus_master_connect", "UINT8", "UINT8");
+        AddState(RobotState.ModbusSlaveConnect, "modbus_slave_connect", "UINT8", "UINT8");
+        AddState(RobotState.BtnBoxStopSignal, "btn_box_stop_signal", "UINT8", "UINT8");
+        AddState(RobotState.DragAlarm, "drag_alarm", "UINT8", "UINT8");
+        AddState(RobotState.SafetyDoorAlarm, "safety_door_alarm", "UINT8", "UINT8");
+        AddState(RobotState.SafetyPlaneAlarm, "safety_plane_alarm", "UINT8", "UINT8");
+        AddState(RobotState.MotonAlarm, "motion_alarm", "UINT8", "UINT8");
+        AddState(RobotState.InterfaceAlarm, "interfere_alarm", "UINT8", "UINT8");
+        AddState(RobotState.UdpCmdState, "udp_cmd_state", "INT32", "INT32");
+        AddState(RobotState.WeldReadyState, "weld_ready_state", "UINT8", "UINT8");
+        AddState(RobotState.AlarmCheckEmergStopBtn, "alarm_check_emerg_stop_btn", "UINT8", "UINT8");
+        AddState(RobotState.TsTmCmdComError, "ts_tm_cmd_com_error", "UINT8", "UINT8");
+        AddState(RobotState.TsTmStateComError, "ts_tm_state_com_error", "UINT8", "UINT8");
+        AddState(RobotState.CtrlBoxError, "ctrl_box_error", "INT32", "INT32");
+        AddState(RobotState.SafetyDataState, "safety_data_state", "UINT8", "UINT8");
+        AddState(RobotState.ForceSensorErrState, "force_sensor_err_state", "UINT8", "UINT8");
+        AddState(RobotState.CtrlOpenLuaErrCode, "ctrl_open_lua_errcode", "UINT8_4", "UINT8_4");
+        AddState(RobotState.StrangePosFlag, "strange_pos_flag", "UINT8", "UINT8");
+        AddState(RobotState.Alarm, "alarm", "UINT8", "UINT8");
+        AddState(RobotState.DriverAlarm, "dr_alarm", "UINT8", "UINT8");
+        AddState(RobotState.AliveSlaveNumError, "alive_slave_num_error", "UINT8", "UINT8");
+        AddState(RobotState.SlaveComError, "slave_com_error", "UINT8_8", "UINT8_8");
+        AddState(RobotState.CmdPointError, "cmd_point_error", "UINT8", "UINT8");
+        AddState(RobotState.IOError, "IO_error", "UINT8", "UINT8");
+        AddState(RobotState.GripperError, "gripper_error", "UINT8", "UINT8");
+        AddState(RobotState.FileError, "file_error", "UINT8", "UINT8");
+        AddState(RobotState.ParaError, "para_error", "UINT8", "UINT8");
+        AddState(RobotState.ExaxisOutLimitError, "exaxis_out_slimit_error", "UINT8", "UINT8");
+        AddState(RobotState.DriverComError, "dr_com_err", "UINT8_6", "UINT8_6");
+        AddState(RobotState.DriverError, "dr_err", "UINT8", "UINT8");
+        AddState(RobotState.OutSoftLimitError, "out_sflimit_err", "UINT8", "UINT8");
+        AddState(RobotState.AxleGenComData, "axle_gen_com_data", "UINT8_130", "UINT8_130");
+        AddState(RobotState.CheckSum, "check_sum", "UINT16", "UINT16");
+    }
+
+    private static void AddState(RobotState state, string fieldName, string structType, string cndeType)
+    {
+        var pkgType = typeof(ROBOT_STATE_PKG);
+        var field = pkgType.GetField(fieldName);
+        if (field == null)
+            throw new Exception($"字段 {fieldName} 不存在于 ROBOT_STATE_PKG 中");
+        int offset = Marshal.OffsetOf(pkgType, fieldName).ToInt32();
+        _allStates[state] = (fieldName, offset, structType, cndeType);
+    }
+
+    public FRCNDEClient(ROBOT_STATE_PKG pkg, string ip = "192.168.58.2", int port = 20005)
+    {
+        _robotStatePkg = pkg;
+        _rtClient = new StatusTCPClient(ip, port);
+        // 默认配置与C++一致（从ProgramState开始，不包含FrameHead等）
+        _configStates = new List<RobotState>
+        {
+            RobotState.ProgramState, RobotState.RobotState, RobotState.MainCode,
+            RobotState.SubCode, RobotState.RobotMode, RobotState.JointCurPos,
+            RobotState.ToolCurPos, RobotState.FlangeCurPos, RobotState.ActualJointVel,
+            RobotState.ActualJointAcc, RobotState.TargetTCPCmpSpeed, RobotState.TargetTCPSpeed,
+            RobotState.ActualTCPCmpSpeed, RobotState.ActualTCPSpeed, RobotState.ActualJointTorque,
+            RobotState.Tool, RobotState.User, RobotState.ClDgtOutputH, RobotState.ClDgtOutputL,
+            RobotState.TlDgtOutputL, RobotState.ClDgtInputH, RobotState.ClDgtInputL,
+            RobotState.TlDgtInputL, RobotState.ClAnalogInput, RobotState.TlAnglogInput,
+            RobotState.FtSensorRawData, RobotState.FtSensorData, RobotState.FtSensorActive,
+            RobotState.EmergencyStop, RobotState.MotionDone, RobotState.GripperMotiondone,
+            RobotState.McQueueLen, RobotState.CollisionState, RobotState.TrajectoryPnum,
+            RobotState.SafetyStop0State, RobotState.SafetyStop1State, RobotState.GripperFaultId,
+            RobotState.GripperFault, RobotState.GripperActive, RobotState.GripperPosition,
+            RobotState.GripperSpeed, RobotState.GripperCurrent, RobotState.GripperTemp,
+            RobotState.GripperVoltage, RobotState.AuxState, RobotState.ExtAxisStatus,
+            RobotState.ExtDIState, RobotState.ExtDOState, RobotState.ExtAIState,
+            RobotState.ExtAOState, RobotState.RbtEnableState, RobotState.JointDriverTorque,
+            RobotState.JointDriverTemperature, RobotState.RobotTime, RobotState.SoftwareUpgradeState,
+            RobotState.EndLuaErrCode, RobotState.ClAnalogOutput, RobotState.TlAnalogOutput,
+            RobotState.GripperRotNum, RobotState.GripperRotSpeed, RobotState.GripperRotTorque,
+            RobotState.WeldingBreakOffState, RobotState.TargetJointTorque, RobotState.SmartToolState,
+            RobotState.WideVoltageCtrlBoxTemp, RobotState.WideVoltageCtrlBoxFanCurrent,
+            RobotState.ToolCoord, RobotState.WobjCoord, RobotState.ExtoolCoord, RobotState.ExAxisCoord,
+            RobotState.Load, RobotState.LoadCog, RobotState.LastServoTarget
+        };
+    }
+
+    public int Connect(string ip, int port)
+    {
+        _rtClient.SetIpPort(ip, port);
+        if (!_rtClient.Connect()) return -1;
+        _robotStateRunFlag = true;
+
+        // 1. 发送配置帧
+        int ret = SendCNDEOutputConfig();
+        if (ret != 0) return ret;
+
+        // 2. 发送开始帧
+        ret = SetCNDEStart();
+        if (ret != 0) return ret;
+
+        // 3. 启动接收线程
+        Thread stateThread = new Thread(RecvRobotStateThread);
+        stateThread.IsBackground = true;
+        stateThread.Start();
+        return 0;
+    }
+
+    public int Close()
+    {
+        _robotStateRunFlag = false;
+        _rtClient.Close();
+        return 0;
+    }
+    // 配置管理接口
+    public int SetCNDEStateConfig(List<RobotState> states, int period)
+    {
+        if (states == null || states.Count == 0) 
+			return ERR_NEED_AT_LEAST_ONE_STATE;
+        foreach (var s in states)
+            if (!_allStates.ContainsKey(s)) 
+			return ERR_STATE_INVALID;
+        if (period < 8 || period > 1000) 
+		return ERR_PARAM_VALUE;
+        _configStates = new List<RobotState>(states);
+        _robotStatePeriod = period;
+        return ERR_SUCCESS;
+    }
+
+    public int AddCNDEState(RobotState state)
+    {
+        if (!_allStates.ContainsKey(state)) 
+		return ERR_STATE_INVALID;
+        if (_configStates.Contains(state)) 
+		return ERR_STATE_ALREADY_EXISTS;
+        _configStates.Add(state);
+        return ERR_SUCCESS;
+    }
+
+    public int DeleteCNDEState(RobotState state)
+    {
+        if (!_configStates.Contains(state)) 
+			return ERR_STATE_INVALID;
+        if (_configStates.Count <= 1) 
+			return ERR_NEED_AT_LEAST_ONE_STATE;
+        _configStates.Remove(state);
+        return ERR_SUCCESS;
+    }
+
+    public int SetCNDEStatePeriod(int period)
+    {
+        if (period < 8 || period > 1000) 
+			return ERR_PARAM_VALUE;
+        _robotStatePeriod = period;
+        return ERR_SUCCESS;
+    }
+
+    public int GetCNDEStateConfig(out List<RobotState> states, out int period)
+    {
+        states = new List<RobotState>(_configStates);
+        period = _robotStatePeriod;
+        return ERR_SUCCESS;
+    }
+
+    public int SetCNDEStart()
+    {
+        lock (_recvLock)
+        {
+            CNDE_PKG startPkg = new CNDE_PKG
+            {
+                Count = _sendCount++,
+                Type = CNDEFrameType.START,
+                Len = 0
+            };
+            byte[] frame = CNDEFrameHandle.CNDEPkgToFrame(startPkg);
+            if (_rtClient.Send(frame) != frame.Length) return -1;
+
+            byte[] recvBuf = new byte[1024];
+            while (_robotStateRunFlag)
+            {
+                int len = _rtClient.RecvCNDEPkg(recvBuf, recvBuf.Length);
+                if (len < 0) return -1;
+                if (len == 0) { _rtClient.Send(frame); continue; }
+                if (CNDEFrameHandle.FrameToCNDEPkg(recvBuf, out CNDE_PKG pkg) == 0 && pkg.Type == CNDEFrameType.MESSAGE)
+                {
+                    if (pkg.Data.Count > 0 && pkg.Data[0] == 0x00)
+                        return 0;
+                    else
+                        return -2;
+                }
+            }
+            return 0;
+        }
+    }
+
+    public int SetCNDEStop()
+    {
+        lock (_recvLock)
+        {
+            CNDE_PKG stopPkg = new CNDE_PKG
+            {
+                Count = _sendCount++,
+                Type = CNDEFrameType.STOP,
+                Len = 0
+            };
+            byte[] frame = CNDEFrameHandle.CNDEPkgToFrame(stopPkg);
+            if (_rtClient.Send(frame) != frame.Length) return -1;
+
+            byte[] recvBuf = new byte[1024];
+            while (_robotStateRunFlag)
+            {
+                int len = _rtClient.RecvCNDEPkg(recvBuf, recvBuf.Length);
+                if (len < 0) return -1;
+                if (len == 0) { _rtClient.Send(frame); continue; }
+                if (CNDEFrameHandle.FrameToCNDEPkg(recvBuf, out CNDE_PKG pkg) == 0 && pkg.Type == CNDEFrameType.MESSAGE)
+                {
+                    if (pkg.Data.Count > 0 && pkg.Data[0] == 0x00)
+                        return 0;
+                    else
+                        return -2;
+                }
+            }
+            return 0;
+        }
+    }
+
+    // 新增：发送输出配置帧（对应C++ SendCNDEOutputConfig）
+    public int SendCNDEOutputConfig()
+    {
+        lock (_recvLock)
+        {
+            CNDE_PKG configPkg = new CNDE_PKG
+            {
+                Count = _sendCount++,
+                Type = CNDEFrameType.OUTPUT_CONFIG,
+                Len = 0
+            };
+            // 添加周期（2字节，小端）
+            configPkg.Data.AddRange(BitConverter.GetBytes((ushort)_robotStatePeriod));
+            // 构建字段名列表，用逗号分隔
+            List<string> fieldNames = new List<string>();
+            foreach (var state in _configStates)
+            {
+                if (_allStates.TryGetValue(state, out var meta))
+                    fieldNames.Add(meta.FieldName);
+            }
+            string namesStr = string.Join(",", fieldNames);
+            configPkg.Data.AddRange(System.Text.Encoding.ASCII.GetBytes(namesStr));
+            configPkg.Len = (ushort)(2 + namesStr.Length); // 周期2字节 + 名称列表长度
+
+            byte[] frame = CNDEFrameHandle.CNDEPkgToFrame(configPkg);
+            if (_rtClient.Send(frame) != frame.Length)
+                return -1;
+
+            byte[] recvBuf = new byte[1024];
+            while (_robotStateRunFlag)
+            {
+                int len = _rtClient.RecvCNDEPkg(recvBuf, recvBuf.Length);
+                if (len < 0) return -1;
+                if (len == 0) { _rtClient.Send(frame); continue; }
+                if (CNDEFrameHandle.FrameToCNDEPkg(recvBuf, out CNDE_PKG pkg) == 0 && pkg.Type == CNDEFrameType.MESSAGE)
+                {
+                    if (pkg.Data.Count > 0 && pkg.Data[0] == 0x00)
+                        return 0;
+                    else
+                        return -2;
+                }
+            }
+            return 0;
+        }
+    }
+
+
+    // 接收线程
+    private void RecvRobotStateThread()
+    {
+        byte[] pkgBuf = new byte[4096];
+        while (_robotStateRunFlag)
+        {
+            lock (_recvLock)
+            {
+                int recvLen = _rtClient.RecvCNDEPkg(pkgBuf, pkgBuf.Length);
+                if (recvLen < 0)
+                {
+                    break;
+                }
+                else if (recvLen == 0)
+                {
+                    if (_rtClient.ReConnect())
+                        SetCNDEStart();
+                    else
+                        break;
+                }
+                else
+                {
+                    if (CNDEFrameHandle.FrameToCNDEPkg(pkgBuf, out CNDE_PKG pkg) == 0 && pkg.Type == CNDEFrameType.OUTPUT_STATE)
+                    {
+                        ParseRobotState(pkg.Data);
+                    }
+                    Array.Clear(pkgBuf, 0, pkgBuf.Length);
+                }
+            }
+            Thread.Sleep(1);
+        }
+        _rtClient.Close();
+    }
+
+    private void ParseRobotState(List<byte> data)
+    {
+        int offset = 0;
+        foreach (var state in _configStates)
+        {
+            if (!_allStates.TryGetValue(state, out var meta))
+                continue;
+            int size = GetTypeSize(meta.CndeType);
+            if (offset + size > data.Count)
+                break;
+            byte[] raw = data.GetRange(offset, size).ToArray();
+            offset += size;
+            SetStateValue(meta, raw);
+        }
+    }
+
+    private void SetStateValue((string FieldName, int Offset, string StructType, string CndeType) meta, byte[] raw)
+    {
+        var field = typeof(ROBOT_STATE_PKG).GetField(meta.FieldName);
+        if (field == null) return;
+        object value = ConvertCndeToStruct(raw, meta.CndeType, meta.StructType, field.FieldType);
+        if (value != null)
+            field.SetValue(_robotStatePkg, value);
+    }
+
+    private object ConvertCndeToStruct(byte[] raw, string cndeType, string structType, Type targetType)
+    {
+        // 基础类型
+        if (cndeType == "UINT8" && structType == "UINT8") return raw[0];
+        if (cndeType == "UINT8" && structType == "INT32") return (int)raw[0];
+        if (cndeType == "INT8" && structType == "INT32") return (int)(sbyte)raw[0];
+        if (cndeType == "UINT16" && structType == "UINT16") return BitConverter.ToUInt16(raw, 0);
+        if (cndeType == "UINT16" && structType == "INT32") return (int)BitConverter.ToUInt16(raw, 0);
+        if (cndeType == "INT32" && structType == "INT32") return BitConverter.ToInt32(raw, 0);
+        if (cndeType == "INT32" && structType == "UINT8") return (byte)BitConverter.ToInt32(raw, 0);
+        if (cndeType == "INT32" && structType == "UINT16") return (ushort)BitConverter.ToInt32(raw, 0);
+        if (cndeType == "INT32" && structType == "UINT32") return (uint)BitConverter.ToInt32(raw, 0);
+        if (cndeType == "UINT32" && structType == "INT32") return (int)BitConverter.ToUInt32(raw, 0);
+        if (cndeType == "DOUBLE" && structType == "DOUBLE") return BitConverter.ToDouble(raw, 0);
+        if (cndeType == "DOUBLE" && structType == "FLOAT") return (float)BitConverter.ToDouble(raw, 0);
+        if (cndeType == "DOUBLE" && structType == "UINT16") return (ushort)BitConverter.ToDouble(raw, 0);
+        if (cndeType == "FLOAT" && structType == "DOUBLE") return (double)BitConverter.ToSingle(raw, 0);
+        if (cndeType == "FLOAT" && structType == "FLOAT") return BitConverter.ToSingle(raw, 0);
+
+        // 数组类型
+        if (cndeType.StartsWith("DOUBLE_") && structType.StartsWith("DOUBLE_"))
+        {
+            int count = int.Parse(cndeType.Substring(7));
+            double[] arr = new double[count];
+            for (int i = 0; i < count; i++)
+                arr[i] = BitConverter.ToDouble(raw, i * 8);
+            return arr;
+        }
+        if (cndeType.StartsWith("UINT16_") && structType.StartsWith("UINT16_"))
+        {
+            int count = int.Parse(cndeType.Substring(7));
+            ushort[] arr = new ushort[count];
+            for (int i = 0; i < count; i++)
+                arr[i] = BitConverter.ToUInt16(raw, i * 2);
+            return arr;
+        }
+        if (cndeType.StartsWith("UINT8_") && structType.StartsWith("UINT8_"))
+        {
+            int count = int.Parse(cndeType.Substring(6));
+            byte[] arr = new byte[count];
+            Array.Copy(raw, arr, count);
+            return arr;
+        }
+        if (cndeType.StartsWith("INT32_") && structType.StartsWith("INT32_"))
+        {
+            int count = int.Parse(cndeType.Substring(6));
+            int[] arr = new int[count];
+            for (int i = 0; i < count; i++)
+                arr[i] = BitConverter.ToInt32(raw, i * 4);
+            return arr;
+        }
+        if (cndeType.StartsWith("INT32_") && structType.StartsWith("UINT16_"))
+        {
+            int count = int.Parse(cndeType.Substring(6));
+            ushort[] arr = new ushort[count];
+            for (int i = 0; i < count; i++)
+                arr[i] = (ushort)BitConverter.ToInt32(raw, i * 4);
+            return arr;
+        }
+
+        // 复合结构体
+        if (targetType == typeof(ROBOT_TIME))
+        {
+            int off = 0;
+            ushort year = BitConverter.ToUInt16(raw, off); off += 2;
+            byte mouth = raw[off++];
+            byte day = raw[off++];
+            byte hour = raw[off++];
+            byte minute = raw[off++];
+            byte second = raw[off++];
+            ushort millisecond = BitConverter.ToUInt16(raw, off);
+            return new ROBOT_TIME
+            {
+                year = year,
+                mouth = mouth,
+                day = day,
+                hour = hour,
+                minute = minute,
+                second = second,
+                millisecond = millisecond
+            };
+        }
+        if (targetType == typeof(ROBOT_AUX_STATE))
+        {
+            int off = 0;
+            byte servoId = raw[off++];
+            int servoErrCode = BitConverter.ToInt32(raw, off); off += 4;
+            int servoState = BitConverter.ToInt32(raw, off); off += 4;
+            double servoPos = BitConverter.ToDouble(raw, off); off += 8;
+            float servoVel = BitConverter.ToSingle(raw, off); off += 4;
+            float servoTorque = BitConverter.ToSingle(raw, off);
+            return new ROBOT_AUX_STATE
+            {
+                servoId = servoId,
+                servoErrCode = servoErrCode,
+                servoState = servoState,
+                servoPos = servoPos,
+                servoVel = servoVel,
+                servoTorque = servoTorque
+            };
+        }
+        if (targetType == typeof(WELDING_BREAKOFF_STATE))
+        {
+            return new WELDING_BREAKOFF_STATE
+            {
+                breakOffState = raw[0],
+                weldArcState = raw[1]
+            };
+        }
+        // 可根据需要添加 EXT_AXIS_STATUS 数组等
+        return null;
+    }
+
+    private int GetTypeSize(string typeStr)
+    {
+        if (string.IsNullOrEmpty(typeStr)) return 0;
+        if (typeStr == "UINT8" || typeStr == "INT8") return 1;
+        if (typeStr == "UINT16") return 2;
+        if (typeStr == "INT32" || typeStr == "UINT32" || typeStr == "FLOAT") return 4;
+        if (typeStr == "DOUBLE") return 8;
+        if (typeStr.StartsWith("UINT8_")) return int.Parse(typeStr.Substring(6));
+        if (typeStr.StartsWith("UINT16_")) return 2 * int.Parse(typeStr.Substring(7));
+        if (typeStr.StartsWith("DOUBLE_")) return 8 * int.Parse(typeStr.Substring(7));
+        if (typeStr.StartsWith("INT32_")) return 4 * int.Parse(typeStr.Substring(6));
+        if (typeStr.Contains(","))
+        {
+            int total = 0;
+            foreach (var part in typeStr.Split(','))
+                total += GetTypeSize(part.Trim());
+            return total;
+        }
+        return 0;
+    }
+}

@@ -41,7 +41,7 @@ namespace fairino
     {
         ICallSupervisor proxy = null;
 
-        const string SDK_VERSION = " C#SDK-V1.2.5  Web-3.9.4";
+        const string SDK_VERSION = " C#SDK-V1.2.6  Web-3.9.5";
 
         private string robot_ip = "192.168.57.2";//机器人ip
         private int g_sock_com_err = (int)RobotError.ERR_SUCCESS;
@@ -61,7 +61,7 @@ namespace fairino
         private string g_sendbuf = "";
         private string g_recvbuf = "";
 
-        private bool reconnEnable = false;  // 重连使能  
+        private bool reconnEnable = true;  // 重连使能  
         private int reconnTimes = 1000;     // 重连次数  
         private int curReconnTimes = 0;    // 当前重连次数  
         private int reconnPeriod = 200;    // 重连时间间隔（毫秒）  
@@ -93,11 +93,124 @@ namespace fairino
 
         private UInt16 frameCnt = 0;               // 帧计数器
         private bool udpConnected;           // UDP 连接状态标志
+
+        private FRCNDEClient _cndeClient;
+
         public Robot()
         {
             proxy = XmlRpcProxyGen.Create<ICallSupervisor>();
             proxy.Timeout = 1800000;
+
+            // 初始化 robot_state_pkg
+            robot_state_pkg = new ROBOT_STATE_PKG();
+
+            //_cndeClient = new FRCNDEClient(robot_state_pkg);
+            // 传入回调，当 CNDE 客户端内部重连成功/失败时更新 g_sock_com_err
+            _cndeClient = new FRCNDEClient(robot_state_pkg, (errCode) =>
+            {
+                g_sock_com_err = errCode;
+            });
+            
         }
+
+        // 连接 CNDE 服务
+        public int ConnectCNDE(string ip, int port = 20005)
+        {
+            
+            int ret = _cndeClient.Connect(ip, port);
+            //if (ret == 0)
+            //    ret = _cndeClient.SetCNDEStart();
+            return ret;
+        }
+
+        // 断开 CNDE 连接
+        public void DisconnectCNDE()
+        {
+            _cndeClient.SetCNDEStop();
+            _cndeClient.Close();
+        }
+
+        /**
+         * @brief 配置机器人实时状态反馈的数据列表和更新周期（覆盖之前的配置）。
+         * @param [in] states 要订阅的状态枚举列表，顺序决定数据包中的排列顺序。
+         * @param [in] period 数据更新周期，单位毫秒，取值范围 [8, 1000]。
+         * @return 成功返回 0；失败返回错误码（如 ERR_STATE_INVALID、ERR_PARAM_VALUE 等）。
+         */
+        public int SetRobotRealtimeStateConfig(List<RobotState> states, int period)
+        {
+            if (IsSockComError())
+                return g_sock_com_err;
+            _cndeClient.SetCNDEStatePeriod(period);
+            return _cndeClient.SetCNDEStateConfig(states, period);
+        }
+
+        /**
+         * @brief 在现有状态反馈列表中添加一个状态项。
+         * @param [in] state 要添加的状态枚举值。
+         * @return 成功返回 0；失败返回错误码（如 ERR_STATE_ALREADY_EXISTS、ERR_STATE_INVALID 等）。
+         */
+        public int AddRobotRealtimeState(RobotState state)
+        {
+            if (IsSockComError())
+                return g_sock_com_err;
+            return _cndeClient.AddCNDEState(state);
+        }
+
+        /**
+         * @brief 从现有状态反馈列表中删除一个状态项（至少保留一个状态）。
+         * @param [in] state 要删除的状态枚举值。
+         * @return 成功返回 0；失败返回负错误码（如 ERR_STATE_INVALID、ERR_NEED_AT_LEAST_ONE_STATE）。
+         */
+        public int DeleteRobotRealtimeState(RobotState state)
+        {
+            if (IsSockComError())
+                return g_sock_com_err;
+            return _cndeClient.DeleteCNDEState(state);
+        }
+
+        /**
+         * @brief 仅修改状态反馈的更新周期，不改变状态列表。
+         * @param [in] period 新的更新周期，单位毫秒，取值范围 [8, 1000]。
+         * @return 成功返回 0；失败返回错误码（如 ERR_PARAM_VALUE）。
+         */
+        public int SetRobotRealtimeStatePeriod(int period)
+        {
+            if (IsSockComError())
+                return g_sock_com_err;
+            return _cndeClient.SetCNDEStatePeriod(period);
+        }
+
+        /**
+         * @brief 获取当前配置的状态反馈列表和更新周期。
+         * @param [out] states 输出当前订阅的状态枚举列表。
+         * @param [out] period 输出当前数据更新周期，单位毫秒。
+         * @return 成功返回 0；失败返回负错误码。
+         */
+        public int GetRobotRealtimeStateConfig(out List<RobotState> states, out int period)
+        {
+            states = null;
+            period = 0;
+            if (IsSockComError())
+                return g_sock_com_err;
+            return _cndeClient.GetCNDEStateConfig(out states, out period);
+        }
+
+        /**
+         * @brief 获取最新一帧的机器人实时状态数据（内部线程持续更新，此接口直接返回缓存数据）。
+         * @param [out] pkg 引用参数，用于接收机器人状态数据（ROBOT_STATE_PKG 结构体）。
+         * @return 成功返回 0；失败返回错误码（例如网络通信错误）。
+         */
+        public int GetRobotRealTimeState(ref ROBOT_STATE_PKG pkg)
+        {
+            if (IsSockComError())
+            {
+                //pkg = null;
+                return g_sock_com_err;
+            }
+            pkg = robot_state_pkg;
+            return 0;
+        }
+
 
         /// <summary>  
         /// 设置重连参数  
@@ -110,6 +223,11 @@ namespace fairino
             reconnEnable = enable;
             reconnTimes = times;
             reconnPeriod = period;
+            //cnde重连参数配置
+            if (_cndeClient != null)
+            {
+                _cndeClient.SetReconnectParam(enable, times, period);
+            }
         }
 
         private void RobotStateRoutineThread()
@@ -283,10 +401,9 @@ namespace fairino
         //重连状态  false:未重连   true:重连
         public bool GetReconnectState()
         {
-            return sock_cli_state.GetReconnState();
+            //return sock_cli_state.GetReconnState();
+            return _cndeClient != null ? _cndeClient.GetReconnectState() : false;
         }
-
-
 
         /**
         * @brief 即时指令发送处理线程 
@@ -388,7 +505,7 @@ namespace fairino
                     byte[] recvBytes = new byte[BUFFER_SIZE];
                     try
                     {
-                        Console.WriteLine($"now recv cmd rtn");
+                        Console.WriteLine($"now recv 8080 cmd");
                         recvbyte = sock_cli_cmd.mSocket.Receive(recvBytes);
                         if (recvbyte < 0)
                         {
@@ -449,7 +566,9 @@ namespace fairino
 
             while (robot_task_exit == 0)
             {
-                if (g_sock_com_err == (int)RobotError.ERR_SUCCESS && sock_cli_state.mSocket != null)//如果当前没出错
+                
+                    //if (g_sock_com_err == (int)RobotError.ERR_SUCCESS && sock_cli_state.mSocket != null)//如果当前没出错
+                if (g_sock_com_err == (int)RobotError.ERR_SUCCESS && _cndeClient.IsConnected())//如果当前没出错
                 {
                     //打时间戳
                     UInt32 curtime = (UInt32)DateTime.UtcNow.TimeOfDay.TotalMilliseconds;
@@ -505,6 +624,7 @@ namespace fairino
         */
         public int RPC(string ip)
         {
+            Console.WriteLine("rpr start in rpc is null");
             robot_instcmd_send_exit = 0;
             robot_instcmd_recv_exit = 0;
             robot_realstate_exit = 0;
@@ -514,6 +634,7 @@ namespace fairino
             robot_ip = ip;
             robot_ip = ip;
             g_sock_com_err = (int)RobotError.ERR_SUCCESS;
+            
 
             // 初始化 UDP 客户端并连接（端口固定为20007）
             try
@@ -521,10 +642,28 @@ namespace fairino
                 // 如果已有实例，先关闭
                 udpCmdClient?.Close();
                 udpCmdClient = new FRUdpClient();
+                if (log == null)
+                {
+                    Console.WriteLine("log in rpc is null");
+                }
+                else
+                {
+                    Console.WriteLine("log in rpc is not null");
+                    log.LogInfo($"UDP连接成功 {ip}:20007");
+                }
                 int udpResult = udpCmdClient.Connect(ip, 20007);
                 if (udpResult == 0)
                 {
                     udpConnected = true;
+                    if(log == null)
+                    {
+                        Console.WriteLine("log in rpc is null");
+                    }
+                    else
+                    {
+                        Console.WriteLine("log in rpc is not null");
+                        log.LogInfo($"UDP连接成功 {ip}:20007");
+                    }
                     log?.LogInfo($"UDP连接成功 {ip}:20007");
                 }
                 else
@@ -540,8 +679,8 @@ namespace fairino
                 log?.LogError($"UDP连接异常：{ex.Message}");
             }
 
-            Thread stateThread = new Thread(RobotStateRoutineThread);
-            stateThread.Start();
+            //Thread stateThread = new Thread(RobotStateRoutineThread);
+            //stateThread.Start();
             Thread cmdsendThread = new Thread(RobotInstCmdSendRoutineThread);
             cmdsendThread.Start();
             Thread.Sleep(2000);
@@ -564,6 +703,20 @@ namespace fairino
             {
                 log.LogInfo($"RPC {ip}");
             }
+
+            //// 启动 CNDE 连接（端口 20005）
+            _cndeClient.SetReconnectParam(reconnEnable, reconnTimes, reconnPeriod);
+            int cndeRet = ConnectCNDE(ip, 20005);
+            if (cndeRet != 0)
+            {
+                log?.LogError($"CNDE 连接失败，错误码：{cndeRet}");
+                g_sock_com_err = -2;
+            }
+            else
+            {
+                log?.LogInfo($"CNDE 连接成功 {ip}:20005");
+            }
+
             return g_sock_com_err;
         }
 
@@ -578,19 +731,22 @@ namespace fairino
             robot_realstate_exit = 1;
             robot_task_exit = 1;
 
+            DisconnectCNDE();
+            Thread.Sleep(100);
+
             udpCmdClient.Close();
 
-            Thread.Sleep(100);
             if (sock_cli_cmd.mSocket != null)
             {
                 sock_cli_cmd.mSocket.Close();
 
             }
 
-            if (sock_cli_state.mSocket != null)
-            {
-                sock_cli_state.mSocket.Close();
-            }
+            //if (sock_cli_state.mSocket != null)
+            //{
+            //    sock_cli_state.mSocket.Close();
+            //}
+
 
             g_sock_com_err = (int)RobotError.ERR_SUCCESS;
 
@@ -598,6 +754,7 @@ namespace fairino
             {
                 log.LogInfo("Close RPC");
                 log.LogInfo("Close UDP");
+                log.LogInfo("Close CNDE");
             }
 
             if (log != null)
@@ -667,6 +824,10 @@ namespace fairino
         }
         public int GetSafetyCode()
         {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
             if (robot_state_pkg.safety_stop0_state == 1 || robot_state_pkg.safety_stop1_state == 1)
             {
                 return 99;
@@ -1397,7 +1558,7 @@ namespace fairino
                 return GetSafetyCode();
             }
 
-            int errcode = MoveL(joint_pos, desc_pos, tool, user, vel, acc, ovl, blendR, 0, epos, search, offset_flag, offset_pos, velAccParamMode, overSpeedStrategy, speedPercent);
+            int errcode = MoveL(joint_pos, desc_pos, tool, user, vel, acc, ovl, blendR, 0, epos, search, offset_flag, offset_pos, ovl, velAccParamMode, overSpeedStrategy, speedPercent);
             return errcode;
 
         }
@@ -2726,7 +2887,7 @@ namespace fairino
             }
             catch
             {
-                return -1;
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -2774,7 +2935,7 @@ namespace fairino
             }
             catch
             {
-                return -1;
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -2804,18 +2965,7 @@ namespace fairino
             }
             catch
             {
-                if (IsSockComError())
-                {
-                    if (log != null)
-                    {
-                        log.LogError($"RPC exception");
-                    }
-                    return g_sock_com_err;
-                }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+	        	return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -2912,6 +3062,10 @@ namespace fairino
          */
         public int GetAI(int id, byte block, ref float persent)
         {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
             try
             {
                 int errcode = 0;
@@ -2940,7 +3094,7 @@ namespace fairino
             }
             catch
             {
-                return -1;
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -2953,6 +3107,10 @@ namespace fairino
          */
         public int GetToolAI(int id, byte block, ref float persent)
         {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
             try
             {
                 int errcode = 0;
@@ -2973,7 +3131,7 @@ namespace fairino
             }
             catch
             {
-                return -1;
+                return (int)RobotError.ERR_RPC_ERROR;
             }
 
         }
@@ -2985,6 +3143,10 @@ namespace fairino
          */
         public int GetAxlePointRecordBtnState(ref byte state)
         {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
             int errcode = 0;
 
             if (g_sock_com_err == (int)RobotError.ERR_SUCCESS)
@@ -3011,6 +3173,10 @@ namespace fairino
          */
         public int GetToolDO(ref byte do_state)
         {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
             int errcode = 0;
 
             if (g_sock_com_err == (int)RobotError.ERR_SUCCESS)
@@ -3037,6 +3203,10 @@ namespace fairino
          */
         public int GetDO(ref int do_state_h, ref int do_state_l)
         {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
             int errcode = 0;
 
             if (g_sock_com_err == (int)RobotError.ERR_SUCCESS)
@@ -4542,22 +4712,53 @@ namespace fairino
          */
         public int GetActualJointPosDegree(byte flag, ref JointPos jPos)
         {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
             int errcode = 0;
 
-            if (g_sock_com_err == (int)RobotError.ERR_SUCCESS)
+            //if (g_sock_com_err == (int)RobotError.ERR_SUCCESS)
+            //{
+            //    for (int i = 0; i < 6; i++)
+            //    {
+            //        jPos.jPos[i] = robot_state_pkg.jt_cur_pos[i];
+            //    }
+            //}
+            //else
+            //{
+            //    errcode = g_sock_com_err;
+            //}
+
+            //修改为RPC方法获取
+            try
             {
+                object[] result = proxy.GetActualJointPosDegree(flag);
+                errcode = (int)result[0];
+                if (errcode != 0)
+                {
+                    if (log != null)
+                    {
+                        log.LogError($"Execute GetActualJointPosDegree fail: {errcode}.");
+                    }
+                    return errcode;
+                }
                 for (int i = 0; i < 6; i++)
                 {
-                    jPos.jPos[i] = robot_state_pkg.jt_cur_pos[i];
+                    jPos.jPos[i] = (double)result[i + 1];
                 }
             }
-            else
+            catch (Exception ex)
             {
-                errcode = g_sock_com_err;
+                if (log != null)
+            {
+                    log.LogError($"RPC exception in GetActualJointPosDegree: {ex.Message}");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
             if (log != null)
             {
-                log.LogInfo($"GetActualJointPosDegree({flag}, ref {jPos.jPos[0]},ref {jPos.jPos[1]},ref {jPos.jPos[2]},ref {jPos.jPos[3]}) : {errcode}");
+                log.LogInfo($"GetActualJointPosDegree({flag}, ref {jPos.jPos[0]},ref {jPos.jPos[1]},ref {jPos.jPos[2]},ref {jPos.jPos[3]}, ref {jPos.jPos[4]}, ref {jPos.jPos[5]}) : {errcode}");
             }
             return errcode;
         }
@@ -4618,6 +4819,10 @@ namespace fairino
          */
         public int GetActualJointSpeedsDegree(byte flag, ref double[] speed)
         {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
             int errcode = 0;
             int i;
 
@@ -4648,6 +4853,10 @@ namespace fairino
          */
         public int GetActualJointAccDegree(byte flag, ref double[] acc)
         {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
             int errcode = 0;
             int i;
 
@@ -4679,6 +4888,10 @@ namespace fairino
          */
         public int GetTargetTCPCompositeSpeed(byte flag, ref double tcp_speed, ref double ori_speed)
         {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
             int errcode = 0;
 
             if (g_sock_com_err == (int)RobotError.ERR_SUCCESS)
@@ -4706,6 +4919,10 @@ namespace fairino
          */
         public int GetActualTCPCompositeSpeed(byte flag, ref double tcp_speed, ref double ori_speed)
         {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
             int errcode = 0;
 
             if (g_sock_com_err == (int)RobotError.ERR_SUCCESS)
@@ -4733,6 +4950,10 @@ namespace fairino
          */
         public int GetTargetTCPSpeed(byte flag, ref double[] speed)
         {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
             int errcode = 0;
             int i;
 
@@ -4762,6 +4983,10 @@ namespace fairino
          */
         public int GetActualTCPSpeed(byte flag, ref double[] speed)
         {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
             int errcode = 0;
             int i;
 
@@ -4791,20 +5016,53 @@ namespace fairino
          */
         public int GetActualTCPPose(byte flag, ref DescPose desc_pos)
         {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
             int errcode = 0;
 
-            if (g_sock_com_err == (int)RobotError.ERR_SUCCESS)
+            //if (g_sock_com_err == (int)RobotError.ERR_SUCCESS)
+            //{
+            //    desc_pos.tran.x = robot_state_pkg.tl_cur_pos[0];
+            //    desc_pos.tran.y = robot_state_pkg.tl_cur_pos[1];
+            //    desc_pos.tran.z = robot_state_pkg.tl_cur_pos[2];
+            //    desc_pos.rpy.rx = robot_state_pkg.tl_cur_pos[3];
+            //    desc_pos.rpy.ry = robot_state_pkg.tl_cur_pos[4];
+            //    desc_pos.rpy.rz = robot_state_pkg.tl_cur_pos[5];
+            //}
+            //else
+            //{
+            //    errcode = g_sock_com_err;
+            //}
+
+            //修改为RPC方法获取保证准确
+            try
             {
-                desc_pos.tran.x = robot_state_pkg.tl_cur_pos[0];
-                desc_pos.tran.y = robot_state_pkg.tl_cur_pos[1];
-                desc_pos.tran.z = robot_state_pkg.tl_cur_pos[2];
-                desc_pos.rpy.rx = robot_state_pkg.tl_cur_pos[3];
-                desc_pos.rpy.ry = robot_state_pkg.tl_cur_pos[4];
-                desc_pos.rpy.rz = robot_state_pkg.tl_cur_pos[5];
+                object[] result = proxy.GetActualTCPPose(flag);
+                errcode = (int)result[0];
+                if (errcode != 0)
+                {
+                    if (log != null)
+                    {
+                        log.LogError($"Execute GetActualTCPPose fail: {errcode}.");
+                    }
+                    return errcode;
+                }
+                desc_pos.tran.x = (double)result[1];
+                desc_pos.tran.y = (double)result[2];
+                desc_pos.tran.z = (double)result[3];
+                desc_pos.rpy.rx = (double)result[4];
+                desc_pos.rpy.ry = (double)result[5];
+                desc_pos.rpy.rz = (double)result[6];
             }
-            else
+            catch (Exception ex)
             {
-                errcode = g_sock_com_err;
+                if (log != null)
+            {
+                    log.LogError($"RPC exception in GetActualTCPPose: {ex.Message}");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
             if (log != null)
             {
@@ -4821,6 +5079,10 @@ namespace fairino
          */
         public int GetActualTCPNum(byte flag, ref int id)
         {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
             int errcode = 0;
 
             if (g_sock_com_err == (int)RobotError.ERR_SUCCESS)
@@ -4846,6 +5108,10 @@ namespace fairino
          */
         public int GetActualWObjNum(byte flag, ref int id)
         {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
             int errcode = 0;
 
             if (g_sock_com_err == (int)RobotError.ERR_SUCCESS)
@@ -4871,6 +5137,10 @@ namespace fairino
          */
         public int GetActualToolFlangePose(byte flag, ref DescPose desc_pos)
         {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
             int errcode = 0;
 
             if (g_sock_com_err == (int)RobotError.ERR_SUCCESS)
@@ -5103,6 +5373,10 @@ namespace fairino
          */
         public int GetJointTorques(byte flag, double[] torques)
         {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            } 
             int errcode = 0;
             int i;
 
@@ -5367,17 +5641,16 @@ namespace fairino
         }
 
         /**
-         * @brief  获取系统时间
-         * @param  [out] t_ms 单位ms
-         * @return  错误码
-         */
+        * @brief  获取系统时间
+        * @param  [out] t_ms 单位ms,可按照UTC时间转换,机器人故障状态下获取CLock为0并返回错误码
+        * @return  错误码
+        */
         public int GetSystemClock(ref double t_ms)
         {
             if (IsSockComError())
             {
                 return g_sock_com_err;
             }
-
             try
             {
                 object[] result = proxy.GetSystemClock();
@@ -5389,7 +5662,13 @@ namespace fairino
                 {
                     log.LogInfo($"GetSystemClock(ref {t_ms}) : {(int)result[0]}");
                 }
-                return (int)result[0];
+                int errcode = (int)result[0];
+                if ((robot_state_pkg.main_code != 0 || robot_state_pkg.sub_code != 0) && errcode == 0)
+                {
+                    errcode = 14;
+                }
+
+                return errcode;
             }
             catch
             {
@@ -5500,6 +5779,10 @@ namespace fairino
          */
         public int GetRobotMotionDone(ref byte state)
         {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
             int errcode = 0;
 
             if (g_sock_com_err == (int)RobotError.ERR_SUCCESS)
@@ -5513,7 +5796,7 @@ namespace fairino
 
             if (log != null)
             {
-                log.LogInfo($"GetRobotMotionDone(ref {state}) : {errcode}");
+                //log.LogInfo($"GetRobotMotionDone(ref {state}) : {errcode}");
             }
 
             return errcode;
@@ -5527,6 +5810,10 @@ namespace fairino
          */
         public int GetRobotErrorCode(ref int maincode, ref int subcode)
         {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
             int errcode = 0;
 
             if (g_sock_com_err == (int)RobotError.ERR_SUCCESS)
@@ -5549,6 +5836,10 @@ namespace fairino
 
         private int GetError()
         {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
             int err = 0;
             int ree = 0;
             object[] result = proxy.GetRobotErrorCode();
@@ -5619,6 +5910,10 @@ namespace fairino
          */
         public int GetMotionQueueLength(ref int len)
         {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
             int errcode = 0;
 
             if (g_sock_com_err == (int)RobotError.ERR_SUCCESS)
@@ -6114,9 +6409,10 @@ namespace fairino
         /**
          * @brief  设置轨迹运行中的速度
          * @param  [in] ovl 速度百分比
+         * @param  [in] mode 0-降速模式 1-直接切换
          * @return  错误码
          */
-        public int SetTrajectoryJSpeed(double ovl)
+        public int SetTrajectoryJSpeed(double ovl, int mode = 0)
         {
             if (IsSockComError())
             {
@@ -6125,10 +6421,10 @@ namespace fairino
 
             try
             {
-                int rtn = proxy.SetTrajectoryJSpeed(ovl);
+                int rtn = proxy.SetTrajectoryJSpeed(ovl, mode);
                 if (log != null)
                 {
-                    log.LogInfo($"SetTrajectoryJSpeed({ovl}) : {rtn}");
+                    log.LogInfo($"SetTrajectoryJSpeed({ovl}) {mode}: {rtn}");
                 }
                 return rtn;
             }
@@ -6758,6 +7054,10 @@ namespace fairino
          */
         public int GetProgramState(ref byte state)
         {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
             int errcode = 0;
 
             if (g_sock_com_err == (int)RobotError.ERR_SUCCESS)
@@ -7007,6 +7307,10 @@ namespace fairino
          */
         public int GetGripperActivateStatus(ref int fault, ref int status)
         {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
             int errcode = 0;
 
             if (g_sock_com_err == (int)RobotError.ERR_SUCCESS)
@@ -7035,6 +7339,10 @@ namespace fairino
          */
         public int GetGripperCurPosition(ref int fault, ref int position)
         {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
             int errcode = 0;
 
             if (g_sock_com_err == (int)RobotError.ERR_SUCCESS)
@@ -7063,6 +7371,10 @@ namespace fairino
          */
         public int GetGripperCurSpeed(ref int fault, ref int speed)
         {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
             int errcode = 0;
 
             if (g_sock_com_err == (int)RobotError.ERR_SUCCESS)
@@ -7089,6 +7401,10 @@ namespace fairino
          */
         public int GetGripperCurCurrent(ref int fault, ref int current)
         {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
             int errcode = 0;
 
             if (g_sock_com_err == (int)RobotError.ERR_SUCCESS)
@@ -7116,6 +7432,10 @@ namespace fairino
          */
         public int GetGripperVoltage(ref int fault, ref int voltage)
         {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
             int errcode = 0;
 
             if (g_sock_com_err == (int)RobotError.ERR_SUCCESS)
@@ -7144,12 +7464,16 @@ namespace fairino
          */
         public int GetGripperTemp(ref int fault, ref int temp)
         {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
             int errcode = 0;
 
             if (g_sock_com_err == (int)RobotError.ERR_SUCCESS)
             {
                 fault = robot_state_pkg.gripper_fault;
-                temp = robot_state_pkg.gripper_tmp;
+                temp = robot_state_pkg.gripper_temp;
             }
             else
             {
@@ -7659,6 +7983,10 @@ namespace fairino
          */
         public int FT_GetForceTorqueRCS(byte flag, ref ForceTorque ft)
         {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
             int errcode = 0;
 
             if (g_sock_com_err == (int)RobotError.ERR_SUCCESS)
@@ -7690,6 +8018,10 @@ namespace fairino
          */
         public int FT_GetForceTorqueOrigin(byte flag, ref ForceTorque ft)
         {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
             int errcode = 0;
 
             if (g_sock_com_err == (int)RobotError.ERR_SUCCESS)
@@ -7782,6 +8114,10 @@ namespace fairino
                              byte adj_sign, byte ILC_sign, float max_dis, float max_ang,
                              int filter_Sign, int posAdapt_sign, int isNoBlock)
         {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
             double[] M = new double[2] { 0.0, 0.0 };
             double[] B = new double[2] { 0.0, 0.0 };
             return FT_Control(flag, sensor_id, select, ft, ft_pid, adj_sign, ILC_sign, max_dis, max_ang,
@@ -7812,6 +8148,10 @@ namespace fairino
                              double[] M, double[] B, double polishRadio, int filter_Sign,
                              int posAdapt_sign, int isNoBlock)
         {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
             double[] threshold = new double[2] { 0.0, 0.0 };
             double[] adjustCoeff = new double[2] { 0.0, 0.0 };
             return FT_Control(flag, sensor_id, select, ft, ft_pid, adj_sign, ILC_sign, max_dis, max_ang,
@@ -8849,6 +9189,10 @@ namespace fairino
          */
         public int GetRobotEmergencyStopState(ref byte state)
         {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
             int errcode = 0;
 
             if (g_sock_com_err == (int)RobotError.ERR_SUCCESS)
@@ -8872,6 +9216,10 @@ namespace fairino
          */
         public int GetSDKComState(ref int state)
         {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
             int errcode = 0;
 
             if (g_sock_com_err == (int)RobotError.ERR_SUCCESS)
@@ -8897,6 +9245,10 @@ namespace fairino
          */
         public int GetSafetyStopState(ref byte si0_state, ref byte si1_state)
         {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            } 
             int errcode = 0;
 
             if (g_sock_com_err == (int)RobotError.ERR_SUCCESS)
@@ -10577,6 +10929,7 @@ namespace fairino
             if (log != null)
             {
                 log.LogInfo($"LoggerInit({logType},{logLevel},{filePath},{saveFileNum},{saveDays}) : {0}");
+                _cndeClient.SetLog(log);
             }
             return 0;
         }
@@ -10603,7 +10956,10 @@ namespace fairino
         private bool IsSockComError()
         {
 
-            while (sock_cli_state.GetReconnState() && sock_cli_cmd.GetReconnState())
+            //while (sock_cli_state.GetReconnState() && sock_cli_cmd.GetReconnState())
+            //while (_cndeClient.GetReconnectState() || sock_cli_cmd.GetReconnState())
+            while ((_cndeClient != null && _cndeClient.GetReconnectState()) ||
+                    (sock_cli_cmd != null && sock_cli_cmd.GetReconnState()))
             {
                 //如果正在重连，就等待重连结果
                 Thread.Sleep(100);
@@ -11137,6 +11493,10 @@ namespace fairino
         */
         public int LuaUpload(string filePath, ref string errStr)
         {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
             FileInfo fileInfo = new FileInfo(filePath);
             if (!fileInfo.Exists)
             {
@@ -11182,6 +11542,10 @@ namespace fairino
         */
         public int LuaDownLoad(string fileName, string savePath)
         {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
             int rtn = 0;
             string[] nameStrs = fileName.Split('.');
             if (nameStrs.Length > 2 && nameStrs[1] == "tar" && nameStrs[2] == "gz")
@@ -11766,35 +12130,35 @@ namespace fairino
          * @param [out] pkg 机器人实时状态结构体 
          * @return 错误码 
          */
-        public int GetRobotRealTimeState(ref ROBOT_STATE_PKG pkg)
-        {
-            if (IsSockComError())
-            {
-                return g_sock_com_err;
-            }
+        //public int GetRobotRealTimeState(ref ROBOT_STATE_PKG pkg)
+        //{
+        //    if (IsSockComError())
+        //    {
+        //        return g_sock_com_err;
+        //    }
 
-            try
-            {
-                pkg = robot_state_pkg;
-                return 0;
-            }
-            catch
-            {
-                if (IsSockComError())
-                {
-                    if (log != null)
-                    {
-                        log.LogError($"RPC exception");
-                    }
-                    return g_sock_com_err;
+        //    try
+        //    {
+        //        pkg = robot_state_pkg;
+        //        return 0;
+        //    }
+        //    catch
+        //    {
+        //        if (IsSockComError())
+        //        {
+        //            if (log != null)
+        //            {
+        //                log.LogError($"RPC exception");
+        //            }
+        //            return g_sock_com_err;
 
-                }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
-            }
-        }
+        //        }
+        //        else
+        //        {
+        //            return (int)RobotError.ERR_SUCCESS;
+        //        }
+        //    }
+        //}
 
         /** 
          * @brief 获取机器人外设协议
@@ -14055,7 +14419,8 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch { 
+            catch
+            {
                 if (IsSockComError())
                 {
                     if (log != null)
@@ -14461,6 +14826,10 @@ namespace fairino
          */
         public int ForceSensorAutoComputeLoad(ref double weight, ref DescTran pos)
         {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
             JointPos startJ = new JointPos(0, 0, 0, 0, 0, 0);
             DescPose startDesc = new DescPose(0, 0, 0, 0, 0, 0);
             GetActualJointPosDegree(1, ref startJ);
@@ -17416,6 +17785,10 @@ namespace fairino
         */
         public int AxleLuaUpload(string filePath)
         {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
             FileInfo fileInfo = new FileInfo(filePath);
             if (!fileInfo.Exists)
             {
@@ -17460,6 +17833,10 @@ namespace fairino
         */
         public int GetGripperRotNum(ref UInt16 fault, ref double num)
         {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
             int errcode = 0;
 
             if (g_sock_com_err == (int)RobotError.ERR_SUCCESS)
@@ -17483,6 +17860,10 @@ namespace fairino
         */
         public int GetGripperRotSpeed(ref UInt16 fault, ref int speed)
         {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
             int errcode = 0;
 
             if (g_sock_com_err == (int)RobotError.ERR_SUCCESS)
@@ -17504,6 +17885,10 @@ namespace fairino
         */
         public int GetGripperRotTorque(ref UInt16 fault, ref int torque)
         {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
             int errcode = 0;
 
             if (g_sock_com_err == (int)RobotError.ERR_SUCCESS)
@@ -20412,10 +20797,10 @@ namespace fairino
          * @brief  写入从站AO
          * @param [in] AOIndex AO编号
          * @param [in] wirteNum 写入数量
-         * @param [in] status 写入数值数组（最多8个）
+         * @param [in] status 写入数值数组（最多8个）,AO0~AO15为整型，AO16~AO31为浮点
          * @return 错误码
          */
-        public int FieldBusSlaveWriteAO(int AOIndex, int wirteNum, int[] status)
+        public int FieldBusSlaveWriteAO(int AOIndex, int wirteNum, double[] status)
         {
             if (IsSockComError())
             {

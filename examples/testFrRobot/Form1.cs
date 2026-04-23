@@ -15,6 +15,8 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using fairino;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using static System.Windows.Forms.AxHost;
+using System.Xml.Linq;
 
 
 namespace testFrRobot
@@ -30,13 +32,47 @@ namespace testFrRobot
         {
             InitializeComponent();
             robot = new Robot();//实例化机器人对象
-           string path = "D://log/";
+            string path = "D://log/";
             robot.LoggerInit(FrLogType.BUFFER, FrLogLevel.INFO, path, 5, 5);
-           // robot.SetLoggerLevel(FrLogLevel.INFO);
+            robot.SetLoggerLevel(FrLogLevel.INFO);
+
+            // 查看最终CNDE配置
+            List<RobotState> finalStates;
+            int finalPeriod;
+            robot.GetRobotRealtimeStateConfig(out finalStates, out finalPeriod);
+            Console.WriteLine($"最终配置状态数量: {finalStates.Count}");
+            foreach (var s in finalStates) Console.WriteLine($"  {s}");
+            Console.WriteLine($"最终周期: {finalPeriod} ms");
+
+
             robot.SetReconnectParam(true, 100, 1000);//断线重连参数
             rrpc = robot.RPC("192.168.58.2"); //与控制箱建立连接
                                               //20004端口接收超时时间
                                               //robot.SetReceivePortTimeout(40);
+
+
+        }
+
+        public void cndeconfigtest()
+        {
+            ////  
+            // 2. 配置状态：JointCurPos, ToolCurPos，周期 20ms
+            List<RobotState> states1 = new List<RobotState>
+            {
+                RobotState.JointCurPos,
+                RobotState.ToolCurPos
+            };
+            int period1 = 20; // ms
+            int ret = robot.SetRobotRealtimeStateConfig(states1, period1);
+            Console.WriteLine($"初始配置结果: {ret}");
+
+            // 8. 查看最终配置（仅用于验证）
+            List<RobotState> finalStates;
+            int finalPeriod;
+            robot.GetRobotRealtimeStateConfig(out finalStates, out finalPeriod);
+            Console.WriteLine($"最终配置状态数量: {finalStates.Count}");
+            foreach (var s in finalStates) Console.WriteLine($"  {s}");
+            Console.WriteLine($"最终周期: {finalPeriod} ms");
 
         }
 
@@ -2058,8 +2094,1504 @@ namespace testFrRobot
             robot.MoveJ(j2, desc_pos2, tool, user, vel, acc, ovl, epos, blendT, flag, offset_pos);
             robot.MoveToolAOStop();
         }
+
+        private void btnGetcnde_Click(object sender, EventArgs e)
+        {
+            Thread.Sleep(2000);
+            //RunCNDETest();
+            //TestAddDeleteSpeedScale();
+            //TestRobotRealtimeStates();
+            //TestRobotOperationalStates();
+            //TestExtendedAxisAndIOStates();
+            //TestGripperAndForceSensorStates();
+            //TestRobotERRStatusStates();
+            //TestErrorCodeInterfaces();
+            //TestNormalFeedbackAndPeriod();
+            //TestInvalidStateConfig();
+            //TestSquareMotionWithMoveL();
+            // 循环获取并打印实时状态
+            while (true)
+            {
+                ROBOT_STATE_PKG pkg = new ROBOT_STATE_PKG();
+                // 获取最新的机器人实时状态（内部会更新pkg对象）
+                robot.GetRobotRealTimeState(ref pkg);
+
+                Console.WriteLine($"robot SocketConnTimeout: {pkg.socketConnTimeout}");
+                Console.WriteLine($"robot SocketReadTimeout: {pkg.socketReadTimeout}");
+                // 如需打印 TsWebStateComErr 可取消注释
+                 Console.WriteLine($"robot TsWebStateComErr: {pkg.tsWebStateComErr}");
+
+                Thread.Sleep(300); // 与C++示例一致，300ms打印一次
+            }
+        }
+
+
+        private async void TestSquareMotionWithMoveL()
+        {
+            int ret = 0;
+            // 1. 初始化机器人
+            //robot = new Robot();
+            //robot.LoggerInit(FrLogType.BUFFER, FrLogLevel.INFO, "D://log/", 5, 5);
+            //robot.SetLoggerLevel(FrLogLevel.INFO);
+            //robot.SetReconnectParam(true, 100, 1000);
+
+            //// 2. 配置状态反馈：工具位姿、运动完成信号，周期 8ms
+            //List<RobotState> states = new List<RobotState>
+            //{
+            //    RobotState.JointCurPos,
+            //    RobotState.ToolCurPos,
+            //    RobotState.MotionDone
+            //};
+            //int periodMs = 8;
+            //int ret = robot.SetRobotRealtimeStateConfig(states, periodMs);
+            //Console.WriteLine($"配置状态结果: {ret}");
+
+            //// 3. 建立 RPC 连接
+            //ret = robot.RPC("192.168.58.3");
+            //if (ret != 0)
+            //{
+            //    Console.WriteLine($"RPC 连接失败: {ret}");
+            //    return;
+            //}
+            //Console.WriteLine("RPC 连接成功，CNDE 已连接。开始正方形运动...");
+
+            // 运动参数
+            int tool = 0;
+            int user = 0;
+            float vel = 100.0f;
+            float acc = 100.0f;
+            float ovl = 100.0f;
+            float blendR = -1.0f;   // 运动到位（阻塞），但我们将手动等待 MotionDone
+            ExaxisPos epos = new ExaxisPos(0, 0, 0, 0);
+            int search = 0;
+            int offset_flag = 0;
+            DescPose offset_pos = new DescPose(0, 0, 0, 0, 0, 0);
+            float oacc = 100.0f;
+            int velAccParamMode = 0;
+            int overSpeedStrategy = 0;
+            int speedPercent = 10;
+
+
+            byte flag = 0;
+  
+            int blendMode = 0;
+            int velAccMode = 0;
+
+            double step = 200.0;  // 边长 100mm
+            long cycles = 10000000000;      // 循环次数
+            robot.Sleep(2000);
+            for (long cycle = 1; cycle <= cycles; cycle++)
+            {
+                Console.WriteLine($"\n========== 第 {cycle} 次正方形运动 ==========");
+
+                // 获取当前 TCP 位姿作为起点
+                ROBOT_STATE_PKG pkg = new ROBOT_STATE_PKG();
+                ret = robot.GetRobotRealTimeState(ref pkg);
+                if (pkg == null)
+                {
+                    Console.WriteLine("获取当前位姿失败，退出");
+                    break;
+                }
+                if (pkg.tl_cur_pos != null && pkg.tl_cur_pos.Length >= 6)
+                {
+                    Console.WriteLine($"  TCP位姿(mm/°): X={pkg.tl_cur_pos[0]:F2}, Y={pkg.tl_cur_pos[1]:F2}, Z={pkg.tl_cur_pos[2]:F2}, RX={pkg.tl_cur_pos[3]:F2}, RY={pkg.tl_cur_pos[4]:F2}, RZ={pkg.tl_cur_pos[5]:F2}");
+                }
+                double startX = pkg.tl_cur_pos[0];
+                double startY = pkg.tl_cur_pos[1];
+                double startZ = pkg.tl_cur_pos[2];
+                double startRX = pkg.tl_cur_pos[3];
+                double startRY = pkg.tl_cur_pos[4];
+                double startRZ = pkg.tl_cur_pos[5];
+
+                // 定义四个目标点（相对起点）
+                DescPose target1 = new DescPose(startX + step, startY, startZ, startRX, startRY, startRZ);
+                DescPose target2 = new DescPose(startX + step, startY + step, startZ, startRX, startRY, startRZ);
+                DescPose target3 = new DescPose(startX, startY + step, startZ, startRX, startRY, startRZ);
+                DescPose target4 = new DescPose(startX, startY, startZ, startRX, startRY, startRZ);
+                //DescPose desc_pos2 = new DescPose(-321.222f, 185.189f, 335.520f, -179.030f, -1.284f, -29.869f);
+                JointPos jpos1 = new JointPos(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+                JointPos jposRef = new JointPos(pkg.jt_cur_pos[0], pkg.jt_cur_pos[1], pkg.jt_cur_pos[2], pkg.jt_cur_pos[3], pkg.jt_cur_pos[4], pkg.jt_cur_pos[5]);
+                robot.GetInverseKinRef(0, target1, jposRef, ref jpos1);
+
+                // 执行四条边
+                await MoveLAndWait(target1, tool, user, vel, acc, ovl, blendR, epos, search, offset_flag, offset_pos, oacc, velAccParamMode, overSpeedStrategy, speedPercent);
+                robot.Sleep(1000);
+                await MoveLAndWait(target2, tool, user, vel, acc, ovl, blendR, epos, search, offset_flag, offset_pos, oacc, velAccParamMode, overSpeedStrategy, speedPercent);
+                robot.Sleep(1000);
+                await MoveLAndWait(target3, tool, user, vel, acc, ovl, blendR, epos, search, offset_flag, offset_pos, oacc, velAccParamMode, overSpeedStrategy, speedPercent);
+                robot.Sleep(1000);
+                await MoveLAndWait(target4, tool, user, vel, acc, ovl, blendR, epos, search, offset_flag, offset_pos, oacc, velAccParamMode, overSpeedStrategy, speedPercent);
+                robot.Sleep(1000);
+                Console.WriteLine($"第 {cycle} 次正方形运动完成");
+            }
+
+            Console.WriteLine("所有运动完成...");
+            //robot.CloseRPC();
+        }
+
+        // 辅助方法：执行 MoveL 并等待 MotionDone
+        private async Task MoveLAndWait( DescPose target, int tool, int user, float vel, float acc, float ovl, float blendR,
+                                        ExaxisPos epos, int search, int offset_flag, DescPose offset_pos,
+                                        float oacc, int velAccParamMode, int overSpeedStrategy, int speedPercent)
+        {
+            // 注意：这里使用 MoveL 重载，参数顺序参考您的示例
+            //int rtn = robot.MoveL(target, 0, 0, 100, 100, 100, -1, 0, epos, 0, 0, offset_pos, 0, 0);
+            ROBOT_STATE_PKG pkg = new ROBOT_STATE_PKG();
+            JointPos jpos = new JointPos(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+            int ret = robot.GetRobotRealTimeState(ref pkg);
+            JointPos jposRef = new JointPos(pkg.jt_cur_pos[0], pkg.jt_cur_pos[1], pkg.jt_cur_pos[2], pkg.jt_cur_pos[3], pkg.jt_cur_pos[4], pkg.jt_cur_pos[5]);
+            Console.WriteLine($"     {pkg.jt_cur_pos[0]}");
+            robot.GetInverseKinRef(0, target, jposRef, ref jpos);
+            int rtn = robot.MoveL(jpos, target, 0, 0, 100, 100, 100, -1, 0, epos, 0, 0, offset_pos, 100.0f, 0, 0);
+
+            if (rtn != 0)
+            {
+                Console.WriteLine($"MoveL 指令失败，错误码: {rtn}");
+                return;
+            }
+
+            // 循环等待 MotionDone 变为 1
+            int timeoutMs = 10000;      // 10 秒超时
+            int intervalMs = 8;         // 检查间隔 8ms
+            DateTime startTime = DateTime.Now;
+            while ((DateTime.Now - startTime).TotalMilliseconds < timeoutMs)
+            {
+                byte done = 0;
+                ret = robot.GetRobotMotionDone(ref done);
+                if (ret != 0)
+                {
+                    Console.WriteLine($"GetRobotMotionDone 失败，错误码: {ret}");
+                    return;
+                }
+                if (done == 1)
+                {
+                    Console.WriteLine($"运动到位，目标位置: X={target.tran.x:F1}, Y={target.tran.y:F1}, Z={target.tran.z:F1}");
+                    return;
+                }
+                await Task.Delay(intervalMs);
+            }
+            Console.WriteLine($"等待运动完成超时 (>{timeoutMs}ms)");
+        }
+
+
+
+
+        private async void TestErrorCodeInterfaces()
+        {
+
+            // 2. 配置状态反馈周期为 2000ms
+            List<RobotState> states1 = new List<RobotState> { RobotState.JointCurPos, RobotState.ToolCurPos };
+            int ret = robot.SetRobotRealtimeStateConfig(states1, 2000);
+            Console.WriteLine($"SetRobotRealtimeStateConfig(周期2000ms) 返回: {ret}(预期 4)");
+
+            // 3. 配置状态反馈周期为 7ms（允许范围 8~1000，应返回 ERR_PARAM_VALUE = 4）
+            ret = robot.SetRobotRealtimeStateConfig(states1, 7);
+            Console.WriteLine($"SetRobotRealtimeStateConfig(周期7ms) 返回: {ret} (预期 4)");
+
+            // 4. 配置空字段组，周期 8ms
+            List<RobotState> emptyStates = new List<RobotState>();
+            ret = robot.SetRobotRealtimeStateConfig(emptyStates, 8);
+            Console.WriteLine($"SetRobotRealtimeStateConfig(空字段,周期8ms) 返回: {ret} (预期  ERR_NEED_AT_LEAST_ONE_STATE -19)");
+
+            // 5. 添加已存在的状态 JointCurPos
+            ret = robot.AddRobotRealtimeState(RobotState.JointCurPos);
+            Console.WriteLine($"AddRobotRealtimeState(已存在JointCurPos) 返回: {ret} (预期  ERR_STATE_ALREADY_EXISTS -17)");
+
+            // 6. 删除不存在的状态 CtrlBoxError
+            ret = robot.DeleteRobotRealtimeState(RobotState.CtrlBoxError);
+            Console.WriteLine($"DeleteRobotRealtimeState(不存在的CtrlBoxError) 返回: {ret} (预期  ERR_STATE_INVALID -18)");
+
+            // 7. 设置周期为 7ms（无效）
+            ret = robot.SetRobotRealtimeStatePeriod(7);
+            Console.WriteLine($"SetRobotRealtimeStatePeriod(7ms) 返回: {ret} (预期 4)");
+            // 设置周期为 1001ms（无效）
+            ret = robot.SetRobotRealtimeStatePeriod(1001);
+            Console.WriteLine($"SetRobotRealtimeStatePeriod(1001ms) 返回: {ret} (预期 4)");
+
+            // 8. 设置有效周期 10ms，并建立连接验证（可选）
+            ret = robot.SetRobotRealtimeStatePeriod(10);
+            Console.WriteLine($"SetRobotRealtimeStatePeriod(10ms) 返回: {ret} (预期 0)");
+            robot.SetRobotRealtimeStateConfig(states1, 10);
+            ret = robot.RPC("192.168.58.2");
+            Console.WriteLine($"RPC 连接结果: {ret}");
+            if (ret == 0)
+            {
+                Console.WriteLine("测试接口错误码完成，等待3秒后自动断开...");
+                await Task.Delay(3000);
+                robot.CloseRPC();
+            }
+        }
+        private async void TestNormalFeedbackAndPeriod()
+        {
+            int ret = 0;
+            // 设置需要反馈的状态：关节位置、TCP位姿、机器人时间、负载质量及质心、关节指令位置
+            //List<RobotState> states = new List<RobotState>
+            //{
+            //    RobotState.JointCurPos,
+            //    RobotState.ToolCurPos,
+            //    RobotState.RobotTime,
+            //    RobotState.Load,
+            //    RobotState.LoadCog,
+            //    RobotState.TargetJointPos,   // 关节指令位置
+            //    RobotState.CollisionLevel
+            //};
+            //int periodMs = 8;   // 要求周期为8ms
+            //int ret = robot.SetRobotRealtimeStatePeriod(periodMs);
+            ret = robot.AddRobotRealtimeState(RobotState.CollisionLevel);
+            //Console.WriteLine($"AddRobotRealtimeState(已存在JointCurPos) 返回: {ret} (预期  ERR_STATE_ALREADY_EXISTS -17)");
+            //int periodMs = 8;
+            //int ret = robot.SetRobotRealtimeStateConfig(states, periodMs);
+            //Console.WriteLine($"配置状态结果: {ret}");
+
+            //Console.WriteLine($"配置状态结果: {ret}");
+
+            // 建立 RPC 连接
+            ret = robot.RPC("192.168.58.2");
+            if (ret != 0)
+            {
+                Console.WriteLine($"RPC 连接失败: {ret}");
+                return;
+            }
+            Console.WriteLine("RPC 连接成功，开始接收数据，周期 8ms...");
+
+            // 记录上一帧时间戳，用于计算间隔
+            DateTime lastTimestamp = DateTime.Now;
+            int frameCount = 0;
+
+            // 循环接收 5 秒，每秒打印一次详细数据，同时记录每帧时间间隔
+            DateTime startTime = DateTime.Now;
+            while ((DateTime.Now - startTime).TotalSeconds < 2500)
+            {
+                ROBOT_STATE_PKG pkg = new ROBOT_STATE_PKG();
+                ret = robot.GetRobotRealTimeState(ref pkg);
+                DateTime now = DateTime.Now;
+                double interval = (now - lastTimestamp).TotalMilliseconds;
+                lastTimestamp = now;
+                frameCount++;
+
+                // 每收到一帧打印时间戳和间隔（用于验证周期）
+                //Console.WriteLine($"[帧 {frameCount}] 时间戳: {now:HH:mm:ss.fff}, 间隔: {interval:F1} ms");
+                printCNDE();
+                //// 碰撞等级
+                if (pkg.collisionLevel != null && pkg.collisionLevel.Length >= 6)
+                    Console.WriteLine($"碰撞等级: J1={pkg.collisionLevel[0]}, J2={pkg.collisionLevel[1]}, J3={pkg.collisionLevel[2]}, J4={pkg.collisionLevel[3]}, J5={pkg.collisionLevel[4]}, J6={pkg.collisionLevel[5]}");
+
+                // 每 1 秒打印一次详细数据（避免控制台刷屏）
+                //if (frameCount % 1 == 0)  // 8ms周期，1秒约125帧
+                //{
+                //    Console.WriteLine($"\n--- 详细数据 ---");
+                //    if (pkg.jt_cur_pos != null && pkg.jt_cur_pos.Length >= 6)
+                //        Console.WriteLine($"  关节位置(°): J1={pkg.jt_cur_pos[0]:F2}, J2={pkg.jt_cur_pos[1]:F2}, J3={pkg.jt_cur_pos[2]:F2}, J4={pkg.jt_cur_pos[3]:F2}, J5={pkg.jt_cur_pos[4]:F2}, J6={pkg.jt_cur_pos[5]:F2}");
+                //    if (pkg.tl_cur_pos != null && pkg.tl_cur_pos.Length >= 6)
+                //        Console.WriteLine($"  TCP位姿(mm/°): X={pkg.tl_cur_pos[0]:F2}, Y={pkg.tl_cur_pos[1]:F2}, Z={pkg.tl_cur_pos[2]:F2}, RX={pkg.tl_cur_pos[3]:F2}, RY={pkg.tl_cur_pos[4]:F2}, RZ={pkg.tl_cur_pos[5]:F2}");
+                //    Console.WriteLine($"  机器人时间: {pkg.robotTime.ToString()}");
+                //    Console.WriteLine($"  负载质量: {pkg.load:F2} kg");
+                //    if (pkg.loadCog != null && pkg.loadCog.Length >= 3)
+                //        Console.WriteLine($"  负载质心(mm): X={pkg.loadCog[0]:F2}, Y={pkg.loadCog[1]:F2}, Z={pkg.loadCog[2]:F2}");
+                //    if (pkg.targetJointPos != null && pkg.targetJointPos.Length >= 6)
+                //        Console.WriteLine($"  关节指令位置(°): J1={pkg.targetJointPos[0]:F2}, J2={pkg.targetJointPos[1]:F2}, J3={pkg.targetJointPos[2]:F2}, J4={pkg.targetJointPos[3]:F2}, J5={pkg.targetJointPos[4]:F2}, J6={pkg.targetJointPos[5]:F2} (应为0)");
+                //}
+
+                // 等待约 8ms 再读下一帧（实际间隔由机器人决定，这里只是避免循环过紧）
+                await Task.Delay(100);
+            }
+
+            Console.WriteLine("\n测试结束，断开连接...");
+            robot.CloseRPC();
+        }
+
+
+        private async void TestInvalidStateConfig()
+        {
+            //robot = new Robot();
+            //robot.LoggerInit(FrLogType.BUFFER, FrLogLevel.INFO, "D://log/", 5, 5);
+            //robot.SetLoggerLevel(FrLogLevel.INFO);
+            //robot.SetReconnectParam(true, 100, 1000);
+
+            // 定义包含不存在状态 OtherState 的列表
+            // 注意：RobotState.OtherState 在枚举中不存在，这里用强制转换一个不存在的值模拟
+            // 实际使用时应使用一个肯定不存在的枚举值，比如 (RobotState)999
+            List<RobotState> invalidStates = new List<RobotState>
+            {
+                RobotState.JointCurPos,
+                (RobotState)999   // 不存在的状态
+            };
+            int periodMs = 20;
+            int ret = robot.SetRobotRealtimeStateConfig(invalidStates, periodMs);
+            Console.WriteLine($"配置不存在的状态返回: {ret} (预期 -18 或 ERR_STATE_INVALID=1003)");
+
+            // 建立 RPC 连接，观察是否会返回错误
+            ret = robot.RPC("192.168.58.2");
+            if (ret != 0)
+            {
+                Console.WriteLine($"RPC 连接失败，错误码: {ret}");
+                return;
+            }
+
+            // 尝试打印数据（实际上配置失败，机器人可能不会发送数据）
+            for (int i = 0; i < 50000000; i++)
+            {
+                ROBOT_STATE_PKG pkg = new ROBOT_STATE_PKG();
+                ret = robot.GetRobotRealTimeState(ref pkg);
+                if (pkg.jt_cur_pos != null && pkg.jt_cur_pos.Length >= 6)
+                {
+                    Console.WriteLine($"  关节位置(°): J1={pkg.jt_cur_pos[0]:F2}, J2={pkg.jt_cur_pos[1]:F2}, J3={pkg.jt_cur_pos[2]:F2}, J4={pkg.jt_cur_pos[3]:F2}, J5={pkg.jt_cur_pos[4]:F2}, J6={pkg.jt_cur_pos[5]:F2}");
+                }
+                await Task.Delay(10);
+            }
+
+            robot.CloseRPC();
+            Console.WriteLine("测试结束。请检查日志文件 D://log/ 中是否有错误记录。");
+        }
+
+
+
+        private async void TestAddDeleteCNDE()
+        {
+            List<RobotState> finalStates;
+            int finalPeriod;
+            // 初始配置：不请求任何状态（默认配置）
+            List<RobotState> emptyStates = new List<RobotState>();
+            int ret = robot.SetRobotRealtimeStateConfig(emptyStates, 20);
+
+            robot.SetRobotRealtimeStatePeriod(10);
+            // 删除两个状态
+            ret = robot.DeleteRobotRealtimeState(RobotState.JointCurPos);
+            Console.WriteLine($"删除 JointCurPos 结果: {ret}");
+            ret = robot.DeleteRobotRealtimeState(RobotState.ToolCurPos);
+            Console.WriteLine($"删除 ToolCurPos 结果: {ret}");
+            // 新增一个状态
+            ret = robot.AddRobotRealtimeState(RobotState.CollisionLevel);
+            Console.WriteLine($"新增 CollisionLevel 结果: {ret}");
+
+            // 获取当前配置列表并重新发送
+            List<RobotState> currentStates;
+            int currentPeriod;
+            robot.GetRobotRealtimeStateConfig(out currentStates, out currentPeriod);
+            Console.WriteLine($"当前配置状态数: {currentStates.Count}");
+            ret = robot.SetRobotRealtimeStateConfig(currentStates, currentPeriod);
+            Console.WriteLine($"应用新配置结果: {ret}"); Console.WriteLine($"初始配置结果: {ret}");
+            robot.GetRobotRealtimeStateConfig(out finalStates, out finalPeriod);
+            Console.WriteLine($"配置状态数量: {finalStates.Count}");
+            foreach (var s in finalStates) Console.WriteLine($"  {s}");
+            Console.WriteLine($"周期: {finalPeriod} ms");
+
+            Thread.Sleep(1000);
+            //  建立 RPC 连接（内部自动连接 CNDE）
+            robot.SetReconnectParam(true, 100, 1000);
+            ret = robot.RPC("192.168.58.2");
+            if (ret != 0)
+            {
+                Console.WriteLine($"RPC 连接失败: {ret}");
+                return;
+            }
+
+            // 循环打印删除和新增的状态，删除的状态打印为0，新增的状态可正常获取实时值
+            DateTime lastTime = DateTime.Now;
+            int frameCount = 0;
+            DateTime startTime = DateTime.Now;
+            while ((DateTime.Now - startTime).TotalSeconds < 10)
+            {
+                ROBOT_STATE_PKG pkg = new ROBOT_STATE_PKG();
+                robot.GetRobotRealTimeState(ref pkg);
+                DateTime now = DateTime.Now;
+                double interval = (now - lastTime).TotalMilliseconds;
+                lastTime = now;
+                frameCount++;
+
+                if (pkg.jt_cur_pos != null && pkg.jt_cur_pos.Length >= 6)
+                {
+                    Console.WriteLine($"  关节位置(°): J1={pkg.jt_cur_pos[0]:F2}, J2={pkg.jt_cur_pos[1]:F2}, J3={pkg.jt_cur_pos[2]:F2}, J4={pkg.jt_cur_pos[3]:F2}, J5={pkg.jt_cur_pos[4]:F2}, J6={pkg.jt_cur_pos[5]:F2}");
+                }
+                if (pkg.tl_cur_pos != null && pkg.tl_cur_pos.Length >= 6)
+                {
+                    Console.WriteLine($"  TCP位姿(mm/°): X={pkg.tl_cur_pos[0]:F2}, Y={pkg.tl_cur_pos[1]:F2}, Z={pkg.tl_cur_pos[2]:F2}, RX={pkg.tl_cur_pos[3]:F2}, RY={pkg.tl_cur_pos[4]:F2}, RZ={pkg.tl_cur_pos[5]:F2}");
+                }
+                // 碰撞等级
+                if (pkg.collisionLevel != null && pkg.collisionLevel.Length >= 6)
+                    Console.WriteLine($"碰撞等级: J1={pkg.collisionLevel[0]}, J2={pkg.collisionLevel[1]}, J3={pkg.collisionLevel[2]}, J4={pkg.collisionLevel[3]}, J5={pkg.collisionLevel[4]}, J6={pkg.collisionLevel[5]}");
+
+                await Task.Delay(50);
+            }
+            //断开连接
+            robot.CloseRPC();
+            Console.WriteLine("测试完成。");
+        }
+
+        /// <summary>
+        /// 测试机器人本体实时状态反馈（使用正确的结构体变量名）
+        /// 配置指定字段组，周期 8ms，建立 RPC 连接后循环打印状态值
+        /// </summary>
+        private async void TestRobotRealtimeStates()
+        {
+            // 1. 定义需要订阅的状态字段
+            List<RobotState> requiredStates = new List<RobotState>
+            {
+                RobotState.JointCurPos,
+                RobotState.ToolCurPos, 
+                RobotState.JointDriverTemperature,
+                RobotState.RobotTime,
+            };
+
+            // 2. 配置状态反馈（周期 8ms）
+            int periodMs = 8;
+            int ret = robot.SetRobotRealtimeStateConfig(requiredStates, periodMs);
+            if (ret != 0)
+            {
+                Console.WriteLine($"配置状态失败，错误码: {ret}");
+                return;
+            }
+            Console.WriteLine($"状态配置成功，共 {requiredStates.Count} 个字段，周期 {periodMs} ms");
+
+            // 验证配置是否生效
+            List<RobotState> actualStates;
+            int actualPeriod;
+            robot.GetRobotRealtimeStateConfig(out actualStates, out actualPeriod);
+            Console.WriteLine($"实际生效的状态数: {actualStates.Count}, 周期: {actualPeriod} ms");
+            Thread.Sleep(3000);
+            // 3. 建立 RPC 连接（内部自动完成 CNDE 握手）
+            robot.SetReconnectParam(true, 10, 1000);
+            ret = robot.RPC("192.168.58.2");  // 请根据实际机器人 IP 修改
+            if (ret != 0)
+            {
+                Console.WriteLine($"RPC 连接失败，错误码: {ret}");
+                return;
+            }
+            // 4. 循环读取并打印状态数据
+            DateTime startTime = DateTime.Now;
+            const int durationSeconds = 500;
+
+            while ((DateTime.Now - startTime).TotalSeconds < durationSeconds)
+            {
+                ROBOT_STATE_PKG pkg = new ROBOT_STATE_PKG();
+                ret = robot.GetRobotRealTimeState(ref pkg);
+                Console.WriteLine($"GetRobotRealTimeState: {ret}");
+
+                //关节位置（度）
+                if (pkg.jt_cur_pos != null && pkg.jt_cur_pos.Length >= 6)
+                    Console.WriteLine($"关节位置(°): J1={pkg.jt_cur_pos[0]:F2}, J2={pkg.jt_cur_pos[1]:F2}, J3={pkg.jt_cur_pos[2]:F2}, J4={pkg.jt_cur_pos[3]:F2}, J5={pkg.jt_cur_pos[4]:F2}, J6={pkg.jt_cur_pos[5]:F2}");
+
+                //TCP 位姿（mm /°）
+                if (pkg.tl_cur_pos != null && pkg.tl_cur_pos.Length >= 6)
+                    Console.WriteLine($"TCP位姿(mm/°): X={pkg.tl_cur_pos[0]:F2}, Y={pkg.tl_cur_pos[1]:F2}, Z={pkg.tl_cur_pos[2]:F2}, RX={pkg.tl_cur_pos[3]:F2}, RY={pkg.tl_cur_pos[4]:F2}, RZ={pkg.tl_cur_pos[5]:F2}");
+   
+                // 关节温度
+                if (pkg.jointDriverTemperature != null && pkg.jointDriverTemperature.Length >= 6)
+                    Console.WriteLine($"关节温度(°C): J1={pkg.jointDriverTemperature[0]:F2}, J2={pkg.jointDriverTemperature[1]:F2}, J3={pkg.jointDriverTemperature[2]:F2}, J4={pkg.jointDriverTemperature[3]:F2}, J5={pkg.jointDriverTemperature[4]:F2}, J6={pkg.jointDriverTemperature[5]:F2}");
+
+                // 机器人时间
+                Console.WriteLine($"机器人时间: {pkg.robotTime.year}-{pkg.robotTime.mouth:D2}-{pkg.robotTime.day:D2} {pkg.robotTime.hour:D2}:{pkg.robotTime.minute:D2}:{pkg.robotTime.second:D2}.{pkg.robotTime.millisecond:D3}");
+
+                await Task.Delay(100);
+            }
+
+            // 5. 断开连接
+            robot.CloseRPC();
+        }
+
+        /// <summary>
+        /// 测试机器人运行相关的状态反馈（手自动、DI、坐标系等）
+        /// 配置指定字段组，周期 8ms，建立 RPC 连接后循环打印状态值
+        /// </summary>
+        private async void TestRobotOperationalStates()
+        {
+            // 1. 定义需要订阅的状态字段（与题目要求完全一致）
+            List<RobotState> requiredStates = new List<RobotState>
+            {
+                //RobotState.Load,
+                //RobotState.LoadCog,
+                //RobotState.CollisionLevel
+                //RobotState.ProgramState,
+                //RobotState.RobotState,
+                //RobotState.RobotMode,
+                //RobotState.MotionDone,
+                //RobotState.McQueueLen,
+                //RobotState.TrajectoryPnum,
+                //RobotState.Tool,
+                //RobotState.User,
+                //RobotState.ClDgtOutputH,
+                //RobotState.ClDgtOutputL,
+                //RobotState.TlDgtOutputL,
+                //RobotState.ClDgtInputH,
+                //RobotState.ClDgtInputL,
+                //RobotState.TlDgtInputL,
+                RobotState.ClAnalogInput,
+                RobotState.TlAnglogInput,
+                //RobotState.RbtEnableState,
+                //RobotState.SoftwareUpgradeState,
+                //RobotState.WeldingBreakOffState,
+                RobotState.ClAnalogOutput,
+                RobotState.TlAnalogOutput,
+                //RobotState.ToolCoord,
+                //RobotState.WobjCoord,
+                //RobotState.ExtoolCoord,
+                //RobotState.ExAxisCoord,
+                //RobotState.Load,
+                //RobotState.LoadCog,
+                //RobotState.LastServoTarget,
+                //RobotState.ServoJCmdNum,
+                //RobotState.CollisionLevel,
+                //RobotState.SpeedScaleManual,
+                //RobotState.SpeedScaleAuto,
+                //RobotState.LuaLineNum,
+                //RobotState.AbnomalStop,
+                //RobotState.CurrentLuaFileName,
+                //RobotState.ProgramTotalLine,
+                //RobotState.WeldVoltage,
+                //RobotState.WeldCurrent,
+                //RobotState.WeldTrackVel,
+                //RobotState.UdpCmdState,
+                //RobotState.WeldReadyState
+            };
+
+            // 2. 配置状态反馈（周期 8ms）
+            int periodMs = 15;
+            int ret = robot.SetRobotRealtimeStateConfig(requiredStates, periodMs);
+            if (ret != 0)
+            {
+                Console.WriteLine($"配置状态失败，错误码: {ret}");
+                return;
+            }
+            Console.WriteLine($"状态配置成功，共 {requiredStates.Count} 个字段，周期 {periodMs} ms");
+
+            // 可选：验证配置是否生效
+            List<RobotState> actualStates;
+            int actualPeriod;
+            robot.GetRobotRealtimeStateConfig(out actualStates, out actualPeriod);
+            Console.WriteLine($"实际生效的状态数: {actualStates.Count}, 周期: {actualPeriod} ms");
+
+            // 3. 建立 RPC 连接（内部自动完成 CNDE 握手）
+            robot.SetReconnectParam(true, 100, 1000);
+            ret = robot.RPC("192.168.58.3");  // 请根据实际机器人 IP 修改
+            if (ret != 0)
+            {
+                Console.WriteLine($"RPC 连接失败，错误码: {ret}");
+                return;
+            }
+            //Console.WriteLine("RPC 连接成功，开始获取机器人运行状态（将持续 30 秒）...");
+            //Console.WriteLine("提示：此时可以进行以下操作，观察下方打印数据变化：");
+            //Console.WriteLine("  - 切换手自动模式");
+            //Console.WriteLine("  - 触发控制箱 DI 输入（如安全门、急停等）");
+            //Console.WriteLine("  - 切换工具坐标系/工件坐标系");
+            //Console.WriteLine("  - 加载不同程序等");
+
+            // 4. 循环读取并打印状态数据
+            DateTime startTime = DateTime.Now;
+            int frameCount = 0;
+            const int durationSeconds = 300;
+
+            while ((DateTime.Now - startTime).TotalSeconds < durationSeconds)
+            {
+                ROBOT_STATE_PKG pkg = new ROBOT_STATE_PKG();
+                ret = robot.GetRobotRealTimeState(ref pkg);
+
+                Console.WriteLine($"\n========== 帧 {++frameCount} @ {DateTime.Now:HH:mm:ss.fff} ==========");
+                //Console.WriteLine($"负载质量: {pkg.load:F3} kg");
+                //if (pkg.loadCog != null && pkg.loadCog.Length >= 3)
+                //    Console.WriteLine($"负载质心: X={pkg.loadCog[0]:F3}, Y={pkg.loadCog[1]:F3}, Z={pkg.loadCog[2]:F3}");
+
+                //// 碰撞等级
+                //if (pkg.collisionLevel != null && pkg.collisionLevel.Length >= 6)
+                //    Console.WriteLine($"碰撞等级: J1={pkg.collisionLevel[0]}, J2={pkg.collisionLevel[1]}, J3={pkg.collisionLevel[2]}, J4={pkg.collisionLevel[3]}, J5={pkg.collisionLevel[4]}, J6={pkg.collisionLevel[5]}");
+                // 程序与机器人基础状态
+                //Console.WriteLine($"程序状态: {pkg.program_state}  机器人状态: {pkg.robot_state}  机器人模式: {pkg.robot_mode}");
+                //Console.WriteLine($"运动完成标志: {pkg.motion_done}  运动队列长度: {pkg.mc_queue_len}  轨迹点数: {pkg.trajectory_pnum}");
+                //Console.WriteLine($"工具编号: {pkg.tool}  工件坐标系编号: {pkg.user}");
+                //Console.WriteLine($"机器人使能状态: {pkg.rbtEnableState}  软件升级状态: {pkg.softwareUpgradeState}");
+
+                //// IO 状态
+                //Console.WriteLine($"控制箱数字输出高8位: 0x{pkg.cl_dgt_output_h:X2}  低8位: 0x{pkg.cl_dgt_output_l:X2}");
+                //Console.WriteLine($"工具数字输出: 0x{pkg.tl_dgt_output_l:X2}");
+                //Console.WriteLine($"控制箱数字输入高8位: 0x{pkg.cl_dgt_input_h:X2}  低8位: 0x{pkg.cl_dgt_input_l:X2}");
+                //Console.WriteLine($"工具数字输入: 0x{pkg.tl_dgt_input_l:X2}");
+                //if (pkg.cl_analog_input != null && pkg.cl_analog_input.Length >= 2)
+                //    Console.WriteLine($"控制箱模拟输入: AI0={(double)(pkg.cl_analog_input[0] * 100 / 4096):F2}%, AI1={pkg.cl_analog_input[1]}");
+                //Console.WriteLine($"工具模拟输入: {pkg.tl_anglog_input}");
+                //if (pkg.cl_analog_output != null && pkg.cl_analog_output.Length >= 2)
+                //    Console.WriteLine($"控制箱模拟输出: AO0={pkg.cl_analog_output[0]}, AO1={pkg.cl_analog_output[1]}");
+                //Console.WriteLine($"工具模拟输出: {pkg.tl_analog_output}");
+                if (pkg.cl_analog_input != null && pkg.cl_analog_input.Length >= 2)
+                {
+                    double ai0Percent = (double)pkg.cl_analog_input[0] * 100 / 4096;
+                    double ai1Percent = (double)pkg.cl_analog_input[1] * 100 / 4096;
+                    Console.WriteLine($"控制箱模拟输入: AI0={ai0Percent:F2}%, AI1={ai1Percent:F2}%");
+                }
+                else
+                {
+                    Console.WriteLine("控制箱模拟输入: 数据无效");
+                }
+
+                double toolAnalogInputPercent = (double)pkg.tl_anglog_input * 100 / 4096;
+                Console.WriteLine($"工具模拟输入: {toolAnalogInputPercent:F2}%");
+
+                if (pkg.cl_analog_output != null && pkg.cl_analog_output.Length >= 2)
+                {
+                    double ao0Percent = (double)pkg.cl_analog_output[0] * 100 / 4096;
+                    double ao1Percent = (double)pkg.cl_analog_output[1] * 100 / 4096;
+                    Console.WriteLine($"控制箱模拟输出: AO0={ao0Percent:F2}%, AO1={ao1Percent:F2}%");
+                }
+                else
+                {
+                    Console.WriteLine("控制箱模拟输出: 数据无效");
+                }
+
+                double toolAnalogOutputPercent = (double)pkg.tl_analog_output * 100 / 4096;
+                Console.WriteLine($"工具模拟输出: {toolAnalogOutputPercent:F2}%");
+
+                // 焊接相关
+
+                //Console.WriteLine($"焊接断弧状态: {pkg.weldingBreakOffState.breakOffState}  焊接起弧状态: {pkg.weldingBreakOffState.weldArcState}");
+                ////Console.WriteLine($"焊接电压: {pkg.weldVoltage:F2} V  焊接电流: {pkg.weldCurrent:F2} A  焊缝跟踪速度: {pkg.weldTrackVel:F2} mm/s");
+                //Console.WriteLine($"焊接就绪状态: {pkg.weldReadyState}");
+
+                // 坐标系数据
+                //if (pkg.toolCoord != null && pkg.toolCoord.Length >= 6)
+                //    Console.WriteLine($"工具坐标系: X={pkg.toolCoord[0]:F3}, Y={pkg.toolCoord[1]:F3}, Z={pkg.toolCoord[2]:F3}, RX={pkg.toolCoord[3]:F3}, RY={pkg.toolCoord[4]:F3}, RZ={pkg.toolCoord[5]:F3}");
+                //if (pkg.wobjCoord != null && pkg.wobjCoord.Length >= 6)
+                //    Console.WriteLine($"工件坐标系: X={pkg.wobjCoord[0]:F3}, Y={pkg.wobjCoord[1]:F3}, Z={pkg.wobjCoord[2]:F3}, RX={pkg.wobjCoord[3]:F3}, RY={pkg.wobjCoord[4]:F3}, RZ={pkg.wobjCoord[5]:F3}");
+                //if (pkg.extoolCoord != null && pkg.extoolCoord.Length >= 6)
+                //    Console.WriteLine($"扩展工具坐标系: X={pkg.extoolCoord[0]:F3}, Y={pkg.extoolCoord[1]:F3}, Z={pkg.extoolCoord[2]:F3}, RX={pkg.extoolCoord[3]:F3}, RY={pkg.extoolCoord[4]:F3}, RZ={pkg.extoolCoord[5]:F3}");
+                //if (pkg.exAxisCoord != null && pkg.exAxisCoord.Length >= 6)
+                //    Console.WriteLine($"扩展轴坐标系: J1={pkg.exAxisCoord[0]:F3}, J2={pkg.exAxisCoord[1]:F3}, J3={pkg.exAxisCoord[2]:F3}, J4={pkg.exAxisCoord[3]:F3}, J5={pkg.exAxisCoord[4]:F3}, J6={pkg.exAxisCoord[5]:F3}");
+
+                //// 负载
+                //Console.WriteLine($"负载质量: {pkg.load:F3} kg");
+                //if (pkg.loadCog != null && pkg.loadCog.Length >= 3)
+                //    Console.WriteLine($"负载质心: X={pkg.loadCog[0]:F3}, Y={pkg.loadCog[1]:F3}, Z={pkg.loadCog[2]:F3}");
+
+                //// 伺服相关
+                //if (pkg.lastServoTarget != null && pkg.lastServoTarget.Length >= 6)
+                //    Console.WriteLine($"上次伺服J目标位置: [{string.Join(",", pkg.lastServoTarget.Select(v => v.ToString("F3")))}]");
+                //Console.WriteLine($"伺服J命令数量: {pkg.servoJCmdNum}");
+
+                //// 碰撞等级与速度倍率
+                //if (pkg.collisionLevel != null && pkg.collisionLevel.Length >= 6)
+                //    Console.WriteLine($"碰撞等级: J1={pkg.collisionLevel[0]}, J2={pkg.collisionLevel[1]}, J3={pkg.collisionLevel[2]}, J4={pkg.collisionLevel[3]}, J5={pkg.collisionLevel[4]}, J6={pkg.collisionLevel[5]}");
+                //Console.WriteLine($"手动模式速度百分比: {pkg.speedScaleManual:F2}  自动模式速度百分比: {pkg.speedScaleAuto:F2}");
+
+                //// 程序信息
+                //Console.WriteLine($"Lua行号: {pkg.luaLineNum}  异常停止标志: {pkg.abnomalStop}");
+                //string curLuaFileName = pkg.currentLuaFileName != null ? System.Text.Encoding.ASCII.GetString(pkg.currentLuaFileName).TrimEnd('\0') : "";
+                //Console.WriteLine($"当前Lua文件名: {curLuaFileName}  程序总行数: {pkg.programTotalLine}");
+
+                //// UDP 命令状态
+                //Console.WriteLine($"UDP命令状态: {pkg.udpCmdState}");
+
+                // 等待一段时间再读取下一帧（8ms周期下，每50ms打印一次即可，避免刷屏过快）
+                await Task.Delay(100);
+            }
+
+            // 5. 断开连接
+            robot.CloseRPC();
+            Console.WriteLine("测试结束，RPC 连接已关闭。");
+        }
+
+        private async void RunCNDETest()
+        {
+            List<RobotState> finalStates;
+            int finalPeriod;
+
+
+            // 2. 配置状态：JointCurPos, ToolCurPos，周期 20ms
+            List<RobotState> states1 = new List<RobotState>
+            {
+                RobotState.JointCurPos,
+                RobotState.ToolCurPos
+            };
+            int period1 = 20;
+            int ret = robot.SetRobotRealtimeStateConfig(states1, period1);
+            Console.WriteLine($"初始配置结果: {ret}");
+            robot.GetRobotRealtimeStateConfig(out finalStates, out finalPeriod);
+            Console.WriteLine($"配置状态数量: {finalStates.Count}");
+            foreach (var s in finalStates) Console.WriteLine($"  {s}");
+            Console.WriteLine($"周期: {finalPeriod} ms");
+
+            // 3. 建立 RPC 连接
+            robot.SetReconnectParam(true, 100, 1000);
+            ret = robot.RPC("192.168.58.3");
+            if (ret != 0)
+            {
+                Console.WriteLine($"RPC 连接失败: {ret}");
+                return;
+            }
+            Console.WriteLine("RPC 连接成功，CNDE 已连接，开始打印关节和 TCP 位姿...");
+
+            // 4. 打印数据，持续 10 秒，记录时间戳
+            DateTime lastTime = DateTime.Now;
+            int frameCount = 0;
+            DateTime startTime = DateTime.Now;
+            while ((DateTime.Now - startTime).TotalSeconds < 10)
+            {
+                ROBOT_STATE_PKG pkg = new ROBOT_STATE_PKG();
+                ret = robot.GetRobotRealTimeState(ref pkg);
+                DateTime now = DateTime.Now;
+                double interval = (now - lastTime).TotalMilliseconds;
+                lastTime = now;
+                frameCount++;
+
+                //Console.WriteLine($"\n[帧 {frameCount}] 时间戳: {now:HH:mm:ss.fff}, 间隔: {interval:F1} ms");
+                if (pkg.jt_cur_pos != null && pkg.jt_cur_pos.Length >= 6)
+                {
+                    Console.WriteLine($"  关节位置(°): J1={pkg.jt_cur_pos[0]:F2}, J2={pkg.jt_cur_pos[1]:F2}, J3={pkg.jt_cur_pos[2]:F2}, J4={pkg.jt_cur_pos[3]:F2}, J5={pkg.jt_cur_pos[4]:F2}, J6={pkg.jt_cur_pos[5]:F2}");
+                }
+                if (pkg.tl_cur_pos != null && pkg.tl_cur_pos.Length >= 6)
+                {
+                    Console.WriteLine($"  TCP位姿(mm/°): X={pkg.tl_cur_pos[0]:F2}, Y={pkg.tl_cur_pos[1]:F2}, Z={pkg.tl_cur_pos[2]:F2}, RX={pkg.tl_cur_pos[3]:F2}, RY={pkg.tl_cur_pos[4]:F2}, RZ={pkg.tl_cur_pos[5]:F2}");
+                }
+                await Task.Delay(20); // 保持与周期相近的打印频率
+            }
+
+            Console.WriteLine("\n第一步完成，等待 2 秒后修改配置...");
+            await Task.Delay(2000);
+
+            // 5. 断开 CNDE 连接（保持 RPC 不断）
+            robot.DisconnectCNDE();
+            Console.WriteLine("CNDE 已断开");
+
+            // 6. 修改配置：RobotMode, RbtEnableState，周期 10ms
+            List<RobotState> states2 = new List<RobotState>
+            {
+                RobotState.RobotMode,
+                RobotState.RbtEnableState
+            };
+            int period2 = 10;
+            ret = robot.SetRobotRealtimeStateConfig(states2, period2);
+            Console.WriteLine($"新配置结果: {ret}");
+            robot.GetRobotRealtimeStateConfig(out finalStates, out finalPeriod);
+            Console.WriteLine($"配置状态数量: {finalStates.Count}");
+            foreach (var s in finalStates) Console.WriteLine($"  {s}");
+            Console.WriteLine($"周期: {finalPeriod} ms");
+
+            // 重新连接 CNDE
+            ret = robot.ConnectCNDE("192.168.58.3", 20005);
+            robot.SetReconnectParam(true, 100, 1000);
+            if (ret != 0)
+            {
+                Console.WriteLine($"CNDE 重连失败: {ret}");
+                return;
+            }
+            Console.WriteLine("CNDE 重新连接成功，开始打印机器人模式和使能状态...");
+
+            // 7. 打印新数据，持续 5 秒，记录时间戳
+            lastTime = DateTime.Now;
+            frameCount = 0;
+            startTime = DateTime.Now;
+            while ((DateTime.Now - startTime).TotalSeconds < 20)
+            {
+                ROBOT_STATE_PKG pkg = new ROBOT_STATE_PKG();
+                ret = robot.GetRobotRealTimeState(ref pkg);
+                DateTime now = DateTime.Now;
+                double interval = (now - lastTime).TotalMilliseconds;
+                lastTime = now;
+                frameCount++;
+
+                //Console.WriteLine($"\n[帧 {frameCount}] 时间戳: {now:HH:mm:ss.fff}, 间隔: {interval:F1} ms");
+                Console.WriteLine($"  机器人模式: {(pkg.robot_mode == 0 ? "自动" : "手动")}");
+                Console.WriteLine($"  机器人使能状态: {pkg.rbtEnableState}");
+                await Task.Delay(10);
+            }
+
+            Console.WriteLine("\n测试完成。");
+            robot.CloseRPC();
+        }
+
+        /// <summary>
+        /// 测试机器人扩展轴及扩展IO状态反馈
+        /// 配置 AuxState, ExtAxisStatus, ExtDIState, ExtDOState, ExtAIState, ExtAOState
+        /// 周期 8ms，建立 RPC 连接后循环打印状态值
+        /// </summary>
+        private async void TestExtendedAxisAndIOStates()
+        {
+            // 1. 定义需要订阅的状态字段（扩展轴与扩展IO）
+            List<RobotState> requiredStates = new List<RobotState>
+            {
+                RobotState.AuxState,        // 辅助轴状态（如伺服参数）
+                RobotState.ExtAxisStatus,   // 扩展轴状态（29字节，包含多轴信息）
+                RobotState.ExtDIState,      // 扩展数字输入（16字节，每bit代表一个DI）
+                RobotState.ExtDOState,      // 扩展数字输出（16字节）
+                RobotState.ExtAIState,      // 扩展模拟输入（4个INT32）
+                RobotState.ExtAOState       // 扩展模拟输出（4个INT32）
+
+            };
+
+            // 2. 配置状态反馈（周期 8ms）
+            int periodMs = 20;
+            int ret = robot.SetRobotRealtimeStateConfig(requiredStates, periodMs);
+            if (ret != 0)
+            {
+                Console.WriteLine($"配置状态失败，错误码: {ret}");
+                return;
+            }
+            Console.WriteLine($"状态配置成功，共 {requiredStates.Count} 个字段，周期 {periodMs} ms");
+
+            // 可选：验证配置是否生效
+            List<RobotState> actualStates;
+            int actualPeriod;
+            robot.GetRobotRealtimeStateConfig(out actualStates, out actualPeriod);
+            Console.WriteLine($"实际生效的状态数: {actualStates.Count}, 周期: {actualPeriod} ms");
+
+            // 3. 建立 RPC 连接（内部自动完成 CNDE 握手）
+            robot.SetReconnectParam(true, 100, 1000);
+            ret = robot.RPC("192.168.58.2");  // 请根据实际机器人 IP 修改
+            if (ret != 0)
+            {
+                Console.WriteLine($"RPC 连接失败，错误码: {ret}");
+                return;
+            }
+            Console.WriteLine("RPC 连接成功，开始获取扩展轴及扩展IO状态（将持续 30 秒）...");
+            Console.WriteLine("提示：此时可以进行以下操作，观察下方打印数据变化：");
+            Console.WriteLine("  - 控制485扩展轴运动（如外部轴）");
+            Console.WriteLine("  - 控制UDP扩展轴运动");
+            Console.WriteLine("  - 触发扩展IO（数字/模拟输入输出）");
+
+            // 4. 循环读取并打印状态数据
+            DateTime startTime = DateTime.Now;
+            int frameCount = 0;
+            const int durationSeconds = 300;
+
+            while ((DateTime.Now - startTime).TotalSeconds < durationSeconds)
+            {
+                ROBOT_STATE_PKG pkg = new ROBOT_STATE_PKG();
+                ret = robot.GetRobotRealTimeState(ref pkg);
+
+                Console.WriteLine($"\n========== 帧 {++frameCount} @ {DateTime.Now:HH:mm:ss.fff} ==========");
+
+                // ----- AuxState（辅助轴状态）-----
+                //if (pkg.auxState != null)
+                
+                    Console.WriteLine($"辅助轴状态:");
+                    Console.WriteLine($"  servoId: {pkg.auxState.servoId}");
+                    Console.WriteLine($"  servoErrCode: {pkg.auxState.servoErrCode}");
+                    Console.WriteLine($"  servoState: {pkg.auxState.servoState}");
+                    Console.WriteLine($"  servoPos: {pkg.auxState.servoPos:F3} deg");
+                    Console.WriteLine($"  servoVel: {pkg.auxState.servoVel:F3} deg/s");
+                    Console.WriteLine($"  servoTorque: {pkg.auxState.servoTorque:F3} Nm");
+                    //}
+                    //else
+                    //{
+                    //    Console.WriteLine("辅助轴状态: null");
+                    //}
+
+                    // ----- ExtAxisStatus（扩展轴状态）-----
+                    // 注意：根据协议，extAxisStatus 可能是 byte[29] 或自定义结构体，这里假设为 byte 数组
+                    if (pkg.extAxisStatus != null && pkg.extAxisStatus.Length > 0)
+                    {
+                        Console.Write($"扩展轴状态({pkg.extAxisStatus.Length} bytes): ");
+                        // 打印前16字节（可根据需要调整）
+                        for (int i = 0; i < Math.Min(16, pkg.extAxisStatus.Length); i++)
+                            Console.Write($"{pkg.extAxisStatus[i]:X2} ");
+                        Console.WriteLine();
+                    // 如果需要解析具体轴位置/状态，需根据机器人协议定义进行转换
+                    Console.WriteLine("extaxis udp states pos {0}; vel {1}; errorCode {2}; ready {3}; inPos {4}; alarm {5}; flerr {6}; nlimit {7}; pLimit {8}; homingStatus {9}",
+                                        pkg.extAxisStatus[0].pos,
+                                        pkg.extAxisStatus[0].vel,
+                                        pkg.extAxisStatus[0].errorCode,
+                                        pkg.extAxisStatus[0].ready,
+                                        pkg.extAxisStatus[0].inPos,
+                                        pkg.extAxisStatus[0].alarm,
+                                        pkg.extAxisStatus[0].flerr,
+                                        pkg.extAxisStatus[0].nlimit,
+                                        pkg.extAxisStatus[0].pLimit,
+                                        pkg.extAxisStatus[0].homingStatus);
+                    }
+                    else
+                    {
+                        Console.WriteLine("扩展轴状态: null");
+                    }
+
+                    // ----- ExtDIState（扩展数字输入）-----
+                    // 通常为 16 字节，每个字节对应一组输入（8个DI）
+                    if (pkg.extDIState != null && pkg.extDIState.Length > 0)
+                    {
+                        Console.Write($"扩展DI状态({pkg.extDIState.Length} bytes): ");
+                        for (int i = 0; i < pkg.extDIState.Length; i++)
+                            Console.Write($"{pkg.extDIState[i]:X2} ");
+                        Console.WriteLine();
+                        // 示例：解析第0字节的bit0-7
+                        if (pkg.extDIState.Length >= 1)
+                            Console.WriteLine($"  第1组DI (bit0~7): 0x{pkg.extDIState[0]:X2}");
+                    }
+                    else
+                    {
+                        Console.WriteLine("扩展DI状态: null");
+                    }
+
+                    // ----- ExtDOState（扩展数字输出）-----
+                    if (pkg.extDOState != null && pkg.extDOState.Length > 0)
+                    {
+                        Console.Write($"扩展DO状态({pkg.extDOState.Length} bytes): ");
+                        for (int i = 0; i < pkg.extDOState.Length; i++)
+                            Console.Write($"{pkg.extDOState[i]:X2} ");
+                        Console.WriteLine();
+                    }
+                    else
+                    {
+                        Console.WriteLine("扩展DO状态: null");
+                    }
+
+                    // ----- ExtAIState（扩展模拟输入）-----
+                    // 通常为 4 个 INT32 值
+                    if (pkg.extAIState != null && pkg.extAIState.Length >= 4)
+                    {
+                        Console.WriteLine($"扩展AI状态: AI0={pkg.extAIState[0]}, AI1={pkg.extAIState[1]}, AI2={pkg.extAIState[2]}, AI3={pkg.extAIState[3]}");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"扩展AI状态: null 或长度不足 ({(pkg.extAIState == null ? "null" : pkg.extAIState.Length.ToString())})");
+                    }
+
+                    // ----- ExtAOState（扩展模拟输出）-----
+                    if (pkg.extAOState != null && pkg.extAOState.Length >= 4)
+                    {
+                        Console.WriteLine($"扩展AO状态: AO0={pkg.extAOState[0]}, AO1={pkg.extAOState[1]}, AO2={pkg.extAOState[2]}, AO3={pkg.extAOState[3]}");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"扩展AO状态: null 或长度不足 ({(pkg.extAOState == null ? "null" : pkg.extAOState.Length.ToString())})");
+                    }
+
+                    // 等待一段时间再读取下一帧（8ms周期下，每100ms打印一次即可，避免刷屏过快）
+                    await Task.Delay(100);
+             }
+
+                // 5. 断开连接
+                robot.CloseRPC();
+                Console.WriteLine("测试结束，RPC 连接已关闭。");
+        }
+
+        /// <summary>
+        /// 测试机器人力传感器和夹爪等外设状态反馈
+        /// 配置 FtSensorRawData, FtSensorData, FtSensorActive, GripperMotiondone, GripperFaultId,
+        /// GripperFault, GripperActive, GripperPosition, GripperSpeed, GripperCurrent, GripperTemp,
+        /// GripperVoltage, GripperRotNum, GripperRotSpeed, GripperRotTorque, SmartToolState,
+        /// ModbusMasterConnect, ModbusSlaveConnect, ForceSensorErrState
+        /// 周期 8ms，建立 RPC 连接后循环打印状态值
+        /// </summary>
+        private async void TestGripperAndForceSensorStates()
+        {
+            // 1. 定义需要订阅的状态字段（力传感器与夹爪相关）
+            List<RobotState> requiredStates = new List<RobotState>
+            {
+                RobotState.FtSensorRawData,
+                RobotState.FtSensorData,
+                RobotState.FtSensorActive,
+                RobotState.GripperMotiondone,
+                RobotState.GripperFaultId,
+                RobotState.GripperFault,
+                RobotState.GripperActive,
+                RobotState.GripperPosition,
+                RobotState.GripperSpeed,
+                RobotState.GripperCurrent,
+                RobotState.GripperTemp,
+                RobotState.GripperVoltage,
+                RobotState.GripperRotNum,
+                RobotState.GripperRotSpeed,
+                RobotState.GripperRotTorque,
+                RobotState.SmartToolState,
+                RobotState.ModbusMasterConnect,
+                RobotState.ModbusSlaveConnect,
+                RobotState.ForceSensorErrState,
+                RobotState.AxleGenComData
+            };
+
+            // 2. 配置状态反馈（周期 8ms）
+            int periodMs = 8;
+            int ret = robot.SetRobotRealtimeStateConfig(requiredStates, periodMs);
+            if (ret != 0)
+            {
+                Console.WriteLine($"配置状态失败，错误码: {ret}");
+                return;
+            }
+            Console.WriteLine($"状态配置成功，共 {requiredStates.Count} 个字段，周期 {periodMs} ms");
+
+            // 可选：验证配置是否生效
+            List<RobotState> actualStates;
+            int actualPeriod;
+            robot.GetRobotRealtimeStateConfig(out actualStates, out actualPeriod);
+            Console.WriteLine($"实际生效的状态数: {actualStates.Count}, 周期: {actualPeriod} ms");
+
+            // 3. 建立 RPC 连接（内部自动完成 CNDE 握手）
+            robot.SetReconnectParam(true, 100, 1000);
+            ret = robot.RPC("192.168.58.2");  // 请根据实际机器人 IP 修改
+            if (ret != 0)
+            {
+                Console.WriteLine($"RPC 连接失败，错误码: {ret}");
+                return;
+            }
+            Console.WriteLine("RPC 连接成功，开始获取力传感器及夹爪状态（将持续 30 秒）...");
+            Console.WriteLine("提示：此时可以进行以下操作，观察下方打印数据变化：");
+            Console.WriteLine("  - 激活/运动夹爪（如夹爪开合）");
+            Console.WriteLine("  - 激活力传感器（如施加外力）");
+            Console.WriteLine("  - 检查夹爪故障、温度、电流等参数");
+            int[] version = new int[5] { 0xAB, 0xBA, 0x11, 0x00, 0x76 };
+            int[] state = new int[6] { 0xAB, 0xBA, 0x1B, 0x01, 0xAA, 0x2B };
+            int[] cycleState = new int[6] { 0xAB, 0xBA, 0x12, 0x01, 0x00, 0x78 };
+
+            int[] rcvdata = new int[16];
+            // 4. 循环读取并打印状态数据
+            DateTime startTime = DateTime.Now;
+            int frameCount = 0;
+            const int durationSeconds = 3000;
+
+            while ((DateTime.Now - startTime).TotalSeconds < durationSeconds)
+            {
+                ROBOT_STATE_PKG pkg = new ROBOT_STATE_PKG();
+                ret = robot.GetRobotRealTimeState(ref pkg);
+
+                Console.WriteLine($"\n========== 帧 {++frameCount} @ {DateTime.Now:HH:mm:ss.fff} ==========");
+
+                ////读取版本号
+                //ret = robot.SndRcvAxleGenComCmdData(5, version, 10, ref rcvdata);
+                //Console.WriteLine($"SndRcvAxleGenComCmdData ret：{ret} hard version : {rcvdata[4]},hard code:{rcvdata[5]}, soft version:{rcvdata[6]} {rcvdata[7]}, soft code:{rcvdata[8]}");
+                //if (ret != 0)
+                //{
+                //    break;
+                //}
+                //Thread.Sleep(1000);
+                ////读取艾灸头在位状态
+                //ret = robot.SndRcvAxleGenComCmdData(6, state, 6, ref rcvdata);
+                //Console.WriteLine($"SndRcvAxleGenComCmdData ret：{ret} state : {rcvdata[4]}");
+                //Thread.Sleep(1000);
+
+                //int errorcode = pkg.axleGenComData[0];
+                //int datalen = pkg.axleGenComData[1];
+                //// 过滤异常包
+                //if ((errorcode != 0) || (datalen == 0) ||
+                //(pkg.axleGenComData[2] != 0xAB) ||
+                //(pkg.axleGenComData[3] != 0xBA))
+                //{
+                //    Console.WriteLine($"################################rcv data is error, errorcode:{pkg.axleGenComData[0]} ");
+                //    //Console.WriteLine($"################################data buff:{pkg.axleGenComData[2]} ");
+                //    string[] hexStrings = pkg.axleGenComData.Select(n => n.ToString("X2")).ToArray();
+                //    string result1 = string.Join("-", hexStrings);
+                //    Console.WriteLine(result1);  // 
+                //    break;
+                //}
+                //// 按照倍益康艾灸头协议进行组包
+                //int curTem = pkg.axleGenComData[6];
+                //int targetTem = pkg.axleGenComData[7];
+                //int genData1 = pkg.axleGenComData[8] << 8 | pkg.axleGenComData[9];
+                //int genData2 = pkg.axleGenComData[10] << 8 | pkg.axleGenComData[11];
+                //int genData3 = pkg.axleGenComData[12] << 8 | pkg.axleGenComData[13];
+                //int genData4 = pkg.axleGenComData[14] << 8 | pkg.axleGenComData[15];
+                //int genData5 = pkg.axleGenComData[16] << 8 | pkg.axleGenComData[17];
+                //int genData6 = pkg.axleGenComData[18] << 8 | pkg.axleGenComData[19];
+
+                //Console.WriteLine($"the data is errorcode {errorcode};  datalen  {datalen}  curTem  {curTem}; targetTem  {targetTem}  genData1  {genData1}  genData2  {genData2}  genData3  {genData3}  genData4  {genData4}  genData5  {genData5}  genData6  {genData6}  ");
+
+
+                //// ----- 力传感器相关 -----
+                //// 原始力传感器数据 (Fx,Fy,Fz,Tx,Ty,Tz)
+                if (pkg.ft_sensor_raw_data != null && pkg.ft_sensor_raw_data.Length >= 6)
+                    Console.WriteLine($"力传感器原始数据(N/Nm): Fx={pkg.ft_sensor_raw_data[0]:F2}, Fy={pkg.ft_sensor_raw_data[1]:F2}, Fz={pkg.ft_sensor_raw_data[2]:F2}, Tx={pkg.ft_sensor_raw_data[3]:F2}, Ty={pkg.ft_sensor_raw_data[4]:F2}, Tz={pkg.ft_sensor_raw_data[5]:F2}");
+                else
+                    Console.WriteLine("力传感器原始数据: null");
+
+                //// 处理后力传感器数据
+                if (pkg.ft_sensor_data != null && pkg.ft_sensor_data.Length >= 6)
+                    Console.WriteLine($"力传感器处理数据(N/Nm): Fx={pkg.ft_sensor_data[0]:F2}, Fy={pkg.ft_sensor_data[1]:F2}, Fz={pkg.ft_sensor_data[2]:F2}, Tx={pkg.ft_sensor_data[3]:F2}, Ty={pkg.ft_sensor_data[4]:F2}, Tz={pkg.ft_sensor_data[5]:F2}");
+                else
+                    Console.WriteLine("力传感器处理数据: null");
+
+                Console.WriteLine($"力传感器激活状态: {pkg.ft_sensor_active}");
+                Console.WriteLine($"力传感器错误状态: {pkg.forceSensorErrState}");
+
+                //// ----- 夹爪相关（普通夹爪）-----
+                //Console.WriteLine($"夹爪运动完成标志: {pkg.gripper_motiondone}");
+                //Console.WriteLine($"夹爪故障ID: {pkg.gripper_fault_id}");
+                //Console.WriteLine($"夹爪故障码: {pkg.gripper_fault}");
+                //Console.WriteLine($"夹爪激活状态: {pkg.gripper_active}");
+                //Console.WriteLine($"夹爪位置: {pkg.gripper_position} (0-255)");
+                //Console.WriteLine($"夹爪速度: {pkg.gripper_speed}");
+                //Console.WriteLine($"夹爪电流: {pkg.gripper_current} mA");
+                //Console.WriteLine($"夹爪温度: {pkg.gripper_temp} °C");
+                //Console.WriteLine($"夹爪电压: {pkg.gripper_voltage} mV");
+
+                //// ----- 旋转夹爪相关 -----
+                //Console.WriteLine($"旋转夹爪转动圈数: {pkg.gripperRotNum:F2}");
+                //Console.WriteLine($"旋转夹爪速度: {pkg.gripperRotSpeed}");
+                //Console.WriteLine($"旋转夹爪扭矩: {pkg.gripperRotTorque}");
+
+                //// ----- 智能工具状态 -----
+                Console.WriteLine($"smartToolState: {pkg.smartToolState}");
+
+                //// ----- Modbus 通信状态 -----
+                //Console.WriteLine($"Modbus主站连接: {pkg.modbusMasterConnect}");
+                //Console.WriteLine($"Modbus从站连接: {pkg.modbusSlaveConnect}");
+
+                // 等待一段时间再读取下一帧（8ms周期下，每100ms打印一次即可，避免刷屏过快）
+                await Task.Delay(100);
+            }
+
+            // 5. 断开连接
+            robot.CloseRPC();
+            Console.WriteLine("测试结束，RPC 连接已关闭。");
+        }
+
+       private async void TestRobotERRStatusStates()
+        {
+            robot.SetReconnectParam(true, 100, 1000);
+            // 2. 配置需要反馈的状态（题目指定的字段组）
+            List<RobotState> states = new List<RobotState>
+            {
+                RobotState.EmergencyStop,
+                RobotState.MainCode,
+                RobotState.SubCode,
+                RobotState.CollisionState,
+                RobotState.EndLuaErrCode,
+                RobotState.TpdException,
+                RobotState.AlarmRebootRobot,
+                RobotState.DragAlarm,
+                RobotState.SafetyDoorAlarm,
+                RobotState.SafetyPlaneAlarm,
+                RobotState.MotonAlarm,
+                RobotState.InterfaceAlarm,
+                RobotState.AlarmCheckEmergStopBtn,
+                RobotState.TsTmCmdComError,
+                RobotState.TsTmStateComError,
+                RobotState.CtrlBoxError,
+                RobotState.SafetyDataState,
+                RobotState.CtrlOpenLuaErrCode,
+                RobotState.StrangePosFlag,
+                RobotState.Alarm,
+                RobotState.DriverAlarm,
+                RobotState.AliveSlaveNumError,
+                RobotState.SlaveComError,
+                RobotState.CmdPointError,
+                RobotState.IOError,
+                RobotState.GripperError,
+                RobotState.FileError,
+                RobotState.ParaError,
+                RobotState.ExaxisOutLimitError,
+                RobotState.DriverComError,
+                RobotState.DriverError,
+                RobotState.OutSoftLimitError
+            };
+            int periodMs = 8;   // 8ms 周期
+            int ret = robot.SetRobotRealtimeStateConfig(states, periodMs);
+            Console.WriteLine($"配置状态结果: {ret}");
+
+            // 3. 建立 RPC 连接（内部自动连接 CNDE）
+            ret = robot.RPC("192.168.58.2");
+            if (ret != 0)
+            {
+                Console.WriteLine($"RPC 连接失败: {ret}");
+                return;
+            }
+            Console.WriteLine("RPC 连接成功，CNDE 已连接，开始打印机器人状态数据...");
+            Console.WriteLine("提示：请进行碰撞触发、奇异位姿等操作，观察下方输出变化。");
+
+            // 4. 循环打印 30 秒，每秒一次
+            DateTime startTime = DateTime.Now;
+            int count = 0;
+            while ((DateTime.Now - startTime).TotalSeconds < 30000)
+            {
+                ROBOT_STATE_PKG pkg = new ROBOT_STATE_PKG();
+                ret = robot.GetRobotRealTimeState(ref pkg);
+                Console.WriteLine($"\n--- 第 {++count} 秒 ---");
+
+               // 打印每个字段
+                Console.WriteLine($"  急停标志 (EmergencyStop): {pkg.EmergencyStop}");
+                Console.WriteLine($"  主故障码 (main_code): {pkg.main_code}");
+                Console.WriteLine($"  子故障码 (sub_code): {pkg.sub_code}");
+                Console.WriteLine($"  碰撞检测 (collisionState): {pkg.collisionState}");
+                Console.WriteLine($"  末端LUA错误码 (endLuaErrCode): {pkg.endLuaErrCode}");
+                Console.WriteLine($"  TPD异常 (tpdException): {pkg.tpdException}");
+                Console.WriteLine($"  报警重启机器人 (alarmRebootRobot): {pkg.alarmRebootRobot}");
+                Console.WriteLine($"  拖动报警 (dragAlarm): {pkg.dragAlarm}");
+                Console.WriteLine($"  安全门报警 (safetyDoorAlarm): {pkg.safetyDoorAlarm}");
+                Console.WriteLine($"  安全平面报警 (safetyPlaneAlarm): {pkg.safetyPlaneAlarm}");
+                Console.WriteLine($"  运动报警 (motonAlarm): {pkg.motonAlarm}");
+                Console.WriteLine($"  干涉区报警 (interfaceAlarm): {pkg.interfaceAlarm}");
+                Console.WriteLine($"  急停按钮检查报警 (alarmCheckEmergStopBtn): {pkg.alarmCheckEmergStopBtn}");
+                Console.WriteLine($"  TS/TM命令通信错误 (tsTmCmdComError): {pkg.tsTmCmdComError}");
+                Console.WriteLine($"  TS/TM状态通信错误 (tsTmStateComError): {pkg.tsTmStateComError}");
+                Console.WriteLine($"  控制箱错误 (ctrlBoxError): {pkg.ctrlBoxError}");
+                Console.WriteLine($"  安全数据状态 (safetyDataState): {pkg.safetyDataState}");
+                Console.WriteLine($"  控制开放Lua错误码 (ctrlOpenLuaErrCode): {(pkg.ctrlOpenLuaErrCode != null ? string.Join(",", pkg.ctrlOpenLuaErrCode) : "")}");
+                Console.WriteLine($"  奇异位姿标志 (strangePosFlag): {pkg.strangePosFlag}");
+                Console.WriteLine($"  报警标志 (alarm): {pkg.alarm}");
+                Console.WriteLine($"  驱动器报警轴号 (driverAlarm): {pkg.driverAlarm}");
+                Console.WriteLine($"  活动从站数量错误 (aliveSlaveNumError): {pkg.aliveSlaveNumError}");
+                Console.WriteLine($"  从站通信错误 (slaveComError): {(pkg.slaveComError != null ? string.Join(",", pkg.slaveComError) : "")}");
+                Console.WriteLine($"  指令点错误 (cmdPointError): {pkg.cmdPointError}");
+                Console.WriteLine($"  IO错误 (IOError): {pkg.IOError}");
+                Console.WriteLine($"  夹爪错误 (gripperError): {pkg.gripperError}");
+                Console.WriteLine($"  文件错误 (fileError): {pkg.fileError}");
+                Console.WriteLine($"  参数错误 (paraError): {pkg.paraError}");
+                Console.WriteLine($"  扩展轴超出软限位错误 (exaxisOutLimitError): {pkg.exaxisOutLimitError}");
+                Console.WriteLine($"  驱动器通信错误 (driverComError): {(pkg.driverComError != null ? string.Join(",", pkg.driverComError) : "")}");
+                Console.WriteLine($"  驱动器错误 (driverError): {pkg.driverError}");
+                Console.WriteLine($"  超出软限位错误 (outSoftLimitError): {pkg.outSoftLimitError}");
+                await Task.Delay(1000); // 每秒打印一次
+            }
+            // 断开连接
+            robot.CloseRPC();
+            Console.WriteLine("测试结束。");
+        }
+        
+        public void printCNDE()
+        {
+
+            // 循环读取数据（10秒）
+            //for (int i = 0; i < 10; i++)
+            //{
+                Thread.Sleep(1000);
+                ROBOT_STATE_PKG pkg = new ROBOT_STATE_PKG();
+                int ret = robot.GetRobotRealTimeState(ref pkg);
+
+                Console.WriteLine($"\n--- ---");
+
+            // 基础状态
+            Console.WriteLine($"  程序状态: {pkg.program_state}");
+                Console.WriteLine($"  机器人状态: {pkg.robot_state}");
+                //Console.WriteLine($"  主故障码: {pkg.main_code}");
+                //Console.WriteLine($"  子故障码: {pkg.sub_code}");
+                Console.WriteLine($"  机器人模式: {pkg.robot_mode}");
+            //Console.WriteLine($"  急停: {pkg.EmergencyStop}");
+            //Console.WriteLine($"  到位信号: {pkg.motion_done}");
+            //Console.WriteLine($"  夹爪运动完成: {pkg.gripper_motiondone}");
+            //Console.WriteLine($"  运动队列长度: {pkg.mc_queue_len}");
+            //Console.WriteLine($"  碰撞检测: {pkg.collisionState}");
+            //Console.WriteLine($"  轨迹点编号: {pkg.trajectory_pnum}");
+            Console.WriteLine($"  安全停止0: {pkg.safety_stop0_state}");
+                Console.WriteLine($"  安全停止1: {pkg.safety_stop1_state}");
+                //Console.WriteLine($"  夹爪故障ID: {pkg.gripper_fault_id}");
+                //Console.WriteLine($"  夹爪故障: {pkg.gripper_fault}");
+                //Console.WriteLine($"  夹爪激活: {pkg.gripper_active}");
+                //Console.WriteLine($"  夹爪位置: {pkg.gripper_position}");
+                //Console.WriteLine($"  夹爪速度: {pkg.gripper_speed}");
+                //Console.WriteLine($"  夹爪电流: {pkg.gripper_current}");
+                //Console.WriteLine($"  夹爪温度: {pkg.gripper_temp}");
+                //Console.WriteLine($"  夹爪电压: {pkg.gripper_voltage}");
+                Console.WriteLine($"  机器人使能状态: {pkg.rbtEnableState}");
+                Console.WriteLine($"  软件升级状态: {pkg.softwareUpgradeState}");
+                Console.WriteLine($"  末端LUA错误码: {pkg.endLuaErrCode}");
+                Console.WriteLine($"  SmartTool状态: {pkg.smartToolState}");
+                //Console.WriteLine($"  宽电压控制箱温度: {pkg.wideVoltageCtrlBoxTemp}");
+                //Console.WriteLine($"  宽电压控制箱风扇电流: {pkg.wideVoltageCtrlBoxFanVel}");
+                Console.WriteLine($"  负载质量: {pkg.load}");
+
+                // 关节数据
+                if (pkg.jt_cur_pos != null && pkg.jt_cur_pos.Length >= 6)
+                {
+                    Console.WriteLine($"  关节位置(°): J1={pkg.jt_cur_pos[0]:F2}, J2={pkg.jt_cur_pos[1]:F2}, J3={pkg.jt_cur_pos[2]:F2}, J4={pkg.jt_cur_pos[3]:F2}, J5={pkg.jt_cur_pos[4]:F2}, J6={pkg.jt_cur_pos[5]:F2}");
+                }
+                if (pkg.jt_cur_tor != null && pkg.jt_cur_tor.Length >= 6)
+                {
+                    Console.WriteLine($"  关节扭矩(Nm): J1={pkg.jt_cur_tor[0]:F2}, J2={pkg.jt_cur_tor[1]:F2}, J3={pkg.jt_cur_tor[2]:F2}, J4={pkg.jt_cur_tor[3]:F2}, J5={pkg.jt_cur_tor[4]:F2}, J6={pkg.jt_cur_tor[5]:F2}");
+                }
+                if (pkg.actual_qd != null && pkg.actual_qd.Length >= 6)
+                {
+                    Console.WriteLine($"  关节速度(°/s): J1={pkg.actual_qd[0]:F2}, J2={pkg.actual_qd[1]:F2}, J3={pkg.actual_qd[2]:F2}, J4={pkg.actual_qd[3]:F2}, J5={pkg.actual_qd[4]:F2}, J6={pkg.actual_qd[5]:F2}");
+                }
+                if (pkg.actual_qdd != null && pkg.actual_qdd.Length >= 6)
+                {
+                    Console.WriteLine($"  关节加速度(°/s²): J1={pkg.actual_qdd[0]:F2}, J2={pkg.actual_qdd[1]:F2}, J3={pkg.actual_qdd[2]:F2}, J4={pkg.actual_qdd[3]:F2}, J5={pkg.actual_qdd[4]:F2}, J6={pkg.actual_qdd[5]:F2}");
+                }
+                if (pkg.jt_tgt_tor != null && pkg.jt_tgt_tor.Length >= 6)
+                {
+                    Console.WriteLine($"  目标关节扭矩(Nm): J1={pkg.jt_tgt_tor[0]:F2}, J2={pkg.jt_tgt_tor[1]:F2}, J3={pkg.jt_tgt_tor[2]:F2}, J4={pkg.jt_tgt_tor[3]:F2}, J5={pkg.jt_tgt_tor[4]:F2}, J6={pkg.jt_tgt_tor[5]:F2}");
+                }
+                //if (pkg.jointDriverTorque != null && pkg.jointDriverTorque.Length >= 6)
+                //{
+                //    Console.WriteLine($"  驱动器扭矩: J1={pkg.jointDriverTorque[0]:F2}, J2={pkg.jointDriverTorque[1]:F2}, J3={pkg.jointDriverTorque[2]:F2}, J4={pkg.jointDriverTorque[3]:F2}, J5={pkg.jointDriverTorque[4]:F2}, J6={pkg.jointDriverTorque[5]:F2}");
+                //}
+                //if (pkg.jointDriverTemperature != null && pkg.jointDriverTemperature.Length >= 6)
+                //{
+                //    Console.WriteLine($"  驱动器温度(℃): J1={pkg.jointDriverTemperature[0]:F2}, J2={pkg.jointDriverTemperature[1]:F2}, J3={pkg.jointDriverTemperature[2]:F2}, J4={pkg.jointDriverTemperature[3]:F2}, J5={pkg.jointDriverTemperature[4]:F2}, J6={pkg.jointDriverTemperature[5]:F2}");
+                //}
+
+                // TCP/工具位姿
+                if (pkg.tl_cur_pos != null && pkg.tl_cur_pos.Length >= 6)
+                {
+                    Console.WriteLine($"  工具位姿: X={pkg.tl_cur_pos[0]:F2}mm, Y={pkg.tl_cur_pos[1]:F2}mm, Z={pkg.tl_cur_pos[2]:F2}mm, RX={pkg.tl_cur_pos[3]:F2}°, RY={pkg.tl_cur_pos[4]:F2}°, RZ={pkg.tl_cur_pos[5]:F2}°");
+                }
+                if (pkg.flange_cur_pos != null && pkg.flange_cur_pos.Length >= 6)
+                {
+                    Console.WriteLine($"  法兰位姿: X={pkg.flange_cur_pos[0]:F2}mm, Y={pkg.flange_cur_pos[1]:F2}mm, Z={pkg.flange_cur_pos[2]:F2}mm, RX={pkg.flange_cur_pos[3]:F2}°, RY={pkg.flange_cur_pos[4]:F2}°, RZ={pkg.flange_cur_pos[5]:F2}°");
+                }
+                if (pkg.target_TCP_Speed != null && pkg.target_TCP_Speed.Length >= 6)
+                {
+                    Console.WriteLine($"  目标TCP速度: Vx={pkg.target_TCP_Speed[0]:F2}mm/s, Vy={pkg.target_TCP_Speed[1]:F2}, Vz={pkg.target_TCP_Speed[2]:F2}, Rx={pkg.target_TCP_Speed[3]:F2}°/s, Ry={pkg.target_TCP_Speed[4]:F2}, Rz={pkg.target_TCP_Speed[5]:F2}");
+                }
+                if (pkg.actual_TCP_Speed != null && pkg.actual_TCP_Speed.Length >= 6)
+                {
+                    Console.WriteLine($"  实际TCP速度: Vx={pkg.actual_TCP_Speed[0]:F2}mm/s, Vy={pkg.actual_TCP_Speed[1]:F2}, Vz={pkg.actual_TCP_Speed[2]:F2}, Rx={pkg.actual_TCP_Speed[3]:F2}°/s, Ry={pkg.actual_TCP_Speed[4]:F2}, Rz={pkg.actual_TCP_Speed[5]:F2}");
+                }
+                if (pkg.target_TCP_CmpSpeed != null && pkg.target_TCP_CmpSpeed.Length >= 2)
+                {
+                    Console.WriteLine($"  目标TCP合成速度: 位置={pkg.target_TCP_CmpSpeed[0]:F2}mm/s, 姿态={pkg.target_TCP_CmpSpeed[1]:F2}°/s");
+                }
+                if (pkg.actual_TCP_CmpSpeed != null && pkg.actual_TCP_CmpSpeed.Length >= 2)
+                {
+                    Console.WriteLine($"  实际TCP合成速度: 位置={pkg.actual_TCP_CmpSpeed[0]:F2}mm/s, 姿态={pkg.actual_TCP_CmpSpeed[1]:F2}°/s");
+                }
+
+                // IO
+                Console.WriteLine($"  控制箱DO高8位: 0x{pkg.cl_dgt_output_h:X2}, 低8位: 0x{pkg.cl_dgt_output_l:X2}");
+                Console.WriteLine($"  工具DO: 0x{pkg.tl_dgt_output_l:X2}");
+                Console.WriteLine($"  控制箱DI高8位: 0x{pkg.cl_dgt_input_h:X2}, 低8位: 0x{pkg.cl_dgt_input_l:X2}");
+                Console.WriteLine($"  工具DI: 0x{pkg.tl_dgt_input_l:X2}");
+                if (pkg.cl_analog_input != null && pkg.cl_analog_input.Length >= 2)
+                {
+                    Console.WriteLine($"  控制箱模拟输入: AI0={pkg.cl_analog_input[0]}, AI1={pkg.cl_analog_input[1]}");
+                }
+                Console.WriteLine($"  工具模拟输入: {pkg.tl_anglog_input}");
+                if (pkg.cl_analog_output != null && pkg.cl_analog_output.Length >= 2)
+                {
+                    Console.WriteLine($"  控制箱模拟输出: AO0={pkg.cl_analog_output[0]}, AO1={pkg.cl_analog_output[1]}");
+                }
+                Console.WriteLine($"  工具模拟输出: {pkg.tl_analog_output}");
+
+                // 力传感器
+                //if (pkg.ft_sensor_data != null && pkg.ft_sensor_data.Length >= 6)
+                //{
+                //    Console.WriteLine($"  力传感器数据(N/Nm): Fx={pkg.ft_sensor_data[0]:F2}, Fy={pkg.ft_sensor_data[1]:F2}, Fz={pkg.ft_sensor_data[2]:F2}, Tx={pkg.ft_sensor_data[3]:F2}, Ty={pkg.ft_sensor_data[4]:F2}, Tz={pkg.ft_sensor_data[5]:F2}");
+                //}
+                //Console.WriteLine($"  力传感器激活: {pkg.ft_sensor_active}");
+
+                // 扩展IO
+                //if (pkg.extDIState != null && pkg.extDIState.Length >= 8)
+                //{
+                //    Console.WriteLine($"  扩展DI: {string.Join(",", pkg.extDIState)}");
+                //}
+                //if (pkg.extDOState != null && pkg.extDOState.Length >= 8)
+                //{
+                //    Console.WriteLine($"  扩展DO: {string.Join(",", pkg.extDOState)}");
+                //}
+                //if (pkg.extAIState != null && pkg.extAIState.Length >= 4)
+                //{
+                //    Console.WriteLine($"  扩展AI: {string.Join(",", pkg.extAIState)}");
+                //}
+                //if (pkg.extAOState != null && pkg.extAOState.Length >= 4)
+                //{
+                //    Console.WriteLine($"  扩展AO: {string.Join(",", pkg.extAOState)}");
+                //}
+
+                //// 旋转夹爪
+                //Console.WriteLine($"  旋转夹爪圈数: {pkg.gripperRotNum}");
+                //Console.WriteLine($"  旋转夹爪速度: {pkg.gripperRotSpeed}%");
+                //Console.WriteLine($"  旋转夹爪力矩: {pkg.gripperRotTorque}%");
+
+                //// 焊接
+                //Console.WriteLine($"  焊接中断状态: {pkg.weldingBreakOffState.breakOffState}, 起弧状态: {pkg.weldingBreakOffState.weldArcState}");
+
+                // 工具/工件坐标系
+                if (pkg.toolCoord != null && pkg.toolCoord.Length >= 6)
+                {
+                    Console.WriteLine($"  工具坐标系: X={pkg.toolCoord[0]:F2}, Y={pkg.toolCoord[1]:F2}, Z={pkg.toolCoord[2]:F2}, RX={pkg.toolCoord[3]:F2}, RY={pkg.toolCoord[4]:F2}, RZ={pkg.toolCoord[5]:F2}");
+                }
+                if (pkg.wobjCoord != null && pkg.wobjCoord.Length >= 6)
+                {
+                    Console.WriteLine($"  工件坐标系: X={pkg.wobjCoord[0]:F2}, Y={pkg.wobjCoord[1]:F2}, Z={pkg.wobjCoord[2]:F2}, RX={pkg.wobjCoord[3]:F2}, RY={pkg.wobjCoord[4]:F2}, RZ={pkg.wobjCoord[5]:F2}");
+                }
+                if (pkg.extoolCoord != null && pkg.extoolCoord.Length >= 6)
+                {
+                    Console.WriteLine($"  外部工具坐标系: X={pkg.extoolCoord[0]:F2}, Y={pkg.extoolCoord[1]:F2}, Z={pkg.extoolCoord[2]:F2}, RX={pkg.extoolCoord[3]:F2}, RY={pkg.extoolCoord[4]:F2}, RZ={pkg.extoolCoord[5]:F2}");
+                }
+                if (pkg.exAxisCoord != null && pkg.exAxisCoord.Length >= 6)
+                {
+                    Console.WriteLine($"  扩展轴坐标系: X={pkg.exAxisCoord[0]:F2}, Y={pkg.exAxisCoord[1]:F2}, Z={pkg.exAxisCoord[2]:F2}, RX={pkg.exAxisCoord[3]:F2}, RY={pkg.exAxisCoord[4]:F2}, RZ={pkg.exAxisCoord[5]:F2}");
+                }
+
+                // 负载质心
+                if (pkg.loadCog != null && pkg.loadCog.Length >= 3)
+                {
+                    Console.WriteLine($"  负载质心(mm): X={pkg.loadCog[0]:F2}, Y={pkg.loadCog[1]:F2}, Z={pkg.loadCog[2]:F2}");
+                }
+
+                // 最后一个ServoJ目标
+                if (pkg.lastServoTarget != null && pkg.lastServoTarget.Length >= 6)
+                {
+                    Console.WriteLine($"  最后一个ServoJ目标(°): J1={pkg.lastServoTarget[0]:F2}, J2={pkg.lastServoTarget[1]:F2}, J3={pkg.lastServoTarget[2]:F2}, J4={pkg.lastServoTarget[3]:F2}, J5={pkg.lastServoTarget[4]:F2}, J6={pkg.lastServoTarget[5]:F2}");
+                }
+
+                // 系统时间
+                Console.WriteLine($"  机器人时间: {pkg.robotTime.ToString()}");
+
+                // ========== 新增状态（按映射表第二列变量名）==========
+                //// 目标关节数据
+                //if (pkg.targetJointPos != null && pkg.targetJointPos.Length >= 6)
+                //    Console.WriteLine($"  目标关节位置(°): J1={pkg.targetJointPos[0]:F2}, J2={pkg.targetJointPos[1]:F2}, J3={pkg.targetJointPos[2]:F2}, J4={pkg.targetJointPos[3]:F2}, J5={pkg.targetJointPos[4]:F2}, J6={pkg.targetJointPos[5]:F2}");
+                //if (pkg.targetJointVel != null && pkg.targetJointVel.Length >= 6)
+                //    Console.WriteLine($"  目标关节速度(°/s): J1={pkg.targetJointVel[0]:F2}, J2={pkg.targetJointVel[1]:F2}, J3={pkg.targetJointVel[2]:F2}, J4={pkg.targetJointVel[3]:F2}, J5={pkg.targetJointVel[4]:F2}, J6={pkg.targetJointVel[5]:F2}");
+                //if (pkg.targetJointAcc != null && pkg.targetJointAcc.Length >= 6)
+                //    Console.WriteLine($"  目标关节加速度(°/s²): J1={pkg.targetJointAcc[0]:F2}, J2={pkg.targetJointAcc[1]:F2}, J3={pkg.targetJointAcc[2]:F2}, J4={pkg.targetJointAcc[3]:F2}, J5={pkg.targetJointAcc[4]:F2}, J6={pkg.targetJointAcc[5]:F2}");
+                //if (pkg.targetJointCurrent != null && pkg.targetJointCurrent.Length >= 6)
+                //    Console.WriteLine($"  目标关节电流(A): J1={pkg.targetJointCurrent[0]:F2}, J2={pkg.targetJointCurrent[1]:F2}, J3={pkg.targetJointCurrent[2]:F2}, J4={pkg.targetJointCurrent[3]:F2}, J5={pkg.targetJointCurrent[4]:F2}, J6={pkg.targetJointCurrent[5]:F2}");
+                //if (pkg.actualJointCurrent != null && pkg.actualJointCurrent.Length >= 6)
+                //    Console.WriteLine($"  实际关节电流(A): J1={pkg.actualJointCurrent[0]:F2}, J2={pkg.actualJointCurrent[1]:F2}, J3={pkg.actualJointCurrent[2]:F2}, J4={pkg.actualJointCurrent[3]:F2}, J5={pkg.actualJointCurrent[4]:F2}, J6={pkg.actualJointCurrent[5]:F2}");
+                //if (pkg.actualTCPForce != null && pkg.actualTCPForce.Length >= 6)
+                //    Console.WriteLine($"  实际TCP力(N/Nm): Fx={pkg.actualTCPForce[0]:F2}, Fy={pkg.actualTCPForce[1]:F2}, Fz={pkg.actualTCPForce[2]:F2}, Tx={pkg.actualTCPForce[3]:F2}, Ty={pkg.actualTCPForce[4]:F2}, Tz={pkg.actualTCPForce[5]:F2}");
+                //if (pkg.targetTCPPos != null && pkg.targetTCPPos.Length >= 6)
+                //    Console.WriteLine($"  目标TCP位置(mm): X={pkg.targetTCPPos[0]:F2}, Y={pkg.targetTCPPos[1]:F2}, Z={pkg.targetTCPPos[2]:F2}, RX={pkg.targetTCPPos[3]:F2}, RY={pkg.targetTCPPos[4]:F2}, RZ={pkg.targetTCPPos[5]:F2}");
+                //if (pkg.collisionLevel != null && pkg.collisionLevel.Length >= 6)
+                //    Console.WriteLine($"  碰撞等级: J1={pkg.collisionLevel[0]}, J2={pkg.collisionLevel[1]}, J3={pkg.collisionLevel[2]}, J4={pkg.collisionLevel[3]}, J5={pkg.collisionLevel[4]}, J6={pkg.collisionLevel[5]}");
+                //Console.WriteLine($"  手动模式速度百分比: {pkg.speedScaleManual:F2}%");
+                //Console.WriteLine($"  自动模式速度百分比: {pkg.speedScaleAuto:F2}%");
+                //Console.WriteLine($"  程序行号: {pkg.luaLineNum}");
+                //Console.WriteLine($"  异常停止标志: {pkg.abnomalStop}");
+                //string curLuaFileName = pkg.currentLuaFileName != null ? System.Text.Encoding.ASCII.GetString(pkg.currentLuaFileName).TrimEnd('\0') : "";
+                //Console.WriteLine($"  当前Lua文件名: {curLuaFileName}");
+                //Console.WriteLine($"  程序总行数: {pkg.programTotalLine}");
+                //if (pkg.safetyBoxSingal != null && pkg.safetyBoxSingal.Length >= 6)
+                //    Console.WriteLine($"  安全盒信号: [{string.Join(",", pkg.safetyBoxSingal)}]");
+                //Console.WriteLine($"  焊接电压: {pkg.weldVoltage:F2} V");
+                //Console.WriteLine($"  焊接电流: {pkg.weldCurrent:F2} A");
+                //Console.WriteLine($"  焊缝跟踪速度: {pkg.weldTrackVel:F2} mm/s");
+                //Console.WriteLine($"  TPD异常: {pkg.tpdException}");
+                //Console.WriteLine($"  报警重启机器人: {pkg.alarmRebootRobot}");
+                //Console.WriteLine($"  Modbus主站连接: {pkg.modbusMasterConnect}");
+                //Console.WriteLine($"  Modbus从站连接: {pkg.modbusSlaveConnect}");
+                //Console.WriteLine($"  按钮盒停止信号: {pkg.btnBoxStopSignal}");
+                //Console.WriteLine($"  拖动报警: {pkg.dragAlarm}");
+                //Console.WriteLine($"  安全门报警: {pkg.safetyDoorAlarm}");
+                //Console.WriteLine($"  安全平面报警: {pkg.safetyPlaneAlarm}");
+                //Console.WriteLine($"  运动报警: {pkg.motonAlarm}");
+                //Console.WriteLine($"  干涉区报警: {pkg.interfaceAlarm}");
+                //Console.WriteLine($"  UDP命令状态: {pkg.udpCmdState}");
+                //Console.WriteLine($"  焊接就绪状态: {pkg.weldReadyState}");
+                //Console.WriteLine($"  急停按钮检查报警: {pkg.alarmCheckEmergStopBtn}");
+                //Console.WriteLine($"  TS/TM命令通信错误: {pkg.tsTmCmdComError}");
+                //Console.WriteLine($"  TS/TM状态通信错误: {pkg.tsTmStateComError}");
+                //Console.WriteLine($"  控制箱错误: {pkg.ctrlBoxError}");
+                //Console.WriteLine($"  安全数据状态: {pkg.safetyDataState}");
+                //Console.WriteLine($"  力传感器错误状态: {pkg.forceSensorErrState}");
+                //if (pkg.ctrlOpenLuaErrCode != null && pkg.ctrlOpenLuaErrCode.Length >= 4)
+                //    Console.WriteLine($"  控制开放Lua错误码: [{string.Join(",", pkg.ctrlOpenLuaErrCode)}]");
+                //Console.WriteLine($"  奇异位姿标志: {pkg.strangePosFlag}");
+                //Console.WriteLine($"  报警标志: {pkg.alarm}");
+                //Console.WriteLine($"  驱动器报警轴号: {pkg.driverAlarm}");
+                //Console.WriteLine($"  活动从站数量错误: {pkg.aliveSlaveNumError}");
+                //if (pkg.slaveComError != null && pkg.slaveComError.Length >= 8)
+                //    Console.WriteLine($"  从站通信错误: [{string.Join(",", pkg.slaveComError)}]");
+                //Console.WriteLine($"  指令点错误: {pkg.cmdPointError}");
+                //Console.WriteLine($"  IO错误: {pkg.IOError}");
+                //Console.WriteLine($"  夹爪错误: {pkg.gripperError}");
+                //Console.WriteLine($"  文件错误: {pkg.fileError}");
+                //Console.WriteLine($"  参数错误: {pkg.paraError}");
+                //Console.WriteLine($"  扩展轴超出软限位错误: {pkg.exaxisOutLimitError}");
+                //if (pkg.driverComError != null && pkg.driverComError.Length >= 6)
+                //    Console.WriteLine($"  驱动器通信错误: [{string.Join(",", pkg.driverComError)}]");
+                //Console.WriteLine($"  驱动器错误: {pkg.driverError}");
+                //Console.WriteLine($"  超出软限位错误: {pkg.outSoftLimitError}");
+                //if (pkg.axleGenComData != null && pkg.axleGenComData.Length > 0)
+                //    Console.WriteLine($"  轴通用通信数据(前16字节): {BitConverter.ToString(pkg.axleGenComData, 0, Math.Min(16, pkg.axleGenComData.Length))}");
+                //Console.WriteLine($"  和校验: {pkg.check_sum}");
+
+            //}
+
+            // 断开连接
+            //robot.DisconnectCNDE();
+            //Console.WriteLine("测试结束");
+        }
+
+
     }
 }
+
+
 
 //ROBOT_STATE_PKG pkg = new ROBOT_STATE_PKG();
 //robot.GetRobotRealTimeState(ref pkg);
