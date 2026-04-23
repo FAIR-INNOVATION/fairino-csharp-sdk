@@ -4272,7 +4272,7 @@ namespace testFrRobot
 
             int type = 0, version = 0, connState = 0;
             int[] ctrl = new int[8];
-            int[] ctrlAO = new int[8];
+            double[] ctrlAO = new double[8];
             int[] DI = new int[8];
             double[] AI = new double[8];
             if (rtn != 0)
@@ -4326,7 +4326,7 @@ namespace testFrRobot
             int rtn = 0;
             int type = 0, version = 0, connState = 0;
             int[] ctrl = new int[8];
-            int[] ctrlAO = new int[8];
+            double[] ctrlAO = new double[8];
             int[] DI = new int[8];
             int[] AI = new int[8];
 
@@ -4411,7 +4411,7 @@ namespace testFrRobot
             int rtn = 0;
             int type = 0, version = 0, connState = 0;
             int[] ctrl = new int[8];
-            int[] ctrlAO = new int[8];
+            double[] ctrlAO = new double[8];
             int[] DI = new int[8];
             int[] AI = new int[8];
 
@@ -4555,17 +4555,17 @@ namespace testFrRobot
         {
 
             // 依次调用所有测试函数
-            TestOriginPointWeave();
             //TestCtrlOpenLuaOperate();
             //TestUDPAxis();
             //testled();
             //TestSetVelReducePara();
             //TestOriginPointWeave();
-            //TestServoJUDP();
+            TestServoJUDP();
             //ServoJTWithSafetyUDP();
 
             //testTPDmove();
             //testAxleGenCom();
+            //RunTrajectoryJ();
             //TestRobotStopOnComDisc();
             //TestRobotUDP();
             //TestIOConfig();
@@ -6551,7 +6551,16 @@ namespace testFrRobot
                         count -= 1;
                         Thread.Sleep(1);
                         robot.GetRobotRealTimeState(ref pkg);
+                        Console.WriteLine($"Servoj命令数量: {pkg.servoJCmdNum}");
                         Console.WriteLine($"Servoj Count {pkg.servoJCmdNum}; last pos is {pkg.lastServoTarget[0]} {pkg.lastServoTarget[1]} {pkg.lastServoTarget[2]} {pkg.lastServoTarget[3]} {pkg.lastServoTarget[4]} {pkg.lastServoTarget[5]}");
+                        if (pkg.jt_cur_pos != null && pkg.jt_cur_pos.Length >= 6)
+                        {
+                            Console.WriteLine($"  关节位置(°): J1={pkg.jt_cur_pos[0]:F2}, J2={pkg.jt_cur_pos[1]:F2}, J3={pkg.jt_cur_pos[2]:F2}, J4={pkg.jt_cur_pos[3]:F2}, J5={pkg.jt_cur_pos[4]:F2}, J6={pkg.jt_cur_pos[5]:F2}");
+                        }
+                        if (pkg.tl_cur_pos != null && pkg.tl_cur_pos.Length >= 6)
+                        {
+                            Console.WriteLine($"  工具位姿: X={pkg.tl_cur_pos[0]:F2}mm, Y={pkg.tl_cur_pos[1]:F2}mm, Z={pkg.tl_cur_pos[2]:F2}mm, RX={pkg.tl_cur_pos[3]:F2}°, RY={pkg.tl_cur_pos[4]:F2}°, RZ={pkg.tl_cur_pos[5]:F2}°");
+                        }
 
                     }
                     robot.ServoMoveEnd(1);
@@ -6571,7 +6580,17 @@ namespace testFrRobot
                         count -= 1;
                         Thread.Sleep(1);
                         robot.GetRobotRealTimeState(ref pkg);
+                        Console.WriteLine($"Servoj命令数量: {pkg.servoJCmdNum}");
                         Console.WriteLine($"Servoj Count {pkg.servoJCmdNum}; last pos is {pkg.lastServoTarget[0]} {pkg.lastServoTarget[1]} {pkg.lastServoTarget[2]} {pkg.lastServoTarget[3]} {pkg.lastServoTarget[4]} {pkg.lastServoTarget[5]}");
+                        if (pkg.jt_cur_pos != null && pkg.jt_cur_pos.Length >= 6)
+                        {
+                            Console.WriteLine($"  关节位置(°): J1={pkg.jt_cur_pos[0]:F2}, J2={pkg.jt_cur_pos[1]:F2}, J3={pkg.jt_cur_pos[2]:F2}, J4={pkg.jt_cur_pos[3]:F2}, J5={pkg.jt_cur_pos[4]:F2}, J6={pkg.jt_cur_pos[5]:F2}");
+                        }
+                        if (pkg.tl_cur_pos != null && pkg.tl_cur_pos.Length >= 6)
+                        {
+                            Console.WriteLine($"  工具位姿: X={pkg.tl_cur_pos[0]:F2}mm, Y={pkg.tl_cur_pos[1]:F2}mm, Z={pkg.tl_cur_pos[2]:F2}mm, RX={pkg.tl_cur_pos[3]:F2}°, RY={pkg.tl_cur_pos[4]:F2}°, RZ={pkg.tl_cur_pos[5]:F2}°");
+                        }
+
                     }
                     robot.ServoMoveEnd(1);
                 }
@@ -7530,16 +7549,18 @@ namespace testFrRobot
                 ret = robot.SndRcvAxleGenComCmdData(6, state, 6, ref rcvdata);
                 Console.WriteLine($" state : {rcvdata[4]}");
                 Thread.Sleep(1000);
-                //开启艾灸头激光
-                ret = robot.SndRcvAxleGenComCmdData(6, led_on, 6, ref rcvdata);
-                Console.WriteLine($"led on rcv data is: {rcvdata[0]},{rcvdata[1]}, {rcvdata[2]}, {rcvdata[3]}, {rcvdata[4]}, {rcvdata[5]}");
-                robot.MoveJ(p1Joint, p1Desc, 0, 0, 100, 100, 100, exaxisPos, -1, 0, offdese);
-                Thread.Sleep(4000);
-                //关闭艾灸头激光
-                ret = robot.SndRcvAxleGenComCmdData(6, led_off, 6, ref rcvdata);
-                Console.WriteLine($"led off rcv data is: {rcvdata[0]},{rcvdata[1]}, {rcvdata[2]}, {rcvdata[3]}, {rcvdata[4]}, {rcvdata[5]}");
-                robot.MoveJ(p2Joint, p2Desc, 0, 0, 100, 100, 100, exaxisPos, -1, 0, offdese);
-                Thread.Sleep(1000);
+
+
+                ////开启艾灸头激光
+                //ret = robot.SndRcvAxleGenComCmdData(6, led_on, 6, ref rcvdata);
+                //Console.WriteLine($"led on rcv data is: {rcvdata[0]},{rcvdata[1]}, {rcvdata[2]}, {rcvdata[3]}, {rcvdata[4]}, {rcvdata[5]}");
+                //robot.MoveJ(p1Joint, p1Desc, 0, 0, 100, 100, 100, exaxisPos, -1, 0, offdese);
+                //Thread.Sleep(4000);
+                ////关闭艾灸头激光
+                //ret = robot.SndRcvAxleGenComCmdData(6, led_off, 6, ref rcvdata);
+                //Console.WriteLine($"led off rcv data is: {rcvdata[0]},{rcvdata[1]}, {rcvdata[2]}, {rcvdata[3]}, {rcvdata[4]}, {rcvdata[5]}");
+                //robot.MoveJ(p2Joint, p2Desc, 0, 0, 100, 100, 100, exaxisPos, -1, 0, offdese);
+                //Thread.Sleep(1000);
                 Console.WriteLine($"***********************complate No. {cnt}  SDK test*****************************");
                 cnt++;
             }
@@ -7830,7 +7851,6 @@ namespace testFrRobot
             Thread.Sleep(1000);
             return 0;
         }
-
         void TestOriginPointWeave()
         {
             // 创建关节位置对象
@@ -8058,6 +8078,109 @@ namespace testFrRobot
             rtn = robot.AllOpenLuaDelete();
             Console.WriteLine($"AllOpenLuaDelete rtn is {rtn}");
 
+            return 0;
+        }
+
+        /// <summary>
+        /// 执行轨迹 J 文件的上传、加载、运动及运动中变速
+        /// </summary>
+        /// <param name="robot">已初始化的 Robot 实例</param>
+        /// <param name="localFilePath">本地轨迹文件路径，例如 "D://zUP/trajHelix_aima_1.txt"</param>
+        /// <param name="remoteFilePath">机器人端轨迹文件路径，例如 "/fruser/traj/trajHelix_aima_1.txt"</param>
+        /// <param name="initialSpeedPercent">初始全局速度百分比，默认 50</param>
+        /// <param name="trajSpeedMode">轨迹速度模式，默认 1</param>
+        /// <returns>成功返回 0，失败返回错误码</returns>
+        public int RunTrajectoryJ(string localFilePath = "D://zUP/trajHelix_aima_1.txt", string remoteFilePath = "/fruser/traj/trajHelix_aima_1.txt",
+            int initialSpeedPercent = 50, int trajSpeedMode = 1)
+        {
+            int rtn;
+
+            // 1. 上传轨迹 J 文件
+            rtn = robot.TrajectoryJUpLoad(localFilePath);
+            if (rtn != 0)
+            {
+                Console.WriteLine($"Upload TrajectoryJ failed: {rtn}");
+                return rtn;
+            }
+            Console.WriteLine($"Upload TrajectoryJ success: {localFilePath}");
+
+            // 2. 加载轨迹文件
+            rtn = robot.LoadTrajectoryJ(remoteFilePath, 100, 1);
+            if (rtn != 0)
+            {
+                Console.WriteLine($"LoadTrajectoryJ failed: {rtn}");
+                return rtn;
+            }
+            Console.WriteLine($"LoadTrajectoryJ success: {remoteFilePath}");
+
+            // 3. 获取轨迹起始位姿
+            DescPose trajStartPose = new DescPose(0, 0, 0, 0, 0, 0);
+            rtn = robot.GetTrajectoryStartPose(remoteFilePath, ref trajStartPose);
+            if (rtn != 0)
+            {
+                Console.WriteLine($"GetTrajectoryStartPose failed: {rtn}");
+                return rtn;
+            }
+            Console.WriteLine($"Trajectory start pose: ({trajStartPose.tran.x}, {trajStartPose.tran.y}, {trajStartPose.tran.z}, " +
+                              $"{trajStartPose.rpy.rx}, {trajStartPose.rpy.ry}, {trajStartPose.rpy.rz})");
+
+            // 4. 移动到轨迹起始点（使用笛卡尔空间 PTP）
+            robot.SetSpeed(initialSpeedPercent);
+            rtn = robot.MoveCart(trajStartPose, 0, 0, 100, 100, 100, -1, -1);
+            if (rtn != 0)
+            {
+                Console.WriteLine($"MoveCart to start pose failed: {rtn}");
+                return rtn;
+            }
+
+            // 5. 获取轨迹点数（可选，仅用于显示）
+            int trajPointNum = 0;
+            rtn = robot.GetTrajectoryPointNum(ref trajPointNum);
+            if (rtn != 0)
+            {
+                Console.WriteLine($"GetTrajectoryPointNum failed: {rtn}");
+                // 不返回，继续执行
+            }
+            else
+            {
+                Console.WriteLine($"Trajectory points count: {trajPointNum}");
+            }
+
+            // 6. 开始执行轨迹运动（非阻塞）
+            rtn = robot.MoveTrajectoryJ();
+            if (rtn != 0)
+            {
+                Console.WriteLine($"MoveTrajectoryJ failed: {rtn}");
+                return rtn;
+            }
+            Console.WriteLine("MoveTrajectoryJ started.");
+
+            // 7. 在运动过程中动态修改速度（交替 10% 和 80%）
+            // 使用 GetRobotMotionDone 检查运动是否完成
+            byte motionDone = 0;
+            robot.GetRobotMotionDone(ref motionDone);
+
+            while (motionDone == 0)
+            {
+                // 设置为 10% 速度
+                rtn = robot.SetTrajectoryJSpeed(10.0, trajSpeedMode);
+                Console.WriteLine($"SetTrajectoryJSpeed to 10% returned: {rtn}");
+                robot.Sleep(1000);
+
+                // 重新检查运动状态
+                robot.GetRobotMotionDone(ref motionDone);
+                if (motionDone != 0) break;
+
+                // 设置为 80% 速度
+                rtn = robot.SetTrajectoryJSpeed(80.0, trajSpeedMode);
+                Console.WriteLine($"SetTrajectoryJSpeed to 80% returned: {rtn}");
+                robot.Sleep(1000);
+
+                // 再次检查运动状态
+                robot.GetRobotMotionDone(ref motionDone);
+            }
+
+            Console.WriteLine("Trajectory J motion completed.");
             return 0;
         }
 

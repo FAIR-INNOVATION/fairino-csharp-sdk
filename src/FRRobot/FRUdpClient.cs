@@ -31,8 +31,8 @@ namespace fairino
                 udpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
                 // 显式绑定到本地任意可用端口，确保套接字立即处于绑定状态
                 udpSocket.Bind(new IPEndPoint(IPAddress.Any, 0));
-                udpSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, RECV_TIMEOUT);
-                udpSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.SendTimeout, RECV_TIMEOUT);
+                //udpSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, RECV_TIMEOUT);
+                //udpSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.SendTimeout, RECV_TIMEOUT);
 
                 Console.WriteLine($"[FRUdpClient] 套接字创建成功，本地是否绑定: {udpSocket.IsBound}");
 
@@ -145,7 +145,7 @@ namespace fairino
 
             try
             {
-                Console.WriteLine($"[FRUdpClient] 准备发送帧: {frame}");
+                //Console.WriteLine($"[FRUdpClient] 准备发送帧: {frame}");
                 byte[] data = Encoding.UTF8.GetBytes(frame);
                 //Console.WriteLine($"[FRUdpClient] 数据长度: {data.Length} 字节");
 

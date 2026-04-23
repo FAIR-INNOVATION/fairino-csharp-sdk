@@ -40,14 +40,31 @@ internal class StatusTCPClient
                 }
             }
             isConnected = false;
+            Thread.Sleep(50);
         }
     }
 
     public bool ReConnect()
     {
-        curReconnTimes = 0;
-        reconnState = true;
+        //curReconnTimes = 0;
+        //if (!reconnEnable) return false;
+        //if (reconnState) return false; // 防止并发重连
+        //reconnState = true;
 
+        //if (!reconnEnable)
+        //{
+        //    reconnState = false;
+        //    return false;
+        //}
+
+        // 防止并发重连
+        lock (socketLock)
+        {
+            if (reconnState) return false;
+            reconnState = true;
+        }
+
+        curReconnTimes = 0;
         if (!reconnEnable)
         {
             reconnState = false;
@@ -57,16 +74,19 @@ internal class StatusTCPClient
         while (curReconnTimes < reconnTimes)
         {
             Close(); // 确保在锁内关闭
+            Thread.Sleep(100);
             lock (socketLock) // 确保 Connect 时不会有其他线程干扰
             {
+
                 if (Connect())
                 {
                     if (log != null)
                     {
                         log.LogInfo("SDK Disconnected from robot, try to reconnect robot success! ");
                     }
+                    Console.WriteLine($"SDK Disconnected from robot, try to reconnect robot success!");
                     reconnState = false;
-
+                    curReconnTimes = 0;
                     return true;
                 }
                 else
@@ -74,12 +94,14 @@ internal class StatusTCPClient
                     curReconnTimes++;
                     if (log != null)
                     {
-                        log.LogInfo($"SDK Disconnected from robot, try to reconnect robot failed! {curReconnTimes} / {reconnTimes}");
+                        log.LogInfo($"SDK Disconnected from robot, Reconnect TCP attempt {curReconnTimes}/{reconnTimes} failed.");
                     }
-                    System.Threading.Thread.Sleep(reconnPeriod);
+                    Console.WriteLine($"SDK Disconnected from robot, Reconnect TCP attempt {curReconnTimes}/{reconnTimes} failed.");
+                    //System.Threading.Thread.Sleep(reconnPeriod);
                 }
             }
         }
+        curReconnTimes = 0;
         reconnState = false;
         return false;
     }
@@ -117,10 +139,20 @@ internal class StatusTCPClient
         {
             if (mSocket != null && mSocket.Connected)
             {
+                Console.WriteLine("复用现有连接，未进行实际网络连接");
                 isConnected = true;
                 return true;
             }
-
+            //try
+            //{
+            //    if (mSocket.Connected && !(mSocket.Poll(100000, SelectMode.SelectRead) && mSocket.Available == 0))
+            //    {
+            //        Console.WriteLine("复用现有连接，未进行实际网络连接");
+            //        isConnected = true;
+            //        return true;
+            //    }
+            //}
+            //catch { }
             Close();
 
             mSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -130,7 +162,7 @@ internal class StatusTCPClient
             {
                 IAsyncResult result = mSocket.BeginConnect(iPEndPoint, null, null);
                 bool success = result.AsyncWaitHandle.WaitOne(reconnPeriod, true);
-
+                //mSocket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
                 if (!success)
                 {
                     mSocket.Close();
@@ -349,6 +381,8 @@ internal class StatusTCPClient
         }
         return 0;
     }
+
+
     public void SetLog(Log logger)
     {
         log = logger;
@@ -364,4 +398,92 @@ internal class StatusTCPClient
             return mSocket.Connected && isConnected;
         }
     }
+
+    public void SetIpPort(string ip, int port)
+    {
+        this.ip = ip;
+        this.port = port;
+    }
+
+    public int Send(byte[] data)
+    {
+        lock (socketLock)
+        {
+            if (mSocket == null || !mSocket.Connected)
+                return -1;
+            try
+            {
+                mSocket.Send(data);
+                return data.Length;
+            }
+            catch
+            {
+                return -1;
+            }
+        }
+    }
+
+    public int RecvCNDEPkg(byte[] recvBytes, int maxBufferSize)
+    {
+        byte[] headerBuf = new byte[8];
+        int received = 0;
+        while (received < 8)
+        {
+            int n;
+            try
+            {
+                n = mSocket.Receive(headerBuf, received, 8 - received, SocketFlags.None);
+            }
+            catch (SocketException ex)
+            {
+                Console.WriteLine($"Socket异常: {ex.Message}");
+                Close();   // 只关闭，不重连
+                return -1;
+            }
+            if (n == 0)
+            {
+                Close();
+                return -1;   // 连接关闭
+            }
+            received += n;
+        }
+
+        if (headerBuf[0] != 0x5A || headerBuf[1] != 0x5A)
+            return -4;
+
+        ushort dataLen = (ushort)(headerBuf[4] | (headerBuf[5] << 8));
+        int totalLen = 8 + dataLen;
+        if (totalLen > maxBufferSize)
+            return -3;
+
+        Array.Copy(headerBuf, 0, recvBytes, 0, 8);
+        int receivedTotal = 8;
+
+        while (receivedTotal < totalLen)
+        {
+            int n;
+            try
+            {
+                n = mSocket.Receive(recvBytes, receivedTotal, totalLen - receivedTotal, SocketFlags.None);
+            }
+            catch (SocketException ex)
+            {
+                Console.WriteLine($"Socket异常: {ex.Message}");
+                Close();
+                return -1;
+            }
+            if (n == 0)
+            {
+                Close();
+                return -1;
+            }
+            receivedTotal += n;
+        }
+
+        if (recvBytes[totalLen - 2] != 0xA5 || recvBytes[totalLen - 1] != 0xA5)
+            return -4;
+
+        return totalLen;
+    }
+
 }

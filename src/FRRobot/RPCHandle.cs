@@ -887,7 +887,7 @@ namespace fairino
         * @param  [in] ovl 速度百分比
         * @return  错误码
         */[XmlRpcMethod("SetTrajectoryJSpeed")]
-        int SetTrajectoryJSpeed(double ovl);
+        int SetTrajectoryJSpeed(double ovl, int mode);
 
         /**
         * @brief  设置轨迹运行中的力和扭矩
@@ -2039,7 +2039,7 @@ namespace fairino
 
 
         [XmlRpcMethod("FieldBusSlaveWriteAO")]
-        int FieldBusSlaveWriteAO(int AOIndex, int wirteNum, int[] status);
+        int FieldBusSlaveWriteAO(int AOIndex, int wirteNum, double[] status);
 
         [XmlRpcMethod("FieldBusSlaveReadDI")]
         object[] FieldBusSlaveReadDI(int DOIndex, int readNum);
@@ -2232,7 +2232,13 @@ namespace fairino
 
         [XmlRpcMethod("SerCoderCompenParams")]
         int SerCoderCompenParams(object[] serCoderParams);
-
+		
+        [XmlRpcMethod("GetActualTCPPose")]
+        object[] GetActualTCPPose(int flag);
+		
+        [XmlRpcMethod("GetActualJointPosDegree")]
+        object[] GetActualJointPosDegree(int flag);
+		
         [XmlRpcMethod("TCPComputeRPY")]
         object[] TCPComputeRPY(object[] tcpComputeParams);
 
