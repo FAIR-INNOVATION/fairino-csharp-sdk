@@ -834,140 +834,6 @@ internal class FRCNDEClient
         }
     }
 
-
-    //private void RecvRobotStateThread()
-    //{
-    //    byte[] pkgBuf = new byte[4096];
-    //    DateTime lastReceiveTime = DateTime.Now;
-    //    int frameCount = 0;
-
-    //    while (_robotStateRunFlag)
-    //    {
-    //        try
-    //        {
-    //            int recvLen;
-    //            lock (_recvLock)
-    //            {
-    //                recvLen = _rtClient.RecvCNDEPkg(pkgBuf, pkgBuf.Length);
-    //            }
-
-    //            if (recvLen <= 0)  // 连接断开或没有数据
-    //            {
-    //                if (!_robotStateRunFlag) break; // 已要求退出，直接结束线程
-    //                Console.WriteLine("[RecvRobotStateThread] 连接断开，尝试重连...");
-    //                if (_rtClient.ReConnect())
-    //                {
-    //                    _startSent = false;
-    //                    // 重连成功后重新发送配置帧和启动帧
-    //                    if (SendCNDEOutputConfig() == 0 && SetCNDEStart() == 0)//SendCNDEOutputConfig() == 0 &&  重连后只发start
-    //                    {
-    //                        Console.WriteLine("[RecvRobotStateThread] 重连并重新配置成功");
-    //                        _errorCallback?.Invoke((int)RobotError.ERR_SUCCESS);
-    //                    }
-    //                    else
-    //                    {
-    //                        Console.WriteLine("[RecvRobotStateThread] 重连后配置失败");
-    //                        _errorCallback?.Invoke((int)RobotError.ERR_SOCKET_COM_FAILED);
-    //                        break;
-    //                    }
-    //                }
-    //                else
-    //                {
-    //                    Console.WriteLine("[RecvRobotStateThread] 重连失败");
-    //                    _errorCallback?.Invoke((int)RobotError.ERR_SOCKET_COM_FAILED);
-    //                    break;
-    //                }
-    //            }
-    //            else  // 收到数据
-    //            {
-    //                lock (_recvLock)
-    //                {
-    //                    StringBuilder hex = new StringBuilder();
-    //                    for (int i = 0; i < recvLen; i++)
-    //                        hex.Append(pkgBuf[i].ToString("X2") + " ");
-    //                    //Console.WriteLine($"[RecvRobotStateThread] 原始数据: {hex.ToString()}");
-    //                    // 创建有效数据副本
-    //                    byte[] validData = new byte[recvLen];
-    //                    Array.Copy(pkgBuf, validData, recvLen);
-
-    //                    if (CNDEFrameHandle.FrameToCNDEPkg(validData, out CNDE_PKG pkg) == 0 && pkg.Type == CNDEFrameType.OUTPUT_STATE)
-    //                    {
-    //                        frameCount++;
-    //                        var now = DateTime.Now;
-    //                        var interval = (now - lastReceiveTime).TotalMilliseconds;
-    //                        //Console.WriteLine($"[Recv] Frame #{frameCount} received, interval = {interval:F1} ms");
-    //                        lastReceiveTime = now;
-
-    //                        // 成功收到一帧数据，清除错误标志
-    //                        _errorCallback?.Invoke((int)RobotError.ERR_SUCCESS);
-
-    //                        ParseRobotState(pkg.Data);
-    //                    }
-    //                    else
-    //                    {
-    //                        Console.WriteLine("[RecvRobotStateThread] 帧解析失败或不是 OUTPUT_STATE 帧");
-    //                        // 解析失败不一定是严重错误，不重置错误标志，也不断开
-    //                    }
-    //                    Array.Clear(pkgBuf, 0, pkgBuf.Length);
-    //                }
-    //            }
-    //        }
-    //        catch (SocketException ex)
-    //        {
-    //            Console.WriteLine($"[RecvRobotStateThread] Socket异常: {ex.Message}");
-    //            // 尝试重连
-    //            if (_rtClient.ReConnect())
-    //            {
-    //                _startSent = false;
-    //                if (SendCNDEOutputConfig() == 0 && SetCNDEStart() == 0)
-    //                {
-    //                    Console.WriteLine("[RecvRobotStateThread] Socket异常后重连成功");
-    //                    _errorCallback?.Invoke((int)RobotError.ERR_SUCCESS);
-    //                }
-    //                else
-    //                {
-    //                    Console.WriteLine("[RecvRobotStateThread] 重连后配置失败");
-    //                    _errorCallback?.Invoke((int)RobotError.ERR_SOCKET_COM_FAILED);
-    //                    break;
-    //                }
-    //            }
-    //            else
-    //            {
-    //                Console.WriteLine("[RecvRobotStateThread] Socket异常后重连失败");
-    //                _errorCallback?.Invoke((int)RobotError.ERR_SOCKET_COM_FAILED);
-    //                break;
-    //            }
-    //        }
-    //        catch (Exception ex)
-    //        {
-    //            Console.WriteLine($"[RecvRobotStateThread] 未知异常: {ex.Message}");
-    //            // 尝试重连
-    //            if (_rtClient.ReConnect())
-    //            {
-    //                _startSent = false;
-    //                if (SendCNDEOutputConfig() == 0 && SetCNDEStart() == 0)
-    //                {
-    //                    Console.WriteLine("[RecvRobotStateThread] 异常后重连成功");
-    //                    _errorCallback?.Invoke((int)RobotError.ERR_SUCCESS);
-    //                }
-    //                else
-    //                {
-    //                    Console.WriteLine("[RecvRobotStateThread] 重连后配置失败");
-    //                    _errorCallback?.Invoke((int)RobotError.ERR_SOCKET_COM_FAILED);
-    //                    break;
-    //                }
-    //            }
-    //            else
-    //            {
-    //                Console.WriteLine("[RecvRobotStateThread] 异常后重连失败");
-    //                _errorCallback?.Invoke((int)RobotError.ERR_SOCKET_COM_FAILED);
-    //                break;
-    //            }
-    //        }
-    //    }
-    //    _rtClient.Close();
-    //}
-
     private void RecvRobotStateThread()
     {
         byte[] pkgBuf = new byte[4096];
@@ -1000,7 +866,7 @@ internal class FRCNDEClient
                         {
                             _startSent = false;
                             // 重连成功后重新发送配置帧和启动帧
-                            if ( SetCNDEStart() == 0) //SendCNDEOutputConfig() == 0 &&
+                            if (SendCNDEOutputConfig() == 0 && SetCNDEStart() == 0)
                             {
                                 reconfigured = true;
                                 Console.WriteLine("[RecvRobotStateThread] 重连并重新配置成功");
