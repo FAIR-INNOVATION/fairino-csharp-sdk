@@ -46,6 +46,7 @@ namespace testFrRobot
 
 
             robot.SetReconnectParam(true, 100, 1000);//断线重连参数
+
             rrpc = robot.RPC("192.168.58.2"); //与控制箱建立连接
                                               //20004端口接收超时时间
                                               //robot.SetReceivePortTimeout(40);
@@ -2112,14 +2113,15 @@ namespace testFrRobot
             // 循环获取并打印实时状态
             while (true)
             {
-                ROBOT_STATE_PKG pkg = new ROBOT_STATE_PKG();
-                // 获取最新的机器人实时状态（内部会更新pkg对象）
-                robot.GetRobotRealTimeState(ref pkg);
+                printCNDE();
+                //ROBOT_STATE_PKG pkg = new ROBOT_STATE_PKG();
+                //// 获取最新的机器人实时状态（内部会更新pkg对象）
+                //robot.GetRobotRealTimeState(ref pkg);
 
-                Console.WriteLine($"robot SocketConnTimeout: {pkg.socketConnTimeout}");
-                Console.WriteLine($"robot SocketReadTimeout: {pkg.socketReadTimeout}");
-                // 如需打印 TsWebStateComErr 可取消注释
-                 Console.WriteLine($"robot TsWebStateComErr: {pkg.tsWebStateComErr}");
+                //Console.WriteLine($"robot SocketConnTimeout: {pkg.socketConnTimeout}");
+                //Console.WriteLine($"robot SocketReadTimeout: {pkg.socketReadTimeout}");
+                //// 如需打印 TsWebStateComErr 可取消注释
+                // Console.WriteLine($"robot TsWebStateComErr: {pkg.tsWebStateComErr}");
 
                 Thread.Sleep(300); // 与C++示例一致，300ms打印一次
             }

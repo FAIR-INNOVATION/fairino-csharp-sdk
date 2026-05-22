@@ -2483,10 +2483,32 @@ namespace testFrRobot
             Console.WriteLine("SetRobotPosToAxis rtn is " + rtn);
             rtn = robot.SetAxisDHParaConfig(10, 20, 0, 0, 0, 0, 0, 0, 0);
             Console.WriteLine("SetAxisDHParaConfig rtn is " + rtn);
+
+
+            int axisType = -1;
+            int axisDirection = -1;
+            double axisMax = -1;
+            double axisMin = -1;
+            double axisVel = -1;
+            double axisAcc = -1;
+            double axisLead = -1;
+            int encResolution = -1;
+            double axisOffect = -1;
+            int axisCompany = -1;
+            int axisModel = -1;
+            int axisEncType = -1;
+
             rtn = robot.ExtAxisParamConfig(1, 1, 1, 1000, -1000, 1000, 1000, 1.905f, 262144, 200, 1, 0, 0);
             Console.WriteLine("ExtAxisParamConfig axis 1 rtn is " + rtn);
+            rtn = robot.ExtAxisGetParamConfig(1, ref axisType, ref axisDirection, ref axisMax, ref axisMin, ref axisVel, ref axisAcc, ref axisLead, ref encResolution, ref axisOffect, ref axisCompany, ref axisModel, ref axisEncType);
+            Console.WriteLine($"axis id 1 ExtAxisGetParamConfig : axisType {axisType}, axisDirection {axisDirection}, axisMax {axisMax}, axisMin {axisMin}, axisVel {axisVel}, axisAcc {axisAcc}, axisLead {axisLead}, encResolution {encResolution}, axisOffect {axisOffect}, axisCompany {axisCompany}, axisModel {axisModel}, axisEncType {axisEncType}\n");
+                                                                                                                                                                                
+
             rtn = robot.ExtAxisParamConfig(2, 1, 1, 1000, -1000, 1000, 1000, 4.444f, 262144, 200, 1, 0, 0);
             Console.WriteLine("ExtAxisParamConfig axis 2 rtn is " + rtn);
+            rtn = robot.ExtAxisGetParamConfig(2, ref axisType, ref axisDirection, ref axisMax,  ref axisMin, ref axisVel, ref axisAcc, ref axisLead, ref encResolution, ref axisOffect, ref axisCompany, ref axisModel, ref axisEncType);
+            Console.WriteLine($"axis id 2 ExtAxisGetParamConfig : axisType {axisType}, axisDirection {axisDirection}, axisMax {axisMax}, axisMin {axisMin}, axisVel {axisVel}, axisAcc {axisAcc}, axisLead {axisLead}, encResolution {encResolution}, axisOffect {axisOffect}, axisCompany {axisCompany}, axisModel {axisModel}, axisEncType {axisEncType}\n");
+
 
             Thread.Sleep(3000);
             robot.ExtAxisStartJog(1, 0, 10, 10, 30);
@@ -4560,8 +4582,10 @@ namespace testFrRobot
             //testled();
             //TestSetVelReducePara();
             //TestOriginPointWeave();
-            TestServoJUDP();
+            //TestServoJUDP();
             //ServoJTWithSafetyUDP();
+            //ServoMITtest();
+            ServoJVtest();
 
             //testTPDmove();
             //testAxleGenCom();
@@ -8188,7 +8212,198 @@ namespace testFrRobot
         {
 
         }
+
+        public int ServoJVtest()
+        {
+            double[] joint_vel = new double[6] { 10, 0, 0, 0, 0, 0 };
+            double[] exis_vel = new double[4] { 0, 0, 0, 0 };
+            float acc = 0.0f; 
+            float vel = 0.0f;
+            float cmdT = 0.01f; 
+            float filterT = 0.0f; 
+            float gain = 0.0f;
+            int cnt = 0;
+            while (cnt < 200)
+            {
+                int error = robot.ServoJV(joint_vel, exis_vel, acc, vel, cmdT, filterT, gain);
+                Console.WriteLine($"ServoJV rtn is {error}");
+                cnt++;
+            }
+            return 0;
+        }
+
+        public int ServoMITtest()
+        {
+            // 订阅回调
+            robot.OnUdpFrameReceived += (comType, frameCount, frameCmdID, contentLen, content) =>
+            {
+                Console.WriteLine($"[UDP响应] comType={comType}, count={frameCount}, cmdID={frameCmdID}, content={content}");
+            };
+            while (true)
+            {
+                robot.ResetAllError();
+                Thread.Sleep(500);
+
+                double[] posGain = new double[6] { 0, 0, 0, 0, 0, 0 };
+                double[] desPos = new double[6] { 0, 0, 0, 0, 0, 0 };
+                double[] velGain = new double[6] { 0, 0, 0, 0, 0, 0 };
+                double[] desVel = new double[6] { 0, 0, 0, 0, 0, 0 };
+                double[] torques = new double[6] { 0, 0, 0, 0, 0, 0 };
+                robot.GetJointTorques(1, torques);
+                Console.WriteLine($"111111");
+                //robot.ServoMITEnd(0);
+                robot.ServoMITStart(0);
+                Console.WriteLine($"ServoMITStart");
+                ROBOT_STATE_PKG pkg = new ROBOT_STATE_PKG();
+                robot.DragTeachSwitch(1);
+                Console.WriteLine($"DragTeachSwitch");
+                double intev = 0.008;
+                double[] jPowerLimit = new double[6] { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
+                double[] jVelLimit = new double[6] { 50, 50, 50, 50, 50, 50 };
+                int error = 0;
+                while (true)
+                {
+
+                    torques[5] = 0.03;
+                    Console.WriteLine($"ServoMIT call ");
+                    error = robot.ServoMIT(posGain, desPos, velGain, desVel, torques, intev, 0);
+
+                    Console.WriteLine($"ServoMIT111111 rtn is {error}");
+                    Thread.Sleep(1);
+
+                    robot.GetRobotRealTimeState(ref pkg);
+                    //Console.WriteLine($"maincode {pkg.main_code}, subcode {pkg.sub_code}");
+                    Console.WriteLine($"pkg.jt_cur_pos[5]:{pkg.jt_cur_pos[5]}");
+                    if (pkg.jt_cur_pos[5] > 30)
+                    {
+                        break;
+                    }
+                }
+
+                while (true)
+                {
+
+                    torques[5] = -0.03;
+                    error = robot.ServoMIT(posGain, desPos, velGain, desVel, torques, intev, 0);
+
+                    Console.WriteLine($"ServoJT222222 rtn is {error}");
+                    Thread.Sleep(1);
+
+                    robot.GetRobotRealTimeState(ref pkg);
+                    //Console.WriteLine($"maincode {pkg.main_code}, subcode {pkg.sub_code}");
+                    Console.WriteLine($"pkg.jt_cur_pos[5]:{pkg.jt_cur_pos[5]}");
+                    if (pkg.jt_cur_pos[5] < 0)
+                    {
+                        break;
+                    }
+                }
+
+                robot.DragTeachSwitch(0);
+                error = robot.ServoMITEnd(0);
+            }
+            return 0;
+        }
+
+        private void btnLaserWeld_Click(object sender, EventArgs e)
+        {
+
+            int rtn = -1;
+            // 加载UDP扩展轴驱动
+            rtn = robot.ExtDevLoadUDPDriver();
+            if (rtn != 0)
+            {
+                Console.WriteLine("Failed to load UDP driver, error code: " + rtn);
+            }
+            Thread.Sleep(1000);
+
+            // 设置激光焊接参数: io_type=1, num=3, scanSpeed=2000, scanWidth=3, peakPower=1500, dutyCycle=100, freq=1000
+            rtn = robot.SetLaserWeldingParam(1, 3, 2000, 3, 1500, 100, 1000);
+            if (rtn != 0)
+            {
+                Console.WriteLine("SetLaserWeldingParam failed, error code: " + rtn);
+            }
+            else
+            {
+                Console.WriteLine("SetLaserWeldingParam success");
+            }
+
+            // 设置启动的DO端口号
+            rtn = robot.SetLaserWeldingStartExtDoNum(1);
+            if (rtn != 0)
+            {
+                Console.WriteLine("SetLaserWeldingStartExtDoNum failed, error code: " + rtn);
+            }
+
+            // 设置为模式0（示教模式）
+            rtn = robot.Mode(0);
+            if (rtn != 0)
+            {
+                Console.WriteLine("Set mode 0 failed, error code: " + rtn);
+            }
+            Thread.Sleep(1000);
+
+
+            DescPose desc_pos1 = new DescPose(-303.721, -206.960, 297.105, 152.209, 19.857, 109.166);
+            DescPose desc_pos2 = new DescPose(-301.575, -254.888, 284.786, 155.919, 26.946, 111.629);
+            DescPose desc_safe = new DescPose(-344.386, -280.830, 435.073, 173.835, 15.333, 124.931);
+
+
+            ExaxisPos exaxis = new ExaxisPos(0.0, 0.0, 0.0, 0.0);
+            DescPose offset = new DescPose(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+
+            // 移动到第一个焊接点
+            int error = robot.MoveL(desc_pos1, 0, 0, 100, 100, 100, -1, 0, exaxis, 0, 0, offset, -1, 0);
+            Console.WriteLine("MoveL to pos1 return: " + error);
+
+            // 开启激光（出光）
+            rtn = robot.SetLaserWeldingStartEnd(1, 1, 10000);
+            if (rtn != 0)
+            {
+                Console.WriteLine("SetLaserWeldingStartEnd (start) failed, error code: " + rtn);
+            }
+            else
+            {
+                Console.WriteLine("Laser started");
+            }
+
+            // 移动到第二个焊接点（焊接过程中）
+            rtn = robot.MoveL(desc_pos2, 0, 0, 30, 100, 100, -1, 0, exaxis, 0, 0, offset, -1, 0);
+            Console.WriteLine("MoveL to pos2 return: " + rtn);
+
+            Thread.Sleep(500);
+            // 关闭激光（收光）
+            rtn = robot.SetLaserWeldingStartEnd(1, 0, 10000);
+            if (rtn != 0)
+            {
+                Console.WriteLine("SetLaserWeldingStartEnd (stop) failed, error code: " + rtn);
+            }
+            else
+            {
+                Console.WriteLine("Laser stopped");
+            }
+
+            // 移动到安全点
+            rtn = robot.MoveL(desc_safe, 0, 0, 100, 100, 100, -1, 0, exaxis, 0, 0, offset, -1, 0);
+            Console.WriteLine("MoveL to safe_pos return: " + rtn);
+
+            // 设置为模式1（远程模式）
+            rtn = robot.Mode(1);
+            if (rtn != 0)
+            {
+                Console.WriteLine("Set mode 1 failed, error code: " + rtn);
+            }
+            Thread.Sleep(1000);
+
+            // 关闭连接
+            robot.CloseRPC();
+            Thread.Sleep(1000);
+
+            Console.WriteLine("Test completed");
+
+            return ;
+        }
+    
     }
-    }
+ }
 
 
