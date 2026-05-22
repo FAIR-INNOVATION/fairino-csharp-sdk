@@ -41,7 +41,7 @@ namespace fairino
     {
         ICallSupervisor proxy = null;
 
-        const string SDK_VERSION = " C#SDK-V1.2.6  Web-3.9.5";
+        const string SDK_VERSION = " C#SDK-V1.2.7  Web-3.9.6";
 
         private string robot_ip = "192.168.57.2";//机器人ip
         private int g_sock_com_err = (int)RobotError.ERR_SUCCESS;
@@ -13620,6 +13620,73 @@ namespace fairino
             }
         }
 
+
+        /**
+        * @brief UDP扩展轴参数获取
+        * @param [in] axisID 扩展轴号[1-4]
+        * @param [out] axisType 扩展轴类型 0-平移；1-旋转
+        * @param [out] axisDirection 扩展轴方向 0-正向；1-方向
+        * @param [out] axisMax 扩展轴最大位置 mm
+        * @param [out] axisMin 扩展轴最小位置 mm
+        * @param [out] axisVel 速度mm/s
+        * @param [out] axisAcc 加速度mm/s2
+        * @param [out] axisLead 导程mm
+        * @param [out] encResolution 编码器分辨率
+        * @param [out] axisOffect焊缝起始点扩展轴偏移量
+        * @param [out] axisCompany 驱动器厂家 1-禾川；2-汇川；3-松下
+        * @param [out] axisModel 驱动器型号 1-禾川-SV-XD3EA040L-E，2-禾川-SV-X2EA150A-A，1-汇川-SV620PT5R4I，1-松下-MADLN15SG，2-松下-MSDLN25SG，3-松下-MCDLN35SG
+        * @param [out] axisEncType 编码器类型  0-增量；1-绝对值
+        * @return 错误码
+        */
+        public int ExtAxisGetParamConfig(int axisID, ref int axisType, ref int axisDirection, ref double axisMax, ref double axisMin, ref double axisVel, ref double axisAcc, ref double axisLead, ref int encResolution, ref double axisOffect, ref int axisCompany, ref int axisModel, ref int axisEncType)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            try
+            {
+                object[] result = proxy.ExtAxisGetParamConfig(axisID);
+                if ((int)result[0] == 0)
+                {
+                    axisType = (int)(result[1]);
+                    axisDirection = (int)(result[2]);
+                    axisMax = (double)(result[3]);
+                    axisMin = (double)(result[4]);
+                    axisVel = (double)(result[5]);
+                    axisAcc = (double)(result[6]);
+                    axisLead = (double)(result[7]);
+                    encResolution = (int)(result[8]);
+                    axisOffect = (double)(result[9]);
+                    axisCompany = (int)(result[10]);
+                    axisModel = (int)(result[11]);
+                    axisEncType = (int)(result[12]);
+                }
+                if (log != null)
+                {
+                    log.LogInfo($"ExtAxisGetParamConfig({axisID}, ref {axisType}, ref {axisDirection}, ref {axisMax},ref {axisMin}, ref {axisVel}, ref {axisAcc}, ref {axisLead}, ref {encResolution}, ref {axisOffect}, ref {axisCompany}, ref {axisModel}, ref {axisEncType}) : {(int)result[0]}");
+                }
+                return (int)result[0];
+            }
+            catch
+            {
+                if (IsSockComError())
+                {
+                    if (log != null)
+                    {
+                        log.LogError($"RPC exception");
+                    }
+                    return g_sock_com_err;
+
+                }
+                else
+                {
+                    return (int)RobotError.ERR_SUCCESS;
+                }
+            }
+        }
+
         /**
          * @brief 获取扩展轴驱动器配置信息
          * @param [in] axisId 轴号[1-4]
@@ -25665,6 +25732,738 @@ namespace fairino
             catch (Exception ex)
             {
                 log?.LogError($"RPC exception: {ex.Message}");
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief  关节空间速度伺服模式运动
+         * @param  [in] joint_pos  6个目标关节速度,单位deg/s
+         * @param  [in] axisPos  4个外部轴速度,单位deg/s
+         * @param  [in] acc  加速度百分比，范围[0~100],暂不开放，默认为0
+         * @param  [in] vel  速度百分比，范围[0~100]，暂不开放，默认为0
+         * @param  [in] cmdT  指令下发周期，单位s，建议范围[0.001~0.0016]
+         * @param  [in] filterT 滤波时间，单位s，暂不开放，默认为0
+         * @param  [in] gain  目标位置的比例放大器，暂不开放，默认为0
+         * @param  [in] id servoJ指令ID,默认为0
+         * @param[in] comType 指令下发类型；0-xmlrpc；1-UDP(对应机器人20007端口)
+         * @return  错误码
+         */
+        public int ServoJV(double[] joint_vel, double[] exis_vel, float acc, float vel, float cmdT, float filterT, float gain, int id = 0, int comType = 0)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            if (GetSafetyCode() != 0)
+            {
+                return GetSafetyCode();
+            }
+
+            try
+            {
+                if (comType == 0)
+                {
+
+                    int rtn = proxy.ServoJV(joint_vel, exis_vel, acc, vel, cmdT, filterT, gain, id);
+                    log?.LogInfo($"ServoJV() : {rtn}");
+                    return rtn;
+                }
+                else if (comType == 1)
+                {
+                    // 格式化数组为字符串，保留3位小数
+                    string jointVelStr = FormatDoubleArray(joint_vel, 3);
+                    string exisVelStr = FormatDoubleArray(exis_vel, 3);
+
+                    // 构建命令字符串
+                    string cmdStr = $"ServoJ({jointVelStr},{exisVelStr},{acc:F3},{vel:F3},{cmdT:F3},{filterT:F3},{gain:F3},{id})";
+
+                    FRAME frame = new FRAME
+                    {
+                        count = frameCnt++,
+                        cmdID = 1337,
+                        content = cmdStr,
+                        contentLen = cmdStr.Length,
+                        head = "/f/b",
+                        tail = "/b/f"
+                    };
+                    string frameStr = FrameHandle.PackFrame(frame);
+                    int sendResult = udpCmdClient.SendFrame(frameStr);
+                    if (sendResult != 0)
+                    {
+                        log?.LogError($"ServoJ UDP send failed: {sendResult}");
+                        return (int)RobotError.ERR_SOCKET_SEND_FAILED;
+                    }
+                    return 0;
+                }
+                else
+                {
+                    log?.LogError($"ServoJ invalid comType: {comType}");
+                    return (int)RobotError.ERR_PARAM_VALUE;
+                }
+            }
+            catch (Exception ex)
+            {
+                if (IsSockComError())
+                {
+                    log?.LogError($"RPC exception: {ex.Message}");
+                    return g_sock_com_err;
+                }
+                else
+                {
+                    return (int)RobotError.ERR_SUCCESS;
+                }
+            }
+        }
+
+        /**
+         * @brief 关节MIT控制开始
+         * @param [in]  comType 指令下发类型；0-xmlrpc；1-UDP(对应机器人20007端口)
+         * @return  错误码
+         */
+        public int ServoMITStart(int comType = 0)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            if (GetSafetyCode() != 0)
+            {
+                return GetSafetyCode();
+            }
+
+            try
+            {
+                if (comType == 0)
+                {
+                    int rtn = proxy.ServoMITStart();
+                    log?.LogInfo($"ServoMITStart() : {rtn}");
+                    return rtn;
+                }
+                else if (comType == 1)
+                {
+                    string cmdStr = "ServoMITStart()";
+                    FRAME frame = new FRAME
+                    {
+                        count = frameCnt++,
+                        cmdID = 1334,
+                        content = cmdStr,
+                        contentLen = cmdStr.Length,
+                        head = "/f/b",
+                        tail = "/b/f"
+                    };
+                    string frameStr = FrameHandle.PackFrame(frame);
+                    int sendResult = udpCmdClient.SendFrame(frameStr);
+                    if (sendResult != 0)
+                    {
+                        log?.LogError($"ServoMITStart UDP send failed: {sendResult}");
+                        return (int)RobotError.ERR_SOCKET_SEND_FAILED;
+                    }
+                    return 0;
+                }
+                else
+                {
+                    log?.LogError($"ServoJTStart invalid comType: {comType}");
+                    return (int)RobotError.ERR_PARAM_VALUE;
+                }
+            }
+            catch (Exception ex)
+            {
+                if (IsSockComError())
+                {
+                    log?.LogError($"RPC exception: {ex.Message}");
+                    return g_sock_com_err;
+                }
+                else
+                {
+                    return (int)RobotError.ERR_SUCCESS;
+                }
+            }
+        }
+
+
+        /**
+         * @brief 关节MIT控制结束
+         * @param [in]  comType 指令下发类型；0-xmlrpc；1-UDP(对应机器人20007端口)
+         * @return  错误码
+         */
+        public int ServoMITEnd(int comType = 0)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            if (GetSafetyCode() != 0)
+            {
+                return GetSafetyCode();
+            }
+
+            try
+            {
+                if (comType == 0)
+                {
+                    int rtn = proxy.ServoMITEnd();
+                    log?.LogInfo($"ServoMITEnd() : {rtn}");
+                    return rtn;
+                }
+                else if (comType == 1)
+                {
+                    string cmdStr = "ServoMITEnd()";
+                    FRAME frame = new FRAME
+                    {
+                        count = frameCnt++,
+                        cmdID = 1335,
+                        content = cmdStr,
+                        contentLen = cmdStr.Length,
+                        head = "/f/b",
+                        tail = "/b/f"
+                    };
+                    string frameStr = FrameHandle.PackFrame(frame);
+                    int sendResult = udpCmdClient.SendFrame(frameStr);
+                    if (sendResult != 0)
+                    {
+                        log?.LogError($"ServoMITEnd UDP send failed: {sendResult}");
+                        return (int)RobotError.ERR_SOCKET_SEND_FAILED;
+                    }
+                    return 0;
+                }
+                else
+                {
+                    log?.LogError($"ServoMITEnd invalid comType: {comType}");
+                    return (int)RobotError.ERR_PARAM_VALUE;
+                }
+            }
+            catch (Exception ex)
+            {
+                if (IsSockComError())
+                {
+                    log?.LogError($"RPC exception: {ex.Message}");
+                    return g_sock_com_err;
+                }
+                else
+                {
+                    return (int)RobotError.ERR_SUCCESS;
+                }
+            }
+        }
+
+
+        /**
+        * @brief 关节MIT控制
+        * @param [in] posGain j1~j6关节位置增益
+        * @param [in] desPos j1~j6关节期望位置 单位:deg
+        * @param [in] velGain j1~j6关节速度增益
+        * @param [in] desVel j1~j6关节期望速度 单位:deg/s
+        * @param [in] torque_ff j1~j6前馈力矩 单位:Nm
+        * @param [in] interval 指令周期，单位s，范围[0.001~0.008]
+        * @param [in]  comType 指令下发类型；0-xmlrpc；1-UDP(对应机器人20007端口)
+        * @return 错误码
+        */
+        public int ServoMIT(double[] posGain, double[] desPos, double[] velGain, double[] desVel, double[] torque_ff, double interval, int comType = 0)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            try
+            {
+                if (comType == 0)
+                {
+                    // XML-RPC 方式
+                    int rtn = proxy.ServoMIT(posGain, desPos, velGain, desVel, torque_ff, interval);
+                    log?.LogInfo($"ServoMIT() : {rtn}");
+                    return rtn;
+                }
+                else if (comType == 1)
+                {
+                    // UDP 方式
+                    // 格式化数组为字符串，保留3位小数
+                    string posGain_str = FormatDoubleArray(posGain, 3);
+                    string desPos_str = FormatDoubleArray(desPos, 3);
+                    string velGain_str = FormatDoubleArray(velGain, 3);
+                    string desVel_str = FormatDoubleArray(desVel, 3);
+                    string torque_ff_str = FormatDoubleArray(torque_ff, 3);
+
+
+                    // 构建命令字符串
+                    string cmdStr = $"ServoMIT({posGain_str},{desPos_str},{velGain_str},{desVel_str},{torque_ff_str},{interval:F3})";
+
+                    // 构造帧
+                    FRAME frame = new FRAME
+                    {
+                        count = frameCnt++,            // 帧计数自增
+                        cmdID = 1336,                   // 命令ID固定为1200
+                        content = cmdStr,
+                        contentLen = cmdStr.Length,
+                        head = "/f/b",
+                        tail = "/b/f"
+                    };
+
+                    string frameStr = FrameHandle.PackFrame(frame);
+
+                    // 通过UDP客户端发送
+                    int sendResult = udpCmdClient.SendFrame(frameStr);
+                    if (sendResult != 0)
+                    {
+                        log?.LogError($"ServoJT UDP send failed: {sendResult}");
+                        return (int)RobotError.ERR_SOCKET_SEND_FAILED;
+                    }
+
+                    // UDP发送成功即返回0（不等待响应）
+                    return 0;
+                }
+                else
+                {
+                    // 不支持的通信类型
+                    log?.LogError($"ServoJT invalid comType: {comType}");
+                    return (int)RobotError.ERR_PARAM_VALUE;
+                }
+            }
+            catch (Exception ex)
+            {
+                if (IsSockComError())
+                {
+                    log?.LogError($"RPC exception: {ex.Message}");
+                    return g_sock_com_err;
+                }
+                else
+                {
+                    // 保持原逻辑：非通信错误时返回成功（可根据需要调整）
+                    return (int)RobotError.ERR_SUCCESS;
+                }
+            }
+        }
+
+        /**
+         * @brief 写入激光焊机10个工艺组中某一个的配置参数并配置给焊机
+         * @param[in] io_type 通信类型 0-IO 1-UDP
+         * @param[in] num 需要设置的组号（1~10）
+         * @param[in] scanSpeed 扫描速度
+         * @param[in] scanWidth 扫描宽度
+         * @param[in] peakPower 峰值功率
+         * @param[in] dutyCycle 占空比
+         * @param[in] freq 频率
+         * @return 错误码
+         */
+        public int SetLaserWeldingParam(int io_type, int num, int scanSpeed, int scanWidth, int peakPower, int dutyCycle, int freq)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            try
+            {
+                int rtn = proxy.SetLaserWeldingParam(io_type, num, scanSpeed, scanWidth, peakPower, dutyCycle, freq);
+                log?.LogInfo($"SetLaserWeldingParam() : {rtn}");
+                return rtn;
+            }
+            catch (Exception ex)
+            {
+                if (log != null)
+                {
+                    log.LogError($"RPC exception in SetLaserWeldingParam: {ex.Message}");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief 设置激光焊机开启关闭
+         * @param[in] io_type 通信类型 0-IO 1-UDP
+         * @param[in] status 控制字 0-收光 1-出光
+         * @param[in] max_waittime 最大等待时间
+         * @return 错误码
+         */
+        public int SetLaserWeldingStartEnd(int io_type, int status, int max_waittime)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            try
+            {
+                int rtn = proxy.SetLaserWeldingStartEnd(io_type, status, max_waittime);
+                log?.LogInfo($"SetLaserWeldingStartEnd() : {rtn}");
+                return rtn;
+            }
+            catch (Exception ex)
+            {
+                if (log != null)
+                {
+                    log.LogError($"RPC exception in SetLaserWeldingStartEnd: {ex.Message}");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief 激光焊机使能去使能
+         * @param[in] io_type 通信类型 0-IO 1-UDP
+         * @param[in] status 0-去使能 1-使能
+         * @return 错误码
+         */
+        public int SetLaserWeldingEnable(int io_type, int status)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            try
+            {
+                int rtn = proxy.SetLaserWeldingEnable(io_type, status);
+                log?.LogInfo($"SetLaserWeldingEnable() : {rtn}");
+                return rtn;
+            }
+            catch (Exception ex)
+            {
+                if (log != null)
+                {
+                    log.LogError($"RPC exception in SetLaserWeldingEnable: {ex.Message}");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief 激光焊机故障复位
+         * @param[in] io_type 通信类型 0-IO 1-UDP
+         * @param[in] status 控制字 0-无效 1-故障复位
+         * @return 错误码
+         */
+        public int ResetLaserWeldingErr(int io_type, int status)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            try
+            {
+                int rtn = proxy.ResetLaserWeldingErr(io_type, status);
+                log?.LogInfo($"ResetLaserWeldingErr() : {rtn}");
+                return rtn;
+            }
+            catch (Exception ex)
+            {
+                if (log != null)
+                {
+                    log.LogError($"RPC exception in ResetLaserWeldingErr: {ex.Message}");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief 获取激光焊机运行状态
+         * @param[in] io_type 通信类型 0-IO 1-UDP
+         * @param[out] status 控制字 0-停机 1-运行
+         * @return 错误码
+         */
+        public int GetLaserWeldingRunningState(int io_type, ref int status)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            try
+            {
+                object[] result = proxy.GetLaserWeldingRunningState(io_type);
+
+                int errcode = (int)result[0];
+                if (errcode != 0)
+                {
+                    log?.LogError($"Execute GetLaserWeldingRunningState fail: {errcode}");
+                    return errcode;
+                }
+                else
+                {
+                    status = (int)result[1];
+                    log?.LogInfo($"GetLaserWeldingRunningState executed successfully: {errcode}");
+                    return errcode;
+                }
+            }
+            catch (Exception ex)
+            {
+                log?.LogError($"RPC exception in GetLaserWeldingRunningState: {ex.Message}");
+                
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief 获取激光焊机故障状态
+         * @param[in] io_type 通信类型 0-IO 1-UDP
+         * @param[out] status 0-无故障 1-存在故障
+         * @return 错误码
+         */
+        public int GetLaserWeldingErrState(int io_type, ref int status)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            try
+            {
+                object[] result = proxy.GetLaserWeldingErrState(io_type);
+
+                int errcode = (int)result[0];
+                if (errcode != 0)
+                {
+                    log?.LogError($"Execute GetLaserWeldingErrState fail: {errcode}");
+                    
+                    return errcode;
+                }
+                else
+                {
+                    status = (int)result[1];
+
+                    log?.LogInfo($"GetLaserWeldingErrState executed successfully: {errcode}");
+                    return errcode;
+                }
+            }
+            catch (Exception ex)
+            {
+                log?.LogError($"RPC exception in GetLaserWeldingErrState: {ex.Message}");
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief 获取激光焊机10个工艺组中某一个的配置参数
+         * @param[in] num 需要设置的组号（1~10）
+         * @param[out] scanSpeed 扫描速度
+         * @param[out] scanWidth 扫描宽度
+         * @param[out] peakPower 峰值功率
+         * @param[out] dutyCycle 占空比
+         * @param[out] freq 频率
+         * @return 错误码
+         */
+        public int GetLaserWeldingParamTarget(int num, ref int scanSpeed, ref int scanWidth, ref int peakPower, ref int dutyCycle, ref int freq)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            try
+            {
+                object[] result = proxy.GetLaserWeldingParamTarget(num);
+
+                int errcode = (int)result[0];
+                if (errcode != 0)
+                {
+                    log?.LogError($"Execute GetLaserWeldingParamTarget fail: {errcode}");
+                    return errcode;
+                }
+                else
+                {
+                    scanSpeed = (int)result[1];
+                    scanWidth = (int)result[2];
+                    peakPower = (int)result[3];
+                    dutyCycle = (int)result[4];
+                    freq = (int)result[5];
+
+                    log?.LogInfo($"GetLaserWeldingParamTarget executed successfully: {errcode}");
+
+                    return errcode;
+                }
+            }
+            catch (Exception ex)
+            {
+                log?.LogError($"RPC exception in GetLaserWeldingParamTarget: {ex.Message}");
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief 获取当前激光焊机生效的配置参数
+         * @param[in] io_type 通信类型 0-IO 1-UDP
+         * @param[out] scanSpeed 扫描速度
+         * @param[out] scanWidth 扫描宽度
+         * @param[out] peakPower 峰值功率
+         * @param[out] dutyCycle 占空比
+         * @param[out] freq 频率
+         * @return 错误码
+         */
+        public int GetLaserWeldingParamActual(int io_type, ref int scanSpeed, ref int scanWidth, ref int peakPower, ref int dutyCycle, ref int freq)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            try
+            {
+                object[] result = proxy.GetLaserWeldingParamActual(io_type);
+
+                int errcode = (int)result[0];
+                if (errcode != 0)
+                {
+                    log?.LogError($"Execute GetLaserWeldingParamActual fail: {errcode}");
+                    return errcode;
+                }
+                else
+                {
+                    scanSpeed = (int)result[1];
+                    scanWidth = (int)result[2];
+                    peakPower = (int)result[3];
+                    dutyCycle = (int)result[4];
+                    freq = (int)result[5];
+
+                    log?.LogInfo($"GetLaserWeldingParamActual executed successfully: {errcode}");
+
+                    return errcode;
+                }
+            }
+            catch (Exception ex)
+            {
+                log?.LogError($"RPC exception in GetLaserWeldingParamActual: {ex.Message}");
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief 激光焊机设置扩展IO，使能的DO端口
+         * @param[in] ctrlModeDONum 激光焊机使能的扩展DO端口号
+         * @return 错误码
+         */
+        public int SetLaserWeldingEnableExtDoNum(int ctrlModeDONum)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            try
+            {
+                int rtn = proxy.SetLaserWeldingEnableExtDoNum(ctrlModeDONum);
+                log?.LogInfo($"ResetLaserWeldingErr() : {rtn}");
+                return rtn;
+            }
+            catch (Exception ex)
+            {
+                if (log != null)
+                {
+                    log.LogError($"RPC exception in SetLaserWeldingEnableExtDoNum: {ex.Message}");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief 激光焊机设置扩展IO，启动的DO端口
+         * @param[in] ctrlModeDONum 激光焊机启动（出光收光）的扩展DO端口号
+         * @return 错误码
+         */
+        public int SetLaserWeldingStartExtDoNum(int ctrlModeDONum)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            try
+            {
+                int rtn = proxy.SetLaserWeldingStartExtDoNum(ctrlModeDONum);
+                log?.LogInfo($"ResetLaserWeldingErr() : {rtn}");
+                return rtn;
+            }
+            catch (Exception ex)
+            {
+                if (log != null)
+                {
+                    log.LogError($"RPC exception in SetLaserWeldingStartExtDoNum: {ex.Message}");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief 激光焊机设置扩展IO，故障复位的DO端口
+         * @param[in] ctrlModeDONum 激光焊机故障复位的扩展DO端口号
+         * @return 错误码
+         */
+        public int SetLaserWeldingErrResetExtDoNum(int ctrlModeDONum)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            try
+            {
+                int rtn = proxy.SetLaserWeldingErrResetExtDoNum(ctrlModeDONum);
+                log?.LogInfo($"ResetLaserWeldingErr() : {rtn}");
+                return rtn;
+            }
+            catch (Exception ex)
+            {
+                if (log != null)
+                {
+                    log.LogError($"RPC exception in SetLaserWeldingErrResetExtDoNum: {ex.Message}");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief 配置激光焊机运行状态（出光状态）扩展DI
+         * @param[in] diNum 配置激光焊机运行状态（出光状态）扩展DI端口
+         * @return 错误码
+         */
+        public int SetLaserWeldingRunningStateExtDiNum(int diNum)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            try
+            {
+                int rtn = proxy.SetLaserWeldingRunningStateExtDiNum(diNum);
+                log?.LogInfo($"ResetLaserWeldingErr() : {rtn}");
+                return rtn;
+            }
+            catch (Exception ex)
+            {
+                if (log != null)
+                {
+                    log.LogError($"RPC exception in SetLaserWeldingRunningStateExtDiNum: {ex.Message}");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief 配置激光焊机故障状态扩展DI
+         * @param[in] diNum 配置激光焊机故障状态扩展DI端口
+         * @return 错误码
+         */
+        public int SetLaserWeldingErrStateExtDiNum(int diNum)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            try
+            {
+                int rtn = proxy.SetLaserWeldingErrStateExtDiNum(diNum);
+                log?.LogInfo($"ResetLaserWeldingErr() : {rtn}");
+                return rtn;
+            }
+            catch (Exception ex)
+            {
+                if (log != null)
+                {
+                    log.LogError($"RPC exception in SetLaserWeldingErrStateExtDiNum: {ex.Message}");
+                }
                 return (int)RobotError.ERR_RPC_ERROR;
             }
         }

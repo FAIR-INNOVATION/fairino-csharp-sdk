@@ -1603,6 +1603,9 @@ namespace fairino
         [XmlRpcMethod("ExtAxisParamConfig")]
         int ExtAxisParamConfig(int axisNum, int axisType, int axisDirection, double axisMax, double axisMin, double axisVel, double axisAcc, double axisLead, int encResolution, double axisOffect, int axisCompany, int axisModel, int axisEncType);
 
+        [XmlRpcMethod("ExtAxisGetParamConfig")]
+        object[] ExtAxisGetParamConfig(int axisID);
+
         [XmlRpcMethod("GetExAxisDriverConfig")]
         object[] GetExAxisDriverConfig(int axisId);
 
@@ -2354,6 +2357,58 @@ namespace fairino
         int OriginPointWeaveEnd();
         [XmlRpcMethod("SetUserLEDColor")]
         int SetUserLEDColor(int param1, int param2, int param3);
+
+        [XmlRpcMethod("ServoMITStart")]
+        int ServoMITStart();
+
+        [XmlRpcMethod("ServoMIT")]
+        int ServoMIT(double[] param1, double[] param2, double[] param3, double[] param4, double[] param5, double interval);
+
+        [XmlRpcMethod("ServoMITEnd")]
+        int ServoMITEnd();
+
+        [XmlRpcMethod("ServoJV")]
+        int ServoJV(double[] joint_pos, double[] axisPos, double acc, double vel, double cmdT, double filterT, double gain, int id);
+
+        [XmlRpcMethod("SetLaserWeldingParam")]
+        int SetLaserWeldingParam(int io_type, int num, int scanSpeed, int scanWidth, int peakPower, int dutyCycle, int freq);
+
+        [XmlRpcMethod("SetLaserWeldingStartEnd")]
+        int SetLaserWeldingStartEnd(int io_type, int status, int max_waittime);
+
+        [XmlRpcMethod("SetLaserWeldingEnable")]
+        int SetLaserWeldingEnable(int io_type, int status);
+
+        [XmlRpcMethod("ResetLaserWeldingErr")]
+        int ResetLaserWeldingErr(int io_type, int status);
+
+        [XmlRpcMethod("GetLaserWeldingRunningState")]
+        object[] GetLaserWeldingRunningState(int io_type);
+
+        [XmlRpcMethod("GetLaserWeldingErrState")]
+        object[] GetLaserWeldingErrState(int io_type);
+
+        [XmlRpcMethod("GetLaserWeldingParamTarget")]
+        object[] GetLaserWeldingParamTarget(int num);
+
+        [XmlRpcMethod("GetLaserWeldingParamActual")]
+        object[] GetLaserWeldingParamActual(int io_type);
+
+        [XmlRpcMethod("SetLaserWeldingEnableExtDoNum")]
+        int SetLaserWeldingEnableExtDoNum(int ctrlModeDONum);
+
+        [XmlRpcMethod("SetLaserWeldingStartExtDoNum")]
+        int SetLaserWeldingStartExtDoNum(int ctrlModeDONum);
+
+        [XmlRpcMethod("SetLaserWeldingErrResetExtDoNum")]
+        int SetLaserWeldingErrResetExtDoNum(int ctrlModeDONum);
+
+        [XmlRpcMethod("SetLaserWeldingRunningStateExtDiNum")]
+        int SetLaserWeldingRunningStateExtDiNum(int diNum);
+
+        [XmlRpcMethod("SetLaserWeldingErrStateExtDiNum")]
+        int SetLaserWeldingErrStateExtDiNum(int diNum);
+
     }
     internal class RPCHandle
     {
