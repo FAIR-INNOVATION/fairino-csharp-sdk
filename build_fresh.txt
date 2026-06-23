@@ -1,0 +1,23 @@
+  Determining projects to restore...
+  Nothing to do. None of the projects specified contain packages to restore.
+D:\C#SDK\各版本sdk\fairino-csharp_-sdk-3.9.7\src\FRRobot\FRRobot.cs(22,29): error CS0234: The type or namespace name 'Forms' does not exist in the namespace 'System.Windows' (are you missing an assembly reference?) [D:\C#SDK\各版本sdk\fairino-csharp_-sdk-3.9.7\src\FRRobot\FRRobot.csproj]
+D:\C#SDK\各版本sdk\fairino-csharp_-sdk-3.9.7\src\FRRobot\FRRobot.cs(23,22): error CS0234: The type or namespace name 'Drawing2D' does not exist in the namespace 'System.Drawing' (are you missing an assembly reference?) [D:\C#SDK\各版本sdk\fairino-csharp_-sdk-3.9.7\src\FRRobot\FRRobot.csproj]
+D:\C#SDK\各版本sdk\fairino-csharp_-sdk-3.9.7\src\FRRobot\FRRobot.cs(24,29): error CS0234: The type or namespace name 'Forms' does not exist in the namespace 'System.Windows' (are you missing an assembly reference?) [D:\C#SDK\各版本sdk\fairino-csharp_-sdk-3.9.7\src\FRRobot\FRRobot.csproj]
+D:\C#SDK\各版本sdk\fairino-csharp_-sdk-3.9.7\src\FRRobot\FRRobot.cs(26,29): error CS0234: The type or namespace name 'Forms' does not exist in the namespace 'System.Windows' (are you missing an assembly reference?) [D:\C#SDK\各版本sdk\fairino-csharp_-sdk-3.9.7\src\FRRobot\FRRobot.csproj]
+D:\C#SDK\各版本sdk\fairino-csharp_-sdk-3.9.7\src\FRRobot\FRRobot.cs(28,22): error CS0234: The type or namespace name 'Forms' does not exist in the namespace 'System.Windows' (are you missing an assembly reference?) [D:\C#SDK\各版本sdk\fairino-csharp_-sdk-3.9.7\src\FRRobot\FRRobot.csproj]
+D:\C#SDK\各版本sdk\fairino-csharp_-sdk-3.9.7\src\FRRobot\FRRobot.cs(30,29): error CS0234: The type or namespace name 'Forms' does not exist in the namespace 'System.Windows' (are you missing an assembly reference?) [D:\C#SDK\各版本sdk\fairino-csharp_-sdk-3.9.7\src\FRRobot\FRRobot.csproj]
+D:\C#SDK\各版本sdk\fairino-csharp_-sdk-3.9.7\src\FRRobot\RobotTypes.cs(236,23): warning CS0114: 'ROBOT_TIME.ToString()' hides inherited member 'ValueType.ToString()'. To make the current member override that implementation, add the override keyword. Otherwise add the new keyword. [D:\C#SDK\各版本sdk\fairino-csharp_-sdk-3.9.7\src\FRRobot\FRRobot.csproj]
+
+Build FAILED.
+
+D:\C#SDK\各版本sdk\fairino-csharp_-sdk-3.9.7\src\FRRobot\RobotTypes.cs(236,23): warning CS0114: 'ROBOT_TIME.ToString()' hides inherited member 'ValueType.ToString()'. To make the current member override that implementation, add the override keyword. Otherwise add the new keyword. [D:\C#SDK\各版本sdk\fairino-csharp_-sdk-3.9.7\src\FRRobot\FRRobot.csproj]
+D:\C#SDK\各版本sdk\fairino-csharp_-sdk-3.9.7\src\FRRobot\FRRobot.cs(22,29): error CS0234: The type or namespace name 'Forms' does not exist in the namespace 'System.Windows' (are you missing an assembly reference?) [D:\C#SDK\各版本sdk\fairino-csharp_-sdk-3.9.7\src\FRRobot\FRRobot.csproj]
+D:\C#SDK\各版本sdk\fairino-csharp_-sdk-3.9.7\src\FRRobot\FRRobot.cs(23,22): error CS0234: The type or namespace name 'Drawing2D' does not exist in the namespace 'System.Drawing' (are you missing an assembly reference?) [D:\C#SDK\各版本sdk\fairino-csharp_-sdk-3.9.7\src\FRRobot\FRRobot.csproj]
+D:\C#SDK\各版本sdk\fairino-csharp_-sdk-3.9.7\src\FRRobot\FRRobot.cs(24,29): error CS0234: The type or namespace name 'Forms' does not exist in the namespace 'System.Windows' (are you missing an assembly reference?) [D:\C#SDK\各版本sdk\fairino-csharp_-sdk-3.9.7\src\FRRobot\FRRobot.csproj]
+D:\C#SDK\各版本sdk\fairino-csharp_-sdk-3.9.7\src\FRRobot\FRRobot.cs(26,29): error CS0234: The type or namespace name 'Forms' does not exist in the namespace 'System.Windows' (are you missing an assembly reference?) [D:\C#SDK\各版本sdk\fairino-csharp_-sdk-3.9.7\src\FRRobot\FRRobot.csproj]
+D:\C#SDK\各版本sdk\fairino-csharp_-sdk-3.9.7\src\FRRobot\FRRobot.cs(28,22): error CS0234: The type or namespace name 'Forms' does not exist in the namespace 'System.Windows' (are you missing an assembly reference?) [D:\C#SDK\各版本sdk\fairino-csharp_-sdk-3.9.7\src\FRRobot\FRRobot.csproj]
+D:\C#SDK\各版本sdk\fairino-csharp_-sdk-3.9.7\src\FRRobot\FRRobot.cs(30,29): error CS0234: The type or namespace name 'Forms' does not exist in the namespace 'System.Windows' (are you missing an assembly reference?) [D:\C#SDK\各版本sdk\fairino-csharp_-sdk-3.9.7\src\FRRobot\FRRobot.csproj]
+    1 Warning(s)
+    6 Error(s)
+
+Time Elapsed 00:00:00.63

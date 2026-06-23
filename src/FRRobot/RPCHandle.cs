@@ -4,9 +4,9 @@ using System.Data.SqlTypes;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Windows.Forms;
 //using System.Threading.Tasks;
 using CookComputing.XmlRpc;
+using fairino;
 
 namespace fairino
 {
@@ -135,7 +135,8 @@ namespace fairino
         * @param  [in] vel  速度百分比，范围[0~100]
         * @param  [in] acc  加速度百分比，范围[0~100],暂不开放
         * @param  [in] ovl  速度缩放因子，范围[0~100]
-        * @param  [in] blendR [-1.0]-运动到位(阻塞)，[0~1000.0]-平滑半径(非阻塞)，单位mm	 
+        * @param  [in] blendR [-1.0]-运动到位(阻塞)，[0~1000.0]-平滑半径(非阻塞)，单位mm
+        * @param  [in] blendMode 过渡方式；0-内切过渡；1-角点过渡
         * @param  [in] epos  扩展轴位置，单位mm
         * @param  [in] search  0-不焊丝寻位，1-焊丝寻位
         * @param  [in] offset_flag  0-不偏移，1-基坐标系/工件坐标系下偏移，2-工具坐标系下偏移
@@ -143,7 +144,7 @@ namespace fairino
         * @return  错误码
         */
         [XmlRpcMethod("MoveL")]
-        int MoveL(double[] joint_pos, double[] desc_pos, int tool, int user, double vel, double acc, double ovl, double blendR, double[] epos, int search, int offset_flag, double[] offset_pos);
+        int MoveL(object[] moveLParams);
 
         /**
         * @brief  笛卡尔空间圆弧运动
@@ -164,7 +165,7 @@ namespace fairino
         * @return  错误码
         */
         [XmlRpcMethod("MoveC")]
-        int MoveC(double[] joint_pos_p, double[] desc_pos_p, double[] controlP, double[] epos_p, int poffset_flag, double[] offset_pos_p, double[] joint_pos_t, double[] desc_pos_t, double[] controlT, double[] epos_t, int toffset_flag, double[] offset_pos_t, double ovl, double blendR);
+        int MoveC(object[] moveCParams);
 
         /**
         * @brief  笛卡尔空间整圆运动
@@ -182,7 +183,8 @@ namespace fairino
         * @return  错误码
         */
         [XmlRpcMethod("Circle")]
-        int Circle(double[] joint_pos_p, double[] desc_pos_p, double[] controlP, double[] epos_p, double[] joint_pos_t, double[] desc_pos_t, double[] controlT, double[] epos_t, double ovl, int offset_flag, double[] offset_pos);
+
+        int Circle(object[] circleParams);
         /**
         * @brief  笛卡尔空间螺旋线运动
         * @param  [in] joint_pos  目标关节位置,单位deg
@@ -199,7 +201,7 @@ namespace fairino
         * @return  错误码
         */
         [XmlRpcMethod("NewSpiral")]
-        int NewSpiral(double[] joint_pos, double[] desc_pos, int tool, int user, double vel, double acc, double[] epos, double ovl, int offset_flag, double[] offset_pos, double[] spiral_param);
+        int NewSpiral(object[] spiral_param);
 
 
         /**
@@ -226,22 +228,23 @@ namespace fairino
         * @return  错误码
         */
         [XmlRpcMethod("ServoJ")]
-        int ServoJ(double[] joint_pos, double[] axisPos, double acc, double vel, double cmdT, double filterT, double gain);
+        int ServoJ(double[] joint_pos, double[] axisPos, double acc, double vel, double cmdT, double filterT, double gain, int id);
 
         /**
         * @brief  笛卡尔空间伺服模式运动
         * @param  [in]  mode  0-绝对运动(基坐标系)，1-增量运动(基坐标系)，2-增量运动(工具坐标系)
         * @param  [in]  desc_pos  目标笛卡尔位姿或位姿增量
+        * @param  [in]  exaxis  扩展轴位置
         * @param  [in]  pos_gain  位姿增量比例系数，仅在增量运动下生效，范围[0~1]
         * @param  [in] acc  加速度百分比，范围[0~100],暂不开放，默认为0
         * @param  [in] vel  速度百分比，范围[0~100]，暂不开放，默认为0
-        * @param  [in] cmdT  指令下发周期，单位s，建议范围[0.001~0.0016]
+        * @param  [in] cmdT  指令下发周期，单位s，建议范围[0.001~0.016]
         * @param  [in] filterT 滤波时间，单位s，暂不开放，默认为0
         * @param  [in] gain  目标位置的比例放大器，暂不开放，默认为0
         * @return  错误码
-        */[XmlRpcMethod("ServoCart")]
-        int ServoCart(int mode, double[] desc_pose, double[] pos_gain, double acc, double vel, double cmdT, double filterT, double gain);
-
+        */
+        [XmlRpcMethod("ServoCart")]
+        int ServoCart(int mode, double[] desc_pose, double[] pos_gain, double[] exaxis, double acc, double vel, double cmdT, double filterT, double gain);
         /**
         * @brief  笛卡尔空间点到点运动
         * @param  [in]  desc_pos  目标笛卡尔位姿或位姿增量
@@ -253,7 +256,8 @@ namespace fairino
         * @param  [in] blendT [-1.0]-运动到位(阻塞)，[0~500.0]-平滑时间(非阻塞)，单位ms	
         * @param  [in] config  关节空间配置，[-1]-参考当前关节位置解算，[0~7]-参考特定关节空间配置解算，默认为-1	 
         * @return  错误码
-        */[XmlRpcMethod("MoveCart")]
+        */
+        [XmlRpcMethod("MoveCart")]
         int MoveCart(double[] desc_pos, int tool, int user, double vel, double acc, double ovl, double blendT, int config);
 
         /**
@@ -568,7 +572,7 @@ namespace fairino
         * @param  [in] coord 质心坐标，单位mm
         * @return  错误码
         */[XmlRpcMethod("SetLoadCoord")]
-        int SetLoadCoord(double coordX, double coordY, double coordZ);
+        int SetLoadCoord(double coordX, double coordY, double coordZ, int loadNum);
 
         /**
         * @brief  设置机器人安装方式
@@ -882,7 +886,7 @@ namespace fairino
         * @param  [in] ovl 速度百分比
         * @return  错误码
         */[XmlRpcMethod("SetTrajectoryJSpeed")]
-        int SetTrajectoryJSpeed(double ovl);
+        int SetTrajectoryJSpeed(double ovl, int mode);
 
         /**
         * @brief  设置轨迹运行中的力和扭矩
@@ -1136,26 +1140,60 @@ namespace fairino
         int FT_Guard(int flag, int sensor_id, int[] select, double[] ft, double[] max_threshold, double[] min_threshold);
 
         /**
-        * @brief  恒力控制
-        * @param  [in] flag 0-关闭恒力控制，1-开启恒力控制
-        * @param  [in] sensor_id 力传感器编号
-        * @param  [in] select  选择六个自由度是否检测碰撞，0-不检测，1-检测
-        * @param  [in] ft  碰撞力/扭矩，fx,fy,fz,tx,ty,tz
-        * @param  [in] ft_pid 力pid参数，力矩pid参数
-        * @param  [in] adj_sign 自适应启停控制，0-关闭，1-开启
-        * @param  [in] ILC_sign ILC启停控制， 0-停止，1-训练，2-实操
-        * @param  [in] max_dis 最大调整距离，单位mm
-        * @param  [in] max_ang 最大调整角度，单位deg
-        * @return  错误码
-        */[XmlRpcMethod("FT_Control")]
-        int FT_Control(int flag, int sensor_id, int[] select, double[] ft, double[] ft_pid, int adj_sign, int ILC_sign, double max_dis, double max_ang, int filter_Sign, int posAdapt_sign, int isNoBlock);
+       * @brief  恒力控制
+       * @param  [in] flag 0-关闭恒力控制，1-开启恒力控制
+       * @param  [in] sensor_id 力传感器编号
+       * @param  [in] select  选择六个自由度是否检测碰撞，0-不检测，1-检测
+       * @param  [in] ft  碰撞力/扭矩，fx,fy,fz,tx,ty,tz
+       * @param  [in] ft_pid 力pid参数，力矩pid参数
+       * @param  [in] adj_sign 自适应启停控制，0-关闭，1-开启
+       * @param  [in] ILC_sign ILC启停控制， 0-停止，1-训练，2-实操
+       * @param  [in] max_dis 最大调整距离，单位mm
+       * @param  [in] max_ang 最大调整角度，单位deg
+       * @return  错误码
+*/
+        //[XmlRpcMethod("FT_Control")]
+        //int FT_Control(
+        //    object flag,
+        //    object sensor_id,
+        //    object select,
+        //    object ft,
+        //    object ft_pid,
+        //    object adj_sign,
+        //    object ILC_sign,
+        //    object max_dis,
+        //    object max_ang,
+        //    object polishRadio,
+        //    object filter_Sign,
+        //    object posAdapt_sign,
+        //    object mbParams,
+        //    object isNoBlock
+        //);
+        [XmlRpcMethod("FT_Control")]
+        int FT_Control(
+            int flag,                    // byte转int
+            int sensor_id,               // int
+            int[] select,                // byte[]转int[]
+            double[] ft,                 // 6个元素的double数组
+            double[] ft_pid,             // 6个元素的double数组
+            int adj_sign,                // byte转int
+            int ILC_sign,                // byte转int
+            double max_dis,              // float转double
+            double max_ang,              // float转double
+            double polishRadio,          // double
+            int filter_Sign,             // int
+            int posAdapt_sign,           // int
+            double[] mbParams,           // 8个元素的double数组
+            int isNoBlock                // int
+        );
 
         /**
         * @brief  柔顺控制开启
         * @param  [in] p 位置调节系数或柔顺系数
         * @param  [in] force 柔顺开启力阈值，单位N
         * @return  错误码
-        */[XmlRpcMethod("FT_ComplianceStart")]
+        */
+        [XmlRpcMethod("FT_ComplianceStart")]
         int FT_ComplianceStart(double p, double force);
 
         /**
@@ -1263,7 +1301,7 @@ namespace fairino
         * @param [in] 
         * @return 错误码
         */[XmlRpcMethod("ConveyorSetParam")]
-        int ConveyorSetParam(double[] param);
+        int ConveyorSetParam(double[] param, int followType, int startDis, int endDis);
 
         /**
         * @brief 传动带抓取点补偿
@@ -1293,7 +1331,7 @@ namespace fairino
         * @return 错误码
         */
         [XmlRpcMethod("PtpFIRPlanningStart")]
-        int PtpFIRPlanningStart(double maxAcc);
+        int PtpFIRPlanningStart(double maxAcc, double maxJek);
 
         /**
         * @brief 关闭Ptp运动FIR滤波
@@ -1387,7 +1425,7 @@ namespace fairino
         int WeldingSetVoltage(int ioType, double voltage, int AOIndex, int blend);
 
         [XmlRpcMethod("WeaveSetPara")]
-        int WeaveSetPara(int weaveNum, int weaveType, double weaveFrequency, int weaveIncStayTime, double weaveRange, double weaveLeftRange, double weaveRightRange, int additionalStayTime, int weaveLeftStayTime, int weaveRightStayTime, int weaveCircleRadio, int weaveStationary, double weaveYawAngle);
+        int WeaveSetPara(int weaveNum, int weaveType, double weaveFrequency, int weaveIncStayTime, double weaveRange, double weaveLeftRange, double weaveRightRange, int additionalStayTime, int weaveLeftStayTime, int weaveRightStayTime, int weaveCircleRadio, int weaveStationary, double weaveYawAngle, double weaveRotAngle);
 
         [XmlRpcMethod("WeaveOnlineSetPara")]
         int WeaveOnlineSetPara(int weaveNum, int weaveType, double weaveFrequency, int weaveIncStayTime, double weaveRange, int weaveLeftStayTime, int weaveRightStayTime, int weaveCircleRadio, int weaveStationary);
@@ -1486,7 +1524,7 @@ namespace fairino
         int MoveToolAOStop();
 
         [XmlRpcMethod("ExtDevSetUDPComParam")]
-        int ExtDevSetUDPComParam(string ip, int port, int period, int lossPkgTime, int lossPkgNum, int disconnectTime, int reconnectEnable, int reconnectPeriod, int reconnectNum);
+        int ExtDevSetUDPComParam(string ip, int port, int period, int lossPkgTime, int lossPkgNum, int disconnectTime, int reconnectEnable, int reconnectPeriod, int reconnectNum, int selfConnect);
 
         [XmlRpcMethod("ExtDevGetUDPComParam")]
         object[] ExtDevGetUDPComParam();
@@ -1526,10 +1564,10 @@ namespace fairino
         int SetWeldMachineCtrlModeExtDoNum(int DONum);
 
         [XmlRpcMethod("SetWeldMachineCtrlMode")]
-        int SetWeldMachineCtrlMode(int mode);
+        int SetWeldMachineCtrlMode(object[] param);
 
         [XmlRpcMethod("ExtAxisMoveJ")]
-        int ExtAxisMoveJ(int syncFlag, double pos1, double pos2, double pos3, double pos4, double ovl);
+        int ExtAxisMoveJ(int syncFlag, double pos1, double pos2, double pos3, double pos4, double ovl, double blendT);
 
         [XmlRpcMethod("SetAuxDO")]
         int SetAuxDO(int DONum, int bOpen, int smooth, int isNoblock);
@@ -1563,6 +1601,9 @@ namespace fairino
 
         [XmlRpcMethod("ExtAxisParamConfig")]
         int ExtAxisParamConfig(int axisNum, int axisType, int axisDirection, double axisMax, double axisMin, double axisVel, double axisAcc, double axisLead, int encResolution, double axisOffect, int axisCompany, int axisModel, int axisEncType);
+
+        [XmlRpcMethod("ExtAxisGetParamConfig")]
+        object[] ExtAxisGetParamConfig(int axisID);
 
         [XmlRpcMethod("GetExAxisDriverConfig")]
         object[] GetExAxisDriverConfig(int axisId);
@@ -1614,13 +1655,13 @@ namespace fairino
         int SetPointToDatabase(string varName, double[] pos);
 
         [XmlRpcMethod("ArcWeldTraceControl")]
-        int ArcWeldTraceControl(int flag, double delaytime, int isLeftRight, double[] paramLR, int isUpLow, double[] paramUD, int axisSelect, int referenceType, double referSampleStartUd, double referSampleCountUd, double referenceCurrent);
+        int ArcWeldTraceControl(int flag, double delaytime, int isLeftRight, double[] paramLR, int isUpLow, double[] paramUD, int axisSelect, int referenceType, double referSampleStartUd, double referSampleCountUd, double referenceCurrent, int offsetType, int offsetParameter);
 
         [XmlRpcMethod("ArcWeldTraceExtAIChannelConfig")]
         int ArcWeldTraceExtAIChannelConfig(int channel);
 
         [XmlRpcMethod("EndForceDragControl")]
-        int EndForceDragControl(int status, int asaptiveFlag, int interfereDragFlag, double[] M, double[] B, double[] K, double[] F, double Fmax, double Vmax);
+        int EndForceDragControl(int status, int asaptiveFlag, int interfereDragFlag, int ingularityConstraintsFlag,double[] M, double[] B, double[] K, double[] F, double Fmax, double Vmax);
 
         [XmlRpcMethod("SetForceSensorDragAutoFlag")]
         int SetForceSensorDragAutoFlag(int status);
@@ -1671,24 +1712,25 @@ namespace fairino
         int AxleSensorRegWrite(int devAddr, int regHAddr, int regLAddr, int regNum, int data1, int data2, int isNoBlock);
 
         [XmlRpcMethod("SetOutputResetCtlBoxDO")]
-        int SetOutputResetCtlBoxDO(int resetFlag);
+        int SetOutputResetCtlBoxDO(int resetFlag, int reloadFlag);
 
         [XmlRpcMethod("SetOutputResetCtlBoxAO")]
-        int SetOutputResetCtlBoxAO(int resetFlag);
+        int SetOutputResetCtlBoxAO(int resetFlag, int reloadFlag);
 
         [XmlRpcMethod("SetOutputResetAxleDO")]
-        int SetOutputResetAxleDO(int resetFlag);
+        int SetOutputResetAxleDO(int resetFlag, int reloadFlag);
 
         [XmlRpcMethod("SetOutputResetAxleAO")]
-        int SetOutputResetAxleAO(int resetFlag);
+        int SetOutputResetAxleAO(int resetFlag, int reloadFlag);
 
         [XmlRpcMethod("SetOutputResetExtDO")]
-        int SetOutputResetExtDO(int resetFlag);
+        int SetOutputResetExtDO(int resetFlag, int reloadFlag);
+
         [XmlRpcMethod("SetOutputResetExtAO")]
-        int SetOutputResetExtAO(int resetFlag);
+        int SetOutputResetExtAO(int resetFlag, int reloadFlag);
 
         [XmlRpcMethod("SetOutputResetSmartToolDO")]
-        int SetOutputResetSmartToolDO(int resetFlag);
+        int SetOutputResetSmartToolDO(int resetFlag, int reloadFlag);
 
         [XmlRpcMethod("WeaveStartSim")]
         int WeaveStartSim(int weaveNum);
@@ -1724,7 +1766,7 @@ namespace fairino
         int SetExtDIWeldBreakOffRecover(int reWeldDINum, int abortWeldDINum);
 
         [XmlRpcMethod("SetCollisionDetectionMethod")]
-        int SetCollisionDetectionMethod(int method);
+        int SetCollisionDetectionMethod(int method, int thresholdMode);
 
         [XmlRpcMethod("SetStaticCollisionOnOff")]
         int SetStaticCollisionOnOff(int status);
@@ -1736,7 +1778,7 @@ namespace fairino
         int ServoJTStart();
 
         [XmlRpcMethod("ServoJT")]
-        int ServoJT(double[] torque, double interval);
+        int ServoJT(double[] torque, double interval, int checkFlag, double[] jPowerLimit, double[] jVelLimit);
 
         [XmlRpcMethod("ServoJTEnd")]
         int ServoJTEnd();
@@ -1796,7 +1838,7 @@ namespace fairino
         object[] GetAxleLuaEnableStatus();
 
         [XmlRpcMethod("SetAxleLuaEnableDeviceType")]
-        int SetAxleLuaEnableDeviceType(int forceSensorEnable, int gripperEnable, int IOEnable);
+        int SetAxleLuaEnableDeviceType(int forceSensorEnable, int gripperEnable, int IOEnable, int dexhandEnable);
 
         [XmlRpcMethod("GetAxleLuaEnableDeviceType")]
         object[] GetAxleLuaEnableDeviceType();
@@ -1860,13 +1902,13 @@ namespace fairino
         int LaserSensorRecord(int status, int delayMode, int delayTime, int delayDisExAxisNum, double delayDis, double sensitivePara, double speed);
 
         [XmlRpcMethod("WeaveChangeStart")]
-        int WeaveChangeStart(int weaveNum);
+        int WeaveChangeStart(int weaveChangeFlag, int weaveNum, double velStart, double velEnd);
 
         [XmlRpcMethod("WeaveChangeEnd")]
         int WeaveChangeEnd();
 
         [XmlRpcMethod("LoadTrajectoryLA")]
-        int LoadTrajectoryLA(string name, int mode, double errorLim, int type, double precision, double vamx, double amax, double jmax);
+        int LoadTrajectoryLA(string name, int mode, double errorLim, int type, double precision, double vamx, double amax, double jmax, int flag);
 
         [XmlRpcMethod("MoveTrajectoryLA")]
         int MoveTrajectoryLA();
@@ -1877,6 +1919,527 @@ namespace fairino
         [XmlRpcMethod("CustomCollisionDetectionEnd")]
         int CustomCollisionDetectionEnd();
 
+
+
+        [XmlRpcMethod("AccSmoothStart")]
+        int AccSmoothStart(int saveFlag);
+
+        [XmlRpcMethod("AccSmoothEnd")]
+        int AccSmoothEnd(int saveFlag);
+
+        [XmlRpcMethod("RbLogDownloadPrepare")]
+        int RbLogDownloadPrepare();
+
+        [XmlRpcMethod("AllDataSourceDownloadPrepare")]
+        int AllDataSourceDownloadPrepare();
+
+        [XmlRpcMethod("DataPackageDownloadPrepare")]
+        int DataPackageDownloadPrepare();
+
+        [XmlRpcMethod("GetRobotSN")]
+        object[] GetRobotSN();
+
+        [XmlRpcMethod("ShutDownRobotOS")]
+        int ShutDownRobotOS();
+
+        [XmlRpcMethod("ConveyorComDetect")]
+        int ConveyorComDetect(int timeout);
+
+
+        [XmlRpcMethod("ConveyorComDetectTrigger")]
+        int ConveyorComDetectTrigger();
+
+        [XmlRpcMethod("ArcWeldTraceAIChannelCurrent")]
+        int ArcWeldTraceAIChannelCurrent(int channel);
+
+        [XmlRpcMethod("ArcWeldTraceAIChannelVoltage")]
+        int ArcWeldTraceAIChannelVoltage(int channel);
+
+        [XmlRpcMethod("ArcWeldTraceCurrentPara")]
+        int ArcWeldTraceCurrentPara(double AILow, double AIHigh, double currentLow, double currentHigh);
+
+        [XmlRpcMethod("ArcWeldTraceVoltagePara")]
+        int ArcWeldTraceVoltagePara(double AILow, double AIHigh, double voltageLow, double voltageHigh);
+
+        [XmlRpcMethod("WeldingSetVoltageGradualChangeStart")]
+        int WeldingSetVoltageGradualChangeStart(int IOType, double voltageStart, double voltageEnd, int AOIndex, int blend);
+
+        [XmlRpcMethod("WeldingSetVoltageGradualChangeEnd")]
+        int WeldingSetVoltageGradualChangeEnd();
+
+        [XmlRpcMethod("WeldingSetCurrentGradualChangeStart")]
+        int WeldingSetCurrentGradualChangeStart(int IOType, double currentStart, double currentEnd, int AOIndex, int blend);
+
+        [XmlRpcMethod("WeldingSetCurrentGradualChangeEnd")]
+        int WeldingSetCurrentGradualChangeEnd();
+
+        [XmlRpcMethod("ExtAxisGetCoord")]
+        object[] ExtAxisGetCoord();
+
+        [XmlRpcMethod("FT_SpiralSearch")]
+        int FT_SpiralSearch(int rcs, float dr, float ft, float max_t_ms, float max_vel);
+
+        [XmlRpcMethod("EndForceDragControl")]
+        int EndForceDragControl(int status, int asaptiveFlag, int interfereDragFlag, int ingularityConstraintsFlag, int forceCollisionFlag, double[] M, double[] B, double[] K, double[] F, double Fmax, double Vmax);
+
+
+        [XmlRpcMethod("SetWideBoxTempFanMonitorParam")]
+        int SetWideBoxTempFanMonitorParam(int enable, int period);
+
+        [XmlRpcMethod("GetWideBoxTempFanMonitorParam")]
+        object[] GetWideBoxTempFanMonitorParam();
+
+
+        [XmlRpcMethod("SetFocusCalibPoint")]
+        int SetFocusCalibPoint(int pointNum, double[] desc);
+
+
+        [XmlRpcMethod("ComputeFocusCalib")]
+        object[] ComputeFocusCalib(int pointNum, ref DescTran resultPos, ref double accuracy);
+
+
+        [XmlRpcMethod("ComputeFocusCalib")]
+        object[] ComputeFocusCalib(int pointNum);
+
+        [XmlRpcMethod("FocusStart")]
+        int FocusStart(double kp, double kpredict, double aMax, double vMax, int type);
+
+
+        [XmlRpcMethod("FocusEnd")]
+        int FocusEnd();
+
+
+        [XmlRpcMethod("SetFocusPosition")]
+        int SetFocusPosition(double x, double y, double z);
+
+        [XmlRpcMethod("SetEncoderUpgrade")]
+        int SetEncoderUpgrade(string path);
+
+        [XmlRpcMethod("JointAllParamUpgrade")]
+        int JointAllParamUpgrade();
+
+
+        [XmlRpcMethod("LaserRecordPoint")]
+        object[] LaserRecordPoint(int coordID, int x, int y);
+
+        [XmlRpcMethod("LaserTrackingSearchStart")]
+        int LaserTrackingSearchStart(int direction, double x, double y, double z, int vel, int distance, int timeout, int posSensorNum);
+
+        [XmlRpcMethod("LaserTrackingSearchStop")]
+        int LaserTrackingSearchStop();
+
+
+        [XmlRpcMethod("SetExAxisRobotPlan")]
+        int SetExAxisRobotPlan(int strategy);
+
+
+        [XmlRpcMethod("GetFieldBusConfig")]
+        object[] GetFieldBusConfig();
+
+        [XmlRpcMethod("FieldBusSlaveWriteDO")]
+        int FieldBusSlaveWriteDO(int DOIndex, int wirteNum, int[] status);
+
+
+        [XmlRpcMethod("FieldBusSlaveWriteAO")]
+        int FieldBusSlaveWriteAO(int AOIndex, int wirteNum, double[] status);
+
+        [XmlRpcMethod("FieldBusSlaveReadDI")]
+        object[] FieldBusSlaveReadDI(int DOIndex, int readNum);
+
+        [XmlRpcMethod("FieldBusSlaveReadAI")]
+        object[] FieldBusSlaveReadAI(int AIIndex, int readNum);
+
+
+
+
+        [XmlRpcMethod("FieldBusSlaveWaitDI")]
+        int FieldBusSlaveWaitDI(int DIIndex, int status, int waitMs);
+
+        [XmlRpcMethod("FieldBusSlaveWaitAI")]
+        int FieldBusSlaveWaitAI(int AIIndex, int waitType, double value, int waitMs);
+
+        [XmlRpcMethod("SetSuckerCtrl")]
+        int SetSuckerCtrl(int slaveID, int len, int[] ctrlValue);
+
+
+        [XmlRpcMethod("GetSuckerState")]
+        object[] GetSuckerState(int slaveID);
+
+        [XmlRpcMethod("WaitSuckerState")]
+        int WaitSuckerState(int slaveID, int state, int ms);
+
+        [XmlRpcMethod("CtrlOpenLuaUpLoadCheck")]
+        object[] CtrlOpenLuaUpLoadCheck(string filePath);
+
+
+        [XmlRpcMethod("SetTorqueDetectionSwitch")]
+        int SetTorqueDetectionSwitch(int flag);
+
+
+
+        [XmlRpcMethod("LaserTrackingLaserOnOff")]
+        int LaserTrackingLaserOnOff(int OnOff, int weldId);
+
+        [XmlRpcMethod("LaserTrackingTrackOnOff")]
+        int LaserTrackingTrackOnOff(int OnOff, int coordId);
+
+        [XmlRpcMethod("LaserTrackingSearchStart_xyz")]
+        int LaserTrackingSearchStart_xyz(int direction, int vel, int distance, int timeout, int posSensorNum);
+
+        [XmlRpcMethod("LaserTrackingSearchStart_point")]
+        int LaserTrackingSearchStart_point(int param0, int vel, int distance, int timeout, int posSensorNum, double x, double y, double z);
+
+        [XmlRpcMethod("LaserTrackingSensorConfig")]
+        int LaserTrackingSensorConfig(string ip, int port);
+
+        [XmlRpcMethod("LaserTrackingSensorSamplePeriod")]
+        int LaserTrackingSensorSamplePeriod(int period);
+
+        [XmlRpcMethod("LoadPosSensorDriver")]
+        int LoadPosSensorDriver(int type);
+
+        [XmlRpcMethod("UnLoadPosSensorDriver")]
+        int UnLoadPosSensorDriver();
+
+        [XmlRpcMethod("LaserSensorRecord1")]
+        int LaserSensorRecord1(int status, int delayTime);
+
+        [XmlRpcMethod("LaserSensorReplay")]
+        int LaserSensorReplay(int param0, int delayTime, double speed);
+
+        [XmlRpcMethod("MoveLTR")]
+        int MoveLTR(int param0);
+
+        //[XmlRpcMethod("LaserSensorRecordandReplay")]
+        //int LaserSensorRecordandReplay(int param0, int delayMode, int delayTime, int delayDisExAxisNum, double delayDis, double sensitivePara, double speed);
+
+        [XmlRpcMethod("MoveToLaserRecordStart")]
+        int MoveToLaserRecordStart(int moveType, double ovl);
+
+        [XmlRpcMethod("MoveToLaserRecordEnd")]
+        int MoveToLaserRecordEnd(int moveType, double ovl);
+
+        [XmlRpcMethod("MoveToLaserSeamPos")]
+        int MoveToLaserSeamPos(object[] parm);
+
+        [XmlRpcMethod("GetLaserSeamPos")]
+        object[] GetLaserSeamPos(object[] parm);
+
+        [XmlRpcMethod("ImpedanceControlStartStop")]
+        int ImpedanceControlStartStop(object[] impedanceParams);
+
+
+        [XmlRpcMethod("GetToolCoordWithID")]
+        object[] GetToolCoordWithID(int param);
+
+        [XmlRpcMethod("GetWObjCoordWithID")]
+        object[] GetWObjCoordWithID(int param);
+
+        [XmlRpcMethod("GetExToolCoordWithID")]
+        object[] GetExToolCoordWithID(int param);
+
+        [XmlRpcMethod("GetExAxisCoordWithID")]
+        object[] GetExAxisCoordWithID(int param);
+
+        [XmlRpcMethod("GetTargetPayloadWithID")]
+        object[] GetTargetPayloadWithID(int param);
+
+
+        [XmlRpcMethod("CustomWeaveSetPara")]
+        int CustomWeaveSetPara(object[] param);
+
+        [XmlRpcMethod("CustomWeaveGetPara")]
+        object[] CustomWeaveGetPara(int param);
+
+        [XmlRpcMethod("KernelUpgrade")]
+
+        int KernelUpgrade();
+
+        [XmlRpcMethod("GetKernelUpgradeResult")]
+
+        object[] GetKernelUpgradeResult();
+
+        [XmlRpcMethod("JointSensitivityEnable")]
+
+        int JointSensitivityEnable(object[] status);
+
+
+        [XmlRpcMethod("JointSensitivityCalibration")]
+
+        object[] JointSensitivityCalibration();
+
+
+        [XmlRpcMethod("JointSensitivityCollect")]
+
+        int JointSensitivityCollect();
+
+        /// <summary>
+        /// 清空运动指令队列
+        /// </summary>
+        [XmlRpcMethod("MotionQueueClear")]
+        int MotionQueueClear();
+
+        /// <summary>
+        /// 获取机器人8个从站端口错误帧数
+        /// 返回值: object[0] = 错误码 (int)
+        ///        object[1] = 数据字符串，格式: "inRecvErr,inCRCErr,inTransmitErr,inLinkErr" * 8 + 同样格式的输出部分，共64个整数，用逗号分隔
+        /// </summary>
+        [XmlRpcMethod("GetSlavePortErrCounter")]
+        object[] GetSlavePortErrCounter();
+
+        /// <summary>
+        /// 从站端口错误帧清零
+        /// 参数: slaveID (int, 0~7)
+        /// </summary>
+        [XmlRpcMethod("SlavePortErrCounterClear")]
+        int SlavePortErrCounterClear(int param);
+
+        /// <summary>
+        /// 设置各轴速度前馈系数
+        /// 参数: double[6] { j1, j2, j3, j4, j5, j6 }
+        /// </summary>
+        [XmlRpcMethod("SetVelFeedForwardRatio")]
+        int SetVelFeedForwardRatio(double[] param);
+
+        /// <summary>
+        /// 获取各轴速度前馈系数
+        /// 返回值: object[0] = 错误码 (int)
+        ///        object[1..6] = j1 ~ j6 系数 (double)
+        /// </summary>
+        [XmlRpcMethod("GetVelFeedForwardRatio")]
+        object[] GetVelFeedForwardRatio();
+
+        /// <summary>
+        /// 机器人MCU日志生成
+        /// </summary>
+        [XmlRpcMethod("RobotMCULogCollect")]
+        int RobotMCULogCollect();
+
+        [XmlRpcMethod("MoveToIntersectLineStart")]
+        int MoveToIntersectLineStart(object[] moveToIntersectLineStartParams);
+
+        [XmlRpcMethod("MoveIntersectLine")]
+        int MoveIntersectLine(object[] moveIntersectLineParams);
+
+        [XmlRpcMethod("JointHysteresisError")]
+        object[] JointHysteresisError();
+
+        [XmlRpcMethod("JointRepeatability")]
+        object[]  JointRepeatability();
+
+
+        [XmlRpcMethod("SetAdmittanceParams")]
+
+        int SetAdmittanceParams(object[] admittanceParams);
+
+        [XmlRpcMethod("SetCoderCompenParams")]
+        int SetCoderCompenParams(object[] serCoderParams);
+		
+        [XmlRpcMethod("GetActualTCPPose")]
+        object[] GetActualTCPPose(int flag);
+		
+        [XmlRpcMethod("GetActualJointPosDegree")]
+        object[] GetActualJointPosDegree(int flag);
+		
+        [XmlRpcMethod("TCPComputeRPY")]
+        object[] TCPComputeRPY(object[] tcpComputeParams);
+
+        [XmlRpcMethod("TCPComputeXYZ")]
+        object[] TCPComputeXYZ(object[] tcpComputeParams);
+
+        [XmlRpcMethod("TCPRecordFlangePosStart")]
+        int TCPRecordFlangePosStart(object[] emptyParams);
+
+        [XmlRpcMethod("TCPRecordFlangePosEnd")]
+        int TCPRecordFlangePosEnd(object[] emptyParams);
+
+        [XmlRpcMethod("TCPGetRecordFlangePos")]
+        object[] TCPGetRecordFlangePos(object[] emptyParams);
+
+        // 激光焊缝轨迹复现方法的RPC句柄
+        // 修改接口定义，将参数展开为单独的参数
+        [XmlRpcMethod("LaserSensorRecordandReplay")]
+        int LaserSensorRecordandReplay(
+            int param0, int param1, double param2, int param3,
+            int param4, double param5, double param6,
+            int param7, int param8, double param9);
+
+        // 原地空运动方法的RPC句柄
+        [XmlRpcMethod("MoveStationary")]
+        int MoveStationary();
+
+        [XmlRpcMethod("FT_RotInsertion")]
+        int FT_RotInsertion(int rcs, double angVelRot, double ft, double max_angle, int orn, double max_angAcc, int rotorn, int strategy);
+
+        [XmlRpcMethod("FT_LinInsertion")]
+        int FT_LinInsertion(int rcs, double ft, double lin_v, double lin_a, double max_dis, int linorn);
+
+        [XmlRpcMethod("FT_FindSurface")]
+        int FT_FindSurface(int rcs, int dir, int axis, double lin_v, double lin_a, double max_dis, double ft);
+
+        [XmlRpcMethod("FT_CalCenterStart")]
+        int FT_CalCenterStart();
+
+        [XmlRpcMethod("FT_CalCenterEnd")]
+        object[] FT_CalCenterEnd();
+
+        [XmlRpcMethod("SetWeavebackCenterConfig")]
+        int SetWeavebackCenterConfig(int flag);
+
+        [XmlRpcMethod("GetWeavebackCenterConfig")]
+        object[] GetWeavebackCenterConfig();
+
+        [XmlRpcMethod("GetInverseKinExaxis")]
+        object[] GetInverseKinExaxis(int type, double[] desc_pos, double[] exaxis, int tool, int workPiece);
+
+        [XmlRpcMethod("MoveToTPDStart")]
+        int MoveToTPDStart(string name, int moveType, double ovl);
+
+        [XmlRpcMethod("SetAxleGenComEnable")]
+        int SetAxleGenComEnable(int mode);
+
+        [XmlRpcMethod("GetAxleGenComCycleData")]
+        object[] GetAxleGenComCycleData(int len);
+
+        [XmlRpcMethod("SndRcvAxleGenComCmdData")]
+        object[] SndRcvAxleGenComCmdData(int len_snd, int[] sndBuff, int len_rcv);
+
+        [XmlRpcMethod("SetRobotStopOnComDisc")]
+        int SetRobotStopOnComDisc(int[] input);
+
+        [XmlRpcMethod("GetRobotStopOnComDisc")]
+        object[] GetRobotStopOnComDisc(int[] input);
+
+        [XmlRpcMethod("SetDIConfig")]
+        int SetDIConfig(int[] config);
+
+        [XmlRpcMethod("GetDIConfig")]
+        object[] GetDIConfig(int[] param);
+
+        [XmlRpcMethod("SetDOConfig")]
+        int SetDOConfig(int[] config);
+
+        [XmlRpcMethod("GetDOConfig")]
+        object[] GetDOConfig(int[] param);
+
+        [XmlRpcMethod("SetToolDIConfig")]
+        int SetToolDIConfig(int[] config);
+
+        [XmlRpcMethod("GetToolDIConfig")]
+        object[] GetToolDIConfig(int[] param);
+
+        [XmlRpcMethod("SetDIConfigLevel")]
+        int SetDIConfigLevel(int[] config);
+
+        [XmlRpcMethod("GetDIConfigLevel")]
+        object[] GetDIConfigLevel(int[] param);
+
+        [XmlRpcMethod("SetDOConfigLevel")]
+        int SetDOConfigLevel(int[] config);
+
+        [XmlRpcMethod("GetDOConfigLevel")]
+        object[] GetDOConfigLevel(int[] param);
+
+        [XmlRpcMethod("SetToolDIConfigLevel")]
+        int SetToolDIConfigLevel(int[] config);
+
+        [XmlRpcMethod("GetToolDIConfigLevel")]
+        object[] GetToolDIConfigLevel(int[] param);
+
+        [XmlRpcMethod("SetStandardDILevel")]
+        int SetStandardDILevel(int[] config);
+
+        [XmlRpcMethod("GetStandardDILevel")]
+        object[] GetStandardDILevel(int[] param);
+
+        [XmlRpcMethod("SetStandardDOLevel")]
+        int SetStandardDOLevel(int[] config);
+
+        [XmlRpcMethod("GetStandardDOLevel")]
+        object[] GetStandardDOLevel(int[] param);
+
+        [XmlRpcMethod("SetExAxisCmdDoneTime")]
+        int SetExAxisCmdDoneTime(double[] time);
+
+        [XmlRpcMethod("OpenLuaDownload")]
+        int OpenLuaDownload(string[] param); // 参数：fileName, savePath
+
+        [XmlRpcMethod("SetVelReducePara")]
+        int SetVelReducePara(object[] param);
+
+        [XmlRpcMethod("OriginPointWeaveStart")]
+        int OriginPointWeaveStart(object[] param);
+
+        [XmlRpcMethod("OriginPointWeaveEnd")]
+        int OriginPointWeaveEnd();
+        [XmlRpcMethod("SetUserLEDColor")]
+        int SetUserLEDColor(int param1, int param2, int param3);
+
+        [XmlRpcMethod("ServoMITStart")]
+        int ServoMITStart();
+
+        [XmlRpcMethod("ServoMIT")]
+        int ServoMIT(double[] param1, double[] param2, double[] param3, double[] param4, double[] param5, double interval);
+
+        [XmlRpcMethod("ServoMITEnd")]
+        int ServoMITEnd();
+
+        [XmlRpcMethod("ServoJV")]
+        int ServoJV(double[] joint_pos, double[] axisPos, double acc, double vel, double cmdT, double filterT, double gain, int id);
+
+        [XmlRpcMethod("SetLaserWeldingParam")]
+        int SetLaserWeldingParam(int io_type, int num, int scanSpeed, int scanWidth, int peakPower, int dutyCycle, int freq);
+
+        [XmlRpcMethod("SetLaserWeldingStartEnd")]
+        int SetLaserWeldingStartEnd(int io_type, int status, int max_waittime);
+
+        [XmlRpcMethod("SetLaserWeldingEnable")]
+        int SetLaserWeldingEnable(int io_type, int status);
+
+        [XmlRpcMethod("ResetLaserWeldingErr")]
+        int ResetLaserWeldingErr(int io_type, int status);
+
+        [XmlRpcMethod("GetLaserWeldingRunningState")]
+        object[] GetLaserWeldingRunningState(int io_type);
+
+        [XmlRpcMethod("GetLaserWeldingErrState")]
+        object[] GetLaserWeldingErrState(int io_type);
+
+        [XmlRpcMethod("GetLaserWeldingParamTarget")]
+        object[] GetLaserWeldingParamTarget(int num);
+
+        [XmlRpcMethod("GetLaserWeldingParamActual")]
+        object[] GetLaserWeldingParamActual(int io_type);
+
+        [XmlRpcMethod("SetLaserWeldingEnableExtDoNum")]
+        int SetLaserWeldingEnableExtDoNum(int ctrlModeDONum);
+
+        [XmlRpcMethod("SetLaserWeldingStartExtDoNum")]
+        int SetLaserWeldingStartExtDoNum(int ctrlModeDONum);
+
+        [XmlRpcMethod("SetLaserWeldingErrResetExtDoNum")]
+        int SetLaserWeldingErrResetExtDoNum(int ctrlModeDONum);
+
+        [XmlRpcMethod("SetLaserWeldingRunningStateExtDiNum")]
+        int SetLaserWeldingRunningStateExtDiNum(int diNum);
+
+        [XmlRpcMethod("SetLaserWeldingErrStateExtDiNum")]
+        int SetLaserWeldingErrStateExtDiNum(int diNum);
+
+        [XmlRpcMethod("SetDexterousHandsMove")]
+        int SetDexterousHandsMove(int p1, int p2, double[] p3, int[] p4, int[] p5, int p6);
+
+        [XmlRpcMethod("SetDexterousHandsAct")]
+        int SetDexterousHandsAct(int p1,int p6);
+
+        [XmlRpcMethod("ClearDexterousHandsError")]
+        int ClearDexterousHandsError();
+
+        [XmlRpcMethod("SetDexterousHandsFunc")]
+        int SetDexterousHandsFunc(int p1, int[] p2);
+
+        [XmlRpcMethod("GetDexterousHandsFunc")]
+        object[] GetDexterousHandsFunc(int p1);
     }
     internal class RPCHandle
     {

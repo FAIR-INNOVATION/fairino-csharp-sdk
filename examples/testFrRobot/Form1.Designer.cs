@@ -88,6 +88,7 @@
             this.btnSetConvey = new System.Windows.Forms.Button();
             this.groupStandard = new System.Windows.Forms.GroupBox();
             this.groupMove = new System.Windows.Forms.GroupBox();
+            this.button2 = new System.Windows.Forms.Button();
             this.btnLinOverVel = new System.Windows.Forms.Button();
             this.groupIO = new System.Windows.Forms.GroupBox();
             this.groupSets = new System.Windows.Forms.GroupBox();
@@ -134,6 +135,8 @@
             this.btnFTtest = new System.Windows.Forms.Button();
             this.btnUpgrade = new System.Windows.Forms.Button();
             this.btnGetSysTime = new System.Windows.Forms.Button();
+            this.button1 = new System.Windows.Forms.Button();
+            this.button3 = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.groupStandard.SuspendLayout();
             this.groupMove.SuspendLayout();
@@ -410,7 +413,7 @@
             this.btnMotionPause.Name = "btnMotionPause";
             this.btnMotionPause.Size = new System.Drawing.Size(121, 39);
             this.btnMotionPause.TabIndex = 28;
-            this.btnMotionPause.Text = "运动暂停恢复";
+            this.btnMotionPause.Text = "暂停 恢复 停止";
             this.btnMotionPause.UseVisualStyleBackColor = true;
             this.btnMotionPause.Click += new System.EventHandler(this.btnMotionPause_Click);
             // 
@@ -536,7 +539,7 @@
             // 
             // btnGetSpeeds
             // 
-            this.btnGetSpeeds.Location = new System.Drawing.Point(32, 183);
+            this.btnGetSpeeds.Location = new System.Drawing.Point(32, 160);
             this.btnGetSpeeds.Name = "btnGetSpeeds";
             this.btnGetSpeeds.Size = new System.Drawing.Size(131, 39);
             this.btnGetSpeeds.TabIndex = 36;
@@ -546,7 +549,7 @@
             // 
             // btnInverse
             // 
-            this.btnInverse.Location = new System.Drawing.Point(32, 131);
+            this.btnInverse.Location = new System.Drawing.Point(32, 119);
             this.btnInverse.Name = "btnInverse";
             this.btnInverse.Size = new System.Drawing.Size(131, 39);
             this.btnInverse.TabIndex = 37;
@@ -750,6 +753,7 @@
             // 
             // groupMove
             // 
+            this.groupMove.Controls.Add(this.button2);
             this.groupMove.Controls.Add(this.btnLinOverVel);
             this.groupMove.Controls.Add(this.btnJOG);
             this.groupMove.Controls.Add(this.btnMovetest);
@@ -770,6 +774,16 @@
             this.groupMove.TabIndex = 57;
             this.groupMove.TabStop = false;
             this.groupMove.Text = "机器人运动";
+            // 
+            // button2
+            // 
+            this.button2.Location = new System.Drawing.Point(594, 155);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(115, 43);
+            this.button2.TabIndex = 31;
+            this.button2.Text = "MoveAo";
+            this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
             // btnLinOverVel
             // 
@@ -838,6 +852,7 @@
             // groupStates
             // 
             this.groupStates.Controls.Add(this.btnRobotState);
+            this.groupStates.Controls.Add(this.button3);
             this.groupStates.Controls.Add(this.btnRobotState2);
             this.groupStates.Controls.Add(this.btnInverse);
             this.groupStates.Controls.Add(this.btnGetSpeeds);
@@ -961,7 +976,7 @@
             this.txtSavePath.Name = "txtSavePath";
             this.txtSavePath.Size = new System.Drawing.Size(213, 25);
             this.txtSavePath.TabIndex = 48;
-            this.txtSavePath.Text = "D://zUP/point_table_test.db";
+            this.txtSavePath.Text = "D://zUP/test_point_A.db";
             this.txtSavePath.TextChanged += new System.EventHandler(this.txtSavePath_TextChanged);
             // 
             // btnDownload
@@ -988,7 +1003,7 @@
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(213, 25);
             this.textBox1.TabIndex = 50;
-            this.textBox1.Text = "point_table_test.db";
+            this.textBox1.Text = "test_point_A.db";
             // 
             // groupBox3
             // 
@@ -1178,7 +1193,7 @@
             this.txtDownLoadLuaName.Name = "txtDownLoadLuaName";
             this.txtDownLoadLuaName.Size = new System.Drawing.Size(166, 25);
             this.txtDownLoadLuaName.TabIndex = 77;
-            this.txtDownLoadLuaName.Text = "1.lua";
+            this.txtDownLoadLuaName.Text = "Text1.lua";
             // 
             // btnDownLoadLua
             // 
@@ -1260,9 +1275,30 @@
             this.btnGetSysTime.UseVisualStyleBackColor = true;
             this.btnGetSysTime.Click += new System.EventHandler(this.btnGetSysTime_Click);
             // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(1266, 579);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(47, 86);
+            this.button1.TabIndex = 86;
+            this.button1.Text = "测试";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
+            // button3
+            // 
+            this.button3.Location = new System.Drawing.Point(32, 199);
+            this.button3.Name = "button3";
+            this.button3.Size = new System.Drawing.Size(131, 39);
+            this.button3.TabIndex = 30;
+            this.button3.Text = "配置CNDE状态";
+            this.button3.UseVisualStyleBackColor = true;
+            this.button3.Click += new System.EventHandler(this.btnGetcnde_Click);
+            // 
             // Form1
             // 
             this.ClientSize = new System.Drawing.Size(1561, 746);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.btnGetSysTime);
             this.Controls.Add(this.btnUpgrade);
             this.Controls.Add(this.btnFTtest);
@@ -1427,6 +1463,9 @@
         private System.Windows.Forms.Button btnFTtest;
         private System.Windows.Forms.Button btnUpgrade;
         private System.Windows.Forms.Button btnGetSysTime;
+        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Button button3;
     }
 }
 

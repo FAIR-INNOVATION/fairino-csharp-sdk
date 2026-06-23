@@ -95,8 +95,8 @@ namespace testFrRobot
 
         private void btnSetUDPParam_Click(object sender, EventArgs e)
         {
-            robot.ExtDevSetUDPComParam(txtip.Text, int.Parse(txtport.Text), int.Parse(txtperiod.Text), int.Parse(txtchackTime.Text), int.Parse(txtLossnum.Text), int.Parse(txtDisconntime.Text), int.Parse(tctenabke.Text), int.Parse(txtreconntperiod.Text), int.Parse(txtreconntnum.Text));
-            robot.ExtDevSetUDPComParam("192.168.58.88", 2021, 2, 100, 3, 100, 1, 100, 10);
+            robot.ExtDevSetUDPComParam(txtip.Text, int.Parse(txtport.Text), int.Parse(txtperiod.Text), int.Parse(txtchackTime.Text), int.Parse(txtLossnum.Text), int.Parse(txtDisconntime.Text), int.Parse(tctenabke.Text), int.Parse(txtreconntperiod.Text), int.Parse(txtreconntnum.Text),1);
+            robot.ExtDevSetUDPComParam("192.168.58.88", 2021, 2, 100, 3, 100, 1, 100, 10,1);
         }
 
         private void btnGetStartPos_Click(object sender, EventArgs e)
@@ -152,7 +152,7 @@ namespace testFrRobot
             //    int SetToolList(int id, DescPose coord, int type, int install);   //设置应用工具坐标系列表
 
             //2.设置UDP通信参数，并加载UDP通信
-            robot.ExtDevSetUDPComParam("192.168.58.88", 2021, 2, 100, 3, 100, 1, 100, 10);
+            robot.ExtDevSetUDPComParam("192.168.58.88", 2021, 2, 100, 3, 100, 1, 100, 10,1);
             robot.ExtDevLoadUDPDriver();
 
             //3.设置扩展轴参数，包括扩展轴类型、扩展轴驱动器参数、扩展轴DH参数
@@ -252,59 +252,34 @@ namespace testFrRobot
 
         private void btnMoveAO_Click(object sender, EventArgs e)
         {
-            //DescPose startdescPose = new DescPose(double.Parse(txtStartX.Text), double.Parse(txtStartY.Text), double.Parse(txtStartZ.Text), double.Parse(txtStartRX.Text), double.Parse(txtStartRY.Text), double.Parse(txtStartRZ.Text));
-            //JointPos startjointPos = new JointPos(double.Parse(txtStartJ1.Text), double.Parse(txtStartJ2.Text), double.Parse(txtStartJ3.Text), double.Parse(txtStartJ4.Text), double.Parse(txtStartJ5.Text), double.Parse(txtStartJ6.Text));
-            //DescPose enddescPose = new DescPose(double.Parse(txtEndX.Text), double.Parse(txtEndY.Text), double.Parse(txtEndZ.Text), double.Parse(txtEndRX.Text), double.Parse(txtEndRY.Text), double.Parse(txtEndRZ.Text));
-            //JointPos endjointPos = new JointPos(double.Parse(txtEndJ1.Text), double.Parse(txtEndJ2.Text), double.Parse(txtEndJ3.Text), double.Parse(txtEndJ4.Text), double.Parse(txtEndJ5.Text), double.Parse(txtEndJ6.Text));
-            //DescPose CPose = new DescPose(double.Parse(txtCX.Text), double.Parse(txtCY.Text), double.Parse(txtCZ.Text), double.Parse(txtCRX.Text), double.Parse(txtCRY.Text), double.Parse(txtCRZ.Text));
-            //JointPos CJPos = new JointPos(double.Parse(txtCJ1.Text), double.Parse(txtCJ2.Text), double.Parse(txtCJ3.Text), double.Parse(txtCJ4.Text), double.Parse(txtCJ5.Text), double.Parse(txtCJ6.Text));
-            //DescPose DPose = new DescPose(double.Parse(txtDX.Text), double.Parse(txtDY.Text), double.Parse(txtDZ.Text), double.Parse(txtDRX.Text), double.Parse(txtDRY.Text), double.Parse(txtDRZ.Text));
-            //JointPos DJPos = new JointPos(double.Parse(txtDJ1.Text), double.Parse(txtDJ2.Text), double.Parse(txtDJ3.Text), double.Parse(txtDJ4.Text), double.Parse(txtDJ5.Text), double.Parse(txtDJ6.Text));
+            JointPos j1 = new JointPos(-11.904, -99.669, 117.473, -108.616, -91.726, 74.256);
+            JointPos j2 = new JointPos(-45.615, -106.172, 124.296, -107.151, -91.282, 74.255);
+            DescPose desc_pos1 = new DescPose(-419.524, -13.000, 351.569, -178.118, 0.314, 3.833);
+            DescPose desc_pos2 = new DescPose(-321.222, 185.189, 335.520, -179.030, -1.284, -29.869);
+            DescPose offset_pos = new DescPose(0, 0, 0, 0, 0, 0);
+            ExaxisPos epos = new ExaxisPos(0, 0, 0, 0);
 
-            DescPose startdescPose = new DescPose();
-            JointPos startjointPos = new JointPos();
-            DescPose enddescPose = new DescPose();
-            JointPos endjointPos = new JointPos();
-            DescPose CPose = new DescPose();
-            JointPos CJPos = new JointPos();
-            DescPose DPose = new DescPose();
-            JointPos DJPos = new JointPos();
+            int tool = 0;
+            int user = 0;
+            float vel = 100.0f;
+            float acc = 100.0f;
+            float ovl = 100.0f;
+            float blendT = 0.0f;
+            float blendR = 0.0f;
+            byte flag = 0;
+            byte search = 0;
 
-            ExaxisPos exaxisPos = new ExaxisPos(0, 0, 0, 0);
-            DescPose offdese = new DescPose(0, 0, 0, 0, 0, 0);
-            int rtn = robot.MoveToolAOStart(0, 100, 80, 1);
-            //int rtn = robot.MoveAOStart(0, 100, 80, 1);
-            Console.WriteLine(rtn);
+            robot.SetSpeed(5);
 
-            rtn = robot.MoveL(startjointPos, startdescPose, 0, 0, 100, 100, 100, 0, exaxisPos, 0, 0, offdese);
-            //robot.MoveJ(startjointPos, startdescPose, 0, 0, 100, 100, 100, exaxisPos, 0, 0, offdese);
-            //robot.MoveC(startjointPos, startdescPose, 0, 0, 100, 100, exaxisPos, 0, offdese, endjointPos, enddescPose, 0, 0, 100, 100, exaxisPos, 0, offdese, 100, 0);
-            //robot.Circle(startjointPos, startdescPose, 0, 0, 100, 100, exaxisPos, endjointPos, enddescPose, 0, 0, 100, 100, exaxisPos, 100, 0, offdese);
-            //robot.SplineStart();
-            //robot.SplinePTP(startjointPos, startdescPose, 0, 0, 100, 100, 100);
-            //robot.SplinePTP(endjointPos, enddescPose, 0, 0, 100, 100, 100);
-            //robot.SplinePTP(CJPos, CPose, 0, 0, 100, 100, 100);
-            //robot.SplinePTP(DJPos, DPose, 0, 0, 100, 100, 100);
-            //robot.SplineEnd();
+            robot.MoveAOStart(0, 100, 100, 20);
+            robot.MoveJ(j1, desc_pos1, tool, user, vel, acc, ovl, epos, blendT, flag, offset_pos);
+            robot.MoveJ(j2, desc_pos2, tool, user, vel, acc, ovl, epos, blendT, flag, offset_pos);
+            robot.MoveAOStop();
 
-            //robot.NewSplineStart(0, 5000);
-            //robot.NewSplinePoint(startjointPos, startdescPose, 0, 0, 100, 100, 100, 5, 0);
-            //robot.NewSplinePoint(endjointPos, enddescPose, 0, 0, 100, 100, 100, 5, 0);
-            //robot.NewSplinePoint(CJPos, CPose, 0, 0, 100, 100, 100, 5, 0);
-            //robot.NewSplinePoint(DJPos, DPose, 0, 0, 100, 100, 100, 5, 1);
-            //robot.NewSplineEnd();
-            //int count = 1000;
-            //while (count > 0)
-            //{
-            //    robot.ServoJ(startjointPos, 0, 0, 0.008f, 0, 0);
-            //    startjointPos.jPos[0] += 0.01;//0关节位置增加
-            //    count -= 1;
-            //}
-
-
-            rtn = robot.MoveToolAOStop();
-            //rtn = robot.MoveAOStop();
-            Console.WriteLine(rtn);
+            robot.MoveToolAOStart(0, 100, 100, 20);
+            robot.MoveJ(j1, desc_pos1, tool, user, vel, acc, ovl, epos, blendT, flag, offset_pos);
+            robot.MoveJ(j2, desc_pos2, tool, user, vel, acc, ovl, epos, blendT, flag, offset_pos);
+            robot.MoveToolAOStop();
         }
 
         private void button4_Click(object sender, EventArgs e)
@@ -360,8 +335,9 @@ namespace testFrRobot
             int reconnenable = 0;
             int reconntime = 0;
             int reconnnum = 0;
-            robot.ExtDevGetUDPComParam(ref ip, ref port, ref period, ref checktime, ref checknum, ref disconntime, ref reconntime, ref reconnenable, ref reconnnum);
-            lblgetUDP.Text = $"{ip}  {port}  {period} {checktime}  {checknum}  {disconntime}  {reconnenable}  {reconntime}  {reconnnum}";
+            int selfConnect = 0;
+            robot.ExtDevGetUDPComParam(ref ip, ref port, ref period, ref checktime, ref checknum, ref disconntime, ref reconntime, ref reconnenable, ref reconnnum, ref selfConnect);
+            lblgetUDP.Text = $"{ip}  {port}  {period} {checktime}  {checknum}  {disconntime}  {reconnenable}  {reconntime}  {reconnnum}  {selfConnect}";
         }
 
         private void lblgetUDP_Click(object sender, EventArgs e)
@@ -548,7 +524,7 @@ namespace testFrRobot
             //    int SetToolList(int id, DescPose coord, int type, int install);   //设置应用工具坐标系列表
 
             //2.设置UDP通信参数，并加载UDP通信
-            robot.ExtDevSetUDPComParam("192.168.58.88", 2021, 2, 100, 3, 100, 1, 100, 10);
+            robot.ExtDevSetUDPComParam("192.168.58.88", 2021, 2, 100, 3, 100, 1, 100, 10,1);
             robot.ExtDevLoadUDPDriver();
 
             //3.设置扩展轴参数，包括扩展轴类型、扩展轴驱动器参数、扩展轴DH参数
@@ -591,9 +567,7 @@ namespace testFrRobot
             robot.MoveJ(startjointPos, startdescPose, 1, 1, 100, 100, 100, startexaxisPos, 0, 0, offdese);
 
             //开始同步运动
-            robot.ExtAxisSyncMoveJ(endjointPos, enddescPose, 1, 1, 100, 100, 100, endexaxisPos, -1, 0, offdese);
-
-
+            robot.ExtAxisSyncMoveJ(endjointPos, 1, 1, 100, 100, 100, endexaxisPos, -1, 0, offdese);
 
         }
 
@@ -608,7 +582,7 @@ namespace testFrRobot
             //    int SetToolList(int id, DescPose coord, int type, int install);   //Sets the list of application tool coordinate systems
 
             //2.Set UDP communication parameters and load UDP communication
-            robot.ExtDevSetUDPComParam("192.168.58.88", 2021, 2, 100, 3, 100, 1, 100, 10);
+            robot.ExtDevSetUDPComParam("192.168.58.88", 2021, 2, 100, 3, 100, 1, 100, 10,1);
             robot.ExtDevLoadUDPDriver();
 
             //3.Set the extension shaft parameters, including the extension shaft type, extension shaft drive parameters, and extension shaft DH parameters
@@ -668,7 +642,7 @@ namespace testFrRobot
             //    int SetToolList(int id, DescPose coord, int type, int install);   //设置应用工具坐标系列表
 
             //2.设置UDP通信参数，并加载UDP通信
-            robot.ExtDevSetUDPComParam("192.168.58.88", 2021, 2, 100, 3, 100, 1, 100, 10);
+            robot.ExtDevSetUDPComParam("192.168.58.88", 2021, 2, 100, 3, 100, 1, 100, 10,1);
             robot.ExtDevLoadUDPDriver();
 
             //3.设置扩展轴参数，包括扩展轴类型、扩展轴驱动器参数、扩展轴DH参数
@@ -711,9 +685,7 @@ namespace testFrRobot
             robot.MoveJ(startjointPos, startdescPose, 1, 1, 100, 100, 100, startexaxisPos, 0, 0, offdese);
 
             //开始同步运动
-            robot.ExtAxisSyncMoveL(endjointPos, enddescPose, 1, 1, 100, 100, 100, 0, endexaxisPos, 0, offdese);
-
-
+            robot.ExtAxisSyncMoveL( enddescPose, 1, 1, 100, 100, 100, 0, endexaxisPos, 0, offdese,-1);
 
         }
 
@@ -728,7 +700,7 @@ namespace testFrRobot
             //    int SetToolList(int id, DescPose coord, int type, int install);   //Sets the list of application tool coordinate systems
 
             //2.Set UDP communication parameters and load UDP communication
-            robot.ExtDevSetUDPComParam("192.168.58.88", 2021, 2, 100, 3, 100, 1, 100, 10);
+            robot.ExtDevSetUDPComParam("192.168.58.88", 2021, 2, 100, 3, 100, 1, 100, 10,1);
             robot.ExtDevLoadUDPDriver();
 
             //3.Set the extension shaft parameters, including the extension shaft type, extension shaft drive parameters, and extension shaft DH parameters
@@ -788,7 +760,7 @@ namespace testFrRobot
             //    int SetToolList(int id, DescPose coord, int type, int install);   //设置应用工具坐标系列表
 
             //2.设置UDP通信参数，并加载UDP通信
-            robot.ExtDevSetUDPComParam("192.168.58.88", 2021, 2, 100, 3, 100, 1, 100, 10);
+            robot.ExtDevSetUDPComParam("192.168.58.88", 2021, 2, 100, 3, 100, 1, 100, 10,1);
             robot.ExtDevLoadUDPDriver();
 
             //3.设置扩展轴参数，包括扩展轴类型、扩展轴驱动器参数、扩展轴DH参数
@@ -833,10 +805,10 @@ namespace testFrRobot
             //运动到起始点，假设应用的工具坐标系、工件坐标系都是1
             robot.ExtAxisMove(startexaxisPos, 20);
             DescPose offdese = new DescPose(0, 0, 0, 0, 0, 0);
-            robot.MoveJ(startjointPos, startdescPose, 1, 1, 100, 100, 100, startexaxisPos, 0, 0, offdese);
+            robot.MoveJ(startjointPos, 1, 1, 100, 100, 100, startexaxisPos, 0, 0, offdese);
 
             //开始同步运动
-            robot.ExtAxisSyncMoveC(midjointPos, middescPose, 1, 1, 100, 100, midexaxisPos, 0, offdese, endjointPos, enddescPose, 1, 1, 100, 100, endexaxisPos, 0, offdese, 100, 0);
+            robot.ExtAxisSyncMoveC( middescPose, 1, 1, 100, 100, midexaxisPos, 0, offdese, enddescPose, 1, 1, 100, 100, endexaxisPos, 0, offdese, 100, 0,-1);
 
 
         }
@@ -852,7 +824,7 @@ namespace testFrRobot
             //    int SetToolList(int id, DescPose coord, int type, int install);   //Sets the list of application tool coordinate systems
 
             //2.Set UDP communication parameters and load UDP communication
-            robot.ExtDevSetUDPComParam("192.168.58.88", 2021, 2, 100, 3, 100, 1, 100, 10);
+            robot.ExtDevSetUDPComParam("192.168.58.88", 2021, 2, 100, 3, 100, 1, 100, 10,1);
             robot.ExtDevLoadUDPDriver();
 
             //3.Set the extension shaft parameters, including the extension shaft type, extension shaft drive parameters, and extension shaft DH parameters
@@ -914,7 +886,7 @@ namespace testFrRobot
             ExaxisPos exaxisPos = new ExaxisPos(double.Parse(textBox4.Text), double.Parse(textBox3.Text), double.Parse(textBox2.Text), double.Parse(textBox1.Text));
             DescPose offdese = new DescPose(0, 0, 0, 0, 0, 0);
             //robot.MoveL(startjointPos, startdescPose, 1, 1, 100, 100, 100, 0, exaxisPos, 0, 0, offdese);
-            robot.MoveL(startjointPos, startdescPose, 0, 0, 100, 100, 100, 0, exaxisPos, 0, 0, offdese, 0, 10);
+            robot.MoveL(startjointPos, startdescPose, 0, 0, 100, 100, 100, 0, 0, exaxisPos, 0, 0, offdese, 0, 10);
         }
 
         private void btnOverVelB_Click(object sender, EventArgs e)
@@ -969,7 +941,7 @@ namespace testFrRobot
             //}
 
             //***********************************************小车运动和中途停止
-            robot.ExtDevSetUDPComParam("192.168.58.2", 2021, 2, 50, 5, 50, 1, 50, 10);
+            robot.ExtDevSetUDPComParam("192.168.58.2", 2021, 2, 50, 5, 50, 1, 50, 10,1);
             int tru = robot.ExtDevLoadUDPDriver();
             Thread.Sleep(2000);
             Console.WriteLine("tru" + tru);
@@ -998,7 +970,7 @@ namespace testFrRobot
         private void button6_Click(object sender, EventArgs e)
         {
             //UDP焊丝寻位
-            robot.ExtDevSetUDPComParam("192.168.58.2", 2021, 2, 50, 5, 50, 1, 50, 10);
+            robot.ExtDevSetUDPComParam("192.168.58.2", 2021, 2, 50, 5, 50, 1, 50, 10, 1);
             robot.ExtDevLoadUDPDriver();
             robot.SetWireSearchExtDIONum(0, 0);
 
@@ -1012,8 +984,8 @@ namespace testFrRobot
             DescPose descEnd = new DescPose(0.332, -516.427, 270.688, 178.165, 0.017, -119.989);
             JointPos jointEnd = new JointPos(79.021, -81.839, 110.752, -118.298, -91.729, -70.981);
 
-            robot.MoveL(jointStart, descStart, 1, 0, 100, 100, 100, -1, exaxisPos, 0, 0, offdese);
-            robot.MoveL(jointEnd, descEnd, 1, 0, 100, 100, 100, -1, exaxisPos, 0, 0, offdese);
+            robot.MoveL(jointStart, descStart, 1, 0, 100, 100, 100, -1, 0, exaxisPos, 0, 0, offdese);
+            robot.MoveL(jointEnd, descEnd, 1, 0, 100, 100, 100, -1, 0, exaxisPos, 0, 0, offdese);
 
             DescPose descREF0A = new DescPose(-66.106, -560.746, 270.381, 176.479, -0.126, -126.745);
             JointPos jointREF0A = new JointPos(73.531, -75.588, 102.941, -116.250, -93.347, -69.689);
@@ -1028,26 +1000,26 @@ namespace testFrRobot
             JointPos jointREF1B = new JointPos(82.117, -87.146, 116.470, -117.737, -93.145, -61.090);
 
             rtn0 = robot.WireSearchStart(0, 10, 100, 0, 10, 100, 0);
-            robot.MoveL(jointREF0A, descREF0A, 1, 0, 100, 100, 100, -1, exaxisPos, 0, 0, offdese);  //起点
-            robot.MoveL(jointREF0B, descREF0B, 1, 0, 10, 100, 100, -1, exaxisPos, 1, 0, offdese);  //方向点
+            robot.MoveL(jointREF0A, descREF0A, 1, 0, 100, 100, 100, -1, 0, exaxisPos, 0, 0, offdese);  //起点
+            robot.MoveL(jointREF0B, descREF0B, 1, 0, 10, 100, 100, -1, 0, exaxisPos, 1, 0, offdese);  //方向点
             rtn1 = robot.WireSearchWait("REF0");
             rtn2 = robot.WireSearchEnd(0, 10, 100, 0, 10, 100, 0);
 
             rtn0 = robot.WireSearchStart(0, 10, 100, 0, 10, 100, 0);
-            robot.MoveL(jointREF1A, descREF1A, 1, 0, 100, 100, 100, -1, exaxisPos, 0, 0, offdese);  //起点
-            robot.MoveL(jointREF1B, descREF1B, 1, 0, 10, 100, 100, -1, exaxisPos, 1, 0, offdese);  //方向点
+            robot.MoveL(jointREF1A, descREF1A, 1, 0, 100, 100, 100, -1, 0, exaxisPos, 0, 0, offdese);  //起点
+            robot.MoveL(jointREF1B, descREF1B, 1, 0, 10, 100, 100, -1, 0, exaxisPos, 1, 0, offdese);  //方向点
             rtn1 = robot.WireSearchWait("REF1");
             rtn2 = robot.WireSearchEnd(0, 10, 100, 0, 10, 100, 0);
 
             rtn0 = robot.WireSearchStart(0, 10, 100, 0, 10, 100, 0);
-            robot.MoveL(jointREF0A, descREF0A, 1, 0, 100, 100, 100, -1, exaxisPos, 0, 0, offdese);  //起点
-            robot.MoveL(jointREF0B, descREF0B, 1, 0, 10, 100, 100, -1, exaxisPos, 1, 0, offdese);  //方向点
+            robot.MoveL(jointREF0A, descREF0A, 1, 0, 100, 100, 100, -1, 0, exaxisPos, 0, 0, offdese);  //起点
+            robot.MoveL(jointREF0B, descREF0B, 1, 0, 10, 100, 100, -1, 0, exaxisPos, 1, 0, offdese);  //方向点
             rtn1 = robot.WireSearchWait("RES0");
             rtn2 = robot.WireSearchEnd(0, 10, 100, 0, 10, 100, 0);
 
             rtn0 = robot.WireSearchStart(0, 10, 100, 0, 10, 100, 0);
-            robot.MoveL(jointREF1A, descREF1A, 1, 0, 100, 100, 100, -1, exaxisPos, 0, 0, offdese);  //起点
-            robot.MoveL(jointREF1B, descREF1B, 1, 0, 10, 100, 100, -1, exaxisPos, 1, 0, offdese);  //方向点
+            robot.MoveL(jointREF1A, descREF1A, 1, 0, 100, 100, 100, -1, 0, exaxisPos, 0, 0, offdese);  //起点
+            robot.MoveL(jointREF1B, descREF1B, 1, 0, 10, 100, 100, -1, 0, exaxisPos, 1, 0, offdese);  //方向点
             rtn1 = robot.WireSearchWait("RES1");
             rtn2 = robot.WireSearchEnd(0, 10, 100, 0, 10, 100, 0);
             List<string> varNameRef1 = new List<string> { "REF0", "REF1", "#", "#", "#", "#" };
@@ -1058,8 +1030,8 @@ namespace testFrRobot
             DescPose offectPos = new DescPose(0, 0, 0, 0, 0, 0);
             rtn0 = robot.GetWireSearchOffset(0, 0, varNameRef, varNameRes, ref offectFlag, ref offectPos);
             robot.PointsOffsetEnable(0, offectPos);
-            robot.MoveL(jointStart, descStart, 1, 0, 100, 100, 100, -1, exaxisPos, 0, 0, offdese);
-            robot.MoveL(jointEnd, descEnd, 1, 0, 100, 100, 100, -1, exaxisPos, 1, 0, offdese);
+            robot.MoveL(jointStart, descStart, 1, 0, 100, 100, 100, -1, 0, exaxisPos, 0, 0, offdese);
+            robot.MoveL(jointEnd, descEnd, 1, 0, 100, 100, 100, -1, 0, exaxisPos, 1, 0, offdese);
             robot.PointsOffsetDisable();
         }
 
@@ -1068,7 +1040,7 @@ namespace testFrRobot
 
             //***********************************************UPD扩展轴参数配置与获取 begin**************************************
 
-            robot.ExtDevSetUDPComParam("192.168.58.88", 2021, 2, 100, 3, 100, 1, 100, 10);
+            robot.ExtDevSetUDPComParam("192.168.58.88", 2021, 2, 100, 3, 100, 1, 100, 10,1);
             string ip = "";
             int port = 0;
             int period = 0;
@@ -1078,8 +1050,9 @@ namespace testFrRobot
             int reconnenable = 0;
             int reconntime = 0;
             int reconnnum = 0;
-            robot.ExtDevGetUDPComParam(ref ip, ref port, ref period, ref checktime, ref checknum, ref disconntime, ref reconntime, ref reconnenable, ref reconnnum);
-            lblgetUDP.Text = $"{ip}  {port}  {period} {checktime}  {checknum}  {disconntime}  {reconnenable}  {reconntime}  {reconnnum}";
+            int selfConnect = 0;
+            robot.ExtDevGetUDPComParam(ref ip, ref port, ref period, ref checktime, ref checknum, ref disconntime, ref reconntime, ref reconnenable, ref reconnnum, ref selfConnect);
+            lblgetUDP.Text = $"{ip}  {port}  {period} {checktime}  {checknum}  {disconntime}  {reconnenable}  {reconntime}  {reconnnum} {selfConnect}";
 
             //***********************************************UPD扩展轴参数配置与获取 end **************************************
 
@@ -1283,7 +1256,7 @@ namespace testFrRobot
         private void button8_Click(object sender, EventArgs e)
         {
             //焊接控制模式切换
-            robot.ExtDevSetUDPComParam("192.168.58.88", 2021, 2, 50, 5, 50, 1, 50, 10);
+            robot.ExtDevSetUDPComParam("192.168.58.88", 2021, 2, 50, 5, 50, 1, 50, 10,1);
             robot.ExtDevLoadUDPDriver();
 
             robot.SetWeldMachineCtrlModeExtDoNum(17);
@@ -1352,9 +1325,11 @@ namespace testFrRobot
             ExaxisPos exaxisPos = new ExaxisPos(0, 0, 0, 0);
             DescPose offdese = new DescPose(0, 0, 0, 0, 0, 0);
 
-            robot.MoveL(startjointPos, startdescPose, 0, 0, 50, 100, 100, -1, exaxisPos, 0, 0, offdese, 1, 1);
+            robot.MoveL(startjointPos, startdescPose, 0, 0, 50, 100, 100, -1, 0, exaxisPos, 0, 0, offdese, 1, 1);
             robot.SingularAvoidStart(0, 150, 50, 20);
-            robot.MoveC(midjointPos, middescPose, 0, 0, 50, 100, exaxisPos, 0, offdese, endjointPos, enddescPose, 0, 0, 100, 100, exaxisPos, 0, offdese, 100, -1);
+
+         
+                robot.MoveC(midjointPos, middescPose, 0, 0, 50, 100, exaxisPos, 0, offdese, endjointPos, enddescPose, 0, 0, 100, 100, exaxisPos, 0, offdese, 100, -1,100,0);
             robot.SingularAvoidEnd();
 
 
