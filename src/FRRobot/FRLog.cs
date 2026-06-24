@@ -37,7 +37,7 @@ namespace fairino
         private int checkLogFileSizeFlag = 0;
         private const int CHECKFILESIZE = 1000;
         private bool writeLogAsyncFlag = true;
-        private static SpinLock slockAsyncLog;
+        private readonly object logLock = new object();
         private const long MAXFILESIZE = 10000000;
         private int logSaveDays = 10;
         private int logSaveFileNum = 10;
@@ -48,6 +48,7 @@ namespace fairino
             logFileName = GetNewLogFileName();
             writeLogAsyncFlag = true;
             Thread t = new Thread(WriteLogAsyncThread);
+            t.IsBackground = true;
             t.Start();
         }
 
@@ -169,9 +170,7 @@ namespace fairino
                 }
             }
 
-            bool lockToken = false;
-            slockAsyncLog.Enter(ref lockToken);
-            try
+            lock (logLock)
             {
                 if (curLogType == FrLogType.DIRECT)
                 {
@@ -184,13 +183,6 @@ namespace fairino
                 else if (curLogType == FrLogType.ASYNC)
                 {
                     WriteLogAsync(logStr);
-                }
-            }
-            finally
-            {
-                if (lockToken)
-                {
-                    slockAsyncLog.Exit(false);
                 }
             }
             return 0;
@@ -359,13 +351,10 @@ namespace fairino
                 {
                     if (curLogType == FrLogType.ASYNC && logBuf.Count > 0)  //只要有就写
                     {
-                        bool lockToken = false;
-                        slockAsyncLog.Enter(ref lockToken);
-                        asyncWriteBuf.AddRange(logBuf);
-                        logBuf.Clear();
-                        if (lockToken)
+                        lock (logLock)
                         {
-                            slockAsyncLog.Exit(false);
+                            asyncWriteBuf.AddRange(logBuf);
+                            logBuf.Clear();
                         }
 
                         // 确保目录存在
@@ -396,9 +385,7 @@ namespace fairino
 
         public int LogClose()
         {
-            bool lockToken = false;
-            slockAsyncLog.Enter(ref lockToken);
-            try
+            lock (logLock)
             {
                 int curLogCount = logBuf.Count;
                 if (curLogCount > 0)
@@ -421,13 +408,6 @@ namespace fairino
                     {
                         Console.WriteLine($"LogClose write failed: {ex.Message}");
                     }
-                }
-            }
-            finally
-            {
-                if (lockToken)
-                {
-                    slockAsyncLog.Exit(false);
                 }
             }
             writeLogAsyncFlag = false;

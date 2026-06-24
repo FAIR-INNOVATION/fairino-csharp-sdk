@@ -507,10 +507,16 @@ namespace testFrRobot
                 //DescPose enddescPose = new DescPose(double.Parse(txtEndX.Text), double.Parse(txtEndY.Text), double.Parse(txtEndZ.Text), double.Parse(txtEndRX.Text), double.Parse(txtEndRY.Text), double.Parse(txtEndRZ.Text));
                 //JointPos endjointPos = new JointPos(double.Parse(txtEndJ1.Text), double.Parse(txtEndJ2.Text), double.Parse(txtEndJ3.Text), double.Parse(txtEndJ4.Text), double.Parse(txtEndJ5.Text), double.Parse(txtEndJ6.Text));
 
-                DescPose startdescPose = new DescPose(238.209, -403.633, 251.291, 177.222, -1.433, 133.675);
-                JointPos startjointPos = new JointPos(-48.728, -86.235, -95.288, -90.025, 92.715, 87.595);
-                DescPose enddescPose = new DescPose(238.207, -596.305, 251.294, 177.223, -1.432, 133.675);
-                JointPos endjointPos = new JointPos(-60.240, -110.743, -66.784, -94.531, 92.351, 76.078);
+                //DescPose startdescPose = new DescPose(238.209, -403.633, 251.291, 177.222, -1.433, 133.675);
+                //JointPos startjointPos = new JointPos(-48.728, -86.235, -95.288, -90.025, 92.715, 87.595);
+                //DescPose enddescPose = new DescPose(238.207, -596.305, 251.294, 177.223, -1.432, 133.675);
+                //JointPos endjointPos = new JointPos(-60.240, -110.743, -66.784, -94.531, 92.351, 76.078);
+
+                DescPose startdescPose = new DescPose(441.901, 416.508, -51.979, -179.234, 0.718, -115.305);
+                JointPos startjointPos = new JointPos(-146.22, -60.551, 104.859, -135.317, -90.289, 59.088);
+
+                DescPose enddescPose = new DescPose(441.901, 615.317, -51.979, -179.234, 0.718, -115.305);
+                JointPos endjointPos = new JointPos(-133.22, -44.193, 74.934, -121.661, -90.509, 72.087);
 
                 ExaxisPos exaxisPos = new ExaxisPos(0, 0, 0, 0);
                 DescPose offdese = new DescPose(0, 0, 0, 0, 0, 0);
@@ -529,10 +535,16 @@ namespace testFrRobot
                 //DescPose enddescPose = new DescPose(double.Parse(txtEndX.Text), double.Parse(txtEndY.Text), double.Parse(txtEndZ.Text), double.Parse(txtEndRX.Text), double.Parse(txtEndRY.Text), double.Parse(txtEndRZ.Text));
                 //JointPos endjointPos = new JointPos(double.Parse(txtEndJ1.Text), double.Parse(txtEndJ2.Text), double.Parse(txtEndJ3.Text), double.Parse(txtEndJ4.Text), double.Parse(txtEndJ5.Text), double.Parse(txtEndJ6.Text));
 
-                DescPose startdescPose = new DescPose(238.209, -403.633, 251.291, 177.222, -1.433, 133.675);
-                JointPos startjointPos = new JointPos(-48.728, -86.235, -95.288, -90.025, 92.715, 87.595);
-                DescPose enddescPose = new DescPose(238.207, -596.305, 251.294, 177.223, -1.432, 133.675);
-                JointPos endjointPos = new JointPos(-60.240, -110.743, -66.784, -94.531, 92.351, 76.078);
+                //DescPose startdescPose = new DescPose(238.209, -403.633, 251.291, 177.222, -1.433, 133.675);
+                //JointPos startjointPos = new JointPos(-48.728, -86.235, -95.288, -90.025, 92.715, 87.595);
+                //DescPose enddescPose = new DescPose(238.207, -596.305, 251.294, 177.223, -1.432, 133.675);
+                //JointPos endjointPos = new JointPos(-60.240, -110.743, -66.784, -94.531, 92.351, 76.078);
+
+                DescPose startdescPose = new DescPose(441.901, 416.508, -51.979, -179.234, 0.718, -115.305);
+                JointPos startjointPos = new JointPos(-146.22, -60.551, 104.859, -135.317, -90.289, 59.088);
+
+                DescPose enddescPose = new DescPose(441.901, 615.317, -51.979, -179.234, 0.718, -115.305);
+                JointPos endjointPos = new JointPos(-133.22, -44.193, 74.934, -121.661, -90.509, 72.087);
 
                 ExaxisPos exaxisPos = new ExaxisPos(0, 0, 0, 0);
                 DescPose offdese = new DescPose(0, 0, 0, 0, 0, 0);

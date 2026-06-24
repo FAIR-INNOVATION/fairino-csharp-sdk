@@ -69,7 +69,7 @@ namespace testFrRobot
 
         private void btnGetParam_Click(object sender, EventArgs e)
         {
-            int ID = -1, company = -1, model = -1, soft = -1, fenbian = -1;
+            int  company = -1, model = -1, soft = -1, fenbian = -1;
             double radio = 0;
             int errCode = 0;
             int servoState = 0;
@@ -129,14 +129,13 @@ namespace testFrRobot
         {
             
                 robot.AuxServoSetParam(int.Parse(txtID.Text), int.Parse(txtCompany.Text), int.Parse(txtModel.Text), int.Parse(txtSoft.Text), int.Parse(txtFenbian.Text), double.Parse(txtRadio.Text));
-                int ID = -1, company = -1, model = -1, soft = -1, fenbian = -1;
+                int company = -1, model = -1, soft = -1, fenbian = -1;
                 double radio = 0;
                 int errCode = 0;
                 int servoState = 0;
                 double pos = 0;
                 double speed = 0;
                 double torque = 0;
-                bool homeOver = false;
 
 
                 robot.AuxServoGetParam(int.Parse(txtID.Text), ref company, ref model, ref soft, ref fenbian, ref radio);
@@ -200,25 +199,21 @@ namespace testFrRobot
 
             }
 
-            robot.AuxServoEnable(int.Parse(txtID.Text), 0);
-                Thread.Sleep(100);
-                robot.AuxServoSetControlMode(int.Parse(txtID.Text), 1);
-                Thread.Sleep(100);
-                robot.AuxServoEnable(int.Parse(txtID.Text), 1);
-                Thread.Sleep(100);
-                robot.AuxServoHoming(int.Parse(txtID.Text), 1, 20, 5);
-                Thread.Sleep(4000);
-                robot.AuxServoSetTargetSpeed(int.Parse(txtID.Text), 50);
-                Thread.Sleep(3000);
+            //robot.AuxServoEnable(int.Parse(txtID.Text), 0);
+            //    Thread.Sleep(100);
+            //    robot.AuxServoSetControlMode(int.Parse(txtID.Text), 1);
+            //    Thread.Sleep(100);
+            //    robot.AuxServoEnable(int.Parse(txtID.Text), 1);
+            //    Thread.Sleep(100);
+            //    robot.AuxServoHoming(int.Parse(txtID.Text), 1, 20, 5);
+            //    Thread.Sleep(4000);
+            //    robot.AuxServoSetTargetSpeed(int.Parse(txtID.Text), 50);
+            //    Thread.Sleep(3000);
 
-                robot.AuxServoSetTargetSpeed(int.Parse(txtID.Text), -300);
-                Thread.Sleep(3000);
-                robot.AuxServoSetTargetSpeed(int.Parse(txtID.Text), 0);
-                Thread.Sleep(100);
-
-
-
-            
+            //    robot.AuxServoSetTargetSpeed(int.Parse(txtID.Text), -300);
+            //    Thread.Sleep(3000);
+            //    robot.AuxServoSetTargetSpeed(int.Parse(txtID.Text), 0);
+            //    Thread.Sleep(100);
 
         }
 

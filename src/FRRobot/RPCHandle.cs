@@ -4,7 +4,6 @@ using System.Data.SqlTypes;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Windows.Forms;
 //using System.Threading.Tasks;
 using CookComputing.XmlRpc;
 using fairino;
@@ -1839,7 +1838,7 @@ namespace fairino
         object[] GetAxleLuaEnableStatus();
 
         [XmlRpcMethod("SetAxleLuaEnableDeviceType")]
-        int SetAxleLuaEnableDeviceType(int forceSensorEnable, int gripperEnable, int IOEnable);
+        int SetAxleLuaEnableDeviceType(int forceSensorEnable, int gripperEnable, int IOEnable, int dexhandEnable);
 
         [XmlRpcMethod("GetAxleLuaEnableDeviceType")]
         object[] GetAxleLuaEnableDeviceType();
@@ -1943,8 +1942,8 @@ namespace fairino
         [XmlRpcMethod("ShutDownRobotOS")]
         int ShutDownRobotOS();
 
-        [XmlRpcMethod("ConveryComDetect")]
-        int ConveryComDetect(int timeout);
+        [XmlRpcMethod("ConveyorComDetect")]
+        int ConveyorComDetect(int timeout);
 
 
         [XmlRpcMethod("ConveyorComDetectTrigger")]
@@ -1957,10 +1956,10 @@ namespace fairino
         int ArcWeldTraceAIChannelVoltage(int channel);
 
         [XmlRpcMethod("ArcWeldTraceCurrentPara")]
-        int ArcWeldTraceCurrentPara(float AILow, float AIHigh, float currentLow, float currentHigh);
+        int ArcWeldTraceCurrentPara(double AILow, double AIHigh, double currentLow, double currentHigh);
 
         [XmlRpcMethod("ArcWeldTraceVoltagePara")]
-        int ArcWeldTraceVoltagePara(float AILow, float AIHigh, float voltageLow, float voltageHigh);
+        int ArcWeldTraceVoltagePara(double AILow, double AIHigh, double voltageLow, double voltageHigh);
 
         [XmlRpcMethod("WeldingSetVoltageGradualChangeStart")]
         int WeldingSetVoltageGradualChangeStart(int IOType, double voltageStart, double voltageEnd, int AOIndex, int blend);
@@ -2200,7 +2199,7 @@ namespace fairino
         /// 参数: double[6] { j1, j2, j3, j4, j5, j6 }
         /// </summary>
         [XmlRpcMethod("SetVelFeedForwardRatio")]
-        int SetVelFeedForwardRatio(object[] param);
+        int SetVelFeedForwardRatio(double[] param);
 
         /// <summary>
         /// 获取各轴速度前馈系数
@@ -2233,8 +2232,8 @@ namespace fairino
 
         int SetAdmittanceParams(object[] admittanceParams);
 
-        [XmlRpcMethod("SerCoderCompenParams")]
-        int SerCoderCompenParams(object[] serCoderParams);
+        [XmlRpcMethod("SetCoderCompenParams")]
+        int SetCoderCompenParams(object[] serCoderParams);
 		
         [XmlRpcMethod("GetActualTCPPose")]
         object[] GetActualTCPPose(int flag);
@@ -2271,6 +2270,24 @@ namespace fairino
 
         [XmlRpcMethod("FT_RotInsertion")]
         int FT_RotInsertion(int rcs, double angVelRot, double ft, double max_angle, int orn, double max_angAcc, int rotorn, int strategy);
+
+        [XmlRpcMethod("FT_LinInsertion")]
+        int FT_LinInsertion(int rcs, double ft, double lin_v, double lin_a, double max_dis, int linorn);
+
+        [XmlRpcMethod("FT_FindSurface")]
+        int FT_FindSurface(int rcs, int dir, int axis, double lin_v, double lin_a, double max_dis, double ft);
+
+        [XmlRpcMethod("FT_CalCenterStart")]
+        int FT_CalCenterStart();
+
+        [XmlRpcMethod("FT_CalCenterEnd")]
+        object[] FT_CalCenterEnd();
+
+        [XmlRpcMethod("SetWeavebackCenterConfig")]
+        int SetWeavebackCenterConfig(int flag);
+
+        [XmlRpcMethod("GetWeavebackCenterConfig")]
+        object[] GetWeavebackCenterConfig();
 
         [XmlRpcMethod("GetInverseKinExaxis")]
         object[] GetInverseKinExaxis(int type, double[] desc_pos, double[] exaxis, int tool, int workPiece);
@@ -2409,6 +2426,20 @@ namespace fairino
         [XmlRpcMethod("SetLaserWeldingErrStateExtDiNum")]
         int SetLaserWeldingErrStateExtDiNum(int diNum);
 
+        [XmlRpcMethod("SetDexterousHandsMove")]
+        int SetDexterousHandsMove(int p1, int p2, double[] p3, int[] p4, int[] p5, int p6);
+
+        [XmlRpcMethod("SetDexterousHandsAct")]
+        int SetDexterousHandsAct(int p1,int p6);
+
+        [XmlRpcMethod("ClearDexterousHandsError")]
+        int ClearDexterousHandsError();
+
+        [XmlRpcMethod("SetDexterousHandsFunc")]
+        int SetDexterousHandsFunc(int p1, int[] p2);
+
+        [XmlRpcMethod("GetDexterousHandsFunc")]
+        object[] GetDexterousHandsFunc(int p1);
     }
     internal class RPCHandle
     {

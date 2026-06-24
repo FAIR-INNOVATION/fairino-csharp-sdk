@@ -293,14 +293,14 @@ namespace fairino
 
         public byte EmergencyStop;          // 急停标志，0-未按下，1-按下
         public int motion_done;             // 运动到位信号，1-到位，0-未到位
-        public byte gripper_motiondone;     // 夹爪运动完成信号，1-完成，0-未完成
+        public byte gripper_motiondone;     // 夹爪运动完成信号，0-未完成，1-完成(未检测到物体)，2-运动完成（检测到物体）
         public int mc_queue_len;            // 运动指令队列长度
         public byte collisionState;         // 碰撞检测，1-碰撞，0-无碰撞
         public int trajectory_pnum;         // 轨迹点编号
         public byte safety_stop0_state;     // 安全停止信号SI0
         public byte safety_stop1_state;     // 安全停止信号SI1
         public byte gripper_fault_id;       // 错误夹爪号
-        public UInt16 gripper_fault;     /* 夹爪故障 */
+        public UInt16 gripper_fault;     /* 夹爪故障 0-无故障 1-485超时 2-指令错误 3-工件掉落 其他-夹爪故障码+3*/
         public UInt16 gripper_active;    /* 夹爪激活状态 */
         public byte gripper_position;       // 夹爪位置
         public byte gripper_speed;       /* 夹爪速度 */

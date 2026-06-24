@@ -91,14 +91,14 @@
             this.button43 = new System.Windows.Forms.Button();
             this.button44 = new System.Windows.Forms.Button();
             this.button45 = new System.Windows.Forms.Button();
+            this.button51 = new System.Windows.Forms.Button();
+            this.button52 = new System.Windows.Forms.Button();
             this.button46 = new System.Windows.Forms.Button();
             this.button47 = new System.Windows.Forms.Button();
             this.flowLayoutPanel5 = new System.Windows.Forms.FlowLayoutPanel();
             this.button48 = new System.Windows.Forms.Button();
             this.button49 = new System.Windows.Forms.Button();
             this.button50 = new System.Windows.Forms.Button();
-            this.button51 = new System.Windows.Forms.Button();
-            this.button52 = new System.Windows.Forms.Button();
             this.button53 = new System.Windows.Forms.Button();
             this.button54 = new System.Windows.Forms.Button();
             this.button55 = new System.Windows.Forms.Button();
@@ -126,6 +126,7 @@
             this.button73 = new System.Windows.Forms.Button();
             this.button74 = new System.Windows.Forms.Button();
             this.btnLaserWeld = new System.Windows.Forms.Button();
+            this.button105 = new System.Windows.Forms.Button();
             this.flowLayoutPanel8 = new System.Windows.Forms.FlowLayoutPanel();
             this.button89 = new System.Windows.Forms.Button();
             this.button88 = new System.Windows.Forms.Button();
@@ -170,7 +171,6 @@
             this.flowLayoutPanel1.Controls.Add(this.button6);
             this.flowLayoutPanel1.Controls.Add(this.button7);
             this.flowLayoutPanel1.Controls.Add(this.button8);
-            this.flowLayoutPanel1.Controls.Add(this.button9);
             this.flowLayoutPanel1.Location = new System.Drawing.Point(59, 12);
             this.flowLayoutPanel1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
@@ -275,12 +275,12 @@
             // 
             // button9
             // 
-            this.button9.Location = new System.Drawing.Point(3, 335);
+            this.button9.Location = new System.Drawing.Point(3, 648);
             this.button9.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.button9.Name = "button9";
             this.button9.Size = new System.Drawing.Size(136, 34);
             this.button9.TabIndex = 10;
-            this.button9.Text = "摆动渐变";
+            this.button9.Text = "焊接电流电压渐变";
             this.button9.UseVisualStyleBackColor = true;
             this.button9.Click += new System.EventHandler(this.button9_Click);
             // 
@@ -725,12 +725,13 @@
             this.flowLayoutPanel4.Controls.Add(this.button43);
             this.flowLayoutPanel4.Controls.Add(this.button44);
             this.flowLayoutPanel4.Controls.Add(this.button45);
-            this.flowLayoutPanel4.Controls.Add(this.button46);
-            this.flowLayoutPanel4.Controls.Add(this.button47);
+            this.flowLayoutPanel4.Controls.Add(this.button51);
+            this.flowLayoutPanel4.Controls.Add(this.button52);
+            this.flowLayoutPanel4.Controls.Add(this.button9);
             this.flowLayoutPanel4.Location = new System.Drawing.Point(539, 18);
             this.flowLayoutPanel4.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.flowLayoutPanel4.Name = "flowLayoutPanel4";
-            this.flowLayoutPanel4.Size = new System.Drawing.Size(144, 689);
+            this.flowLayoutPanel4.Size = new System.Drawing.Size(155, 689);
             this.flowLayoutPanel4.TabIndex = 6;
             // 
             // button31
@@ -859,7 +860,7 @@
             this.button42.Location = new System.Drawing.Point(3, 420);
             this.button42.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.button42.Name = "button42";
-            this.button42.Size = new System.Drawing.Size(136, 34);
+            this.button42.Size = new System.Drawing.Size(166, 34);
             this.button42.TabIndex = 24;
             this.button42.Text = "TestSetWeldParam";
             this.button42.UseVisualStyleBackColor = true;
@@ -898,9 +899,31 @@
             this.button45.UseVisualStyleBackColor = true;
             this.button45.Click += new System.EventHandler(this.button45_Click);
             // 
+            // button51
+            // 
+            this.button51.Location = new System.Drawing.Point(3, 572);
+            this.button51.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.button51.Name = "button51";
+            this.button51.Size = new System.Drawing.Size(136, 34);
+            this.button51.TabIndex = 33;
+            this.button51.Text = "TestExtDIConfig";
+            this.button51.UseVisualStyleBackColor = true;
+            this.button51.Click += new System.EventHandler(this.button51_Click);
+            // 
+            // button52
+            // 
+            this.button52.Location = new System.Drawing.Point(3, 610);
+            this.button52.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.button52.Name = "button52";
+            this.button52.Size = new System.Drawing.Size(136, 34);
+            this.button52.TabIndex = 34;
+            this.button52.Text = "TestArcWeldTrace";
+            this.button52.UseVisualStyleBackColor = true;
+            this.button52.Click += new System.EventHandler(this.button52_Click);
+            // 
             // button46
             // 
-            this.button46.Location = new System.Drawing.Point(3, 572);
+            this.button46.Location = new System.Drawing.Point(3, 534);
             this.button46.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.button46.Name = "button46";
             this.button46.Size = new System.Drawing.Size(136, 34);
@@ -911,7 +934,7 @@
             // 
             // button47
             // 
-            this.button47.Location = new System.Drawing.Point(3, 610);
+            this.button47.Location = new System.Drawing.Point(3, 496);
             this.button47.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.button47.Name = "button47";
             this.button47.Size = new System.Drawing.Size(136, 34);
@@ -925,8 +948,6 @@
             this.flowLayoutPanel5.Controls.Add(this.button48);
             this.flowLayoutPanel5.Controls.Add(this.button49);
             this.flowLayoutPanel5.Controls.Add(this.button50);
-            this.flowLayoutPanel5.Controls.Add(this.button51);
-            this.flowLayoutPanel5.Controls.Add(this.button52);
             this.flowLayoutPanel5.Controls.Add(this.button53);
             this.flowLayoutPanel5.Controls.Add(this.button54);
             this.flowLayoutPanel5.Controls.Add(this.button55);
@@ -937,6 +958,8 @@
             this.flowLayoutPanel5.Controls.Add(this.button60);
             this.flowLayoutPanel5.Controls.Add(this.button61);
             this.flowLayoutPanel5.Controls.Add(this.button62);
+            this.flowLayoutPanel5.Controls.Add(this.button47);
+            this.flowLayoutPanel5.Controls.Add(this.button46);
             this.flowLayoutPanel5.Location = new System.Drawing.Point(700, 18);
             this.flowLayoutPanel5.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.flowLayoutPanel5.Name = "flowLayoutPanel5";
@@ -976,31 +999,9 @@
             this.button50.UseVisualStyleBackColor = true;
             this.button50.Click += new System.EventHandler(this.button50_Click);
             // 
-            // button51
-            // 
-            this.button51.Location = new System.Drawing.Point(3, 116);
-            this.button51.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.button51.Name = "button51";
-            this.button51.Size = new System.Drawing.Size(136, 34);
-            this.button51.TabIndex = 33;
-            this.button51.Text = "TestExtDIConfig";
-            this.button51.UseVisualStyleBackColor = true;
-            this.button51.Click += new System.EventHandler(this.button51_Click);
-            // 
-            // button52
-            // 
-            this.button52.Location = new System.Drawing.Point(3, 154);
-            this.button52.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.button52.Name = "button52";
-            this.button52.Size = new System.Drawing.Size(136, 34);
-            this.button52.TabIndex = 34;
-            this.button52.Text = "TestArcWeldTrace";
-            this.button52.UseVisualStyleBackColor = true;
-            this.button52.Click += new System.EventHandler(this.button52_Click);
-            // 
             // button53
             // 
-            this.button53.Location = new System.Drawing.Point(3, 192);
+            this.button53.Location = new System.Drawing.Point(3, 116);
             this.button53.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.button53.Name = "button53";
             this.button53.Size = new System.Drawing.Size(136, 34);
@@ -1011,7 +1012,7 @@
             // 
             // button54
             // 
-            this.button54.Location = new System.Drawing.Point(3, 230);
+            this.button54.Location = new System.Drawing.Point(3, 154);
             this.button54.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.button54.Name = "button54";
             this.button54.Size = new System.Drawing.Size(136, 34);
@@ -1022,7 +1023,7 @@
             // 
             // button55
             // 
-            this.button55.Location = new System.Drawing.Point(3, 268);
+            this.button55.Location = new System.Drawing.Point(3, 192);
             this.button55.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.button55.Name = "button55";
             this.button55.Size = new System.Drawing.Size(136, 34);
@@ -1033,7 +1034,7 @@
             // 
             // button56
             // 
-            this.button56.Location = new System.Drawing.Point(3, 306);
+            this.button56.Location = new System.Drawing.Point(3, 230);
             this.button56.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.button56.Name = "button56";
             this.button56.Size = new System.Drawing.Size(136, 34);
@@ -1044,7 +1045,7 @@
             // 
             // button57
             // 
-            this.button57.Location = new System.Drawing.Point(3, 344);
+            this.button57.Location = new System.Drawing.Point(3, 268);
             this.button57.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.button57.Name = "button57";
             this.button57.Size = new System.Drawing.Size(136, 34);
@@ -1055,7 +1056,7 @@
             // 
             // button58
             // 
-            this.button58.Location = new System.Drawing.Point(3, 382);
+            this.button58.Location = new System.Drawing.Point(3, 306);
             this.button58.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.button58.Name = "button58";
             this.button58.Size = new System.Drawing.Size(136, 34);
@@ -1066,10 +1067,10 @@
             // 
             // button59
             // 
-            this.button59.Location = new System.Drawing.Point(3, 420);
+            this.button59.Location = new System.Drawing.Point(3, 344);
             this.button59.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.button59.Name = "button59";
-            this.button59.Size = new System.Drawing.Size(136, 34);
+            this.button59.Size = new System.Drawing.Size(156, 34);
             this.button59.TabIndex = 41;
             this.button59.Text = "TestSurface";
             this.button59.UseVisualStyleBackColor = true;
@@ -1077,7 +1078,7 @@
             // 
             // button60
             // 
-            this.button60.Location = new System.Drawing.Point(3, 458);
+            this.button60.Location = new System.Drawing.Point(3, 382);
             this.button60.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.button60.Name = "button60";
             this.button60.Size = new System.Drawing.Size(136, 34);
@@ -1088,7 +1089,7 @@
             // 
             // button61
             // 
-            this.button61.Location = new System.Drawing.Point(3, 496);
+            this.button61.Location = new System.Drawing.Point(3, 420);
             this.button61.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.button61.Name = "button61";
             this.button61.Size = new System.Drawing.Size(136, 34);
@@ -1099,7 +1100,7 @@
             // 
             // button62
             // 
-            this.button62.Location = new System.Drawing.Point(3, 534);
+            this.button62.Location = new System.Drawing.Point(3, 458);
             this.button62.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.button62.Name = "button62";
             this.button62.Size = new System.Drawing.Size(136, 34);
@@ -1173,6 +1174,7 @@
             this.flowLayoutPanel7.Controls.Add(this.button73);
             this.flowLayoutPanel7.Controls.Add(this.button74);
             this.flowLayoutPanel7.Controls.Add(this.btnLaserWeld);
+            this.flowLayoutPanel7.Controls.Add(this.button105);
             this.flowLayoutPanel7.Location = new System.Drawing.Point(1227, 122);
             this.flowLayoutPanel7.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.flowLayoutPanel7.Name = "flowLayoutPanel7";
@@ -1302,13 +1304,24 @@
             // btnLaserWeld
             // 
             this.btnLaserWeld.Location = new System.Drawing.Point(4, 384);
-            this.btnLaserWeld.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnLaserWeld.Margin = new System.Windows.Forms.Padding(4);
             this.btnLaserWeld.Name = "btnLaserWeld";
             this.btnLaserWeld.Size = new System.Drawing.Size(135, 41);
             this.btnLaserWeld.TabIndex = 56;
             this.btnLaserWeld.Text = "激光焊接";
             this.btnLaserWeld.UseVisualStyleBackColor = true;
             this.btnLaserWeld.Click += new System.EventHandler(this.btnLaserWeld_Click);
+            // 
+            // button105
+            // 
+            this.button105.Location = new System.Drawing.Point(4, 433);
+            this.button105.Margin = new System.Windows.Forms.Padding(4);
+            this.button105.Name = "button105";
+            this.button105.Size = new System.Drawing.Size(135, 41);
+            this.button105.TabIndex = 57;
+            this.button105.Text = "灵巧手测试";
+            this.button105.UseVisualStyleBackColor = true;
+            this.button105.Click += new System.EventHandler(this.button105_Click);
             // 
             // flowLayoutPanel8
             // 
@@ -1577,7 +1590,7 @@
             this.button104.Location = new System.Drawing.Point(3, 551);
             this.button104.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.button104.Name = "button104";
-            this.button104.Size = new System.Drawing.Size(268, 88);
+            this.button104.Size = new System.Drawing.Size(268, 66);
             this.button104.TabIndex = 49;
             this.button104.Text = "Text";
             this.button104.UseVisualStyleBackColor = true;
@@ -1739,5 +1752,6 @@
         private System.Windows.Forms.Button TestDragSwitchDetect;
         private System.Windows.Forms.Button button104;
         private System.Windows.Forms.Button btnLaserWeld;
+        private System.Windows.Forms.Button button105;
     }
 }

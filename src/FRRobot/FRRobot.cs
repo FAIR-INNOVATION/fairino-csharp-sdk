@@ -19,15 +19,8 @@ using System.Runtime.InteropServices.ComTypes;
 using System.Xml.Linq;
 using System.Data;
 using System.Text.RegularExpressions;
-using static System.Windows.Forms.AxHost;
-using System.Drawing.Drawing2D;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
-using System.Drawing;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.Rebar;
 using System.Globalization;
-using System.Windows.Forms;
 using static System.Net.WebRequestMethods;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.TaskbarClock;
 using System.Runtime.Remoting.Channels;
 using System.Security.AccessControl;
 using System.IO.Ports;
@@ -41,7 +34,7 @@ namespace fairino
     {
         ICallSupervisor proxy = null;
 
-        const string SDK_VERSION = " C#SDK-V1.2.7  Web-3.9.6";
+        const string SDK_VERSION = " C#SDK-V1.2.8  Web-3.9.7";
 
         private string robot_ip = "192.168.57.2";//机器人ip
         private int g_sock_com_err = (int)RobotError.ERR_SUCCESS;
@@ -235,14 +228,14 @@ namespace fairino
             byte[] recvbuf = new byte[BUFFER_SIZE];
             byte[] tmp_recvbuf = new byte[BUFFER_SIZE];
             byte[] state_pkg = new byte[BUFFER_SIZE];
-            int i;
-            byte find_head_flag = 0;
-            UInt16 index = 0;
-            UInt16 len = 0;
-            UInt16 tmp_len = 0;
-            int recvbyte = 0;
+            //int i;
+            //byte find_head_flag = 0;
+            //UInt16 index = 0;
+            //UInt16 len = 0;
+            //UInt16 tmp_len = 0;
+            //int recvbyte = 0;
 
-            long start = 0;
+            //long start = 0;
 
             sock_cli_state = new StatusTCPClient(robot_ip, ROBOT_REALTIME_PORT);
             sock_cli_state.SetReconnectParam(reconnEnable, reconnTimes, reconnPeriod);//断线重连参数
@@ -806,20 +799,21 @@ namespace fairino
 
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
         public int GetSafetyCode()
@@ -855,20 +849,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -892,20 +887,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -1027,7 +1023,7 @@ namespace fairino
 
                 if (log != null)
                 {
-                    log.LogInfo($"SingularAvoidEnd  fail : {rtn}");
+                    log.LogInfo($"SingularAvoidEnd : {rtn}");
                 }
 
                 return rtn;
@@ -1072,20 +1068,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -1109,20 +1106,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -1145,20 +1143,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
         /**
@@ -1212,10 +1211,7 @@ namespace fairino
                     }
                     return g_sock_com_err;
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
 
             }
         }
@@ -1374,10 +1370,7 @@ namespace fairino
                     }
                     return g_sock_com_err;
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -1519,10 +1512,7 @@ namespace fairino
                     }
                     return g_sock_com_err;
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
         /**
@@ -1720,10 +1710,7 @@ namespace fairino
                     }
                     return g_sock_com_err;
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -1833,9 +1820,9 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch(Exception ex)
+            catch
             {
-    
+                
                 if (IsSockComError())
                 {
                     if (log != null)
@@ -1844,10 +1831,7 @@ namespace fairino
                     }
                     return g_sock_com_err;
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -1885,20 +1869,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -1960,10 +1945,7 @@ namespace fairino
                     log?.LogError($"RPC exception: {ex.Message}");
                     return g_sock_com_err;
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -2026,10 +2008,7 @@ namespace fairino
                     log?.LogError($"RPC exception: {ex.Message}");
                     return g_sock_com_err;
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -2079,7 +2058,7 @@ namespace fairino
                     FRAME frame = new FRAME
                     {
                         count = frameCnt++,
-                        cmdID = 476,
+                        cmdID = 376,
                         content = cmdStr,
                         contentLen = cmdStr.Length,
                         head = "/f/b",
@@ -2107,10 +2086,7 @@ namespace fairino
                     log?.LogError($"RPC exception: {ex.Message}");
                     return g_sock_com_err;
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -2169,20 +2145,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -2219,20 +2196,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -2260,20 +2238,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -2314,20 +2293,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
         /**
@@ -2349,20 +2329,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -2392,20 +2373,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -2471,10 +2453,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
         /**
@@ -2496,20 +2475,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -2637,10 +2617,7 @@ namespace fairino
                     }
                     return g_sock_com_err;
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -2663,20 +2640,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -2703,20 +2681,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -2744,20 +2723,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -2784,20 +2764,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -2824,20 +2805,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -2994,20 +2976,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
 
         }
@@ -3036,20 +3019,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -3252,20 +3236,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -3294,20 +3279,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -3332,20 +3318,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
 
         }
@@ -3372,20 +3359,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -3410,20 +3398,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -3461,20 +3450,21 @@ namespace fairino
                 }
                 return (int)result[0];
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -3499,20 +3489,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -3550,20 +3541,21 @@ namespace fairino
                 }
                 return (int)result[0];
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -3594,20 +3586,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
 
         }
@@ -3638,20 +3631,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -3677,20 +3671,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -3728,20 +3723,21 @@ namespace fairino
                 }
                 return (int)result[0];
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -3770,20 +3766,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -3812,20 +3809,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -3850,20 +3848,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
 
         }
@@ -3904,20 +3903,21 @@ namespace fairino
                 }
                 return (int)result[0];
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
 
         }
@@ -3947,20 +3947,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -3988,20 +3989,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -4027,20 +4029,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -4065,20 +4068,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -4104,20 +4108,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
         /**
@@ -4173,20 +4178,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -4211,20 +4217,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -4244,7 +4251,7 @@ namespace fairino
 
             try
             {
-                double[] collisionLevel;
+                double[] collisionLevel = level;
                 if (mode == 1)
                 {
                     collisionLevel = Array.ConvertAll<double, double>(level, t => Convert.ToDouble(t) * 10);
@@ -4260,20 +4267,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -4302,20 +4310,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
 
         }
@@ -4341,20 +4350,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -4379,20 +4389,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -4416,20 +4427,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -4454,20 +4466,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -4492,20 +4505,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -4530,20 +4544,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -4568,20 +4583,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -4606,20 +4622,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
 
         }
@@ -4687,20 +4704,21 @@ namespace fairino
                 }
                 return (int)result[0];
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -4794,20 +4812,21 @@ namespace fairino
                 }
                 return (int)result[0];
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -5197,20 +5216,21 @@ namespace fairino
                 }
                 return (int)result[0];
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -5249,20 +5269,21 @@ namespace fairino
                 }
                 return (int)result[0];
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
 
         }
@@ -5308,10 +5329,7 @@ namespace fairino
                     }
                     return g_sock_com_err;
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -5347,20 +5365,21 @@ namespace fairino
                 }
                 return (int)result[0];
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
 
         }
@@ -5424,20 +5443,21 @@ namespace fairino
                 }
                 return (int)result[0];
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -5469,20 +5489,21 @@ namespace fairino
                 }
                 return (int)result[0];
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -5517,20 +5538,21 @@ namespace fairino
                 }
                 return (int)result[0];
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
 
         }
@@ -5566,20 +5588,21 @@ namespace fairino
                 }
                 return (int)result[0];
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
 
         }
@@ -5622,20 +5645,21 @@ namespace fairino
                 }
                 return (int)result[0];
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
 
         }
@@ -5670,20 +5694,21 @@ namespace fairino
 
                 return errcode;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
 
         }
@@ -5713,20 +5738,21 @@ namespace fairino
                 }
                 return (int)result[0];
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -5755,20 +5781,21 @@ namespace fairino
                 }
                 return (int)result[0];
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -5871,9 +5898,11 @@ namespace fairino
             try
             {
                 object[] result = proxy.GetRobotTeachingPoint(name);
+                Console.WriteLine("data is: {0} \n", result[0]);
                 if ((int)result[0] == 0)
                 {
                     string paramStr = (string)result[1];
+                    //Console.WriteLine("data is: {0} \n", (string)result[1]);
                     string[] parS = paramStr.Split(',');
                     if (parS.Length != 20)
                     {
@@ -5959,20 +5988,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
 
         }
@@ -6002,20 +6032,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -6039,20 +6070,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -6077,20 +6109,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
 
         }
@@ -6116,20 +6149,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
 
         }
@@ -6164,20 +6198,21 @@ namespace fairino
                 }
                 return (int)result[0];
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
 
         }
@@ -6209,20 +6244,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -6249,20 +6285,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
 
         }
@@ -6291,20 +6328,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -6338,20 +6376,21 @@ namespace fairino
                 }
                 return (int)result[0];
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
 
         }
@@ -6398,10 +6437,7 @@ namespace fairino
                     }
                     return g_sock_com_err;
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
 
         }
@@ -6428,20 +6464,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
 
         }
@@ -6468,20 +6505,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -6506,20 +6544,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
 
         }
@@ -6545,20 +6584,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
 
         }
@@ -6584,20 +6624,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
 
         }
@@ -6623,20 +6664,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -6661,20 +6703,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
 
         }
@@ -6700,20 +6743,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
 
         }
@@ -6740,20 +6784,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
 
         }
@@ -6779,20 +6824,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
 
         }
@@ -6822,20 +6868,21 @@ namespace fairino
                 }
                 return (int)result[0];
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
 
         }
@@ -6865,20 +6912,21 @@ namespace fairino
                 }
                 return (int)result[0];
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
 
 
@@ -6908,20 +6956,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
 
         }
@@ -6950,20 +6999,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -6991,20 +7041,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
 
         }
@@ -7029,20 +7080,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
 
         }
@@ -7099,20 +7151,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -7147,20 +7200,21 @@ namespace fairino
                 }
                 return (int)result[0];
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -7186,20 +7240,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -7237,20 +7292,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
 
         }
@@ -7282,20 +7338,21 @@ namespace fairino
                 }
                 return (int)result[0];
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -7524,20 +7581,21 @@ namespace fairino
                 }
                 return (int)result[0];
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
 
         }
@@ -7580,20 +7638,21 @@ namespace fairino
                 }
                 return (int)result[0];
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
         /**
@@ -7621,20 +7680,21 @@ namespace fairino
 
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
 
         }
@@ -7671,20 +7731,21 @@ namespace fairino
                 }
                 return (int)result[0];
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -7709,20 +7770,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -7747,20 +7809,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
 
         }
@@ -7787,20 +7850,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -7826,20 +7890,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -7880,10 +7945,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
 
         }
@@ -7921,10 +7983,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
 
         }
@@ -7967,10 +8026,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
 
         }
@@ -8085,10 +8141,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -8242,10 +8295,7 @@ namespace fairino
                 {
                     return g_sock_com_err;
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
         //      /**
@@ -8397,10 +8447,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -8435,10 +8482,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -8473,10 +8517,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -8511,10 +8552,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -8552,10 +8590,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -8601,10 +8636,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -8640,10 +8672,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
 
         }
@@ -8679,10 +8708,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
 
         }
@@ -8718,10 +8744,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -8756,10 +8779,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -8794,10 +8814,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -8833,10 +8850,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -8872,10 +8886,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -8911,10 +8922,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -8949,10 +8957,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -8999,10 +9004,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -9038,10 +9040,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -9086,10 +9085,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
 
         }
@@ -9130,10 +9126,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -9174,10 +9167,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
 
         }
@@ -9309,10 +9299,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -9442,10 +9429,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -9561,10 +9545,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -9618,10 +9599,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -9684,10 +9662,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -9798,10 +9773,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -9856,10 +9828,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -9914,10 +9883,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -9955,10 +9921,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -9996,10 +9959,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -10039,10 +9999,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -10082,10 +10039,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -10133,10 +10087,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -10184,10 +10135,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -10226,10 +10174,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -10268,10 +10213,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -10319,10 +10261,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -10366,10 +10305,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -10405,10 +10341,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -10444,10 +10377,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -10484,10 +10414,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -10524,10 +10451,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -10564,10 +10488,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -10794,10 +10715,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -10892,10 +10810,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -11268,7 +11183,7 @@ namespace fairino
                     log.LogDebug("Upload file connected!");
                 }
 
-                client.ReceiveTimeout = 10000;
+                client.ReceiveTimeout = 100000;
                 client.SendTimeout = 2000;
 
                 string sendMd5 = getMD5ByMD5CryptoService(filePath).ToLower();
@@ -11359,9 +11274,9 @@ namespace fairino
 
                 // 记录接收开始时间
                 DateTime receiveStartTime = DateTime.Now;
-
+                Console.WriteLine("start recv");
                 num = client.Receive(resultBuf);
-
+                Console.WriteLine($" recv over {num}");
                 // 记录接收完成时间
                 DateTime receiveEndTime = DateTime.Now;
 
@@ -11438,10 +11353,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -11478,10 +11390,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -11629,10 +11538,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -11674,10 +11580,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -11726,10 +11629,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -11766,10 +11666,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -11806,10 +11703,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -11852,10 +11746,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -11897,10 +11788,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -11941,10 +11829,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -11988,10 +11873,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -12027,10 +11909,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -12079,10 +11958,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -12118,10 +11994,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -12196,10 +12069,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -12235,10 +12105,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -12274,10 +12141,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -12321,10 +12185,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -12359,10 +12220,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -12405,10 +12263,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -12443,10 +12298,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -12502,10 +12354,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -12564,10 +12413,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -12602,10 +12448,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -12640,10 +12483,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -12722,10 +12562,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -12788,10 +12625,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
         /**
@@ -12837,10 +12671,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
 
         }
@@ -12876,10 +12707,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
         /**
@@ -12921,10 +12749,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -12967,10 +12792,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
         /**
@@ -13006,10 +12828,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -13046,10 +12865,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -13088,10 +12904,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -13134,10 +12947,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -13180,10 +12990,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -13223,10 +13030,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -13262,10 +13066,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -13302,10 +13103,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -13347,10 +13145,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -13392,10 +13187,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -13440,10 +13232,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -13486,10 +13275,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -13524,10 +13310,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -13562,10 +13345,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -13613,10 +13393,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -13680,10 +13457,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -13728,10 +13502,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -13766,10 +13537,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -13812,10 +13580,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -13850,10 +13615,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -13898,10 +13660,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -13939,10 +13698,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -13977,10 +13733,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -14015,10 +13768,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -14040,11 +13790,11 @@ namespace fairino
                 if ((int)result[0] == 0)
                 {
                     coord.tran.x = (double)result[1];
-                    coord.tran.y = (double)result[1];
-                    coord.tran.z = (double)result[1];
-                    coord.rpy.rx = (double)result[1];
-                    coord.rpy.ry = (double)result[1];
-                    coord.rpy.rz = (double)result[1];
+                    coord.tran.y = (double)result[2];
+                    coord.tran.z = (double)result[3];
+                    coord.rpy.rx = (double)result[4];
+                    coord.rpy.ry = (double)result[5];
+                    coord.rpy.rz = (double)result[6];
                 }
                 if (log != null)
                 {
@@ -14063,10 +13813,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -14133,10 +13880,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -14219,10 +13963,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -14308,10 +14049,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -14362,10 +14100,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -14399,10 +14134,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -14439,10 +14171,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -14497,10 +14226,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -14535,10 +14261,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -14583,10 +14306,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -14621,10 +14341,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -14665,10 +14382,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -14710,10 +14424,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -14748,10 +14459,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -14788,10 +14496,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -14831,10 +14536,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -14878,10 +14580,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -14976,10 +14675,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -15023,10 +14719,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -15099,10 +14792,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -15145,10 +14835,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -15203,10 +14890,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -15244,10 +14928,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -15289,10 +14970,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -15327,10 +15005,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -15371,10 +15046,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -15399,20 +15071,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -15437,20 +15110,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -15475,20 +15149,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -15513,20 +15188,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -15551,20 +15227,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -15589,20 +15266,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -15627,20 +15305,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -15675,10 +15354,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -15713,10 +15389,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -15751,10 +15424,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -15789,10 +15459,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -15827,10 +15494,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -15865,10 +15529,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -15903,10 +15564,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -15941,10 +15599,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -15979,10 +15634,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -16017,10 +15669,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -16056,10 +15705,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -16095,10 +15741,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -16134,10 +15777,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -16173,10 +15813,7 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -16276,10 +15913,7 @@ namespace fairino
                     log?.LogError($"RPC exception: {ex.Message}");
                     return g_sock_com_err;
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -16310,20 +15944,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -16420,11 +16055,7 @@ namespace fairino
                     log?.LogError($"RPC exception: {ex.Message}");
                     return g_sock_com_err;
                 }
-                else
-                {
-                    // 保持原逻辑：非通信错误时返回成功（可根据需要调整）
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -16486,10 +16117,7 @@ namespace fairino
                     log?.LogError($"RPC exception: {ex.Message}");
                     return g_sock_com_err;
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -16513,20 +16141,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -16555,20 +16184,21 @@ namespace fairino
                 }
                 return (int)result[0];
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -16603,10 +16233,7 @@ namespace fairino
                     }
                     return g_sock_com_err;
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -16641,10 +16268,7 @@ namespace fairino
                     }
                     return g_sock_com_err;
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -16667,20 +16291,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -16703,20 +16328,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -16757,20 +16383,21 @@ namespace fairino
                 }
                 return (int)result[0];
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -16794,20 +16421,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -16830,20 +16458,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -16861,6 +16490,7 @@ namespace fairino
             }
 
             int errcode = FileUpLoad(1, filePath);
+            Console.WriteLine($"errcode is {errcode}");
             if (0 == errcode)
             {
                 int result = proxy.SoftwareUpgrade();
@@ -16946,20 +16576,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -16984,20 +16615,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -17028,20 +16660,21 @@ namespace fairino
                 }
                 return (int)result[0];
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -17072,20 +16705,21 @@ namespace fairino
                 }
                 return (int)result[0];
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -17120,20 +16754,21 @@ namespace fairino
                 }
                 return (int)result[0];
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -17157,20 +16792,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -17194,20 +16830,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -17231,20 +16868,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -17268,20 +16906,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -17310,20 +16949,21 @@ namespace fairino
                 }
                 return (int)result[0];
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -17332,9 +16972,10 @@ namespace fairino
          * @param [in] forceSensorEnable 力传感器启用状态，0-不启用；1-启用
          * @param [in] gripperEnable 夹爪启用状态，0-不启用；1-启用
          * @param [in] IOEnable IO设备启用状态，0-不启用；1-启用
+         * @param [in] dexhandEnable 灵巧手设备启用状态，0-不启用；1-启用
          * @return  错误码
          */
-        public int SetAxleLuaEnableDeviceType(int forceSensorEnable, int gripperEnable, int IOEnable)
+        public int SetAxleLuaEnableDeviceType(int forceSensorEnable, int gripperEnable, int IOEnable, int dexhandEnable)
         {
             if (IsSockComError())
             {
@@ -17342,27 +16983,28 @@ namespace fairino
             }
             try
             {
-                int rtn = proxy.SetAxleLuaEnableDeviceType(forceSensorEnable, gripperEnable, IOEnable);
+                int rtn = proxy.SetAxleLuaEnableDeviceType(forceSensorEnable, gripperEnable, IOEnable, dexhandEnable);
                 if (log != null)
                 {
-                    log.LogInfo($"SetAxleLuaEnableDeviceType({forceSensorEnable},{gripperEnable}, {IOEnable}) : {rtn}");
+                    log.LogInfo($"SetAxleLuaEnableDeviceType({forceSensorEnable},{gripperEnable}, {IOEnable}, {dexhandEnable}) : {rtn}");
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -17371,9 +17013,10 @@ namespace fairino
          * @param [out] forceSensorEnable 力传感器启用状态，0-不启用；1-启用
          * @param [out] gripperEnable 夹爪启用状态，0-不启用；1-启用
          * @param [out] IOEnable IO设备启用状态，0-不启用；1-启用
+         * @param [out] dexhandEnable 灵巧手设备启用状态，0-不启用；1-启用
          * @return  错误码
          */
-        public int GetAxleLuaEnableDeviceType(ref int forceSensorEnable, ref int gripperEnable, ref int IOEnable)
+        public int GetAxleLuaEnableDeviceType(ref int forceSensorEnable, ref int gripperEnable, ref int IOEnable, ref int dexhandEnable)
         {
             if (IsSockComError())
             {
@@ -17388,27 +17031,29 @@ namespace fairino
                     forceSensorEnable = (int)result[1];
                     gripperEnable = (int)result[2];
                     IOEnable = (int)result[3];
+                    dexhandEnable = (int)result[4];
                 }
                 if (log != null)
                 {
-                    log.LogInfo($"GetAxleLuaEnableDeviceType(ref {forceSensorEnable}, ref {gripperEnable}, ref {IOEnable}) : {(int)result[0]}");
+                    log.LogInfo($"GetAxleLuaEnableDeviceType(ref {forceSensorEnable}, ref {gripperEnable}, ref {IOEnable}, ref {dexhandEnable}) : {(int)result[0]}");
                 }
                 return (int)result[0];
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -17417,9 +17062,10 @@ namespace fairino
          * @param [out] forceSensorEnable 力传感器启用设备编号 0-未启用；1-启用
          * @param [out] gripperEnable 夹爪启用设备编号，0-不启用；1-启用
          * @param [out] IODeviceEnable IO设备启用设备编号，0-不启用；1-启用
+         * @param [out] decHandEnable 灵巧手启用设备编号，0-不启用；1-启用
          * @return  错误码
          */
-        public int GetAxleLuaEnableDevice(ref int[] forceSensorEnable, ref int[] gripperEnable, ref int[] IODeviceEnable)
+        public int GetAxleLuaEnableDevice(ref int[] forceSensorEnable, ref int[] gripperEnable, ref int[] IODeviceEnable, ref int[] decHandEnable)
         {
             if (IsSockComError())
             {
@@ -17434,9 +17080,10 @@ namespace fairino
                 {
                     resultStr = (string)result[1];
                     string[] parS = resultStr.Split(',');
-                    if (parS.Length != 24)
+                    if (parS.Length != 40)
                     {
-                        log.LogError("GetAxleLuaEnableDevice fail");
+
+                        log.LogError($"GetAxleLuaEnableDevice fail, {parS.Length}");
                         return -1;
                     }
                     for (int i = 0; i < 8; i++)
@@ -17444,7 +17091,9 @@ namespace fairino
                         forceSensorEnable[i] = int.Parse(parS[i]);
                         gripperEnable[i] = int.Parse(parS[i + 8]);
                         IODeviceEnable[i] = int.Parse(parS[i + 16]);
+                        decHandEnable[i] = int.Parse(parS[i + 24]);
                     }
+
                     return (int)result[0];
                 }
                 if (log != null)
@@ -17453,27 +17102,32 @@ namespace fairino
                 }
                 return (int)result[0];
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
         /**
          * @brief 设置启用夹爪动作控制功能
          * @param [in] id 夹爪设备编号
-         * @param [in] func func[0]-夹爪使能；func[1]-夹爪初始化；2-位置设置；3-速度设置；4-力矩设置；6-读夹爪状态；7-读初始化状态；8-读故障码；9-读位置；10-读速度；11-读力矩
+         * @param [in] func func[0]-夹爪使能；func[1]-夹爪初始化；func[2]-位置设置；func[3]-速度设置；func[4]-力矩设置；func[6]-读夹爪状态；
+               func[7]-读初始化状态；func[8]-读故障码；func[9]-读位置；func[10]-读速度；func[11]-读力矩; func[12]-旋转夹爪旋转圈数设置； 
+               func[13]-旋转夹爪旋转速度设置； func[14]-旋转夹爪旋转力矩设置； func[15]-读旋转夹爪状态；func[16]-读旋转夹爪初始化状态；
+               func[17]-读旋转夹爪圈数；func[18]-读旋转夹爪速度；func[19]-读旋转夹爪力矩；func[20]-多轴同步运动设置；func[21]-故障清除指令；
+               func[22]-单轴运行状态；func[23]-所有轴运行状态；
          * @return  错误码
          */
         public int SetAxleLuaGripperFunc(int id, int[] func)
@@ -17491,27 +17145,32 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
         /**
           * @brief 获取启用夹爪动作控制功能
           * @param [in] id 夹爪设备编号
-          * @param [out] func func[0]-夹爪使能；func[1]-夹爪初始化；2-位置设置；3-速度设置；4-力矩设置；6-读夹爪状态；7-读初始化状态；8-读故障码；9-读位置；10-读速度；11-读力矩
+          * @param [out] func func[0]-夹爪使能；func[1]-夹爪初始化；func[2]-位置设置；func[3]-速度设置；func[4]-力矩设置；func[6]-读夹爪状态；
+               func[7]-读初始化状态；func[8]-读故障码；func[9]-读位置；func[10]-读速度；func[11]-读力矩; func[12]-旋转夹爪旋转圈数设置； 
+               func[13]-旋转夹爪旋转速度设置； func[14]-旋转夹爪旋转力矩设置； func[15]-读旋转夹爪状态；func[16]-读旋转夹爪初始化状态；
+               func[17]-读旋转夹爪圈数；func[18]-读旋转夹爪速度；func[19]-读旋转夹爪力矩；func[20]-多轴同步运动设置；func[21]-故障清除指令；
+               func[22]-单轴运行状态；func[23]-所有轴运行状态；
           * @return  错误码
           */
         public int GetAxleLuaGripperFunc(int id, ref int[] func)
@@ -17529,12 +17188,12 @@ namespace fairino
                 {
                     resultStr = (string)result[1];
                     string[] parS = resultStr.Split(',');
-                    if (parS.Length != 16)
+                    if (parS.Length != 32)
                     {
-                        log.LogError("GetAxleLuaGripperFunc fail");
+                        log.LogError($"GetAxleLuaGripperFunc fail, {parS.Length}");
                         return -1;
                     }
-                    for (int i = 0; i < 16; i++)
+                    for (int i = 0; i < 32; i++)
                     {
                         func[i] = int.Parse(parS[i]);
                     }
@@ -17550,20 +17209,21 @@ namespace fairino
                 }
                 return (int)result[0];
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -17588,20 +17248,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -17642,20 +17303,21 @@ namespace fairino
                 }
                 return (int)result[0];
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -17679,20 +17341,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -17716,20 +17379,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -17753,20 +17417,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -17792,20 +17457,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -17828,20 +17494,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -17863,20 +17530,28 @@ namespace fairino
             }
 
             int rtn = FileUpLoad(10, filePath);
+            Thread.Sleep(3000);
             if (rtn == 0)
             {
-                String fileName = "/tmp/" + fileInfo.Name;
+                String fileName = fileInfo.Name;
+                RobotEnable(0);
+                
                 rtn = SetAxleFileType(2);
+           
                 if (rtn != 0)
                 {
                     return -1;
                 }
+                Thread.Sleep(2000);
                 rtn = SetSysServoBootMode();
                 if (rtn != 0)
                 {
                     return -1;
                 }
+
+                Thread.Sleep(5000);
                 rtn = SlaveFileWrite(1, 7, fileName);
+                Thread.Sleep(3000);
                 if (rtn != 0)
                 {
                     return -1;
@@ -17991,20 +17666,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
 
         }
@@ -18047,20 +17723,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -18088,20 +17765,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
         /**
@@ -18124,20 +17802,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -18205,20 +17884,21 @@ namespace fairino
                 }
                 return (int)result[0];
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
         /**
@@ -18277,20 +17957,21 @@ namespace fairino
                 }
                 return (int)result[0];
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
         /**
@@ -18314,20 +17995,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
         /**
@@ -18355,20 +18037,21 @@ namespace fairino
                 }
                 return (int)rtn[0];
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
         /**
@@ -18394,20 +18077,21 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
         /**
@@ -18438,20 +18122,21 @@ namespace fairino
                 }
                 return (int)result[0];
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
         /**
@@ -18473,20 +18158,21 @@ namespace fairino
                 }
                 return result;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
         /**
@@ -18509,20 +18195,21 @@ namespace fairino
                 }
                 return (int)result;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -18541,20 +18228,21 @@ namespace fairino
                 }
                 return (int)result;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
         /**
@@ -18580,20 +18268,21 @@ namespace fairino
                 }
                 return (int)result;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
         /**
@@ -18616,20 +18305,21 @@ namespace fairino
                 }
                 return (int)result;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
         /**
@@ -18661,20 +18351,21 @@ namespace fairino
                 }
                 return (int)result;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
         /**
@@ -18697,20 +18388,21 @@ namespace fairino
                 }
                 return (int)result;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -18767,20 +18459,21 @@ namespace fairino
 
                 return errcode;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
 
         }
@@ -18810,20 +18503,21 @@ namespace fairino
                 }
                 return (int)result;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -18856,20 +18550,21 @@ namespace fairino
                 }
                 return (int)result;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -18900,20 +18595,21 @@ namespace fairino
                 }
                 return (int)result;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -19091,7 +18787,7 @@ namespace fairino
                 // 返回错误码
                 return errcode;
             }
-            catch (Exception ex)
+            catch
             {
                 // 捕获异常，记录日志（可选）
                 // 返回预定义的错误码
@@ -19104,7 +18800,7 @@ namespace fairino
         * @param [in] timeout 等待超时时间ms
         * @return 错误码
         */
-        public int ConveryComDetect(int timeout)
+        public int ConveyorComDetect(int timeout)
         {
             if (IsSockComError())
             {
@@ -19118,7 +18814,7 @@ namespace fairino
             int errcode = 0;
             try
             {
-                errcode = proxy.ConveryComDetect(timeout);
+                errcode = proxy.ConveyorComDetect(timeout);
 
 
                 return errcode;
@@ -19150,14 +18846,14 @@ namespace fairino
             }
 
             // 3. 直接赋值字符串（不再需要清空缓冲区）
-            g_sendbuf = $"/f/bIII{_conveyorCounter}III1149III25IIIConveryComDetectTrigger()III/b/f";
+            g_sendbuf = $"/f/bIII{_conveyorCounter}III1149III26IIIConveyorComDetectTrigger()III/b/f";
 
             // 4. 计数器递增
             _conveyorCounter++;
             is_sendcmd = true;
 
             // 5. 记录日志
-            log.LogInfo("ConveryComDetectTrigger().");
+            log.LogInfo("ConveyorComDetectTrigger().");
 
             // 6. 返回错误码（原C++代码缺少返回值，这里返回errcode）
             return errcode;
@@ -19250,7 +18946,7 @@ namespace fairino
          * @param [in] currentHigh AI通道上限对应焊机电流值，默认值100V，范围[0-200V]
          * @return 错误码
          */
-        public int ArcWeldTraceCurrentPara(float AILow, float AIHigh, float currentLow, float currentHigh)
+        public int ArcWeldTraceCurrentPara(double AILow, double AIHigh, double currentLow, double currentHigh)
         {
             if (IsSockComError())
             {
@@ -19294,7 +18990,7 @@ namespace fairino
          * @param [in] voltageHigh AI通道上限对应焊机电压值，默认值100V，范围[0-200V]
          * @return 错误码
          */
-        public int ArcWeldTraceVoltagePara(float AILow, float AIHigh, float voltageLow, float voltageHigh)
+        public int ArcWeldTraceVoltagePara(double AILow, double AIHigh, double voltageLow, double voltageHigh)
         {
             if (IsSockComError())
             {
@@ -19329,14 +19025,14 @@ namespace fairino
             }
         }
         /**
- * @brief 设置焊接电压渐变开始
- * @param [in] IOType 控制类型；0-控制箱IO；1-数字通信协议(UDP);2-数字通信协议(ModbusTCP)
- * @param [in] voltageStart 起始焊接电压(V)
- * @param [in] voltageEnd 终止焊接电压(V)
- * @param [in] AOIndex 控制箱AO端口号(0-1)
- * @param [in] blend 是否平滑 0-不平滑；1-平滑
- * @return 错误码
- */
+		 * @brief 设置焊接电压渐变开始
+		 * @param [in] IOType 控制类型；0-控制箱IO；1-数字通信协议(UDP);2-数字通信协议(ModbusTCP)
+		 * @param [in] voltageStart 起始焊接电压(V)
+		 * @param [in] voltageEnd 终止焊接电压(V)
+		 * @param [in] AOIndex 控制箱AO端口号(0-1)
+		 * @param [in] blend 是否平滑 0-不平滑；1-平滑
+		 * @return 错误码
+		 */
         public int WeldingSetVoltageGradualChangeStart(int IOType, double voltageStart, double voltageEnd, int AOIndex, int blend)
         {
             if (IsSockComError())
@@ -19729,20 +19425,21 @@ namespace fairino
                 }
                 return (int)result[0];
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
         /**
@@ -20297,7 +19994,7 @@ namespace fairino
         */
         public int MoveJ(JointPos joint_pos, int tool, int user, float vel, float acc, float ovl, ExaxisPos epos, float blendT, byte offset_flag, DescPose offset_pos)
         {
-            int rtn;
+            //int rtn;
             if (IsSockComError())
             {
                 return g_sock_com_err;
@@ -22944,10 +22641,8 @@ namespace fairino
 
             try
             {
-                object[] param = new object[1];
-                param[0] = radio; // 传递 double[6]
 
-                int rtn = (int)proxy.SetVelFeedForwardRatio(param);
+                int rtn = (int)proxy.SetVelFeedForwardRatio(radio);
 
                 if (log != null)
                 {
@@ -23616,7 +23311,7 @@ namespace fairino
             {
                 if (log != null)
                 {
-                  //  log.LogError($"Exception in MoveIntersectLine: {ex.Message}");
+                    log.LogError($"Exception in MoveIntersectLine: {ex.Message}");
                 }
                 return (int)RobotError.ERR_RPC_ERROR;
             }
@@ -23629,7 +23324,7 @@ namespace fairino
         * @param [in] torqueCoeff J1-J6力矩补偿系数[0-1]
         * @return 错误码
         */
-        public int SerCoderCompenParams(int status, double[] torqueCoeff)
+        public int SetCoderCompenParams(int status, double[] torqueCoeff)
         {
             if (IsSockComError())
             {
@@ -23654,7 +23349,7 @@ namespace fairino
                 param[5] = torqueCoeff[4];
                 param[6] = torqueCoeff[5];
 
-                errcode = proxy.SerCoderCompenParams(param);
+                errcode = proxy.SetCoderCompenParams(param);
 
                 return errcode;
             }
@@ -23996,7 +23691,7 @@ namespace fairino
 
         /**
         * @brief 光电传感器TCP标定
-        * @param [in] luaPath 自动标定lua程序路径：QX版本机器人-"/fruser/FR_CalibrateTheToolTcp.lua";LA版本机器人-"/usr/local/etc/controller/lua/FR_CalibrateTheToolTcp.lua"
+        * @param [in] luaPath 自动标定lua程序路径："FR_CalibrateTheToolTcp.lua"
         * @param [in] offsetX 示教点偏移(x,y,z)mm
         * @param [out] TCP 标定后的工具坐标系(x,y,z,rx,ry,rz)
         * @return 错误码
@@ -24265,6 +23960,181 @@ namespace fairino
             }
         }
 
+        /**
+        * @brief  直线插入
+        * @param  [in] rcs 参考坐标系，0-工具坐标系，1-基坐标系
+        * @param  [in] ft  力/扭矩阈值，fx,fy,fz,tx,ty,tz，范围[0~100]
+        * @param  [in] lin_v 直线速度，单位mm/s
+        * @param  [in] lin_a 直线加速度，单位mm/s^2，暂不使用
+        * @param  [in] max_dis 最大插入距离，单位mm
+        * @param  [in] linorn  插入方向，0-负方向，1-正方向
+        * @return  错误码
+        */
+        public int FT_LinInsertion(int rcs, float ft, float lin_v, float lin_a, float max_dis, byte linorn)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            if (GetSafetyCode() != 0)
+            {
+                return GetSafetyCode();
+            }
+
+            try
+            {
+                int rtn = proxy.FT_LinInsertion(rcs, ft, lin_v, lin_a, max_dis, linorn);
+
+                if (log != null)
+                {
+                    log.LogInfo($"FT_LinInsertion: {rtn}");
+                }
+                return rtn;
+            }
+            catch
+            {
+                if (log != null)
+                {
+                    log.LogError("RPC exception");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+        * @brief  表面定位
+        * @param  [in] rcs 参考坐标系，0-工具坐标系，1-基坐标系
+        * @param  [in] dir  移动方向，1-正方向，2-负方向
+        * @param  [in] axis 移动轴，1-x轴，2-y轴，3-z轴
+        * @param  [in] lin_v 探索直线速度，单位mm/s
+        * @param  [in] lin_a 探索直线加速度，单位mm/s^2，暂不使用，默认为0
+        * @param  [in] max_dis 最大探索距离，单位mm
+        * @param  [in] ft  动作终止力/扭矩阈值，fx,fy,fz,tx,ty,tz
+        * @return  错误码
+        */
+        public int FT_FindSurface(int rcs, byte dir, byte axis, float lin_v, float lin_a, float max_dis, float ft)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            if (GetSafetyCode() != 0)
+            {
+                return GetSafetyCode();
+            }
+
+            try
+            {
+                int rtn = proxy.FT_FindSurface(rcs, dir, axis, lin_v, lin_a, max_dis, ft);
+
+                if (log != null)
+                {
+                    log.LogInfo($"FT_FindSurface: {rtn}");
+                }
+                return rtn;
+            }
+            catch
+            {
+                if (log != null)
+                {
+                    log.LogError("RPC exception");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+        * @brief  计算中间平面位置开始
+        * @return  错误码
+        */
+        public int FT_CalCenterStart()
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            if (GetSafetyCode() != 0)
+            {
+                return GetSafetyCode();
+            }
+
+            try
+            {
+                int rtn = proxy.FT_CalCenterStart();
+
+                if (log != null)
+                {
+                    log.LogInfo($"FT_CalCenterStart: {rtn}");
+                }
+                return rtn;
+            }
+            catch
+            {
+                if (log != null)
+                {
+                    log.LogError("RPC exception");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+        * @brief  计算中间平面位置结束
+        * @param  [out] pos 中间平面位姿
+        * @return  错误码
+        */
+        public int FT_CalCenterEnd(ref DescPose pos)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            if (GetSafetyCode() != 0)
+            {
+                return GetSafetyCode();
+            }
+
+            try
+            {
+                object[] result = proxy.FT_CalCenterEnd();
+                int errcode = (int)result[0];
+                if (errcode == 0 && result.Length >= 7)
+                {
+                    pos.tran.x = Convert.ToDouble(result[1]);
+                    pos.tran.y = Convert.ToDouble(result[2]);
+                    pos.tran.z = Convert.ToDouble(result[3]);
+                    pos.rpy.rx = Convert.ToDouble(result[4]);
+                    pos.rpy.ry = Convert.ToDouble(result[5]);
+                    pos.rpy.rz = Convert.ToDouble(result[6]);
+                }
+                else
+                {
+                    if (log != null)
+                    {
+                        log.LogError($"FT_CalCenterEnd fail {errcode}");
+                    }
+                }
+
+                if (log != null)
+                {
+                    log.LogInfo($"FT_CalCenterEnd: {errcode}");
+                }
+                return errcode;
+            }
+            catch
+            {
+                if (log != null)
+                {
+                    log.LogError("RPC exception");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
 
         /**
         * @brief  逆运动学求解，笛卡尔空间包含扩展轴位置
@@ -24335,20 +24205,21 @@ namespace fairino
 
                 return errcode;
             }
-            catch
+            catch (Exception ex)
             {
                 if (IsSockComError())
                 {
                     if (log != null)
                     {
-                        log.LogError($"RPC exception");
+                        log.LogError($"RPC exception: {ex.Message}");
                     }
                     return g_sock_com_err;
                 }
-                else
+                if (log != null)
                 {
-                    return (int)RobotError.ERR_SUCCESS;
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
         /**
@@ -25776,7 +25647,7 @@ namespace fairino
                     string exisVelStr = FormatDoubleArray(exis_vel, 3);
 
                     // 构建命令字符串
-                    string cmdStr = $"ServoJ({jointVelStr},{exisVelStr},{acc:F3},{vel:F3},{cmdT:F3},{filterT:F3},{gain:F3},{id})";
+                    string cmdStr = $"ServoJV({jointVelStr},{exisVelStr},{acc:F3},{vel:F3},{cmdT:F3},{filterT:F3},{gain:F3},{id})";
 
                     FRAME frame = new FRAME
                     {
@@ -25809,10 +25680,7 @@ namespace fairino
                     log?.LogError($"RPC exception: {ex.Message}");
                     return g_sock_com_err;
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -25874,10 +25742,7 @@ namespace fairino
                     log?.LogError($"RPC exception: {ex.Message}");
                     return g_sock_com_err;
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -25940,10 +25805,7 @@ namespace fairino
                     log?.LogError($"RPC exception: {ex.Message}");
                     return g_sock_com_err;
                 }
-                else
-                {
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -26027,11 +25889,7 @@ namespace fairino
                     log?.LogError($"RPC exception: {ex.Message}");
                     return g_sock_com_err;
                 }
-                else
-                {
-                    // 保持原逻辑：非通信错误时返回成功（可根据需要调整）
-                    return (int)RobotError.ERR_SUCCESS;
-                }
+                return (int)RobotError.ERR_RPC_ERROR;
             }
         }
 
@@ -26466,6 +26324,372 @@ namespace fairino
                 }
                 return (int)RobotError.ERR_RPC_ERROR;
             }
+        }
+
+        /**
+         * @brief  控制灵巧手运动
+         * @param  [in] idstart  起始从站号
+         * @param  [in] slaveNum  数量
+         * @param  [in] pos[16]  位置(-360~360) 
+         * @param  [in] speed[16]  速度百分比，范围[0~100]
+         * @param  [in] force[16]  力矩百分比，范围[0~100]
+         * @param  [in] max_time  最大等待时间，范围[0~30000]，单位ms
+         * @return  错误码
+         */
+        public int SetDexterousHandsMove(int idstart, int slaveNum, double[] pos, int[] speed, int[] force, int max_time)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            if (GetSafetyCode() != 0)
+            {
+
+                return GetSafetyCode();
+            }
+            try
+            {
+                int rtn = proxy.SetDexterousHandsMove(idstart, slaveNum, pos, speed, force, max_time);
+                if (log != null)
+                {
+                    log.LogInfo($"SetDexterousHandsMove({idstart},{slaveNum},{pos[0]},{speed[0]},{force[0]},{max_time}) : {rtn}");
+                }
+                return rtn;
+            }
+            catch (Exception ex)
+            {
+                if (IsSockComError())
+                {
+                    if (log != null)
+                    {
+                        log.LogError($"RPC exception: {ex.Message}");
+                    }
+                    return g_sock_com_err;
+                }
+                if (log != null)
+                {
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+
+        }
+
+        /**
+         * @brief  控制灵巧手复位激活
+         * @param  [in] id  从站号
+         * @param  [in] act  0-复位 1-激活
+         * @return  错误码
+         */
+        public int SetDexterousHandsAct(int id, int act)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            if (GetSafetyCode() != 0)
+            {
+
+                return GetSafetyCode();
+            }
+            try
+            {
+                int rtn = proxy.SetDexterousHandsAct(id, act);
+                if (log != null)
+                {
+                    log.LogInfo($"SetDexterousHandsAct({id},{act}) : {rtn}");
+                }
+                return rtn;
+            }
+            catch (Exception ex)
+            {
+                if (IsSockComError())
+                {
+                    if (log != null)
+                    {
+                        log.LogError($"RPC exception: {ex.Message}");
+                    }
+                    return g_sock_com_err;
+                }
+                if (log != null)
+                {
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+
+        }
+
+        /**
+         * @brief  清除灵巧手错误
+         * @return  错误码
+         */
+        public int ClearDexterousHandsError()
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            if (GetSafetyCode() != 0)
+            {
+
+                return GetSafetyCode();
+            }
+            try
+            {
+                int rtn = proxy.ClearDexterousHandsError();
+                if (log != null)
+                {
+                    log.LogInfo($"ClearDexterousHandsError() : {rtn}");
+                }
+                return rtn;
+            }
+            catch (Exception ex)
+            {
+                if (IsSockComError())
+                {
+                    if (log != null)
+                    {
+                        log.LogError($"RPC exception: {ex.Message}");
+                    }
+                    return g_sock_com_err;
+                }
+                if (log != null)
+                {
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+
+        }
+
+        /**
+         * @brief 设置启用灵巧手动作控制功能
+         * @param [in] id 灵巧手从站编号
+         * @param [in] 0-夹持触发、1-夹爪初始化、2-位置设置、3-速度设置、4-力矩设置、6-读夹爪状态、7-读初始化状态、8-读故障码、9-读位置、10-读速度、11-读力矩、12-旋转圈数设置、13-旋转速度设置、14-旋转力矩设置、15-读旋转夹爪状态、16-读旋转初始化状态、17-读旋转圈数、18-读旋转速度、19-读旋转力矩、20-多轴同步运动设置、21-故障清除指令、22-单轴运行状态、23-所有轴运行状态
+         * @return  错误码
+         */
+        public int SetDexterousHandsFunc(int id, int[] func)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+                int rtn = proxy.SetDexterousHandsFunc(id, func);
+                if (log != null)
+                {
+                    log.LogInfo($"SetDexterousHandsFunc(id:{id}; func:{func[0]},{func[1]}, {func[2]}, {func[3]}, {func[4]}, {func[5]}, {func[6]}, {func[7]}, {func[8]}, {func[9]}, {func[10]}, {func[11]}, {func[12]}, {func[13]}, {func[14]}, {func[15]},{func[16]},{func[17]},{func[18]},{func[19]},{func[20]},{func[21]},{func[22]},{func[23]},{func[24]},{func[25]},{func[26]},{func[27]},{func[28]},{func[29]},{func[30]},{func[31]}) : {rtn}");
+                }
+                return rtn;
+            }
+            catch (Exception ex)
+            {
+                if (IsSockComError())
+                {
+                    if (log != null)
+                    {
+                        log.LogError($"RPC exception: {ex.Message}");
+                    }
+                    return g_sock_com_err;
+                }
+                if (log != null)
+                {
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+        * @brief 获取启用灵巧手动作控制功能
+        * @param [in] id 灵巧手设备编号
+        * @param [out]0-夹持触发、1-夹爪初始化、2-位置设置、3-速度设置、4-力矩设置、6-读夹爪状态、7-读初始化状态、8-读故障码、9-读位置、10-读速度、11-读力矩、12-旋转圈数设置、13-旋转速度设置、14-旋转力矩设置、15-读旋转夹爪状态、16-读旋转初始化状态、17-读旋转圈数、18-读旋转速度、19-读旋转力矩、20-多轴同步运动设置、21-故障清除指令、22-单轴运行状态、23-所有轴运行状态
+        */
+        public int GetDexterousHandsFunc(int id, ref int[] func)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            try
+            {
+                string resultStr = "";
+                object[] result = proxy.GetDexterousHandsFunc(id);
+                if ((int)result[0] == 0)
+                {
+                    resultStr = (string)result[1];
+                    string[] parS = resultStr.Split(',');
+                    if (parS.Length != 32)
+                    {
+                        log.LogError("GetDexterousHandsFunc fail");
+                        return -1;
+                    }
+                    for (int i = 0; i < 32; i++)
+                    {
+                        func[i] = int.Parse(parS[i]);
+                    }
+                    if (log != null)
+                    {
+                        log.LogInfo($"GetDexterousHandsFunc({id},{func[0]},{func[1]}, {func[2]}, {func[3]}, {func[4]}, {func[5]}, {func[6]}, {func[7]}, {func[8]}, {func[9]}, {func[10]}, {func[11]}, {func[12]}, {func[13]}, {func[14]}, {func[15]},{func[16]},{func[17]},{func[18]},{func[19]},{func[20]},{func[21]},{func[22]},{func[23]},{func[24]},{func[25]},{func[26]},{func[27]},{func[28]},{func[29]},{func[30]},{func[31]}) : {(int)result[0]}");
+                    }
+                    return (int)result[0];
+                }
+                if (log != null)
+                {
+                    log.LogInfo($"GetAxleLuaGripperFunc(ref {resultStr}) : {(int)result[0]}");
+                }
+                return (int)result[0];
+            }
+            catch (Exception ex)
+            {
+                if (IsSockComError())
+                {
+                    if (log != null)
+                    {
+                        log.LogError($"RPC exception: {ex.Message}");
+                    }
+                    return g_sock_com_err;
+                }
+                if (log != null)
+                {
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+
+        /**
+        * @brief  设置摆动结束回周期零点
+        * @param [in] flag 摆动结束是否回周期零点；0-不回周期零点；1-回周期零点
+        * @return  错误码
+        */
+        public int SetWeavebackCenterConfig(int flag)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            try
+            {
+                int rtn = proxy.SetWeavebackCenterConfig(flag);
+
+                if (log != null)
+                {
+                    log.LogInfo($"SetWeavebackCenterConfig({flag}): {rtn}");
+                }
+                return rtn;
+            }
+            catch
+            {
+                if (log != null)
+                {
+                    log.LogError("RPC exception");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+        * @brief  获取摆动结束回周期零点参数
+        * @param [out] flag 摆动结束是否回周期零点；0-不回周期零点；1-回周期零点
+        * @return  错误码
+        */
+        public int GetWeavebackCenterConfig(ref int flag)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            try
+            {
+                object[] result = proxy.GetWeavebackCenterConfig();
+                int errcode = (int)result[0];
+                if (errcode == 0 && result.Length >= 2)
+                {
+                    flag = (int)result[1];
+                }
+                else
+                {
+                    if (log != null)
+                    {
+                        log.LogError($"GetWeavebackCenterConfig fail {errcode}");
+                    }
+                }
+
+                if (log != null)
+                {
+                    log.LogInfo($"GetWeavebackCenterConfig: flag={flag}, errcode={errcode}");
+                }
+                return errcode;
+            }
+            catch
+            {
+                if (log != null)
+                {
+                    log.LogError("RPC exception");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+        * @brief  设置摆动实时偏移
+        * @param [in] offset 实时偏移量[mm、°]
+        * @return  错误码
+        */
+        public int SetWeaveOffsetRT(DescPose offset)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            while (is_sendcmd == true)
+            {
+                Thread.Sleep(10);
+            }
+
+            string content = string.Format("SetWeaveOffsetRT({0},{1},{2},{3},{4},{5})",
+                offset.tran.x, offset.tran.y, offset.tran.z,
+                offset.rpy.rx, offset.rpy.ry, offset.rpy.rz);
+            g_sendbuf = string.Format("/f/bIII{0}III1368III{1}III{2}III/b/f",
+                frameCnt++, content.Length, content);
+
+            is_sendcmd = true;
+            log?.LogInfo("SetWeaveOffsetRT()");
+            return 0;
+        }
+
+        /**
+        * @brief  设置速度(指令帧，低延迟)
+        * @param [in] vel 速度百分比，范围[0~100]
+        * @return  错误码
+        */
+        public int SetSpeedInstant(int vel)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            while (is_sendcmd == true)
+            {
+                Thread.Sleep(10);
+            }
+
+            string content = string.Format("SetSpeed({0})", vel);
+            g_sendbuf = string.Format("/f/bIII{0}III983III{1}III{2}III/b/f",
+                frameCnt++, content.Length, content);
+
+            is_sendcmd = true;
+            log?.LogInfo($"SetSpeedInstant({vel})");
+            return 0;
         }
     }
 }
