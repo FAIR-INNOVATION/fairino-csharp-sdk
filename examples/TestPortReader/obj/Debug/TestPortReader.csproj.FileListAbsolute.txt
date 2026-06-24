@@ -1,6 +1,0 @@
-D:\C#SDK\各版本sdk\fairino-csharp_-sdk-3.9.7\examples\TestPortReader\obj\Debug\TestPortReader.csproj.AssemblyReference.cache
-D:\C#SDK\各版本sdk\fairino-csharp_-sdk-3.9.7\examples\TestPortReader\obj\Debug\TestPortReader.csproj.CoreCompileInputs.cache
-D:\C#SDK\各版本sdk\fairino-csharp_-sdk-3.9.7\examples\TestPortReader\bin\Debug\TestPortReader.exe
-D:\C#SDK\各版本sdk\fairino-csharp_-sdk-3.9.7\examples\TestPortReader\bin\Debug\TestPortReader.pdb
-D:\C#SDK\各版本sdk\fairino-csharp_-sdk-3.9.7\examples\TestPortReader\obj\Debug\TestPortReader.exe
-D:\C#SDK\各版本sdk\fairino-csharp_-sdk-3.9.7\examples\TestPortReader\obj\Debug\TestPortReader.pdb

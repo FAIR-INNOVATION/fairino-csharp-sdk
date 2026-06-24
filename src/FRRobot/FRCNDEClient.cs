@@ -480,9 +480,9 @@ internal class FRCNDEClient
             }
         }
 
-        if (period < 8 || period > 1000)
+        if (period < 4 || period > 1000)
         {
-            log?.LogInfo($"CNDE SetCNDEStateConfig: 周期 {period} ms 超出允许范围 [8, 1000]，返回 ERR_PARAM_VALUE");
+            log?.LogInfo($"CNDE SetCNDEStateConfig: 周期 {period} ms 超出允许范围 [4, 1000]，返回 ERR_PARAM_VALUE");
             return ERR_PARAM_VALUE;
         }
 
