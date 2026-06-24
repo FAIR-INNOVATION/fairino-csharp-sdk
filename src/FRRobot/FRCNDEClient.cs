@@ -480,9 +480,9 @@ internal class FRCNDEClient
             }
         }
 
-        if (period < 8 || period > 1000)
+        if (period < 4 || period > 1000)
         {
-            log?.LogInfo($"CNDE SetCNDEStateConfig: 周期 {period} ms 超出允许范围 [8, 1000]，返回 ERR_PARAM_VALUE");
+            log?.LogInfo($"CNDE SetCNDEStateConfig: 周期 {period} ms 超出允许范围 [4, 1000]，返回 ERR_PARAM_VALUE");
             return ERR_PARAM_VALUE;
         }
 
@@ -514,7 +514,7 @@ internal class FRCNDEClient
 
     public int SetCNDEStatePeriod(int period)
     {
-        if (period < 8 || period > 1000)
+        if (period < 4 || period > 1000)
             return ERR_PARAM_VALUE;
         _robotStatePeriod = period;
         return ERR_SUCCESS;
@@ -527,139 +527,7 @@ internal class FRCNDEClient
         return ERR_SUCCESS;
     }
 
-    // 启停控制
-    //public int SetCNDEStart()
-    //{
-    //    if (_startSent)
-    //    {
-    //        Console.WriteLine("[SetCNDEStart] Already started, skip.");
-    //        return 0;
-    //    }
-    //    lock (_recvLock)
-    //    {
-    //        Console.WriteLine("[SetCNDEStart] 开始发送 START 帧...");
 
-    //        CNDE_PKG startPkg = new CNDE_PKG
-    //        {
-    //            Count = _sendCount++,
-    //            Type = CNDEFrameType.START,
-    //            Len = 0
-    //        };
-    //        byte[] frame = CNDEFrameHandle.CNDEPkgToFrame(startPkg);
-
-    //        // 打印发送的 START 帧内容
-    //        //Console.WriteLine($"[SetCNDEStart] 准备发送 {frame.Length} 字节:");
-    //        StringBuilder hex = new StringBuilder();
-    //        foreach (byte b in frame)
-    //        {
-    //            hex.Append(b.ToString("X2") + " ");
-    //        }
-    //        Console.WriteLine(hex.ToString());
-
-    //        // 手动解析验证
-    //        if (frame.Length >= 8)
-    //        {
-    //            ushort head = (ushort)(frame[0] | (frame[1] << 8));
-    //            //Console.WriteLine($"[SetCNDEStart] 帧头: 0x{head:X4} (预期 0x5A5A)");
-    //            //Console.WriteLine($"[SetCNDEStart] 帧计数: {frame[2]}");
-    //            //Console.WriteLine($"[SetCNDEStart] 帧类型: {frame[3]}");
-    //            ushort lenField = (ushort)(frame[4] | (frame[5] << 8));
-    //            //Console.WriteLine($"[SetCNDEStart] 长度字段: {lenField} (预期 0)");
-    //            ushort tail = (ushort)(frame[frame.Length - 2] | (frame[frame.Length - 1] << 8));
-    //            //Console.WriteLine($"[SetCNDEStart] 帧尾: 0x{tail:X4} (预期 0xA5A5)");
-    //        }
-
-    //        int sendResult = _rtClient.Send(frame);
-    //        if (sendResult != frame.Length)
-    //        {
-    //            //Console.WriteLine($"[SetCNDEStart] 发送失败，实际发送 {sendResult} 字节，预期 {frame.Length}");
-    //            return -1;
-    //        }
-    //        //Console.WriteLine("[SetCNDEStart] 发送成功，等待机器人响应...");
-
-    //        byte[] recvBuf = new byte[1024];
-    //        DateTime startTime = DateTime.Now;
-    //        int timeoutMs = 3000; // 3秒超时
-    //        //Thread.Sleep(1000);
-    //        while (_robotStateRunFlag && (DateTime.Now - startTime).TotalMilliseconds < timeoutMs)
-    //        {
-    //            int len;
-    //            try
-    //            {
-    //                len = _rtClient.RecvCNDEPkg(recvBuf, recvBuf.Length);
-    //            }
-    //            catch (SocketException ex)
-    //            {
-    //                Console.WriteLine($"[SetCNDEStart] Recv 异常: {ex.Message}");
-    //                // 不直接返回，继续等待
-    //                Thread.Sleep(100);
-    //                continue;
-    //                //return -3;
-    //            }
-    //            if (len < 0)
-    //            {
-    //                if (len == -2)
-    //                {
-    //                    Console.WriteLine("[SetCNDEStart] 接收超时，继续等待...");
-    //                    continue;
-    //                }
-    //                Console.WriteLine($"[SetCNDEStart] 接收失败，错误码 {len}");
-    //                return -1;
-    //            }
-    //            if (len == 0)
-    //            {
-    //                Console.WriteLine("[SetCNDEStart] 收到空数据（连接断开），重发 START 帧...");
-    //                _rtClient.Send(frame);
-    //                continue;
-    //            }
-    //            //Console.WriteLine($"[SetCNDEStart] 收到 {len} 字节数据");
-
-    //            // 打印收到的原始数据
-    //            StringBuilder recvHex = new StringBuilder();
-    //            for (int i = 0; i < len; i++)
-    //                recvHex.Append(recvBuf[i].ToString("X2") + " ");
-    //            //Console.WriteLine($"[SetCNDEStart] 接收数据: {recvHex.ToString()}");
-
-    //            if (CNDEFrameHandle.FrameToCNDEPkg(recvBuf, out CNDE_PKG pkg) == 0)
-    //            {
-    //                //Console.WriteLine($"[SetCNDEStart] 解析成功，帧类型: {pkg.Type}, 数据长度: {pkg.Data.Count}");
-
-    //                // 如果收到 OUTPUT_STATE 帧，说明机器人已经开始发送状态数据，认为启动成功
-    //                if (pkg.Type == CNDEFrameType.OUTPUT_STATE)
-    //                {
-    //                    //Console.WriteLine("[SetCNDEStart] 收到 OUTPUT_STATE 帧，启动成功");
-    //                    return 0;
-    //                }
-    //                // 如果收到 MESSAGE 帧
-    //                else if (pkg.Type == CNDEFrameType.MESSAGE)
-    //                {
-    //                    if (pkg.Data.Count > 0 && pkg.Data[0] == 0x00)
-    //                    {
-    //                        Console.WriteLine("[SetCNDEStart] 机器人返回成功 (0x00)");
-    //                        return 0;
-    //                    }
-    //                    else
-    //                    {
-    //                        Console.WriteLine($"[SetCNDEStart] 机器人返回失败，首字节 = {(pkg.Data.Count > 0 ? pkg.Data[0].ToString("X2") : "无数据")}");
-    //                        return -2;
-    //                    }
-    //                }
-    //                else
-    //                {
-    //                    Console.WriteLine($"[SetCNDEStart] 机器人返回失败，首字节 = {(pkg.Data.Count > 0 ? pkg.Data[0].ToString("X2") : "无数据")}");
-    //                    return -2;
-    //                }
-    //            }
-    //            else
-    //            {
-    //                Console.WriteLine("[SetCNDEStart] 收到非 MESSAGE 帧，继续等待...");
-    //            }
-    //        }
-
-    //        Console.WriteLine($"[SetCNDEStart] 等待响应超时 ({timeoutMs} ms)");
-    //        return -3;
-    //    }
-    //}
     public int SetCNDEStart()
     {
         if (_startSent)
@@ -855,11 +723,13 @@ internal class FRCNDEClient
             if (_rtClient.Send(frame) != frame.Length) return -1;
 
             byte[] recvBuf = new byte[1024];
-            while (_robotStateRunFlag)
+            DateTime startTime = DateTime.Now;
+            const int totalTimeoutMs = 8000;
+
+            while (_robotStateRunFlag && (DateTime.Now - startTime).TotalMilliseconds < totalTimeoutMs)
             {
                 int len = _rtClient.RecvCNDEPkg(recvBuf, recvBuf.Length);
                 if (len < 0) return -1;
-                if (len == 0) { _rtClient.Send(frame); continue; }
                 if (CNDEFrameHandle.FrameToCNDEPkg(recvBuf, out CNDE_PKG pkg) == 0 && pkg.Type == CNDEFrameType.MESSAGE)
                 {
                     if (pkg.Data.Count > 0 && pkg.Data[0] == 0x00)
@@ -873,147 +743,6 @@ internal class FRCNDEClient
     }
 
 
-    // 新增：发送输出配置帧（对应C++ SendCNDEOutputConfig）
-    //public int SendCNDEOutputConfig()
-    //{
-    //    lock (_recvLock)
-    //    {
-    //        Console.WriteLine("[SendCNDEOutputConfig] 开始发送配置帧...");
-
-    //        CNDE_PKG configPkg = new CNDE_PKG
-    //        {
-    //            Count = _sendCount++,
-    //            Type = CNDEFrameType.OUTPUT_CONFIG,
-    //            Len = 0
-    //        };
-    //        // 添加周期（2字节，小端）
-    //        configPkg.Data.AddRange(BitConverter.GetBytes((ushort)_robotStatePeriod));
-    //        Console.WriteLine($"[SendCNDEOutputConfig] 周期: {_robotStatePeriod} ms");
-
-    //        // 构建字段名列表
-    //        // 构建字段名列表（使用协议名）
-    //        List<string> fieldNames = new List<string>();
-    //        foreach (var state in _configStates)
-    //        {
-    //            if (_allStates.TryGetValue(state, out var meta))
-    //            {
-    //                string csharpFieldName = meta.FieldName;  // 现在是 C# 字段名
-    //                if (CSharpToProtocolFieldMap.TryGetValue(csharpFieldName, out string protocolName))
-    //                    fieldNames.Add(protocolName);
-    //                else
-    //                    fieldNames.Add(csharpFieldName);  // 兼容未映射的字段
-    //            }
-    //        }
-    //        string namesStr = string.Join(",", fieldNames);
-    //        Console.WriteLine($"[SendCNDEOutputConfig] 请求的字段(协议名): {namesStr}");
-
-    //        configPkg.Data.AddRange(System.Text.Encoding.ASCII.GetBytes(namesStr));
-    //        configPkg.Len = (ushort)(2 + namesStr.Length); // 周期2字节 + 名称列表长度
-
-    //        // 打印 CNDE_PKG 内部信息
-    //        //Console.WriteLine($"[SendCNDEOutputConfig] CNDE_PKG 头: 0x{configPkg.Head:X4}, 计数: {configPkg.Count}, 类型: {configPkg.Type}, 长度字段: {configPkg.Len}, 数据长度: {configPkg.Data.Count}");
-
-    //        byte[] frame = CNDEFrameHandle.CNDEPkgToFrame(configPkg);
-
-    //        // 打印完整帧的十六进制
-    //        //Console.WriteLine($"[SendCNDEOutputConfig] 准备发送 {frame.Length} 字节:");
-    //        StringBuilder hex = new StringBuilder();
-    //        foreach (byte b in frame)
-    //        {
-    //            hex.Append(b.ToString("X2") + " ");
-    //        }
-    //        Console.WriteLine(hex.ToString());
-
-    //        // 手动解析帧头验证
-    //        if (frame.Length >= 8)
-    //        {
-    //            ushort head = (ushort)(frame[0] | (frame[1] << 8));
-    //            //Console.WriteLine($"[SendCNDEOutputConfig] 帧头: 0x{head:X4} (预期 0x5A5A)");
-    //            //Console.WriteLine($"[SendCNDEOutputConfig] 帧计数: {frame[2]}");
-    //            //Console.WriteLine($"[SendCNDEOutputConfig] 帧类型: {frame[3]}");
-    //            ushort lenField = (ushort)(frame[4] | (frame[5] << 8));
-    //            //Console.WriteLine($"[SendCNDEOutputConfig] 长度字段: {lenField} (预期 {configPkg.Len})");
-    //            ushort tail = (ushort)(frame[frame.Length - 2] | (frame[frame.Length - 1] << 8));
-    //            //Console.WriteLine($"[SendCNDEOutputConfig] 帧尾: 0x{tail:X4} (预期 0xA5A5)");
-    //        }
-
-    //        int sendResult = _rtClient.Send(frame);
-    //        if (sendResult != frame.Length)
-    //        {
-    //            Console.WriteLine($"[SendCNDEOutputConfig] 发送失败，实际发送 {sendResult} 字节，预期 {frame.Length}");
-    //            return -1;
-    //        }
-    //        Console.WriteLine("[SendCNDEOutputConfig] 发送成功，等待机器人响应...");
-
-    //        byte[] recvBuf = new byte[1024];
-    //        DateTime startTime = DateTime.Now;
-    //        int timeoutMs = 3000;  // 3秒超时
-
-    //        //Thread.Sleep(1000);
-    //        while (_robotStateRunFlag && (DateTime.Now - startTime).TotalMilliseconds < timeoutMs)
-    //        {
-    //            int len = _rtClient.RecvCNDEPkg(recvBuf, recvBuf.Length);
-    //            if (len < 0)
-    //            {
-    //                Console.WriteLine($"[SendCNDEOutputConfig] 接收失败，错误码 {len}");
-    //                return -1;
-    //            }
-    //            if (len == 0)
-    //            {
-    //                Console.WriteLine("[SendCNDEOutputConfig] 收到空数据（连接断开），重发配置帧...");
-    //                _rtClient.Send(frame);
-    //                continue;
-    //            }
-    //            //Console.WriteLine($"[SendCNDEOutputConfig] 收到 {len} 字节数据");
-    //            //Console.WriteLine($"[SendCNDEOutputConfig] 原始数据: {BitConverter.ToString(recvBuf, 0, len)}");
-    //            int ret = CNDEFrameHandle.FrameToCNDEPkg(recvBuf, out CNDE_PKG pkg);
-    //            //Console.WriteLine($"[SendCNDEOutputConfig] FrameToCNDEPkg ret: {ret}");
-    //            if ( ret == 0 && pkg.Type == CNDEFrameType.MESSAGE)
-    //            {
-
-    //                Console.WriteLine($"[SendCNDEOutputConfig] 收到 MESSAGE 帧，数据长度 {pkg.Data.Count}");
-    //                if (pkg.Data.Count > 0 && pkg.Data[0] == 0x00)
-    //                {
-    //                    Console.WriteLine("[SendCNDEOutputConfig] 机器人返回成功 (0x00)");
-    //                    return 0;
-    //                }
-    //                else
-    //                {
-    //                    Console.WriteLine($"[SendCNDEOutputConfig] 机器人返回失败，首字节 = {(pkg.Data.Count > 0 ? pkg.Data[0].ToString("X2") : "无数据")}");
-    //                    // 解析错误信息（机器人返回的字符串，以 ASCII 编码）
-    //                    string errorMsg = "";
-    //                    if (pkg.Data.Count > 0)
-    //                    {
-    //                        // 跳过首字节（错误码），剩余部分为文本
-    //                        byte[] textBytes = pkg.Data.Skip(1).ToArray();
-    //                        errorMsg = Encoding.ASCII.GetString(textBytes).TrimEnd('\0');
-    //                    }
-    //                    Console.WriteLine($"[SendCNDEOutputConfig] 机器人返回失败，错误码 = {(pkg.Data.Count > 0 ? pkg.Data[0].ToString("X2") : "无数据")}, 详情: {errorMsg}");
-
-    //                    // 根据错误内容进行特定处理
-    //                    if (errorMsg.Contains("NOT_FOUND") || errorMsg.Contains("unknown field"))
-    //                    {
-    //                        // 尝试找出哪个字段无效，并从配置中移除
-    //                        // 注意：此处需要获取发送的字段名列表，可以从 namesStr 或重新构建
-    //                        // 简化示例：记录错误并返回特定错误码
-    //                        Console.WriteLine("[SendCNDEOutputConfig] 检测到无效字段，请检查配置的状态列表");
-    //                        // 可以在这里触发重新配置（例如移除无效字段后重试），但注意防止无限递归
-    //                        return (int)RobotError.ERR_STATE_INVALID;  // 自定义错误码：字段不存在
-    //                    }
-
-    //                    return (int)RobotError.ERR_SOCKET_COM_FAILED;
-    //                }
-    //            }
-    //            else
-    //            {
-    //                Console.WriteLine("[SendCNDEOutputConfig] 收到非 MESSAGE 帧，继续等待...");
-    //            }
-    //        }
-
-    //        Console.WriteLine($"[SendCNDEOutputConfig] 等待响应超时 ({timeoutMs} ms)");
-    //        return -3;
-    //    }
-    //}
 
     public int SendCNDEOutputConfig()
     {
@@ -1225,6 +954,8 @@ internal class FRCNDEClient
         byte[] pkgBuf = new byte[4096];
         DateTime lastReceiveTime = DateTime.Now;
         int frameCount = 0;
+        //DateTime prevFrameTime = DateTime.Now;
+
 
         while (_robotStateRunFlag)
         {
@@ -1240,7 +971,7 @@ internal class FRCNDEClient
                 {
                     if (!_robotStateRunFlag) break;
 
-                    Console.WriteLine("[RecvRobotStateThread] 连接断开，尝试重连...");
+                    Console.WriteLine("[RecvRobotStateThread] Connection lost, reconnecting...");
 
                     // 重连+重新配置的重试循环
                     bool reconfigured = false;
@@ -1255,13 +986,13 @@ internal class FRCNDEClient
                             if (SendCNDEOutputConfig() == 0 && SetCNDEStart() == 0)
                             {
                                 reconfigured = true;
-                                Console.WriteLine("[RecvRobotStateThread] 重连并重新配置成功");
+                                Console.WriteLine("[RecvRobotStateThread] Reconnect and reconfigure success");
                                 _errorCallback?.Invoke((int)RobotError.ERR_SUCCESS);
                                 break;
                             }
                             else
                             {
-                                Console.WriteLine($"[RecvRobotStateThread] 重连后配置失败，重试 {retry + 1}/{maxReconfigRetries}");
+                                 Console.WriteLine($"[RecvRobotStateThread] Reconfigure failed, retry {retry + 1}/{maxReconfigRetries}");
                                 // 配置失败，关闭当前连接（下次循环会重新 ReConnect）
                                 _rtClient.Close();
                                 Thread.Sleep(500);  // 等待后重试
@@ -1269,14 +1000,14 @@ internal class FRCNDEClient
                         }
                         else
                         {
-                            Console.WriteLine($"[RecvRobotStateThread] 重连失败，重试 {retry + 1}/{maxReconfigRetries}");
+                            Console.WriteLine($"[RecvRobotStateThread] Reconnect failed, retry {retry + 1}/{maxReconfigRetries}");
                             Thread.Sleep(500);
                         }
                     }
 
                     if (!reconfigured)
                     {
-                        Console.WriteLine("[RecvRobotStateThread] 多次重连并重配置均失败，退出线程");
+                        Console.WriteLine("[RecvRobotStateThread] All reconnect retries failed, exit thread");
                         _errorCallback?.Invoke((int)RobotError.ERR_SOCKET_COM_FAILED);
                         break;
                     }
@@ -1294,13 +1025,18 @@ internal class FRCNDEClient
                         if (CNDEFrameHandle.FrameToCNDEPkg(validData, out CNDE_PKG pkg) == 0 && pkg.Type == CNDEFrameType.OUTPUT_STATE)
                         {
                             frameCount++;
+                            //DateTime now = DateTime.Now;
+                            //double interval = (now - prevFrameTime).TotalMilliseconds;
+                            //prevFrameTime = now;
+                            //if (frameCount > 1)
+                                //Console.WriteLine($"[CNDE] frame={frameCount} time={now:HH:mm:ss.fff} interval={interval:F2}ms");
                             lastReceiveTime = DateTime.Now;
                             _errorCallback?.Invoke((int)RobotError.ERR_SUCCESS);
                             ParseRobotState(pkg.Data);
                         }
                         else
                         {
-                            Console.WriteLine("[RecvRobotStateThread] 帧解析失败或不是 OUTPUT_STATE 帧");
+                            Console.WriteLine("[RecvRobotStateThread] Frame parse failed or not OUTPUT_STATE");
                         }
                         Array.Clear(pkgBuf, 0, pkgBuf.Length);
                     }
@@ -1308,7 +1044,7 @@ internal class FRCNDEClient
             }
             catch (SocketException ex)
             {
-                Console.WriteLine($"[RecvRobotStateThread] Socket异常: {ex.Message}");
+                Console.WriteLine($"[RecvRobotStateThread] Socket exception: {ex.Message}");
                 // 尝试重连+重配置（复用上面的逻辑，或简单处理）
                 bool reconfigured = false;
                 const int maxRetries = 3;
@@ -1334,7 +1070,7 @@ internal class FRCNDEClient
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[RecvRobotStateThread] 未知异常: {ex.Message}");
+                Console.WriteLine($"[RecvRobotStateThread] Unknown exception: {ex.Message}");
                 // 同样尝试重连
                 if (_rtClient.ReConnect())
                 {

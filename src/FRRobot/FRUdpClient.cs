@@ -127,7 +127,7 @@ namespace fairino
 
                 catch (Exception ex)
                 {
-                    //Console.WriteLine($"[FRUdpClient] receive error: {ex.Message}");
+                    Console.WriteLine($"[FRUdpClient] receive error: {ex.Message}");
                     continue;
                 }
 

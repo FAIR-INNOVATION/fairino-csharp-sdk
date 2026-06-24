@@ -1,8 +1,14 @@
 # Visual Studio
 .vs/
+*.suo
+*.user
+*.sln.docstates
+*.userosscache
+
+# Build results
 **/bin/
 **/obj/
-*.exe
-*.dll
-*.pdb
+
+# Local tools
+git-auto-commit.sh
 

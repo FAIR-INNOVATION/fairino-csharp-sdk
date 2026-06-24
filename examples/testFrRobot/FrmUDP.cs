@@ -252,59 +252,32 @@ namespace testFrRobot
 
         private void btnMoveAO_Click(object sender, EventArgs e)
         {
-            //DescPose startdescPose = new DescPose(double.Parse(txtStartX.Text), double.Parse(txtStartY.Text), double.Parse(txtStartZ.Text), double.Parse(txtStartRX.Text), double.Parse(txtStartRY.Text), double.Parse(txtStartRZ.Text));
-            //JointPos startjointPos = new JointPos(double.Parse(txtStartJ1.Text), double.Parse(txtStartJ2.Text), double.Parse(txtStartJ3.Text), double.Parse(txtStartJ4.Text), double.Parse(txtStartJ5.Text), double.Parse(txtStartJ6.Text));
-            //DescPose enddescPose = new DescPose(double.Parse(txtEndX.Text), double.Parse(txtEndY.Text), double.Parse(txtEndZ.Text), double.Parse(txtEndRX.Text), double.Parse(txtEndRY.Text), double.Parse(txtEndRZ.Text));
-            //JointPos endjointPos = new JointPos(double.Parse(txtEndJ1.Text), double.Parse(txtEndJ2.Text), double.Parse(txtEndJ3.Text), double.Parse(txtEndJ4.Text), double.Parse(txtEndJ5.Text), double.Parse(txtEndJ6.Text));
-            //DescPose CPose = new DescPose(double.Parse(txtCX.Text), double.Parse(txtCY.Text), double.Parse(txtCZ.Text), double.Parse(txtCRX.Text), double.Parse(txtCRY.Text), double.Parse(txtCRZ.Text));
-            //JointPos CJPos = new JointPos(double.Parse(txtCJ1.Text), double.Parse(txtCJ2.Text), double.Parse(txtCJ3.Text), double.Parse(txtCJ4.Text), double.Parse(txtCJ5.Text), double.Parse(txtCJ6.Text));
-            //DescPose DPose = new DescPose(double.Parse(txtDX.Text), double.Parse(txtDY.Text), double.Parse(txtDZ.Text), double.Parse(txtDRX.Text), double.Parse(txtDRY.Text), double.Parse(txtDRZ.Text));
-            //JointPos DJPos = new JointPos(double.Parse(txtDJ1.Text), double.Parse(txtDJ2.Text), double.Parse(txtDJ3.Text), double.Parse(txtDJ4.Text), double.Parse(txtDJ5.Text), double.Parse(txtDJ6.Text));
+            JointPos j1 = new JointPos(-11.904, -99.669, 117.473, -108.616, -91.726, 74.256);
+            JointPos j2 = new JointPos(-45.615, -106.172, 124.296, -107.151, -91.282, 74.255);
+            DescPose desc_pos1 = new DescPose(-419.524, -13.000, 351.569, -178.118, 0.314, 3.833);
+            DescPose desc_pos2 = new DescPose(-321.222, 185.189, 335.520, -179.030, -1.284, -29.869);
+            DescPose offset_pos = new DescPose(0, 0, 0, 0, 0, 0);
+            ExaxisPos epos = new ExaxisPos(0, 0, 0, 0);
 
-            DescPose startdescPose = new DescPose();
-            JointPos startjointPos = new JointPos();
-            DescPose enddescPose = new DescPose();
-            JointPos endjointPos = new JointPos();
-            DescPose CPose = new DescPose();
-            JointPos CJPos = new JointPos();
-            DescPose DPose = new DescPose();
-            JointPos DJPos = new JointPos();
+            int tool = 0;
+            int user = 0;
+            float vel = 100.0f;
+            float acc = 100.0f;
+            float ovl = 100.0f;
+            float blendT = 0.0f;
+            byte flag = 0;
 
-            ExaxisPos exaxisPos = new ExaxisPos(0, 0, 0, 0);
-            DescPose offdese = new DescPose(0, 0, 0, 0, 0, 0);
-            int rtn = robot.MoveToolAOStart(0, 100, 80, 1);
-            //int rtn = robot.MoveAOStart(0, 100, 80, 1);
-            Console.WriteLine(rtn);
+            robot.SetSpeed(5);
 
-            rtn = robot.MoveL(startjointPos, startdescPose, 0, 0, 100, 100, 100, 0, 0, exaxisPos, 0, 0, offdese);
-            //robot.MoveJ(startjointPos, startdescPose, 0, 0, 100, 100, 100, exaxisPos, 0, 0, offdese);
-            //robot.MoveC(startjointPos, startdescPose, 0, 0, 100, 100, exaxisPos, 0, offdese, endjointPos, enddescPose, 0, 0, 100, 100, exaxisPos, 0, offdese, 100, 0);
-            //robot.Circle(startjointPos, startdescPose, 0, 0, 100, 100, exaxisPos, endjointPos, enddescPose, 0, 0, 100, 100, exaxisPos, 100, 0, offdese);
-            //robot.SplineStart();
-            //robot.SplinePTP(startjointPos, startdescPose, 0, 0, 100, 100, 100);
-            //robot.SplinePTP(endjointPos, enddescPose, 0, 0, 100, 100, 100);
-            //robot.SplinePTP(CJPos, CPose, 0, 0, 100, 100, 100);
-            //robot.SplinePTP(DJPos, DPose, 0, 0, 100, 100, 100);
-            //robot.SplineEnd();
+            robot.MoveAOStart(0, 100, 100, 20);
+            robot.MoveJ(j1, desc_pos1, tool, user, vel, acc, ovl, epos, blendT, flag, offset_pos);
+            robot.MoveJ(j2, desc_pos2, tool, user, vel, acc, ovl, epos, blendT, flag, offset_pos);
+            robot.MoveAOStop();
 
-            //robot.NewSplineStart(0, 5000);
-            //robot.NewSplinePoint(startjointPos, startdescPose, 0, 0, 100, 100, 100, 5, 0);
-            //robot.NewSplinePoint(endjointPos, enddescPose, 0, 0, 100, 100, 100, 5, 0);
-            //robot.NewSplinePoint(CJPos, CPose, 0, 0, 100, 100, 100, 5, 0);
-            //robot.NewSplinePoint(DJPos, DPose, 0, 0, 100, 100, 100, 5, 1);
-            //robot.NewSplineEnd();
-            //int count = 1000;
-            //while (count > 0)
-            //{
-            //    robot.ServoJ(startjointPos, 0, 0, 0.008f, 0, 0);
-            //    startjointPos.jPos[0] += 0.01;//0关节位置增加
-            //    count -= 1;
-            //}
-
-
-            rtn = robot.MoveToolAOStop();
-            //rtn = robot.MoveAOStop();
-            Console.WriteLine(rtn);
+            robot.MoveToolAOStart(0, 100, 100, 20);
+            robot.MoveJ(j1, desc_pos1, tool, user, vel, acc, ovl, epos, blendT, flag, offset_pos);
+            robot.MoveJ(j2, desc_pos2, tool, user, vel, acc, ovl, epos, blendT, flag, offset_pos);
+            robot.MoveToolAOStop();
         }
 
         private void button4_Click(object sender, EventArgs e)
@@ -503,37 +476,37 @@ namespace testFrRobot
             Console.WriteLine(Marshal.SizeOf(pKG));
             return;
 
-            while (true)
-            {
+            //while (true)
+            //{
 
-                int rtn = 0;
-                ExaxisPos pos = new ExaxisPos(double.Parse(textBox4.Text), double.Parse(textBox3.Text), double.Parse(textBox2.Text), double.Parse(textBox1.Text));
-                rtn = robot.ExtAxisMove(pos, 10);
-                pos.ePos[1] += 10;
-                txtRtn.Text = rtn.ToString();
-                rtn = robot.ExtAxisMove(pos, 10);
-                txtRtn.Text = rtn.ToString();
-                for (int i = 0; i < 6; i++)
-                {
-                    robot.SetAuxDO(i, true, false, true);
-                    Thread.Sleep(200);
-                }
-                for (int i = 0; i < 6; i++)
-                {
-                    robot.SetAuxDO(i, false, false, true);
-                    Thread.Sleep(200);
-                }
+            //    int rtn = 0;
+            //    ExaxisPos pos = new ExaxisPos(double.Parse(textBox4.Text), double.Parse(textBox3.Text), double.Parse(textBox2.Text), double.Parse(textBox1.Text));
+            //    rtn = robot.ExtAxisMove(pos, 10);
+            //    pos.ePos[1] += 10;
+            //    txtRtn.Text = rtn.ToString();
+            //    rtn = robot.ExtAxisMove(pos, 10);
+            //    txtRtn.Text = rtn.ToString();
+            //    for (int i = 0; i < 6; i++)
+            //    {
+            //        robot.SetAuxDO(i, true, false, true);
+            //        Thread.Sleep(200);
+            //    }
+            //    for (int i = 0; i < 6; i++)
+            //    {
+            //        robot.SetAuxDO(i, false, false, true);
+            //        Thread.Sleep(200);
+            //    }
 
-                for (int i = 0; i < 4; i++)
-                {
-                    robot.SetAuxAO(0, i * 10, true);
-                    robot.SetAuxAO(1, 4095 - i * 10, true);
-                    robot.SetAuxAO(2, i * 10, true);
-                    robot.SetAuxAO(3, 4095 - i * 10, true);
-                    Thread.Sleep(10);
-                }
-                Thread.Sleep(1000);
-            }
+            //    for (int i = 0; i < 4; i++)
+            //    {
+            //        robot.SetAuxAO(0, i * 10, true);
+            //        robot.SetAuxAO(1, 4095 - i * 10, true);
+            //        robot.SetAuxAO(2, i * 10, true);
+            //        robot.SetAuxAO(3, 4095 - i * 10, true);
+            //        Thread.Sleep(10);
+            //    }
+            //    Thread.Sleep(1000);
+            //}
 
 
         }
@@ -581,7 +554,7 @@ namespace testFrRobot
             ExaxisPos startexaxisPos = new ExaxisPos(/* 输入您的扩展轴起始点坐标 */);
 
             //8.记录您的同步关节运动终点坐标
-            DescPose enddescPose = new DescPose(/*输入您的坐标*/);
+            new DescPose(/*输入您的坐标*/);
             JointPos endjointPos = new JointPos(/*输入您的坐标*/);
             ExaxisPos endexaxisPos = new ExaxisPos(/* 输入您的扩展轴终点坐标 */);
 
@@ -700,7 +673,7 @@ namespace testFrRobot
 
             //8.记录您的同步直线运动终点坐标
             DescPose enddescPose = new DescPose(/*输入您的坐标*/);
-            JointPos endjointPos = new JointPos(/*输入您的坐标*/);
+            new JointPos(/*输入您的坐标*/);
             ExaxisPos endexaxisPos = new ExaxisPos(/* 输入您的扩展轴终点坐标 */);
 
             //9.编写同步运动程序
@@ -812,18 +785,18 @@ namespace testFrRobot
             //int SetWObjList(int id, DescPose coord);
 
             //7.记录您的同步圆弧运动起始点
-            DescPose startdescPose = new DescPose(/*输入您的坐标*/);
+            new DescPose(/*输入您的坐标*/);
             JointPos startjointPos = new JointPos(/*输入您的坐标*/);
             ExaxisPos startexaxisPos = new ExaxisPos(/* 输入您的扩展轴起始点坐标 */);
 
             //8.记录您的同步圆弧运动终点坐标
             DescPose enddescPose = new DescPose(/*输入您的坐标*/);
-            JointPos endjointPos = new JointPos(/*输入您的坐标*/);
+            new JointPos(/*输入您的坐标*/);
             ExaxisPos endexaxisPos = new ExaxisPos(/* 输入您的扩展轴终点坐标 */);
 
             //8.记录您的同步圆弧运动中间点坐标
             DescPose middescPose = new DescPose(/*输入您的坐标*/);
-            JointPos midjointPos = new JointPos(/*输入您的坐标*/);
+            new JointPos(/*输入您的坐标*/);
             ExaxisPos midexaxisPos = new ExaxisPos(/* 输入机器人圆弧中间点时的扩展轴坐标 */);
 
             //9.编写同步运动程序
@@ -1210,10 +1183,6 @@ namespace testFrRobot
             double vel = 20.0;
             double acc = 100.0;
             double ovl = 100.0;
-            float blendT = -1;
-            float blendR = -1;
-            int flag = 0;
-            int type = 1;
 
             ExaxisPos exaxisPos = new ExaxisPos(0, 0, 0, 0);
 
