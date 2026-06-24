@@ -265,9 +265,7 @@ namespace testFrRobot
             float acc = 100.0f;
             float ovl = 100.0f;
             float blendT = 0.0f;
-            float blendR = 0.0f;
             byte flag = 0;
-            byte search = 0;
 
             robot.SetSpeed(5);
 
@@ -478,37 +476,37 @@ namespace testFrRobot
             Console.WriteLine(Marshal.SizeOf(pKG));
             return;
 
-            while (true)
-            {
+            //while (true)
+            //{
 
-                int rtn = 0;
-                ExaxisPos pos = new ExaxisPos(double.Parse(textBox4.Text), double.Parse(textBox3.Text), double.Parse(textBox2.Text), double.Parse(textBox1.Text));
-                rtn = robot.ExtAxisMove(pos, 10);
-                pos.ePos[1] += 10;
-                txtRtn.Text = rtn.ToString();
-                rtn = robot.ExtAxisMove(pos, 10);
-                txtRtn.Text = rtn.ToString();
-                for (int i = 0; i < 6; i++)
-                {
-                    robot.SetAuxDO(i, true, false, true);
-                    Thread.Sleep(200);
-                }
-                for (int i = 0; i < 6; i++)
-                {
-                    robot.SetAuxDO(i, false, false, true);
-                    Thread.Sleep(200);
-                }
+            //    int rtn = 0;
+            //    ExaxisPos pos = new ExaxisPos(double.Parse(textBox4.Text), double.Parse(textBox3.Text), double.Parse(textBox2.Text), double.Parse(textBox1.Text));
+            //    rtn = robot.ExtAxisMove(pos, 10);
+            //    pos.ePos[1] += 10;
+            //    txtRtn.Text = rtn.ToString();
+            //    rtn = robot.ExtAxisMove(pos, 10);
+            //    txtRtn.Text = rtn.ToString();
+            //    for (int i = 0; i < 6; i++)
+            //    {
+            //        robot.SetAuxDO(i, true, false, true);
+            //        Thread.Sleep(200);
+            //    }
+            //    for (int i = 0; i < 6; i++)
+            //    {
+            //        robot.SetAuxDO(i, false, false, true);
+            //        Thread.Sleep(200);
+            //    }
 
-                for (int i = 0; i < 4; i++)
-                {
-                    robot.SetAuxAO(0, i * 10, true);
-                    robot.SetAuxAO(1, 4095 - i * 10, true);
-                    robot.SetAuxAO(2, i * 10, true);
-                    robot.SetAuxAO(3, 4095 - i * 10, true);
-                    Thread.Sleep(10);
-                }
-                Thread.Sleep(1000);
-            }
+            //    for (int i = 0; i < 4; i++)
+            //    {
+            //        robot.SetAuxAO(0, i * 10, true);
+            //        robot.SetAuxAO(1, 4095 - i * 10, true);
+            //        robot.SetAuxAO(2, i * 10, true);
+            //        robot.SetAuxAO(3, 4095 - i * 10, true);
+            //        Thread.Sleep(10);
+            //    }
+            //    Thread.Sleep(1000);
+            //}
 
 
         }
@@ -556,7 +554,7 @@ namespace testFrRobot
             ExaxisPos startexaxisPos = new ExaxisPos(/* 输入您的扩展轴起始点坐标 */);
 
             //8.记录您的同步关节运动终点坐标
-            DescPose enddescPose = new DescPose(/*输入您的坐标*/);
+            new DescPose(/*输入您的坐标*/);
             JointPos endjointPos = new JointPos(/*输入您的坐标*/);
             ExaxisPos endexaxisPos = new ExaxisPos(/* 输入您的扩展轴终点坐标 */);
 
@@ -675,7 +673,7 @@ namespace testFrRobot
 
             //8.记录您的同步直线运动终点坐标
             DescPose enddescPose = new DescPose(/*输入您的坐标*/);
-            JointPos endjointPos = new JointPos(/*输入您的坐标*/);
+            new JointPos(/*输入您的坐标*/);
             ExaxisPos endexaxisPos = new ExaxisPos(/* 输入您的扩展轴终点坐标 */);
 
             //9.编写同步运动程序
@@ -787,18 +785,18 @@ namespace testFrRobot
             //int SetWObjList(int id, DescPose coord);
 
             //7.记录您的同步圆弧运动起始点
-            DescPose startdescPose = new DescPose(/*输入您的坐标*/);
+            new DescPose(/*输入您的坐标*/);
             JointPos startjointPos = new JointPos(/*输入您的坐标*/);
             ExaxisPos startexaxisPos = new ExaxisPos(/* 输入您的扩展轴起始点坐标 */);
 
             //8.记录您的同步圆弧运动终点坐标
             DescPose enddescPose = new DescPose(/*输入您的坐标*/);
-            JointPos endjointPos = new JointPos(/*输入您的坐标*/);
+            new JointPos(/*输入您的坐标*/);
             ExaxisPos endexaxisPos = new ExaxisPos(/* 输入您的扩展轴终点坐标 */);
 
             //8.记录您的同步圆弧运动中间点坐标
             DescPose middescPose = new DescPose(/*输入您的坐标*/);
-            JointPos midjointPos = new JointPos(/*输入您的坐标*/);
+            new JointPos(/*输入您的坐标*/);
             ExaxisPos midexaxisPos = new ExaxisPos(/* 输入机器人圆弧中间点时的扩展轴坐标 */);
 
             //9.编写同步运动程序
@@ -1185,10 +1183,6 @@ namespace testFrRobot
             double vel = 20.0;
             double acc = 100.0;
             double ovl = 100.0;
-            float blendT = -1;
-            float blendR = -1;
-            int flag = 0;
-            int type = 1;
 
             ExaxisPos exaxisPos = new ExaxisPos(0, 0, 0, 0);
 

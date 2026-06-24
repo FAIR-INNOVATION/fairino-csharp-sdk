@@ -1820,7 +1820,7 @@ namespace fairino
                 }
                 return rtn;
             }
-            catch(Exception ex)
+            catch
             {
                 
                 if (IsSockComError())
@@ -18787,7 +18787,7 @@ namespace fairino
                 // 返回错误码
                 return errcode;
             }
-            catch (Exception ex)
+            catch
             {
                 // 捕获异常，记录日志（可选）
                 // 返回预定义的错误码
@@ -23311,7 +23311,7 @@ namespace fairino
             {
                 if (log != null)
                 {
-                  //  log.LogError($"Exception in MoveIntersectLine: {ex.Message}");
+                    log.LogError($"Exception in MoveIntersectLine: {ex.Message}");
                 }
                 return (int)RobotError.ERR_RPC_ERROR;
             }
@@ -23691,7 +23691,7 @@ namespace fairino
 
         /**
         * @brief 光电传感器TCP标定
-        * @param [in] luaPath 自动标定lua程序路径：QX版本机器人-"/fruser/FR_CalibrateTheToolTcp.lua";LA版本机器人-"/usr/local/etc/controller/lua/FR_CalibrateTheToolTcp.lua"
+        * @param [in] luaPath 自动标定lua程序路径："FR_CalibrateTheToolTcp.lua"
         * @param [in] offsetX 示教点偏移(x,y,z)mm
         * @param [out] TCP 标定后的工具坐标系(x,y,z,rx,ry,rz)
         * @return 错误码
@@ -26638,8 +26638,59 @@ namespace fairino
             }
         }
 
+        /**
+        * @brief  设置摆动实时偏移
+        * @param [in] offset 实时偏移量[mm、°]
+        * @return  错误码
+        */
+        public int SetWeaveOffsetRT(DescPose offset)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
 
+            while (is_sendcmd == true)
+            {
+                Thread.Sleep(10);
+            }
 
+            string content = string.Format("SetWeaveOffsetRT({0},{1},{2},{3},{4},{5})",
+                offset.tran.x, offset.tran.y, offset.tran.z,
+                offset.rpy.rx, offset.rpy.ry, offset.rpy.rz);
+            g_sendbuf = string.Format("/f/bIII{0}III1368III{1}III{2}III/b/f",
+                frameCnt++, content.Length, content);
+
+            is_sendcmd = true;
+            log?.LogInfo("SetWeaveOffsetRT()");
+            return 0;
+        }
+
+        /**
+        * @brief  设置速度(指令帧，低延迟)
+        * @param [in] vel 速度百分比，范围[0~100]
+        * @return  错误码
+        */
+        public int SetSpeedInstant(int vel)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            while (is_sendcmd == true)
+            {
+                Thread.Sleep(10);
+            }
+
+            string content = string.Format("SetSpeed({0})", vel);
+            g_sendbuf = string.Format("/f/bIII{0}III983III{1}III{2}III/b/f",
+                frameCnt++, content.Length, content);
+
+            is_sendcmd = true;
+            log?.LogInfo($"SetSpeedInstant({vel})");
+            return 0;
+        }
     }
 }
 

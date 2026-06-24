@@ -1,9 +1,0 @@
-  Determining projects to restore...
-  Nothing to do. None of the projects specified contain packages to restore.
-  FRRobot -> D:\C#SDK\各版本sdk\fairino-csharp_-sdk-3.9.7\src\FRRobot\bin\Debug\libfairino.dll
-
-Build succeeded.
-    0 Warning(s)
-    0 Error(s)
-
-Time Elapsed 00:00:00.51

@@ -207,8 +207,8 @@ namespace testFrRobot
             ROBOT_STATE_PKG pkg = new ROBOT_STATE_PKG();
             //robot.SetAxleCommunicationParam(7, 8, 1, 0, 5, 3, 1);
 
-            int baudRate = 0, dataBit = 0, stopBit = 0, verify = 0, timeout = 0, timeoutTimes = 0, period = 0;
-           // robot.GetAxleCommunicationParam(ref baudRate, ref dataBit, ref stopBit, ref verify, ref timeout, ref timeoutTimes, ref period);
+            //int baudRate = 0, dataBit = 0, stopBit = 0, verify = 0, timeout = 0, timeoutTimes = 0, period = 0;
+            //robot.GetAxleCommunicationParam(ref baudRate, ref dataBit, ref stopBit, ref verify, ref timeout, ref timeoutTimes, ref period);
 
             robot.SetAxleLuaEnable(1);
             int luaEnableStatus = 0;
@@ -243,7 +243,7 @@ namespace testFrRobot
             ROBOT_STATE_PKG pkg = new ROBOT_STATE_PKG();
            // robot.SetAxleCommunicationParam(7, 8, 1, 0, 5, 3, 1);
 
-            int baudRate = 0, dataBit = 0, stopBit = 0, verify = 0, timeout = 0, timeoutTimes = 0, period = 0;
+            //int baudRate = 0, dataBit = 0, stopBit = 0, verify = 0, timeout = 0, timeoutTimes = 0, period = 0;
             //robot.GetAxleCommunicationParam(ref baudRate, ref dataBit, ref stopBit, ref verify, ref timeout, ref timeoutTimes, ref period);
 
             robot.SetAxleLuaEnable(1);
@@ -674,7 +674,7 @@ namespace testFrRobot
             double[] min_threshold = { 0.01, 0.01, 5.01, 0.01, 0.01, 0.01 };
 
             ForceTorque ft = new ForceTorque(1.0, 0.0, 2.0, 0.0, 0.0, 0.0);
-            DescPose desc_p1, desc_p2, desc_p3;
+            DescPose desc_p1, desc_p2;
 
             desc_p1 = new DescPose(-280.5, -474.534, 320.677, 177.986, 1.498, -118.235);
             desc_p2 = new DescPose(-283.273, -468.668, 172.905, 177.986, 1.498, -118.235);
@@ -995,7 +995,6 @@ namespace testFrRobot
 
             int config = 0;
             int rtn = 0;
-            int rrpc;
             bool isConnected = true; // 标记连接状态
 
             DescPose p1Desc = new DescPose(-424.459, 7.448, 215.42, -175.985, -30.876, -31.116);
@@ -1152,7 +1151,6 @@ namespace testFrRobot
         private void button16_Click(object sender, EventArgs e)
 
         {
-            int config = 0;
             int rtn = 0;
             bool isConnected = true; // 标记连接状态
 

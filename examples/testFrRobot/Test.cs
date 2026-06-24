@@ -112,9 +112,6 @@ namespace testFrRobot
             });
 
             int retval = 0;
-            int index = 1;
-            int max_time = 30000;
-            bool block = false;
             retval = 0;
 
             /* 传送带抓取流程 */
@@ -342,7 +339,6 @@ namespace testFrRobot
         private void button10_Click(object sender, EventArgs e)
         {
 
-            bool saveFlag = false;
             DescPose startdescPose = new DescPose(-319.303, -240.689, 116.379, -175.879, -0.337, 148.239);
             JointPos startjointPos = new JointPos(20.474, -103.554, 126.774, -116.682, -87.746, -37.709);
 
@@ -455,9 +451,8 @@ namespace testFrRobot
             byte status = 1;
             byte smooth = 0;
             byte block = 0;
-            byte di = 0, tool_di = 0;
-            float ai = 0.0f, tool_ai = 0.0f;
-            float value = 0.0f;
+            //byte di = 0, tool_di = 0;
+            //float ai = 0.0f, tool_ai = 0.0f;
 
 
             for (int i = 0; i < 16; i++)
@@ -506,12 +501,9 @@ namespace testFrRobot
 
         private void button15_Click(object sender, EventArgs e)
         {
-            byte status = 1;
-            byte smooth = 0;
             byte block = 0;
             byte di = 0, tool_di = 0;
             float ai = 0.0f, tool_ai = 0.0f;
-            float value = 0.0f;
 
             robot.GetDI(0, block, ref di);
             Console.WriteLine($"di0: {di}");
@@ -541,12 +533,8 @@ namespace testFrRobot
 
         private void button16_Click(object sender, EventArgs e)
         {
-            byte status = 1;
-            byte smooth = 0;
-            byte block = 0;
-            byte di = 0, tool_di = 0;
-            float ai = 0.0f, tool_ai = 0.0f;
-            float value = 0.0f;
+            //byte di = 0, tool_di = 0;
+            //float ai = 0.0f, tool_ai = 0.0f;
 
             int rtn = robot.WaitDI(0, 1, 1000, 1);
             Console.WriteLine("WaitDI over; rtn is: " + rtn);
@@ -1447,7 +1435,6 @@ namespace testFrRobot
             robot.ActGripper(1, 1);
             Thread.Sleep(4000);
             robot.MoveGripper(1, 50, 10, 100, 50000, 0, 0, 0, 0, 0);
-            int pos = 0;
             while (true)
             {
                 robot.GetRobotRealTimeState(ref pkg);
@@ -1625,10 +1612,6 @@ namespace testFrRobot
         {
             string file_path = "/usr/local/etc/controller/lua/airlab.lua";
             string md5 = "";
-            byte emerg_state = 0;
-            byte si0_state = 0;
-            byte si1_state = 0;
-            int sdk_com_state = 0;
 
             string ssh_keygen = "";
             int retval = robot.GetSSHKeygen(ref ssh_keygen);
@@ -1928,7 +1911,6 @@ namespace testFrRobot
             int device = 0;
             int softversion = 0;
             int bus = 1;
-            int index = 1;
 
             robot.FT_SetConfig(company, device, softversion, bus);
             Thread.Sleep(1000);
@@ -1965,7 +1947,6 @@ namespace testFrRobot
             robot.SetForceSensorPayLoad(0);
             robot.SetForceSensorPayLoadCog(0, 0, 0);
 
-            double computeWeight = 0;
             DescTran tran = new DescTran(0, 0, 0);
             robot.ForceSensorAutoComputeLoad(ref weight, ref tran);
             Console.WriteLine($"the result is weight {weight} pos is {tran.x} {tran.y} {tran.z}");
@@ -2080,11 +2061,10 @@ namespace testFrRobot
             robot.FT_SetZero(0);
             Thread.Sleep(1000);
 
-            byte sensor_id = 1;
             int[] select = { 0, 0, 1, 0, 0, 0 };
             double[] ft_pid = { 0.0005f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
-            byte adj_sign = 0, ILC_sign = 0;
-            float max_dis = 100.0f, max_ang = 0.0f;
+            //byte adj_sign = 0, ILC_sign = 0;
+            //float max_dis = 100.0f, max_ang = 0.0f;
 
             ForceTorque ft = new ForceTorque(0.0, 0.0, -10.0, 0.0, 0.0, 0.0);
             ExaxisPos epos = new ExaxisPos(0, 0, 0, 0);
@@ -2285,12 +2265,11 @@ namespace testFrRobot
             robot.FT_SetZero(0);
             Thread.Sleep(1000);
 
-            byte flag = 1;
-            int sensor_id = 1;
+            //byte flag = 0;
             int[] select = { 1, 1, 1, 0, 0, 0 };
             double[] ft_pid = { 0.0005f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
-            byte adj_sign = 0, ILC_sign = 0;
-            float max_dis = 100.0f, max_ang = 0.0f;
+            //byte adj_sign = 0, ILC_sign = 0;
+            //float max_dis = 100.0f, max_ang = 0.0f;
 
             ForceTorque ft = new ForceTorque { fx = -10.0, fy = -10.0, fz = -10.0 };
             DescPose offset_pos = new DescPose(0, 0, 0, 0, 0, 0);
@@ -2317,7 +2296,7 @@ namespace testFrRobot
             //robot.FT_ComplianceStop();
             //Console.WriteLine($"FT_ComplianceStop rtn is {rtn}");
 
-            flag = 0;
+            //flag = 0;
           //  robot.FT_Control(flag, (byte)sensor_id, select, ft, ft_pid, adj_sign, ILC_sign, max_dis, max_ang);
         }
 
@@ -2388,7 +2367,6 @@ namespace testFrRobot
             retval = robot.AuxServoEnable(1, 0);
             Console.WriteLine($"AuxServoEnable disenable {retval}");
             Thread.Sleep(1000);
-            int servoerrcode = 0;
             int servoErrCode = 0;
             int servoState = 0;
             double servoPos = 0;
@@ -2824,7 +2802,6 @@ namespace testFrRobot
 
         private void button74_Click(object sender, EventArgs e)
         {
-            int rtn;
             int retval = 0;
 
             retval = robot.LoadIdentifyDynFilterInit();
@@ -2859,7 +2836,6 @@ namespace testFrRobot
 
         private void button75_Click(object sender, EventArgs e)
         {
-            int rtn = 0;
             DescPose middescPoseCir1 = new DescPose(-435.414, -342.926, 309.205, -171.382, -4.513, 171.520);
             JointPos midjointPosCir1 = new JointPos(26.804, -79.866, 106.642, -125.433, -85.562, -54.721);
             DescPose enddescPoseCir1 = new DescPose(-524.862, -217.402, 308.459, -171.425, -4.810, 156.088);
@@ -3656,13 +3632,8 @@ namespace testFrRobot
                 float acc = 100.0f;
                 float ovl = 100.0f;
                 float blendT = 0.0f;
-                float blendR = 0.0f;
 
-                int blendMode = 0;
                 byte flag = 0;
-                float oacc = 0.0f;
-                byte search = 0;
-                int config = -1;
                 //robot.SetSpeed(20);
                 int rtn;
                 rtn = robot.MoveJ(j2, tool, user, vel, acc, ovl, epos, blendT, flag, offset_pos);
@@ -3737,13 +3708,9 @@ namespace testFrRobot
             float vel = 100.0f;
             float acc = 100.0f;
             float ovl = 100.0f;
-            float blendT = 0.0f;
             float blendR = 0.0f;
 
-            int blendMode = 0;
             byte flag = 0;
-            float oacc = 0.0f;
-            byte search = 0;
             int config = -1;
             //robot.SetSpeed(20);
             int rtn;
@@ -3859,13 +3826,10 @@ namespace testFrRobot
             float vel = 100.0f;
             float acc = 100.0f;
             float ovl = 100.0f;
-            float blendT = 0.0f;
             float blendR = 0.0f;
 
-            int blendMode = 0;
             byte flag = 0;
             float oacc = 0.0f;
-            byte search = 0;
             int config = -1;
             robot.SetSpeed(20);
             int rtn;
@@ -3904,12 +3868,7 @@ namespace testFrRobot
                 float acc = 100.0f;
                 float ovl = 100.0f;
                 float blendT = 0.0f;
-                float blendR = 0.0f;
-                int blendMode = 0;
                 byte flag = 0;
-                float oacc = 0.0f;
-                byte search = 0;
-                int config = -1;
                 //robot.SetSpeed(20);
                 int rtn;
                 rtn = robot.MoveJ(j2, tool, user, vel, acc, ovl, epos, blendT, flag, offset_pos);
@@ -3970,10 +3929,6 @@ namespace testFrRobot
 
         private void button95_Click(object sender, EventArgs e)
         {
-            int rtn = 0;
-            int state;
-            int pressValue;
-            int error;
             int[] ctrl = new int[8];
 
             for (int i = 0; i < 5; i++)
@@ -4010,7 +3965,6 @@ namespace testFrRobot
             int state = 0;
             int pressValue = 0;
             int error = 0;
-            int rtn;
 
 
             // Upload and load open protocol file
@@ -4053,9 +4007,6 @@ namespace testFrRobot
         public void TestSetSuckerCtrl(Robot robot)
         {
             int rtn = 0;
-            int state;
-            int pressValue;
-            int error;
             int[] ctrl = new int[8];
 
             if (rtn != 0)
@@ -4165,7 +4116,6 @@ namespace testFrRobot
             int state = 0;
             int pressValue = 0;
             int error = 0;
-            int rtn;
 
 
             // Upload and load open protocol file
@@ -4204,7 +4154,6 @@ namespace testFrRobot
             int state = 0;
             int pressValue = 0;
             int error = 0;
-            int rtn;
 
 
             // Upload and load open protocol file
@@ -4274,9 +4223,7 @@ namespace testFrRobot
             float acc = 100.0f;
             float ovl = 100.0f;
             float blendT = -1.0f;
-            float blendR = 0.0f;
             byte flag = 0;
-            int search = 0;
 
             robot.SetSpeed(20);
 
@@ -4322,7 +4269,6 @@ namespace testFrRobot
 
         private void button101_Click(object sender, EventArgs e)
         {
-            int rtn = 0;
 
             int type = 0, version = 0, connState = 0;
             int[] ctrl = new int[8];
@@ -4378,7 +4324,6 @@ namespace testFrRobot
         private void button102_Click(object sender, EventArgs e)
         {
             int rtn = 0;
-            int type = 0, version = 0, connState = 0;
             int[] ctrl = new int[8];
             double[] ctrlAO = new double[8];
             int[] DI = new int[8];
@@ -4405,7 +4350,6 @@ namespace testFrRobot
 
         private void button103_Click(object sender, EventArgs e)
         {
-            int type = 0, version = 0, connState = 0;
             int[] ctrl = new int[8];
             int[] ctrlAO = new int[8];
             int[] DI = new int[8];
@@ -4463,7 +4407,6 @@ namespace testFrRobot
         public void TestFieldBusSlaveWriteDOAO(Robot robot)
         {
             int rtn = 0;
-            int type = 0, version = 0, connState = 0;
             int[] ctrl = new int[8];
             double[] ctrlAO = new double[8];
             int[] DI = new int[8];
@@ -4492,7 +4435,6 @@ namespace testFrRobot
         public void TestFieldBusSlaveReadDIAI_WaitDIAI(Robot robot)
         {
 
-            int type = 0, version = 0, connState = 0;
             int[] ctrl = new int[8];
             int[] ctrlAO = new int[8];
             int[] DI = new int[8];
@@ -4548,7 +4490,6 @@ namespace testFrRobot
             float vel = 100.0f;
             float acc = 200.0f;
             float ovl = 100.0f;
-            float blendT = -1.0f;
             float blendR = -1.0f;
             byte flag = 0;
             byte search = 0;
@@ -4608,6 +4549,7 @@ namespace testFrRobot
         private void button104_Click(object sender, EventArgs e)
         {
 
+            TestWeaveSpeedAndOffset();
             //TestCoordMain5();
             //RunTrajectoryJ("D://zUP/horse.txt", "/usr/local/etc/controller/lua/traj/horse.txt", 50, 1);
             //TestSplineWeave();
@@ -4668,7 +4610,7 @@ namespace testFrRobot
             //TestFTControlWithDamping();
             //ServoJTWithSafety();
             //TestLua();
-            TestIntersectLineMove();
+            //TestIntersectLineMove();
             //TestFTControlWithAdjustCoeff();
             //TestRotInsert();
             //TestMove();
@@ -4742,7 +4684,6 @@ namespace testFrRobot
             ExaxisPos exaxis = new ExaxisPos(100.0f, 0.0f, 0.0f, 0.0f);
             JointPos jointPos = new JointPos(0,0,0,0,0,0);
             DescPose offsetPos = new DescPose(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-            int rtn;
             robot.GetRobotRealTimeState(ref pkg);
             int toolnum = pkg.tool;
             int workPcsNum = pkg.user;
@@ -4752,10 +4693,6 @@ namespace testFrRobot
 
             //robot.ExtAxisMove(exaxis, 100, -1);
 
-            int blendMode = 0;
-            int velAccMode = 0;
-            float oacc = 100.0f;
-            byte flag = 0;
             robot.MoveJ(jointPos, desc, toolnum, workPcsNum, (float)100.0, (float)100.0, (float)100.0, exaxis, -1, 0, offsetPos);
 
 
@@ -4776,7 +4713,6 @@ namespace testFrRobot
             float cmdT = 0.001f;
             float filterT = 0.0f;
             float gain = 0.0f;
-            byte flag = 0;
             int count = 5000;
 
             robot.SetSpeed(20);
@@ -5703,7 +5639,7 @@ namespace testFrRobot
                         recoverySuccess = 0;
                     }
                 }
-                catch (Exception ex)
+                catch
                 {
                     Console.Write($"R{i + 1}:E ");
                     recoverySuccess = 0;
@@ -6018,10 +5954,6 @@ namespace testFrRobot
             double[] B = new double[2] { 15.0, 15.0 };
             double[] threshold = new double[2] { 1.0, 1.0 };
             double[] adjustCoeff = new double[2] { 1.0, 0.8 };
-            double polishRadio = 0.0;
-            int filter_Sign = 0;
-            int posAdapt_sign = 1;
-            int isNoBlock = 0;
             robot.MoveL(j1, desc_p1, 0, 0, 100, 100, 100, -1, 0, epos, 0, 0, offset_pos, 0, 0, 0, 10);
             robot.MoveL(j2, desc_p2, 0, 0, 100, 100, 100, -1, 0, epos, 0, 0, offset_pos, 0, 0, 0, 10);
             while (true)
@@ -6372,7 +6304,7 @@ namespace testFrRobot
                 robot.DragTeachSwitch(0);
                 error = robot.ServoJTEnd(1);
             }
-            return 0;
+            //return 0;
         }
 
 
@@ -6766,9 +6698,6 @@ public void TestVelFeedForwardRatio()
         {
 
             byte[] ctrl = new byte[20];
-            byte state;
-            int pressValue;
-            int error;
 
 
             //上传并加载开放协议文件
@@ -6788,7 +6717,7 @@ public void TestVelFeedForwardRatio()
                 DescPose startDescPose = new DescPose(-167.396, -301.742, 224.468, -157.008, -6.084, 152.043);
                 ExaxisPos exaxisPos = new ExaxisPos(0, 0, 0, 0);
                 DescPose offDesc = new DescPose(0, 0, 0, 0, 0, 0);
-                DescTran directionPoint = new DescTran();
+                new DescTran();
 
                 robot.MoveL(startJointPos, startDescPose, 1, 0, 50, 100, 100, -1, exaxisPos, 0, 0, offDesc, 0, 0, 10);
                 Thread.Sleep(2000);
@@ -6824,11 +6753,7 @@ public void TestVelFeedForwardRatio()
         {
 
             byte[] ctrl = new byte[20];
-            byte state;
-            int pressValue;
-            int error;
 
-            int rtn;
             int cnt = 1;
             while (cnt < 2)
             {
@@ -6974,8 +6899,7 @@ public void TestVelFeedForwardRatio()
                 DescPose wobjCoord = new DescPose(0, 0, 0, 0, 0, 0);
                 DescPose extoolCoord = new DescPose(0, 0, 0, 0, 0, 0);
                 DescPose exAxisCoord = new DescPose(0, 0, 0, 0, 0, 0);
-                double weightT = 0.0f;
-                DescTran cogT = new DescTran();
+                new DescTran();
 
                 //robot.GetCurToolCoord(ref toolCoord);
                 //Console.WriteLine($"GetCurToolCoord {toolCoord.tran.x} {toolCoord.tran.y} {toolCoord.tran.z} {toolCoord.rpy.rx} {toolCoord.rpy.ry} {toolCoord.rpy.rz}");
@@ -7196,7 +7120,7 @@ public void TestVelFeedForwardRatio()
 
             //}
 
-            DescTran loadCoord = new DescTran();
+            new DescTran();
 
             for (int i = 0; i < 100; i++)
             {
@@ -7294,9 +7218,6 @@ public void TestVelFeedForwardRatio()
         public void TestImpedanceControl()
         {
             int[] ctrl = new int[20];
-            int state;
-            int pressValue;
-            int error;
             int rtn;
             JointPos j1 = new JointPos(102.622, -135.990, 120.769, -73.950, -90.848, 35.507);
             JointPos j2 = new JointPos(93.674, -80.062, 82.947, -92.199, -90.967, 26.559);
@@ -7311,7 +7232,6 @@ public void TestVelFeedForwardRatio()
             float vel = 100.0f;
             float acc = 200.0f;
             float ovl = 100.0f;
-            float blendT = -1.0f;
             float blendR = -1.0f;
 
             byte flag = 0;
@@ -7359,9 +7279,6 @@ public void TestVelFeedForwardRatio()
         void testLaserConfig()
         {
             int[] ctrl = new int[20];
-            int state;
-            int pressValue;
-            int error;
             robot.LaserTrackingSensorConfig("192.168.58.120", 502);
             robot.LaserTrackingSensorSamplePeriod(20);
             robot.LoadPosSensorDriver(103);
@@ -7375,9 +7292,6 @@ public void TestVelFeedForwardRatio()
         void testGetLaserPoint()
         {
             int[] ctrl = new int[20];
-            int state;
-            int pressValue;
-            int error;
             string name = "laserPoint";
             double[] data = new double[20];
             robot.GetRobotTeachingPoint(name, ref data);
@@ -7395,9 +7309,6 @@ public void TestVelFeedForwardRatio()
         void testMoveToLaserRecordStart()
         {
             int[] ctrl = new int[20];
-            int state;
-            int pressValue;
-            int error;
 
 
 
@@ -7420,9 +7331,6 @@ public void TestVelFeedForwardRatio()
         void testMoveToLaserRecordEnd()
         {
             int[] ctrl = new int[20];
-            int state;
-            int pressValue;
-            int error;
 
 
 
@@ -7445,9 +7353,6 @@ public void TestVelFeedForwardRatio()
         void testLasertrack_xyz()
         {
             int[] ctrl = new int[20];
-            int state;
-            int pressValue;
-            int error;
 
 
 
@@ -7455,7 +7360,7 @@ public void TestVelFeedForwardRatio()
             DescPose startdescPose = new DescPose(-97.552, -282.855, 26.675, 174.182, -1.338, -91.707);
             ExaxisPos exaxisPos = new ExaxisPos(0, 0, 0, 0);
             DescPose offdese = new DescPose(0, 0, 0, 0, 0, 0);
-            DescTran directionPoint = new DescTran();
+            new DescTran();
 
             robot.MoveL(startjointPos, startdescPose, 1, 0, 100, 100, 100, -1, exaxisPos, 0, 0, offdese, 0);
             robot.LaserTrackingSearchStart_xyz(3, 100, 300, 1000, 3);
@@ -7466,9 +7371,6 @@ public void TestVelFeedForwardRatio()
         void testLasertrack_point()
         {
             int[] ctrl = new int[20];
-            int state;
-            int pressValue;
-            int error;
 
             string name = "laserEnd";
             double[] data = new double[20];
@@ -7502,9 +7404,6 @@ public void TestVelFeedForwardRatio()
         void testLaserRecordAndReplay()
         {
             int[] ctrl = new int[20];
-            int state;
-            int pressValue;
-            int error;
             //robot.OpenLuaUpload("D://zUP/CtrlDev_laser_ruiniu-0117.lua");
             //System.Threading.Thread.Sleep(2000);
             //robot.SetCtrlOpenLUAName(0, "CtrlDev_laser_ruiniu-0117.lua");
@@ -7538,9 +7437,6 @@ public void TestVelFeedForwardRatio()
         void testLasertrack()
         {
             int[] ctrl = new int[20];
-            int state;
-            int pressValue;
-            int error;
             //robot.OpenLuaUpload("D://zUP/CtrlDev_laser_ruiniu-0117.lua");
             //System.Threading.Thread.Sleep(2000);
             //robot.SetCtrlOpenLUAName(0, "CtrlDev_laser_ruiniu-0117.lua");
@@ -7554,7 +7450,7 @@ public void TestVelFeedForwardRatio()
                 DescPose startdescPose = new DescPose(-74.319, -312.541, 39.168, 177.512, -1.843, 122.527);
                 ExaxisPos exaxisPos = new ExaxisPos(0, 0, 0, 0);
                 DescPose offdese = new DescPose(0, 0, 0, 0, 0, 0);
-                DescTran directionPoint = new DescTran();
+                new DescTran();
 
                 robot.MoveL(startjointPos, startdescPose, 1, 0, 20, 100, 100, -1, exaxisPos, 0, 0, offdese, 0);
 
@@ -7825,10 +7721,6 @@ public void TestVelFeedForwardRatio()
             float vel = 100.0f;
             float acc = 200.0f;
             float ovl = 100.0f;
-            double blendT = -1.0;
-            double blendR = -1.0;
-            int flag = 0;
-            int search = 0;
 
             robot.SetSpeed(20);
 
@@ -8197,99 +8089,99 @@ public void TestVelFeedForwardRatio()
         /// <param name="initialSpeedPercent">初始全局速度百分比，默认 50</param>
         /// <param name="trajSpeedMode">轨迹速度模式，默认 1</param>
         /// <returns>成功返回 0，失败返回错误码</returns>
-        public int RunTrajectoryJ(string localFilePath = "D://zUP/horse.txt", string remoteFilePath = "horse.txt",
-            int initialSpeedPercent = 50, int trajSpeedMode = 1)
-        {
-            int rtn;
+public int RunTrajectoryJ(string localFilePath = "D://zUP/horse.txt", string remoteFilePath = "horse.txt",
+    int initialSpeedPercent = 50, int trajSpeedMode = 1)
+{
+    int rtn;
 
-            // 1. 上传轨迹 J 文件
-            rtn = robot.TrajectoryJUpLoad(localFilePath);
-            if (rtn != 0)
-            {
-                Console.WriteLine($"Upload TrajectoryJ failed: {rtn}");
-                return rtn;
-            }
-            Console.WriteLine($"Upload TrajectoryJ success: {localFilePath}");
+    // 1. Upload trajectory J file
+    rtn = robot.TrajectoryJUpLoad(localFilePath);
+    if (rtn != 0)
+    {
+        Console.WriteLine($"Upload TrajectoryJ failed: {rtn}");
+        return rtn;
+    }
+    Console.WriteLine($"Upload TrajectoryJ success: {localFilePath}");
 
-            // 2. 加载轨迹文件
-            rtn = robot.LoadTrajectoryJ(remoteFilePath, 100, 1);
-            if (rtn != 0)
-            {
-                Console.WriteLine($"LoadTrajectoryJ failed: {rtn}");
-                return rtn;
-            }
-            Console.WriteLine($"LoadTrajectoryJ success: {remoteFilePath}");
+    // 2. Load trajectory file
+    rtn = robot.LoadTrajectoryJ(remoteFilePath, 100, 1);
+    if (rtn != 0)
+    {
+        Console.WriteLine($"LoadTrajectoryJ failed: {rtn}");
+        return rtn;
+    }
+    Console.WriteLine($"LoadTrajectoryJ success: {remoteFilePath}");
 
-            // 3. 获取轨迹起始位姿
-            DescPose trajStartPose = new DescPose(0, 0, 0, 0, 0, 0);
-            rtn = robot.GetTrajectoryStartPose(remoteFilePath, ref trajStartPose);
-            if (rtn != 0)
-            {
-                Console.WriteLine($"GetTrajectoryStartPose failed: {rtn}");
-                return rtn;
-            }
-            Console.WriteLine($"Trajectory start pose: ({trajStartPose.tran.x}, {trajStartPose.tran.y}, {trajStartPose.tran.z}, " +
-                              $"{trajStartPose.rpy.rx}, {trajStartPose.rpy.ry}, {trajStartPose.rpy.rz})");
+    // 3. Get trajectory start pose
+    DescPose trajStartPose = new DescPose(0, 0, 0, 0, 0, 0);
+    rtn = robot.GetTrajectoryStartPose(remoteFilePath, ref trajStartPose);
+    if (rtn != 0)
+    {
+        Console.WriteLine($"GetTrajectoryStartPose failed: {rtn}");
+        return rtn;
+    }
+    Console.WriteLine($"Trajectory start pose: ({trajStartPose.tran.x}, {trajStartPose.tran.y}, {trajStartPose.tran.z}, " +
+                        $"{trajStartPose.rpy.rx}, {trajStartPose.rpy.ry}, {trajStartPose.rpy.rz})");
 
-            // 4. 移动到轨迹起始点（使用笛卡尔空间 PTP）
-            robot.SetSpeed(initialSpeedPercent);
-            rtn = robot.MoveCart(trajStartPose, 0, 0, 100, 100, 100, -1, -1);
-            if (rtn != 0)
-            {
-                Console.WriteLine($"MoveCart to start pose failed: {rtn}");
-                return rtn;
-            }
+    // 4. Move to trajectory start point (using Cartesian PTP)
+    robot.SetSpeed(initialSpeedPercent);
+    rtn = robot.MoveCart(trajStartPose, 0, 0, 100, 100, 100, -1, -1);
+    if (rtn != 0)
+    {
+        Console.WriteLine($"MoveCart to start pose failed: {rtn}");
+        return rtn;
+    }
 
-            // 5. 获取轨迹点数（可选，仅用于显示）
-            int trajPointNum = 0;
-            rtn = robot.GetTrajectoryPointNum(ref trajPointNum);
-            if (rtn != 0)
-            {
-                Console.WriteLine($"GetTrajectoryPointNum failed: {rtn}");
-                // 不返回，继续执行
-            }
-            else
-            {
-                Console.WriteLine($"Trajectory points count: {trajPointNum}");
-            }
+    // 5. Get trajectory point count (optional, for display only)
+    int trajPointNum = 0;
+    rtn = robot.GetTrajectoryPointNum(ref trajPointNum);
+    if (rtn != 0)
+    {
+        Console.WriteLine($"GetTrajectoryPointNum failed: {rtn}");
+        // Do not return, continue execution
+    }
+    else
+    {
+        Console.WriteLine($"Trajectory points count: {trajPointNum}");
+    }
 
-            // 6. 开始执行轨迹运动（非阻塞）
-            rtn = robot.MoveTrajectoryJ();
-            if (rtn != 0)
-            {
-                Console.WriteLine($"MoveTrajectoryJ failed: {rtn}");
-                return rtn;
-            }
-            Console.WriteLine("MoveTrajectoryJ started.");
+    // 6. Start trajectory execution (non-blocking)
+    rtn = robot.MoveTrajectoryJ();
+    if (rtn != 0)
+    {
+        Console.WriteLine($"MoveTrajectoryJ failed: {rtn}");
+        return rtn;
+    }
+    Console.WriteLine("MoveTrajectoryJ started.");
 
-            // 7. 在运动过程中动态修改速度（交替 10% 和 80%）
-            // 使用 GetRobotMotionDone 检查运动是否完成
-            //byte motionDone = 0;
-            //robot.GetRobotMotionDone(ref motionDone);
+    // 7. Dynamically change speed during motion (alternate 10% and 80%)
+    // Use GetRobotMotionDone to check if motion is complete
+    byte motionDone = 0;
+    robot.GetRobotMotionDone(ref motionDone);
 
-            //while (motionDone == 0)
-            //{
-            //    // 设置为 10% 速度
-            //    rtn = robot.SetTrajectoryJSpeed(10.0, trajSpeedMode);
-            //    Console.WriteLine($"SetTrajectoryJSpeed to 10% returned: {rtn}");
-            //    robot.Sleep(1000);
+    while (motionDone == 0)
+    {
+        // Set speed to 10%
+        rtn = robot.SetTrajectoryJSpeed(10.0, trajSpeedMode);
+        Console.WriteLine($"SetTrajectoryJSpeed to 10% returned: {rtn}");
+        robot.Sleep(1000);
 
-            //    // 重新检查运动状态
-            //    robot.GetRobotMotionDone(ref motionDone);
-            //    if (motionDone != 0) break;
+        // Re-check motion status
+        robot.GetRobotMotionDone(ref motionDone);
+        if (motionDone != 0) break;
 
-            //    // 设置为 80% 速度
-            //    rtn = robot.SetTrajectoryJSpeed(80.0, trajSpeedMode);
-            //    Console.WriteLine($"SetTrajectoryJSpeed to 80% returned: {rtn}");
-            //    robot.Sleep(1000);
+        // Set speed to 80%
+        rtn = robot.SetTrajectoryJSpeed(80.0, trajSpeedMode);
+        Console.WriteLine($"SetTrajectoryJSpeed to 80% returned: {rtn}");
+        robot.Sleep(1000);
 
-            //    // 再次检查运动状态
-            //    robot.GetRobotMotionDone(ref motionDone);
-            //}
+        // Re-check motion status again
+        robot.GetRobotMotionDone(ref motionDone);
+    }
 
-            Console.WriteLine("Trajectory J motion completed.");
-            return 0;
-        }
+    Console.WriteLine("Trajectory J motion completed.");
+    return 0;
+}
 
         private void flowLayoutPanel8_Paint(object sender, PaintEventArgs e)
         {
@@ -8384,7 +8276,7 @@ public void TestVelFeedForwardRatio()
                 robot.DragTeachSwitch(0);
                 error = robot.ServoMITEnd(0);
             }
-            return 0;
+            //return 0;
         }
 
         private void btnLaserWeld_Click(object sender, EventArgs e)
@@ -9058,7 +8950,6 @@ public void TestVelFeedForwardRatio()
             float acc = 100.0f;
             float ovl = 20.0f;
             float blendT = 0.0f;
-            float blendR = 0.0f;
             byte flag = 0;
 
             robot.SetSpeed(1);
@@ -9756,6 +9647,107 @@ public void TestVelFeedForwardRatio()
             Console.WriteLine("  01 xmlrpc接口兼容测试 完成");
             Console.WriteLine("============================================================");
         }
+
+        public void TestWeaveSpeedAndOffset()
+        {
+            Console.WriteLine("============================================================");
+            Console.WriteLine("  Weave Speed and Offset Test");
+            Console.WriteLine("============================================================");
+
+            if (robot == null)
+            {
+                Console.WriteLine("ERROR: Robot not connected!");
+                return;
+            }
+
+            int rtn;
+            ROBOT_STATE_PKG pkg = new ROBOT_STATE_PKG();
+            ExaxisPos epos = new ExaxisPos(0, 0, 0, 0);
+            DescPose offset_pos = new DescPose(0, 0, 0, 0, 0, 0);
+
+            JointPos j1 = new JointPos(5.027, -84.331, -75.139, -103.690, 86.379, 20.794);
+            DescPose d1 = new DescPose(324.752, -83.339, 366.314, -172.321, -0.936, -106.047);
+
+            JointPos j2 = new JointPos(-35.335, -117.598, -57.174, -95.234, 90.001, -19.560);
+            DescPose d2 = new DescPose(324.999, -355.439, 260.000, 179.995, 0.003, -105.775);
+
+            JointPos j3 = new JointPos(59.787, -117.594, -57.183, -95.222, 90.006, 75.562);
+            DescPose d3 = new DescPose(324.998, 355.441, 260.002, 179.995, 0.003, -105.775);
+
+            // ---- Step 1: MoveJ to start point ----
+            Console.WriteLine("\nStep 1: MoveJ to start point");
+            rtn = robot.MoveJ(j1, d1, 1, 0, 100, 100, 50, epos, -1, 0, offset_pos);
+            Console.WriteLine("  MoveJ(j1) rtn={0}", rtn);
+            Thread.Sleep(500);
+
+            // ---- Step 2: MoveJ to weave entry ----
+            Console.WriteLine("\nStep 2: MoveJ to weave entry point");
+            rtn = robot.MoveJ(j2, d2, 1, 0, 100, 100, 50, epos, -1, 0, offset_pos);
+            Console.WriteLine("  MoveJ(j2) rtn={0}", rtn);
+            Thread.Sleep(500);
+
+            // ---- Step 3: WeaveStart, launch weave MoveL thread ----
+            Console.WriteLine("\nStep 3: WeaveStart + MoveL in background thread");
+            robot.WeaveStart(0);
+
+            bool weaveRunning = true;
+            Thread weaveThread = new Thread(() =>
+            {
+                rtn = robot.MoveL(j3, d3, 1, 0, 100, 100, 5, -1, 0, epos, 0, 0, offset_pos, 5, 0, 0, 10);
+                Console.WriteLine("  MoveL(weave) thread finished, rtn={0}", rtn);
+                weaveRunning = false;
+            });
+            weaveThread.IsBackground = true;
+            weaveThread.Start();
+            Thread.Sleep(500);  // Wait for motion to start
+
+            // ---- Step 4: Speed test (main thread, weave MoveL in background) ----
+            Console.WriteLine("\nStep 4: SetSpeed test during weaving");
+            int[] speedValues = { 20, 50, 80, 30, 60, 10 };
+            foreach (int speed in speedValues)
+            {
+                if (!weaveRunning) break;
+                rtn = robot.SetSpeedInstant(speed);
+                robot.GetRobotRealTimeState(ref pkg);
+                Console.WriteLine("  SetSpeed({0}) -> rtn={1}, TCP_CmpSpeed={2}", speed, rtn, pkg.target_TCP_CmpSpeed);
+                Thread.Sleep(5000);
+            }
+
+
+            Thread.Sleep(5000);
+            // ---- Step 5: SetWeaveOffsetRT offset test (main thread, weave MoveL in background) ----
+            Console.WriteLine("\nStep 5: SetWeaveOffsetRT test (50 iterations, delta=0.1)");
+            double accumOffset = 0.0;
+            for (int i = 0; i < 50 && weaveRunning; i++)
+            {
+                accumOffset += 0.1;
+                DescPose weaveOffset = new DescPose(0, 0, accumOffset, 0, 0, 0);
+                rtn = robot.SetWeaveOffsetRT(weaveOffset);
+                robot.GetRobotRealTimeState(ref pkg);
+                Console.WriteLine("  [{0}/50] SetWeaveOffsetRT(x={1:F1}) -> rtn={2}, TCP_pos=({3:F2},{4:F2},{5:F2})",
+                    i + 1, accumOffset, rtn,
+                    pkg.tl_cur_pos[0], pkg.tl_cur_pos[1], pkg.tl_cur_pos[2]);
+                Thread.Sleep(100);
+            }
+
+            // ---- Step 6: Wait for weave MoveL, then WeaveEnd ----
+            Console.WriteLine("\nStep 6: Wait for weave MoveL, then WeaveEnd");
+            weaveThread.Join();
+            robot.WeaveEnd(0);
+            Thread.Sleep(500);
+
+            // ---- Step 7: MoveL back to start ----
+            Console.WriteLine("\nStep 7: MoveL back to start");
+            rtn = robot.MoveL(j1, d1, 1, 0, 100, 100, 50, -1, 0, epos, 0, 0, offset_pos, 50, 0, 0, 10);
+            Console.WriteLine("  MoveL(back) rtn={0}", rtn);
+
+            robot.GetRobotRealTimeState(ref pkg);
+            Console.WriteLine("\n  Final robot state: main_code={0}, sub_code={1}", pkg.main_code, pkg.sub_code);
+            Console.WriteLine("============================================================");
+            Console.WriteLine("  Weave Speed and Offset Test Complete");
+            Console.WriteLine("============================================================");
+        }
+
     }
 
     /// <summary>

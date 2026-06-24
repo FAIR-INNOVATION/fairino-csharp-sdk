@@ -319,12 +319,7 @@ namespace testFrRobot
 
             desc_pos_dt.tran.z = -0.5;
             double[] pos_gain = new double[6]{ 0.0, 0.0, 1.0, 0.0, 0.0, 0.0 };
-            int mode = 2;
-            float vel = 0.0f;
-            float acc = 0.0f;
             float cmdT = 0.008f;
-            float filterT = 0.0f;
-            float gain = 0.0f;
             int count = 500;
 
             robot.SetSpeed(20);
@@ -990,63 +985,63 @@ namespace testFrRobot
             robot.FT_SetRCS(0, coord);
             return;
 
-            double weight = 0.1;
-            int rtn = -1;
+            //double weight = 0.1;
+            //int rtn = -1;
 
-            DescPose tcoord, desc_p1, desc_p2, desc_p3;
-            tcoord = new DescPose(0, 0, 0, 0, 0, 0);
-            desc_p1 = new DescPose(0, 0, 0, 0, 0, 0);
-            desc_p2 = new DescPose(0, 0, 0, 0, 0, 0);
-            desc_p3 = new DescPose(0, 0, 0, 0, 0, 0);
+            //DescPose tcoord, desc_p1, desc_p2, desc_p3;
+            //tcoord = new DescPose(0, 0, 0, 0, 0, 0);
+            //desc_p1 = new DescPose(0, 0, 0, 0, 0, 0);
+            //desc_p2 = new DescPose(0, 0, 0, 0, 0, 0);
+            //desc_p3 = new DescPose(0, 0, 0, 0, 0, 0);
 
-            //DescPose coord = new DescPose(0, 0, 1, 0, 0, 0);
-            robot.FT_SetRCS(0, coord);
-            Thread.Sleep(1000);
+            ////DescPose coord = new DescPose(0, 0, 1, 0, 0, 0);
+            //robot.FT_SetRCS(0, coord);
+            //Thread.Sleep(1000);
 
-            tcoord.tran.z = 35.0;
-            robot.SetToolCoord(10, tcoord, 1, 0,0,0);
-            Thread.Sleep(1000);
-            robot.FT_PdIdenRecord(10);
-            Thread.Sleep(1000);
-            robot.FT_PdIdenCompute(ref weight);
-            Console.WriteLine($"payload weight : {weight}");
+            //tcoord.tran.z = 35.0;
+            //robot.SetToolCoord(10, tcoord, 1, 0,0,0);
+            //Thread.Sleep(1000);
+            //robot.FT_PdIdenRecord(10);
+            //Thread.Sleep(1000);
+            //robot.FT_PdIdenCompute(ref weight);
+            //Console.WriteLine($"payload weight : {weight}");
 
-            desc_p1.tran.x = -47.805;
-            desc_p1.tran.y = -362.266;
-            desc_p1.tran.z = 317.754;
-            desc_p1.rpy.rx = -179.496;
-            desc_p1.rpy.ry = -0.255;
-            desc_p1.rpy.rz = 34.948;
+            //desc_p1.tran.x = -47.805;
+            //desc_p1.tran.y = -362.266;
+            //desc_p1.tran.z = 317.754;
+            //desc_p1.rpy.rx = -179.496;
+            //desc_p1.rpy.ry = -0.255;
+            //desc_p1.rpy.rz = 34.948;
 
-            desc_p2.tran.x = -77.805;
-            desc_p2.tran.y = -312.266;
-            desc_p2.tran.z = 317.754;
-            desc_p2.rpy.rx = -179.496;
-            desc_p2.rpy.ry = -0.255;
-            desc_p2.rpy.rz = 34.948;
+            //desc_p2.tran.x = -77.805;
+            //desc_p2.tran.y = -312.266;
+            //desc_p2.tran.z = 317.754;
+            //desc_p2.rpy.rx = -179.496;
+            //desc_p2.rpy.ry = -0.255;
+            //desc_p2.rpy.rz = 34.948;
 
-            desc_p3.tran.x = -167.805;
-            desc_p3.tran.y = -312.266;
-            desc_p3.tran.z = 387.754;
-            desc_p3.rpy.rx = -179.496;
-            desc_p3.rpy.ry = -0.255;
-            desc_p3.rpy.rz = 34.948;
+            //desc_p3.tran.x = -167.805;
+            //desc_p3.tran.y = -312.266;
+            //desc_p3.tran.z = 387.754;
+            //desc_p3.rpy.rx = -179.496;
+            //desc_p3.rpy.ry = -0.255;
+            //desc_p3.rpy.rz = 34.948;
 
-            rtn = robot.MoveCart(desc_p1, 0, 0, 100.0f, 100.0f, 100.0f, -1.0f, -1);
-            Console.WriteLine($"MoveCart rtn  {rtn}");
-            Thread.Sleep(1000);
-            robot.FT_PdCogIdenRecord(10, 1);
-            robot.MoveCart(desc_p2, 0, 0, 100.0f, 100.0f, 100.0f, -1.0f, -1);
-            Thread.Sleep(1000);
-            robot.FT_PdCogIdenRecord(10, 2);
-            robot.MoveCart(desc_p3, 0, 0, 100.0f, 100.0f, 100.0f, -1.0f, -1);
-            Thread.Sleep(1000);
-            robot.FT_PdCogIdenRecord(10, 3);
-            Thread.Sleep(1000);
-            DescTran cog = new DescTran(0, 0, 0);
+            //rtn = robot.MoveCart(desc_p1, 0, 0, 100.0f, 100.0f, 100.0f, -1.0f, -1);
+            //Console.WriteLine($"MoveCart rtn  {rtn}");
+            //Thread.Sleep(1000);
+            //robot.FT_PdCogIdenRecord(10, 1);
+            //robot.MoveCart(desc_p2, 0, 0, 100.0f, 100.0f, 100.0f, -1.0f, -1);
+            //Thread.Sleep(1000);
+            //robot.FT_PdCogIdenRecord(10, 2);
+            //robot.MoveCart(desc_p3, 0, 0, 100.0f, 100.0f, 100.0f, -1.0f, -1);
+            //Thread.Sleep(1000);
+            //robot.FT_PdCogIdenRecord(10, 3);
+            //Thread.Sleep(1000);
+            //DescTran cog = new DescTran(0, 0, 0);
             
-            robot.FT_PdCogIdenCompute(ref cog);
-            Console.WriteLine($"cog : {cog.x}, {cog.y}, {cog.z}");
+            //robot.FT_PdCogIdenCompute(ref cog);
+            //Console.WriteLine($"cog : {cog.x}, {cog.y}, {cog.z}");
         }
 
         private void btnFTGuard_Click(object sender, EventArgs e)
@@ -1097,14 +1092,9 @@ namespace testFrRobot
 
         private void btnFTConttol_Click(object sender, EventArgs e)
         {
-            byte flag = 1;
-            byte sensor_id = 1;
+            //byte flag;
             int[] select = new int[6]{ 0, 0, 1, 0, 0, 0 };
             double[] ft_pid = new double[6]{ 0.0005f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
-            byte adj_sign = 0;
-            byte ILC_sign = 0;
-            float max_dis = 100.0f;
-            float max_ang = 0.0f;
 
             ForceTorque ft = new ForceTorque(0, 0, 0, 0 ,0 ,0);
             DescPose desc_p1, desc_p2, offset_pos;
@@ -1140,7 +1130,8 @@ namespace testFrRobot
            // Console.WriteLine($"FT_Control start rtn {rtn}");
 
             robot.MoveL(j2, desc_p2, 1, 0, 100.0f, 180.0f, 20.0f, -1.0f, 0, epos, 0, 0, offset_pos);
-            flag = 0;
+            //flag = 0;
+            
         //  rtn = robot.FT_Control(flag, sensor_id, select, ft, ft_pid, adj_sign, ILC_sign, max_dis, max_ang);
           //  Console.WriteLine($"FT_Control end rtn {rtn}");
         }
@@ -1845,63 +1836,63 @@ namespace testFrRobot
             return;
 
 
-            int count = 0;
-            byte done = 0;
-            string program_name = "/fruser/" + txtUopdateLuaName.Text;
-            while (true)
-            {
-                //int rtn = 0;
-                //string errorStr = "";
-                rtn = robot.PointTableUpdateLua("point_table_小无人机.db", txtUopdateLuaName.Text, ref errorStr);
-                rtn = robot.ProgramLoad(program_name);
-                rtn = robot.ProgramRun();
-                count++;
-                txtLog.Text = "正在进行循环切换点位表测试，测试次数： " + count;
+            //int count = 0;
+            //byte done = 0;
+            //string program_name = "/fruser/" + txtUopdateLuaName.Text;
+            //while (true)
+            //{
+            //    //int rtn = 0;
+            //    //string errorStr = "";
+            //    rtn = robot.PointTableUpdateLua("point_table_小无人机.db", txtUopdateLuaName.Text, ref errorStr);
+            //    rtn = robot.ProgramLoad(program_name);
+            //    rtn = robot.ProgramRun();
+            //    count++;
+            //    txtLog.Text = "正在进行循环切换点位表测试，测试次数： " + count;
 
-                while(done == 0)
-                {
-                    robot.GetRobotMotionDone(ref done);
-                    Thread.Sleep(1000);
-                }
-                Thread.Sleep(8000);
-
-
+            //    while(done == 0)
+            //    {
+            //        robot.GetRobotMotionDone(ref done);
+            //        Thread.Sleep(1000);
+            //    }
+            //    Thread.Sleep(8000);
 
 
-                rtn = robot.PointTableUpdateLua("point_table_大无人机.db", txtUopdateLuaName.Text, ref errorStr);
-                rtn = robot.ProgramLoad(program_name);
-                rtn = robot.ProgramRun();
-                count++;
-                txtLog.Text = "正在进行循环切换点位表测试，测试次数： " + count;
-                done = 1;
-                Thread.Sleep(2000);
-
-                while (done == 0)
-                {
-                    robot.GetRobotMotionDone(ref done);
-                    Thread.Sleep(1000);
-                }
-                Thread.Sleep(8000);
 
 
-                rtn = robot.PointTableUpdateLua("", txtUopdateLuaName.Text, ref errorStr);
-                rtn = robot.ProgramLoad(program_name);
-                rtn = robot.ProgramRun();
-                count++;
-                txtLog.Text = "正在进行循环切换点位表测试，测试次数： " + count;
-                done = 1;
-                Thread.Sleep(2000);
+            //    rtn = robot.PointTableUpdateLua("point_table_大无人机.db", txtUopdateLuaName.Text, ref errorStr);
+            //    rtn = robot.ProgramLoad(program_name);
+            //    rtn = robot.ProgramRun();
+            //    count++;
+            //    txtLog.Text = "正在进行循环切换点位表测试，测试次数： " + count;
+            //    done = 1;
+            //    Thread.Sleep(2000);
 
-                while (done == 0)
-                {
-                    robot.GetRobotMotionDone(ref done);
-                    Thread.Sleep(1000);
-                }
-                Thread.Sleep(8000);
+            //    while (done == 0)
+            //    {
+            //        robot.GetRobotMotionDone(ref done);
+            //        Thread.Sleep(1000);
+            //    }
+            //    Thread.Sleep(8000);
 
-                done = 1;
+
+            //    rtn = robot.PointTableUpdateLua("", txtUopdateLuaName.Text, ref errorStr);
+            //    rtn = robot.ProgramLoad(program_name);
+            //    rtn = robot.ProgramRun();
+            //    count++;
+            //    txtLog.Text = "正在进行循环切换点位表测试，测试次数： " + count;
+            //    done = 1;
+            //    Thread.Sleep(2000);
+
+            //    while (done == 0)
+            //    {
+            //        robot.GetRobotMotionDone(ref done);
+            //        Thread.Sleep(1000);
+            //    }
+            //    Thread.Sleep(8000);
+
+            //    done = 1;
             
-            }
+            //}
         }
 
         private void btnGetVersions_Click(object sender, EventArgs e)
@@ -2116,9 +2107,7 @@ namespace testFrRobot
             float acc = 100.0f;
             float ovl = 100.0f;
             float blendT = 0.0f;
-            float blendR = 0.0f;
             byte flag = 0;
-            byte search = 0;
 
             robot.SetSpeed(5);
 
@@ -2211,10 +2200,7 @@ namespace testFrRobot
             int speedPercent = 10;
 
 
-            byte flag = 0;
   
-            int blendMode = 0;
-            int velAccMode = 0;
 
             double step = 200.0;  // 边长 100mm
             long cycles = 10000000000;      // 循环次数
