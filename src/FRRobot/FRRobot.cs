@@ -25366,36 +25366,35 @@ namespace fairino
          * @param [in] enable 0-关；1-手动模式启用；2-所有模式启用(不支持自动限速)
          * @param [in] maxTCPVel 限制最大TCP速度;[0-1000]mm/s
          * @param [in] strategy 超速后策略；0-停止报警；1-自动限速；2-停止报警并去使能
+         * @param [in] maxJointVel 6个关节最大速度(°/s) 默认为45°/s
          * @return 错误码
          */
-        public int SetVelReducePara(int enable, double maxTCPVel, int strategy)
+        public int SetVelReducePara(int enable, double maxTCPVel, int strategy, double[] maxJointVel = null)
         {
             if (IsSockComError())
                 return g_sock_com_err;
 
-            if (GetSafetyCode() != 0)
-                return GetSafetyCode();
+            if (maxJointVel == null)
+                maxJointVel = new double[] { 45.0, 45.0, 45.0, 45.0, 45.0, 45.0 };
 
             // 参数有效性检查（与 C++ 一致）
             if (enable == 2 && strategy == 1)
-            {
                 return (int)RobotError.ERR_PARAM_VALUE;
-            }
-            object[] input = new object[3] { enable, maxTCPVel, strategy };
+
+            object[] input = new object[9]
+            {
+                enable, maxTCPVel, strategy,
+                maxJointVel[0], maxJointVel[1], maxJointVel[2],
+                maxJointVel[3], maxJointVel[4], maxJointVel[5]
+            };
             try
             {
                 int errcode = proxy.SetVelReducePara(input);
                 if (errcode != 0)
                 {
-                    Console.WriteLine($"errcode : {errcode}");
                     log?.LogError($"execute SetVelReducePara fail {errcode}");
                     return errcode;
                 }
-
-                // 检查机器人状态是否有错误（与 SetStandardDOLevel 逻辑一致）
-                if ((robot_state_pkg.main_code != 0 || robot_state_pkg.sub_code != 0) && errcode == 0)
-                    errcode = 14;
-
                 return errcode;
             }
             catch (Exception ex)
@@ -25404,6 +25403,8 @@ namespace fairino
                 return (int)RobotError.ERR_RPC_ERROR;
             }
         }
+
+
         /**
          * @brief 定点摆动开始
          * @param [in] weaveNum 摆动编号[0-7]

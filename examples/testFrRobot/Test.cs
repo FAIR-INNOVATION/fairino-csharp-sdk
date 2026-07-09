@@ -8387,109 +8387,236 @@ public int RunTrajectoryJ(string localFilePath = "D://zUP/horse.txt", string rem
 
         private void button105_Click(object sender, EventArgs e)
         {
-            int id = 1;               // Slave station number
-            int slaveNum = 4;         // Control 4 fingers
-            int max_time = 8000;      // Maximum wait time 8 seconds
-            int[] speed = new int[16]; // Speed array, all 0 means use default speed
-            int[] force = new int[16]; // Torque array
+            TestFiveDexterousHands();
+            //int id = 1;               // Slave station number
+            //int slaveNum = 4;         // Control 4 fingers
+            //int max_time = 8000;      // Maximum wait time 8 seconds
+            //int[] speed = new int[16]; // Speed array, all 0 means use default speed
+            //int[] force = new int[16]; // Torque array
 
-            // Initialize torque array: first 4 fingers set to 50%, the rest 0 (values sent via Move command)
-            for (int i = 0; i < 16; i++)
-                force[i] = (i < 4) ? 50 : 0;
+            //// Initialize torque array: first 4 fingers set to 50%, the rest 0 (values sent via Move command)
+            //for (int i = 0; i < 16; i++)
+            //    force[i] = (i < 4) ? 50 : 0;
 
-            // Helper function: set position array (only first 4 fingers are effective)
-            double[] pos = new double[16];
-            void SetPositions(double v1, double v2, double v3, double v4)
-            {
-                for (int i = 0; i < 16; i++)
-                    pos[i] = 0;
-                pos[0] = v1;
-                pos[1] = v2;
-                pos[2] = v3;
-                pos[3] = v4;
-            }
+            //// Helper function: set position array (only first 4 fingers are effective)
+            //double[] pos = new double[16];
+            //void SetPositions(double v1, double v2, double v3, double v4)
+            //{
+            //    for (int i = 0; i < 16; i++)
+            //        pos[i] = 0;
+            //    pos[0] = v1;
+            //    pos[1] = v2;
+            //    pos[2] = v3;
+            //    pos[3] = v4;
+            //}
 
-            JointPos j1 = new JointPos(-91.876, -85.920, 109.279, -86.239, -96.664, -28.563);
-            JointPos j2 = new JointPos(-40.954, -85.920, 109.279, -86.239, -96.664, -28.563);
+            //JointPos j1 = new JointPos(-91.876, -85.920, 109.279, -86.239, -96.664, -28.563);
+            //JointPos j2 = new JointPos(-40.954, -85.920, 109.279, -86.239, -96.664, -28.563);
+            //ExaxisPos epos = new ExaxisPos(0, 0, 0, 0);
+            //DescPose offset_pos = new DescPose(0, 0, 0, 0, 0, 0);
+
+            //Console.WriteLine("===== Dexterous Hand Full Function Test Started =====");
+
+            //// 1. Clear error
+            //int ret = robot.ClearDexterousHandsError();
+            //Console.WriteLine($"ClearDexterousHandsError -> {ret}");
+
+            //// ========== 2. Set function switches ==========
+            //int[] setFunc = new int[32];
+            //setFunc[2] = 1;   // Enable position setting function
+            //setFunc[4] = 1;   // Enable torque setting function
+            //setFunc[9] = 1;   // Read position
+            //setFunc[10] = 1;  // Read torque
+            //setFunc[11] = 1;  // Read status
+            //setFunc[22] = 1;  // Single-axis motion status
+
+            //ret = robot.SetDexterousHandsFunc(id, setFunc);
+            //Console.WriteLine($"SetDexterousHandsFunc(enable + init + position/torque functions enabled) -> {ret}");
+
+            //// ========== 3. Read function status (verify settings took effect) ==========
+            //int[] getFunc = new int[32];  // GetDexterousHandsFunc returns 32 integers
+            //ret = robot.GetDexterousHandsFunc(id, ref getFunc);
+            //Console.WriteLine($"GetDexterousHandsFunc -> {ret}");
+            //if (ret == 0)
+            //{
+            //    // Print all 32 values
+            //    Console.WriteLine("All 32 values returned by GetDexterousHandsFunc:");
+            //    for (int i = 0; i < getFunc.Length; i++)
+            //    {
+            //        Console.Write($"  [{i}]={getFunc[i]}");
+            //        if ((i + 1) % 8 == 0)
+            //            Console.WriteLine();          // New line every 8 items
+            //        else if (i < getFunc.Length - 1)
+            //            Console.Write(", ");
+            //    }
+            //    if (getFunc.Length % 8 != 0)
+            //        Console.WriteLine();              // Add newline if last line has fewer than 8 items
+            //}
+
+            //// ========== 4. Activate dexterous hand ==========
+            //ret = robot.SetDexterousHandsAct(id, 1);
+            //Console.WriteLine($"SetDexterousHandsAct(activate) -> {ret}");
+            //if (ret != 0)
+            //{
+            //    Console.WriteLine("Activation failed, test aborted");
+            //    return;
+            //}
+
+            //// ========== 5. Initial move to 20° (send position and torque values via Move command) ==========
+            //SetPositions(20, 20, 20, 20);
+            //ret = robot.SetDexterousHandsMove(id, slaveNum, pos, speed, force, max_time);
+            //Console.WriteLine($"Initial move to 20° -> {ret}");
+            //robot.Sleep(5000);
+
+            //// ========== 6. Reciprocating motion 10 times (10° ↔ 50°) ==========
+            //Console.WriteLine("Starting 10 reciprocating motions...");
+            //for (int iteration = 1; iteration <= 10; iteration++)
+            //{
+            //    robot.MoveJ(j1, 0, 0, 100, 100, 100, epos, -1, 0, offset_pos);
+
+            //    SetPositions(10, 10, 10, 10);
+            //    ret = robot.SetDexterousHandsMove(id, slaveNum, pos, speed, force, max_time);
+            //    Console.WriteLine($"[{iteration}] Move to 10° -> {ret}");
+            //    robot.Sleep(1000);
+
+            //    robot.MoveJ(j2, 0, 0, 100, 100, 100, epos, -1, 0, offset_pos);
+
+            //    SetPositions(50, 50, 50, 50);
+            //    ret = robot.SetDexterousHandsMove(id, slaveNum, pos, speed, force, max_time);
+            //    Console.WriteLine($"[{iteration}] Move to 50° -> {ret}");
+            //    robot.Sleep(1000);
+            //}
+
+            //Console.WriteLine("Test completed (function switch set/read + activation + 10 reciprocating motions).");
+        }
+
+        /// <summary>
+        /// 五指灵巧手完整功能测试
+        /// 测试流程：
+        /// 1. 清除错误 → 2. 设置功能开关(主站funcA + 从站funcB) → 3. 读取验证 → 4. 激活
+        /// 5. 等待5s → 6. 往复运动10次(j1↔j2, 手指A→B→A→C)
+        /// </summary>
+        /// <returns>0-成功, -2-激活失败</returns>
+        private int TestFiveDexterousHands()
+        {
+            const int DEXTEROUS_ID = 1;
+            const int FINGER_COUNT = 12;
+            const int MOVE_TIMEOUT_MS = 12000;
+
+            int[] speed = { 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 0, 0, 0, 0 };
+            int[] force = { 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 0, 0, 0, 0 };
+
+            double[] posA = { 5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5, 0, 0, 0, 0 };
+            double[] posB = { 60, 10, 70, 30, 70, 70, 10, 10, 10, 10, 10, 10, 0, 0, 0, 0 };
+            double[] posC = { 50, 50, 20, 20, 0,  0,  0,  0,  70, 70, 70, 70, 0, 0, 0, 0 };
+
+            JointPos j1 = new JointPos(-172.132, -90.455, -102.422, -67.864, 95.273, -21.129);
+            JointPos j2 = new JointPos(-173.180, -106.578, -83.661, -70.600, 95.440, -22.167);
             ExaxisPos epos = new ExaxisPos(0, 0, 0, 0);
             DescPose offset_pos = new DescPose(0, 0, 0, 0, 0, 0);
 
-            Console.WriteLine("===== Dexterous Hand Full Function Test Started =====");
+            Console.WriteLine("===== 五指灵巧手完整功能测试开始 =====");
 
-            // 1. Clear error
-            int ret = robot.ClearDexterousHandsError();
-            Console.WriteLine($"ClearDexterousHandsError -> {ret}");
+            // 1. 清除错误
+            int rtn = robot.ClearDexterousHandsError();
+            Console.WriteLine($"[清除错误] rtn = {rtn}");
 
-            // ========== 2. Set function switches ==========
-            int[] setFunc = new int[32];
-            setFunc[2] = 1;   // Enable position setting function
-            setFunc[4] = 1;   // Enable torque setting function
-            setFunc[9] = 1;   // Read position
-            setFunc[10] = 1;  // Read torque
-            setFunc[11] = 1;  // Read status
-            setFunc[22] = 1;  // Single-axis motion status
+            // 2. 设置功能开关 — 主站(funcA, 含多轴同步) + 从站(funcB)
+            int[] funcA = new int[32];
+            funcA[2] = 1;   // 位置设置
+            funcA[3] = 1;   // 速度设置
+            funcA[4] = 1;   // 力矩设置
+            funcA[9] = 1;   // 读位置
+            funcA[10] = 1;  // 读速度
+            funcA[11] = 1;  // 读力矩
+            funcA[20] = 1;  // 多轴同步运动
+            funcA[22] = 1;  // 单轴运行状态
 
-            ret = robot.SetDexterousHandsFunc(id, setFunc);
-            Console.WriteLine($"SetDexterousHandsFunc(enable + init + position/torque functions enabled) -> {ret}");
+            int[] funcB = new int[32];
+            funcB[2] = 1;
+            funcB[3] = 1;
+            funcB[4] = 1;
+            funcB[9] = 1;
+            funcB[10] = 1;
+            funcB[11] = 1;
+            funcB[22] = 1;
 
-            // ========== 3. Read function status (verify settings took effect) ==========
-            int[] getFunc = new int[32];  // GetDexterousHandsFunc returns 32 integers
-            ret = robot.GetDexterousHandsFunc(id, ref getFunc);
-            Console.WriteLine($"GetDexterousHandsFunc -> {ret}");
-            if (ret == 0)
+            rtn = robot.SetDexterousHandsFunc(DEXTEROUS_ID, funcA);
+            Console.WriteLine($"[设置主站功能] rtn = {rtn}");
+
+            for (int i = 2; i <= FINGER_COUNT; i++)
             {
-                // Print all 32 values
-                Console.WriteLine("All 32 values returned by GetDexterousHandsFunc:");
-                for (int i = 0; i < getFunc.Length; i++)
+                rtn = robot.SetDexterousHandsFunc(i, funcB);
+            }
+            Console.WriteLine($"[设置从站功能(2~12)] rtn = {rtn}");
+
+            // 3. 读取功能状态
+            int[] getFunc = new int[32];
+            rtn = robot.GetDexterousHandsFunc(DEXTEROUS_ID, ref getFunc);
+            Console.WriteLine($"[读取功能状态] rtn = {rtn}");
+            if (rtn == 0)
+            {
+                Console.WriteLine("功能开关状态(32位):");
+                for (int i = 0; i < 32; i++)
                 {
-                    Console.Write($"  [{i}]={getFunc[i]}");
-                    if ((i + 1) % 8 == 0)
-                        Console.WriteLine();          // New line every 8 items
-                    else if (i < getFunc.Length - 1)
+                    Console.Write($"[{i}]={getFunc[i]}");
+                    if ((i + 1) % 8 == 0 && i < 31)
+                        Console.WriteLine();
+                    else if (i < 31)
                         Console.Write(", ");
                 }
-                if (getFunc.Length % 8 != 0)
-                    Console.WriteLine();              // Add newline if last line has fewer than 8 items
+                Console.WriteLine();
             }
 
-            // ========== 4. Activate dexterous hand ==========
-            ret = robot.SetDexterousHandsAct(id, 1);
-            Console.WriteLine($"SetDexterousHandsAct(activate) -> {ret}");
-            if (ret != 0)
+            // 4. 激活
+            rtn = robot.SetDexterousHandsAct(DEXTEROUS_ID, 1);
+            Console.WriteLine($"[激活灵巧手] rtn = {rtn}");
+            if (rtn != 0)
             {
-                Console.WriteLine("Activation failed, test aborted");
-                return;
+                Console.WriteLine("激活失败，测试中止");
+                return -2;
             }
-
-            // ========== 5. Initial move to 20° (send position and torque values via Move command) ==========
-            SetPositions(20, 20, 20, 20);
-            ret = robot.SetDexterousHandsMove(id, slaveNum, pos, speed, force, max_time);
-            Console.WriteLine($"Initial move to 20° -> {ret}");
             robot.Sleep(5000);
 
-            // ========== 6. Reciprocating motion 10 times (10° ↔ 50°) ==========
-            Console.WriteLine("Starting 10 reciprocating motions...");
-            for (int iteration = 1; iteration <= 10; iteration++)
-            {
-                robot.MoveJ(j1, 0, 0, 100, 100, 100, epos, -1, 0, offset_pos);
+            // 5. 往复运动测试 10 次，每组 4 个动作：j1+A → j2+B → j1+A → j2+C
+            Console.WriteLine("\n开始往复运动测试(共10次循环)...");
+            Console.WriteLine("  位姿1: j1(左)  位姿2: j2(右)");
+            Console.WriteLine("  手指目标: A→B→A→C(每组4个动作)\n");
 
-                SetPositions(10, 10, 10, 10);
-                ret = robot.SetDexterousHandsMove(id, slaveNum, pos, speed, force, max_time);
-                Console.WriteLine($"[{iteration}] Move to 10° -> {ret}");
+            for (int iter = 1; iter <= 10; iter++)
+            {
+                Console.WriteLine($"--- 第 {iter,2} 次循环 ---");
+
+                robot.MoveJ(j1, 0, 0, 100, 100, 100, epos, -1, 0, offset_pos);
+                rtn = robot.SetDexterousHandsMove(DEXTEROUS_ID, FINGER_COUNT, posA, speed, force, MOVE_TIMEOUT_MS);
+                Console.WriteLine($"  j1 + posA → {rtn}");
                 robot.Sleep(1000);
 
                 robot.MoveJ(j2, 0, 0, 100, 100, 100, epos, -1, 0, offset_pos);
+                rtn = robot.SetDexterousHandsMove(DEXTEROUS_ID, FINGER_COUNT, posB, speed, force, MOVE_TIMEOUT_MS);
+                Console.WriteLine($"  j2 + posB → {rtn}");
+                robot.Sleep(1000);
 
-                SetPositions(50, 50, 50, 50);
-                ret = robot.SetDexterousHandsMove(id, slaveNum, pos, speed, force, max_time);
-                Console.WriteLine($"[{iteration}] Move to 50° -> {ret}");
+                robot.MoveJ(j1, 0, 0, 100, 100, 100, epos, -1, 0, offset_pos);
+                rtn = robot.SetDexterousHandsMove(DEXTEROUS_ID, FINGER_COUNT, posA, speed, force, MOVE_TIMEOUT_MS);
+                Console.WriteLine($"  j1 + posA → {rtn}");
+                robot.Sleep(1000);
+
+                robot.MoveJ(j2, 0, 0, 100, 100, 100, epos, -1, 0, offset_pos);
+                rtn = robot.SetDexterousHandsMove(DEXTEROUS_ID, FINGER_COUNT, posC, speed, force, MOVE_TIMEOUT_MS);
+                Console.WriteLine($"  j2 + posC → {rtn}");
                 robot.Sleep(1000);
             }
 
-            Console.WriteLine("Test completed (function switch set/read + activation + 10 reciprocating motions).");
+            Console.WriteLine("\n===== 测试完成 =====");
+            Console.WriteLine("  功能开关设置/读取  ok");
+            Console.WriteLine("  灵巧手激活        ok");
+            Console.WriteLine("  10次往复运动      ok");
+            return 0;
         }
+
         /// <summary>
-        /// 夹爪工件掉落报警测试 
+        /// 夹爪工件掉落报警测试
         /// 测试要求:
         /// 1. 已通过web配置完成外设协议/使能/夹爪/CO2=53
         /// 2. 夹爪安装在机器人末端

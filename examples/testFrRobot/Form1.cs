@@ -2133,24 +2133,24 @@ namespace testFrRobot
             //TestGripperAndForceSensorStates();
             //TestRobotERRStatusStates();
             //TestErrorCodeInterfaces();
-            //TestNormalFeedbackAndPeriod();
+            TestNormalFeedbackAndPeriod();
             //TestInvalidStateConfig();
             //TestSquareMotionWithMoveL();
             // 循环获取并打印实时状态
-            while (true)
-            {
-                printCNDE();
-                //ROBOT_STATE_PKG pkg = new ROBOT_STATE_PKG();
-                //// 获取最新的机器人实时状态（内部会更新pkg对象）
-                //robot.GetRobotRealTimeState(ref pkg);
+            //while (true)
+            //{
+            //    printCNDE();
+            //    //ROBOT_STATE_PKG pkg = new ROBOT_STATE_PKG();
+            //    //// 获取最新的机器人实时状态（内部会更新pkg对象）
+            //    //robot.GetRobotRealTimeState(ref pkg);
 
-                //Console.WriteLine($"robot SocketConnTimeout: {pkg.socketConnTimeout}");
-                //Console.WriteLine($"robot SocketReadTimeout: {pkg.socketReadTimeout}");
-                //// 如需打印 TsWebStateComErr 可取消注释
-                // Console.WriteLine($"robot TsWebStateComErr: {pkg.tsWebStateComErr}");
+            //    //Console.WriteLine($"robot SocketConnTimeout: {pkg.socketConnTimeout}");
+            //    //Console.WriteLine($"robot SocketReadTimeout: {pkg.socketReadTimeout}");
+            //    //// 如需打印 TsWebStateComErr 可取消注释
+            //    // Console.WriteLine($"robot TsWebStateComErr: {pkg.tsWebStateComErr}");
 
-                Thread.Sleep(300); // 与C++示例一致，300ms打印一次
-            }
+            //    Thread.Sleep(300); // 与C++示例一致，300ms打印一次
+            //}
         }
 
 
@@ -2360,32 +2360,38 @@ namespace testFrRobot
             //    RobotState.TargetJointPos,   // 关节指令位置
             //    RobotState.CollisionLevel
             //};
-            //int periodMs = 8;   // 要求周期为8ms
-            //int ret = robot.SetRobotRealtimeStatePeriod(periodMs);
-            ret = robot.AddRobotRealtimeState(RobotState.CollisionLevel);
-            //Console.WriteLine($"AddRobotRealtimeState(已存在JointCurPos) 返回: {ret} (预期  ERR_STATE_ALREADY_EXISTS -17)");
-            //int periodMs = 8;
-            //int ret = robot.SetRobotRealtimeStateConfig(states, periodMs);
-            //Console.WriteLine($"配置状态结果: {ret}");
+            // 配置CNDE状态和4ms周期
+            // List<RobotState> states = new List<RobotState>
+            // {
+            //     RobotState.JointCurPos,
+            //     RobotState.ToolCurPos,
+            //     RobotState.CollisionLevel
+            // };
+            // int periodMs = 4;
+            // int cfgRet = robot.SetRobotRealtimeStateConfig(states, periodMs);
+            // Console.WriteLine($"SetRobotRealtimeStateConfig(period={periodMs}ms) = {cfgRet}");
 
             //Console.WriteLine($"配置状态结果: {ret}");
 
             // 建立 RPC 连接
-            ret = robot.RPC("192.168.58.2");
-            if (ret != 0)
-            {
-                Console.WriteLine($"RPC 连接失败: {ret}");
-                return;
-            }
-            Console.WriteLine("RPC 连接成功，开始接收数据，周期 8ms...");
+            // ret = robot.RPC("192.168.58.2");
+            // if (ret != 0)
+            // {
+            //     Console.WriteLine($"RPC 连接失败: {ret}");
+            //     return;
+            // }
+            // Console.WriteLine("RPC 连接成功，开始接收数据，周期 4ms...");
 
             // 记录上一帧时间戳，用于计算间隔
             DateTime lastTimestamp = DateTime.Now;
             int frameCount = 0;
 
-            // 循环接收 5 秒，每秒打印一次详细数据，同时记录每帧时间间隔
+            // 循环接收至1000帧，同时记录每帧时间间隔
             DateTime startTime = DateTime.Now;
-            while ((DateTime.Now - startTime).TotalSeconds < 2500)
+            int maxFrames = 10000;
+            // 用于统计
+            List<double> intervals = new List<double>();
+            while (frameCount < maxFrames)
             {
                 ROBOT_STATE_PKG pkg = new ROBOT_STATE_PKG();
                 ret = robot.GetRobotRealTimeState(ref pkg);
@@ -2394,31 +2400,50 @@ namespace testFrRobot
                 lastTimestamp = now;
                 frameCount++;
 
-                // 每收到一帧打印时间戳和间隔（用于验证周期）
-                //Console.WriteLine($"[帧 {frameCount}] 时间戳: {now:HH:mm:ss.fff}, 间隔: {interval:F1} ms");
-                printCNDE();
+                // 记录间隔用于统计
+                intervals.Add(interval);
+                // 前20帧打印详细间隔
+                if (frameCount <= 1000)
+                    Console.WriteLine($"[帧 {frameCount}] 间隔: {interval:F2} ms");
+                //printCNDE();
                 //// 碰撞等级
-                if (pkg.collisionLevel != null && pkg.collisionLevel.Length >= 6)
-                    Console.WriteLine($"碰撞等级: J1={pkg.collisionLevel[0]}, J2={pkg.collisionLevel[1]}, J3={pkg.collisionLevel[2]}, J4={pkg.collisionLevel[3]}, J5={pkg.collisionLevel[4]}, J6={pkg.collisionLevel[5]}");
+                //if (pkg.collisionLevel != null && pkg.collisionLevel.Length >= 6)
+                //    Console.WriteLine($"碰撞等级: J1={pkg.collisionLevel[0]}, J2={pkg.collisionLevel[1]}, J3={pkg.collisionLevel[2]}, J4={pkg.collisionLevel[3]}, J5={pkg.collisionLevel[4]}, J6={pkg.collisionLevel[5]}");
 
-                // 每 1 秒打印一次详细数据（避免控制台刷屏）
-                //if (frameCount % 1 == 0)  // 8ms周期，1秒约125帧
-                //{
-                //    Console.WriteLine($"\n--- 详细数据 ---");
-                //    if (pkg.jt_cur_pos != null && pkg.jt_cur_pos.Length >= 6)
-                //        Console.WriteLine($"  关节位置(°): J1={pkg.jt_cur_pos[0]:F2}, J2={pkg.jt_cur_pos[1]:F2}, J3={pkg.jt_cur_pos[2]:F2}, J4={pkg.jt_cur_pos[3]:F2}, J5={pkg.jt_cur_pos[4]:F2}, J6={pkg.jt_cur_pos[5]:F2}");
-                //    if (pkg.tl_cur_pos != null && pkg.tl_cur_pos.Length >= 6)
-                //        Console.WriteLine($"  TCP位姿(mm/°): X={pkg.tl_cur_pos[0]:F2}, Y={pkg.tl_cur_pos[1]:F2}, Z={pkg.tl_cur_pos[2]:F2}, RX={pkg.tl_cur_pos[3]:F2}, RY={pkg.tl_cur_pos[4]:F2}, RZ={pkg.tl_cur_pos[5]:F2}");
-                //    Console.WriteLine($"  机器人时间: {pkg.robotTime.ToString()}");
-                //    Console.WriteLine($"  负载质量: {pkg.load:F2} kg");
-                //    if (pkg.loadCog != null && pkg.loadCog.Length >= 3)
-                //        Console.WriteLine($"  负载质心(mm): X={pkg.loadCog[0]:F2}, Y={pkg.loadCog[1]:F2}, Z={pkg.loadCog[2]:F2}");
-                //    if (pkg.targetJointPos != null && pkg.targetJointPos.Length >= 6)
-                //        Console.WriteLine($"  关节指令位置(°): J1={pkg.targetJointPos[0]:F2}, J2={pkg.targetJointPos[1]:F2}, J3={pkg.targetJointPos[2]:F2}, J4={pkg.targetJointPos[3]:F2}, J5={pkg.targetJointPos[4]:F2}, J6={pkg.targetJointPos[5]:F2} (应为0)");
-                //}
+                // 每100帧打印一次关节位置和TCP位姿(含时间戳和帧间隔)
+                if (frameCount % 100 == 0)
+                {
+                    Console.WriteLine($"\n--- 帧 {frameCount} 详细数据 [时间: {now:HH:mm:ss.fff} 间隔: {interval:F2}ms] ---");
+                    if (pkg.jt_cur_pos != null && pkg.jt_cur_pos.Length >= 6)
+                        Console.WriteLine($"  关节位置(°): J1={pkg.jt_cur_pos[0]:F3}, J2={pkg.jt_cur_pos[1]:F3}, J3={pkg.jt_cur_pos[2]:F3}, J4={pkg.jt_cur_pos[3]:F3}, J5={pkg.jt_cur_pos[4]:F3}, J6={pkg.jt_cur_pos[5]:F3}");
+                    if (pkg.tl_cur_pos != null && pkg.tl_cur_pos.Length >= 6)
+                        Console.WriteLine($"  TCP位姿(mm/°): X={pkg.tl_cur_pos[0]:F3}, Y={pkg.tl_cur_pos[1]:F3}, Z={pkg.tl_cur_pos[2]:F3}, RX={pkg.tl_cur_pos[3]:F3}, RY={pkg.tl_cur_pos[4]:F3}, RZ={pkg.tl_cur_pos[5]:F3}");
+                }
 
-                // 等待约 8ms 再读下一帧（实际间隔由机器人决定，这里只是避免循环过紧）
-                await Task.Delay(100);
+                // 不加延迟，让CNDE推送决定读取速率
+                // 如果读取太快（无新帧），GetRobotRealTimeState会阻塞等待
+                Thread.Sleep(1);
+            }
+
+            // 统计报告
+            if (intervals.Count > 0)
+            {
+                intervals.Sort();
+                double min = intervals[0];
+                double max = intervals[intervals.Count - 1];
+                double avg = intervals.Average();
+                double median = intervals[intervals.Count / 2];
+                double total = intervals.Sum();
+                Console.WriteLine($"\n========== CNDE 帧间隔统计 (周期=4ms) ==========");
+                Console.WriteLine($"  总帧数: {intervals.Count}");
+                Console.WriteLine($"  总时长: {total:F0} ms ({total/1000:F1} s)");
+                Console.WriteLine($"  最小间隔: {min:F2} ms");
+                Console.WriteLine($"  最大间隔: {max:F2} ms");
+                Console.WriteLine($"  平均间隔: {avg:F2} ms");
+                Console.WriteLine($"  中位间隔: {median:F2} ms");
+                Console.WriteLine($"  理论周期: 4 ms");
+                Console.WriteLine($"  偏差: {Math.Abs(avg - 4):F2} ms");
+                Console.WriteLine("===================================================");
             }
 
             Console.WriteLine("\n测试结束，断开连接...");
