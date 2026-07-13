@@ -4548,8 +4548,8 @@ namespace testFrRobot
 
         private void button104_Click(object sender, EventArgs e)
         {
-
-            TestWeaveSpeedAndOffset();
+            //TestWorkPieceTrsf();
+            //TestWeaveSpeedAndOffset();
             //TestCoordMain5();
             //RunTrajectoryJ("D://zUP/horse.txt", "/usr/local/etc/controller/lua/traj/horse.txt", 50, 1);
             //TestSplineWeave();
@@ -4562,7 +4562,7 @@ namespace testFrRobot
             //TestCtrlOpenLuaOperate();
             //TestUDPAxis();
             //testled();
-            //TestSetVelReducePara();
+            TestSetVelReducePara();
             //TestOriginPointWeave();
             //TestServoJUDP();
             //ServoJTWithSafetyUDP();
@@ -7811,11 +7811,13 @@ public void TestVelFeedForwardRatio()
             JointPos j2 = new JointPos(90, -90, 90, 0, 0, 0);
             ExaxisPos epos = new ExaxisPos(0, 0, 0, 0);
             DescPose offset_pos = new DescPose(0, 0, 0, 0, 0, 0);
+            double[] maxJointVel = new double[] { 45.0, 45.0, 45.0, 45.0, 45.0, 45.0 };
+
 
             robot.SetSpeed(80);
 
             // 测试参数错误
-            rtn = robot.SetVelReducePara(2, 30, 1);
+            rtn = robot.SetVelReducePara(2, 30, 1, maxJointVel);
             Console.WriteLine($"SetVelReducePara param error rtn is {rtn}");
 
             // 禁用减速
@@ -9873,6 +9875,112 @@ public int RunTrajectoryJ(string localFilePath = "D://zUP/horse.txt", string rem
             Console.WriteLine("============================================================");
             Console.WriteLine("  Weave Speed and Offset Test Complete");
             Console.WriteLine("============================================================");
+        }
+
+        /// <summary>
+        /// 测试工件坐标系点位转换 (WorkPieceTrsfStart/End)
+        /// 在坐标系1执行运动 → 切换到坐标系2 → 重复相同运动 → 结束转换
+        /// </summary>
+        private void TestWorkPieceTrsf()
+        {
+            Console.WriteLine("\n========== 工件坐标系点位转换测试 ==========");
+
+            ExaxisPos ex = new ExaxisPos(0, 0, 0, 0);
+            DescPose zeroOff = new DescPose(0, 0, 0, 0, 0, 0);
+            int rtn;
+
+            // ========== Home点 MoveJ ==========
+            Console.WriteLine("\n--- Step 1: Home点 MoveJ ---");
+            JointPos jHome  = new JointPos(-11.188, -64.165, -107.299, -76.706, 89.590, 92.983);
+            DescPose dHome  = new DescPose(225.986, 190.694, 394.238, -6.230, -23.797, -98.972);
+            rtn = robot.MoveJ(jHome, dHome, 1, 1, 100, 100, 100, ex, -1, 0, zeroOff);
+            Console.WriteLine("  MoveJ(home) rtn={0}", rtn);
+
+            // ========== 坐标系1: PTP ==========
+            Console.WriteLine("\n--- Step 2: 坐标系1 PTP ---");
+            JointPos j1PTP = new JointPos(-38.148, -97.408, -133.704, -30.999, 89.584, 92.986);
+            DescPose d1PTP = new DescPose(52.741, 262.917, 30.824, -5.696, -9.864, -126.092);
+            rtn = robot.MoveJ(j1PTP, d1PTP, 1, 1, 100, 100, 90, ex, 500, 0, zeroOff);
+            Console.WriteLine("  MoveJ(PTP) rtn={0}", rtn);
+
+            // ========== 坐标系1: LIN ==========
+            Console.WriteLine("\n--- Step 3: 坐标系1 LIN ---");
+            JointPos j1LIN = new JointPos(-25.561, -123.131, -85.736, -94.911, 89.582, 93.006);
+            DescPose d1LIN = new DescPose(70.455, 88.410, 45.299, -4.101, 31.775, -113.199);
+            rtn = robot.MoveL(j1LIN, d1LIN, 1, 1, 100, 100, 90, 5, 0, ex, 0, 0, zeroOff, 0, 90);
+            Console.WriteLine("  MoveL(LIN) rtn={0}", rtn);
+
+            // ========== 坐标系1: ARC (MoveJ到起点 + MoveC) ==========
+            Console.WriteLine("\n--- Step 4: 坐标系1 ARC ---");
+            JointPos j1ArcStart = new JointPos(-25.561, -123.131, -85.736, -94.911, 89.582, 93.006);
+            DescPose d1ArcStart = new DescPose(70.455, 88.410, 45.299, -4.101, 31.775, -113.199);
+            rtn = robot.MoveJ(j1ArcStart, d1ArcStart, 1, 1, 100, 100, 100, ex, -1, 0, zeroOff);
+            Console.WriteLine("  MoveJ(arc_start) rtn={0}", rtn);
+
+            JointPos jVia = new JointPos(-8.013, -125.881, -79.196, -84.440, 89.564, 93.005);
+            DescPose dVia = new DescPose(209.453, -73.895, 56.416, -4.727, 17.523, -95.906);
+            JointPos jTgt = new JointPos(-2.722, -94.518, -119.965, -54.518, 89.563, 93.005);
+            DescPose dTgt = new DescPose(274.800, 81.106, 102.977, -5.467, -2.980, -90.711);
+            rtn = robot.MoveC(jVia, dVia, 1, 1, 100, 100, ex, 0, zeroOff,
+                             jTgt, dTgt, 1, 1, 100, 100, ex, 0, zeroOff,
+                             100, 5, 100, 0);
+            Console.WriteLine("  MoveC(ARC) rtn={0}", rtn);
+
+            // ========== 坐标系1: CIR (MoveJ到起点 + Circle) ==========
+            Console.WriteLine("\n--- Step 5: 坐标系1 CIR ---");
+            JointPos j1CirStart = new JointPos(-2.722, -94.518, -119.965, -54.518, 89.563, 93.005);
+            DescPose d1CirStart = new DescPose(274.800, 81.106, 102.977, -5.467, -2.980, -90.711);
+            rtn = robot.MoveJ(j1CirStart, d1CirStart, 1, 1, 100, 100, 100, ex, -1, 0, zeroOff);
+            Console.WriteLine("  MoveJ(cir_start) rtn={0}", rtn);
+
+            JointPos jCirVia = new JointPos(-2.671, -56.234, -138.914, -25.099, 95.355, 92.967);
+            DescPose dCirVia = new DescPose(300.392, 177.281, 300.926, -1.909, -51.894, -89.703);
+            JointPos jCirTgt = new JointPos(-1.229, -121.184, -63.201, -122.331, 93.045, 93.019);
+            DescPose dCirTgt = new DescPose(296.856, -31.294, 215.698, -0.589, 34.594, -88.954);
+            rtn = robot.Circle(jCirVia, dCirVia, 1, 1, 100, 100, ex,
+                               jCirTgt, dCirTgt, 1, 1, 100, 100, ex,
+                               90, 0, zeroOff, 90, 5, 0);
+            Console.WriteLine("  Circle(CIR) rtn={0}", rtn);
+
+            // ========== 开始转换到工件坐标系2 ==========
+            Console.WriteLine("\n--- Step 6: WorkPieceTrsfStart(2) ---");
+            rtn = robot.WorkPieceTrsfStart(2);
+            Console.WriteLine("  WorkPieceTrsfStart(2) rtn={0}", rtn);
+
+            // ========== 坐标系2: PTP ==========
+            Console.WriteLine("\n--- Step 7: 坐标系2 PTP ---");
+            rtn = robot.MoveJ(j1PTP, d1PTP, 1, 1, 100, 100, 90, ex, 500, 0, zeroOff);
+            Console.WriteLine("  MoveJ(PTP) rtn={0}", rtn);
+
+            // ========== 坐标系2: LIN ==========
+            Console.WriteLine("\n--- Step 8: 坐标系2 LIN ---");
+            rtn = robot.MoveL(j1LIN, d1LIN, 1, 1, 100, 100, 90, 5, 0, ex, 0, 0, zeroOff, 0, 90);
+            Console.WriteLine("  MoveL(LIN) rtn={0}", rtn);
+
+            // ========== 坐标系2: ARC ==========
+            Console.WriteLine("\n--- Step 9: 坐标系2 ARC ---");
+            rtn = robot.MoveJ(j1ArcStart, d1ArcStart, 1, 1, 100, 100, 100, ex, -1, 0, zeroOff);
+            Console.WriteLine("  MoveJ(arc_start) rtn={0}", rtn);
+            rtn = robot.MoveC(jVia, dVia, 1, 1, 100, 100, ex, 0, zeroOff,
+                             jTgt, dTgt, 1, 1, 100, 100, ex, 0, zeroOff,
+                             100, 5, 100, 0);
+            Console.WriteLine("  MoveC(ARC) rtn={0}", rtn);
+
+            // ========== 坐标系2: CIR ==========
+            Console.WriteLine("\n--- Step 10: 坐标系2 CIR ---");
+            rtn = robot.MoveJ(j1CirStart, d1CirStart, 1, 1, 100, 100, 100, ex, -1, 0, zeroOff);
+            Console.WriteLine("  MoveJ(cir_start) rtn={0}", rtn);
+            rtn = robot.Circle(jCirVia, dCirVia, 1, 1, 100, 100, ex,
+                               jCirTgt, dCirTgt, 1, 1, 100, 100, ex,
+                               90, 0, zeroOff, 90, 5, 0);
+            Console.WriteLine("  Circle(CIR) rtn={0}", rtn);
+
+            // ========== 结束转换 ==========
+            Console.WriteLine("\n--- Step 11: WorkPieceTrsfEnd() ---");
+            rtn = robot.WorkPieceTrsfEnd();
+            Console.WriteLine("  WorkPieceTrsfEnd() rtn={0}", rtn);
+
+            Console.WriteLine("\n========== 工件坐标系点位转换测试完成 ==========");
         }
 
     }
