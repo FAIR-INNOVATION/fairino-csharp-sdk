@@ -559,6 +559,19 @@ namespace fairino
         int SetWObjList(int id, double[] coord, int refFrame);
 
         /**
+        * @brief  工件坐标系点位转换开始
+        * @param  [in] workpieceID 工件号[0-14]
+        * @return  错误码
+        */[XmlRpcMethod("WorkPieceTrsfStart")]
+        int WorkPieceTrsfStart(int workpieceID);
+
+        /**
+        * @brief  工件坐标系点位转换结束
+        * @return  错误码
+        */[XmlRpcMethod("WorkPieceTrsfEnd")]
+        int WorkPieceTrsfEnd();
+
+        /**
         * @brief  设置末端负载重量
         * @param  [in] loadNum 负载编号
         * @param  [in] weight  负载重量，单位kg

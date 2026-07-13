@@ -4008,6 +4008,59 @@ namespace fairino
         }
 
         /**
+         * @brief  工件坐标系点位转换开始
+         * @param  [in] workpieceID 工件号[0-14]
+         * @return  错误码，成功返回0
+         */
+        public int WorkPieceTrsfStart(int workpieceID)
+        {
+            if (IsSockComError())
+                return g_sock_com_err;
+
+            try
+            {
+                int errcode = proxy.WorkPieceTrsfStart(workpieceID);
+                if (errcode != 0)
+                {
+                    log?.LogError($"execute WorkPieceTrsfStart fail {errcode}");
+                    return errcode;
+                }
+                return errcode;
+            }
+            catch (Exception ex)
+            {
+                log?.LogError($"RPC exception: {ex.Message}");
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief  工件坐标系点位转换结束
+         * @return  错误码，成功返回0
+         */
+        public int WorkPieceTrsfEnd()
+        {
+            if (IsSockComError())
+                return g_sock_com_err;
+
+            try
+            {
+                int errcode = proxy.WorkPieceTrsfEnd();
+                if (errcode != 0)
+                {
+                    log?.LogError($"execute WorkPieceTrsfEnd fail {errcode}");
+                    return errcode;
+                }
+                return errcode;
+            }
+            catch (Exception ex)
+            {
+                log?.LogError($"RPC exception: {ex.Message}");
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
          * @brief  设置末端负载重量
          * @param  [in] loadNum 负载编号
          * @param  [in] weight  负载重量，单位kg
