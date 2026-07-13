@@ -1317,6 +1317,15 @@ namespace fairino
         int ConveyorSetParam(double[] param, int followType, int startDis, int endDis);
 
         /**
+        * @brief  静止跟踪参数配置
+        * @param  [in] trackMode 0-时间；1-距离；2-时间和距离任意满足一个
+        * @param  [in] trackTime 跟踪时间，单位s
+        * @param  [in] trackDis 跟踪距离
+        * @return  错误码
+        */[XmlRpcMethod("SetStationaryTrackPara")]
+        int SetStationaryTrackPara(int trackMode, double trackTime, int trackDis);
+
+        /**
         * @brief 传动带抓取点补偿
         * @param [in] cmp 补偿位置 
         * @return 错误码

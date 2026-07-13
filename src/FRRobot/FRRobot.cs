@@ -9062,6 +9062,35 @@ namespace fairino
         }
 
         /**
+         * @brief  传送带原地跟踪参数配置
+         * @param  [in] trackMode 0-时间；1-距离；2-时间和距离任意满足一个
+         * @param  [in] trackTime 跟踪时间，单位s
+         * @param  [in] trackDis 跟踪距离
+         * @return  错误码
+         */
+        public int SetStationaryTrackPara(int trackMode, double trackTime, int trackDis)
+        {
+            if (IsSockComError())
+                return g_sock_com_err;
+
+            try
+            {
+                int errcode = proxy.SetStationaryTrackPara(trackMode, trackTime, trackDis);
+                if (errcode != 0)
+                {
+                    log?.LogError($"execute SetStationaryTrackPara fail {errcode}");
+                    return errcode;
+                }
+                return errcode;
+            }
+            catch (Exception ex)
+            {
+                log?.LogError($"RPC exception: {ex.Message}");
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
          * @brief 设置传动带抓取点补偿
          * @param [in] cmp 补偿位置 double[3]{x, y, z}
          * @return 错误码
