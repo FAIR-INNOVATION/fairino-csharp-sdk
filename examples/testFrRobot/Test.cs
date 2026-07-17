@@ -7815,20 +7815,21 @@ public void TestVelFeedForwardRatio()
             double[] maxJointVel = new double[] { 100.0, 100.0, 100.0, 100.0, 100.0, 100.0 };
 
             robot.SetSpeed(20);
-  
+            rtn = robot.SetVelReducePara(0, 200, 0, maxJointVel);
+            robot.MoveJ(j2, 1, 2, 100, 100, 100, epos, -1, 0, offset_pos);
 
             // 第一次
             rtn = robot.SetVelReducePara(2, 200, 0, maxJointVel);
-            Console.WriteLine($"SetVelReducePara disable reduce vel rtn is {rtn}");
-            robot.MoveJ(j1, 0, 0, 100, 100, 100, epos, -1, 0, offset_pos);
-            robot.MoveJ(j2, 0, 0, 100, 100, 100, epos, -1, 0, offset_pos);
+            Console.WriteLine($"SetVelReduceParaA param error rtn is {rtn}");
+            robot.MoveJ(j1, 1, 2, 100, 100, 100, epos, -1, 0, offset_pos);
+            robot.MoveJ(j2, 1, 2, 100, 100, 100, epos, -1, 0, offset_pos);
 
             // 第二次
             maxJointVel = new double[] { 20.0, 20.0, 20.0, 20.0, 20.0, 20.0 };
-            rtn = robot.SetVelReducePara(2, 200, 01, maxJointVel);
-            Console.WriteLine($"SetVelReducePara reduce vel rtn is {rtn}");
-            robot.MoveJ(j1, 0, 0, 100, 100, 100, epos, -1, 0, offset_pos);
-            robot.MoveJ(j2, 0, 0, 100, 100, 100, epos, -1, 0, offset_pos);
+            rtn = robot.SetVelReducePara(2, 200, 0, maxJointVel);
+            Console.WriteLine($"SetVelReduceParaB reduce vel rtn is {rtn}");
+            robot.MoveJ(j1, 1, 2, 100, 100, 100, epos, -1, 0, offset_pos);
+            robot.MoveJ(j2, 1, 2, 100, 100, 100, epos, -1, 0, offset_pos);
             return 0;
             //int rtn = 0;
             //JointPos j1 = new JointPos(0, -90, 90, 0, 0, 0);
