@@ -9022,9 +9022,6 @@ namespace fairino
         * @param [in] para[3] 工件坐标系编号 针对跟踪运动功能选择工件坐标系编号，跟踪抓取、TPD跟踪设为0
         * @param [in] para[4] 是否配视觉  0 不配  1 配
         * @param [in] para[5] 速度比  针对传送带跟踪抓取选项（1-100）  其他选项默认为1 
-        * @param [in] followType 跟踪运动类型，0-跟踪运动；1-追检运动
-        * @param [in] startDis 追检抓取需要设置， 跟踪起始距离， -1：自动计算(工件到达机器人下方后自动追检)，单位mm， 默认值0
-        * @param [in] endDis 追检抓取需要设置，跟踪终止距离， 单位mm， 默认值100
         * @return 错误码
         */
 

@@ -4548,6 +4548,7 @@ namespace testFrRobot
 
         private void button104_Click(object sender, EventArgs e)
         {
+            TestStationaryTrack();
             //TestWorkPieceTrsf();
             //TestWeaveSpeedAndOffset();
             //TestCoordMain5();
@@ -4562,7 +4563,7 @@ namespace testFrRobot
             //TestCtrlOpenLuaOperate();
             //TestUDPAxis();
             //testled();
-            TestSetVelReducePara();
+            //TestSetVelReducePara();
             //TestOriginPointWeave();
             //TestServoJUDP();
             //ServoJTWithSafetyUDP();
@@ -9973,6 +9974,75 @@ public int RunTrajectoryJ(string localFilePath = "D://zUP/horse.txt", string rem
             //robot.CloseRPC();
             Console.WriteLine("\n========== 工件坐标系点位转换测试完成 ==========");
             return rtn;
+        }
+
+        /// <summary>
+        /// 测试静止跟踪 (SetStationaryTrackPara + MoveStationary)
+        /// SetDO(6,1) → ConveyorTrackStart → ConveyorIODetect → ConveyorGetTrackData
+        /// → SetStationaryTrackPara → MoveStationary → ConveyorTrackEnd → SetDO(6,0)
+        /// </summary>
+        public int TestStationaryTrack()
+        {
+            Console.WriteLine("\n========== 传送带静止跟踪测试 ==========");
+
+            int rtn;
+
+            JointPos j1 = new JointPos(-35.146, -102.684, 120.805, -100.401, -90.295, 150.105);
+            DescPose d1 = new DescPose(-121.814, -348.341, 209.978, -173.152, -3.585, -5.446);
+
+            ExaxisPos ex = new ExaxisPos(0, 0, 0, 0);
+            DescPose zeroOff = new DescPose(0, 0, 0, 0, 0, 0);
+
+            int tool = 1;
+            int workpiece = 1;
+
+            rtn = robot.ConveyorSetParam(0, 10000, 200, 0, 0, 10);
+
+
+            robot.MoveJ(j1, d1, tool, workpiece, 100, 100, 100, ex, -1, 0, zeroOff);
+
+            // Step 1: SetDO 控制信号
+            Console.WriteLine("--- Step 1: SetDO(6,1) ---");
+            rtn = robot.SetDO(6, 1, 0, 0);
+            Console.WriteLine("  SetDO(6,1) rtn={0}", rtn);
+
+            // Step 2: 传送带跟踪开始
+            Console.WriteLine("--- Step 2: ConveyorTrackStart(2) ---");
+            rtn = robot.ConveyorTrackStart(2);
+            Console.WriteLine("  ConveyorTrackStart(2) rtn={0}", rtn);
+
+            // Step 3: 工件IO检测
+            Console.WriteLine("--- Step 3: ConveyorIODetect(10000) ---");
+            rtn = robot.ConveyorIODetect(10000);
+            Console.WriteLine("  ConveyorIODetect(10000) rtn={0}", rtn);
+
+            // Step 4: 获取跟踪数据
+            Console.WriteLine("--- Step 4: ConveyorGetTrackData(2) ---");
+            rtn = robot.ConveyorGetTrackData(2);
+            Console.WriteLine("  ConveyorGetTrackData(2) rtn={0}", rtn);
+
+            // Step 5: 静止跟踪参数配置 (时间模式, 200s, 距离5)
+            Console.WriteLine("--- Step 5: SetStationaryTrackPara(0,200,5) ---");
+            rtn = robot.SetStationaryTrackPara(0, 5, 5);
+            Console.WriteLine("  SetStationaryTrackPara(0,200,5) rtn={0}", rtn);
+
+            // Step 6: 执行静止跟踪运动
+            Console.WriteLine("--- Step 6: MoveStationary() ---");
+            rtn = robot.MoveStationary();
+            Console.WriteLine("  MoveStationary() rtn={0}", rtn);
+
+            // Step 7: 传送带跟踪结束
+            Console.WriteLine("--- Step 7: ConveyorTrackEnd() ---");
+            rtn = robot.ConveyorTrackEnd();
+            Console.WriteLine("  ConveyorTrackEnd() rtn={0}", rtn);
+
+            // Step 8: SetDO 关闭信号
+            Console.WriteLine("--- Step 8: SetDO(6,0) ---");
+            rtn = robot.SetDO(6, 0, 0, 0);
+            Console.WriteLine("  SetDO(6,0) rtn={0}", rtn);
+
+            Console.WriteLine("\n========== 静止跟踪测试完成 ==========");
+            return 0;
         }
 
     }
