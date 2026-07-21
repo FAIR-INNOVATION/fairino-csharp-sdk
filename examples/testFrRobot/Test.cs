@@ -4548,7 +4548,8 @@ namespace testFrRobot
 
         private void button104_Click(object sender, EventArgs e)
         {
-            TestStationaryTrack();
+            //TestCoord();
+            //TestStationaryTrack();
             //TestWorkPieceTrsf();
             //TestWeaveSpeedAndOffset();
             //TestCoordMain5();
@@ -6995,19 +6996,21 @@ public void TestVelFeedForwardRatio()
                     Thread.Sleep(100);
                 }   
                 //DescPose toolCoord = new DescPose();
-                robot.GetToolCoordWithID(id, ref toolCoord);
+                int _type=0,_install=0,_toolID=0,_loadNo=0,_refFrame=0,_axisCN=0,_calib=0;
+                DescPose _tc = new DescPose(0,0,0,0,0,0);
+                robot.GetToolCoordWithID(id, ref toolCoord, ref _type, ref _install, ref _toolID, ref _loadNo);
                 Console.WriteLine($"GetToolCoordWithID {id}, {toolCoord.tran.x} {toolCoord.tran.y} {toolCoord.tran.z} {toolCoord.rpy.rx} {toolCoord.rpy.ry} {toolCoord.rpy.rz}");
 
                 //DescPose wobjCoord = new DescPose();
-                robot.GetWObjCoordWithID(id, ref wobjCoord);
+                robot.GetWObjCoordWithID(id, ref wobjCoord, ref _refFrame);
                 Console.WriteLine($"GetWObjCoordWithID {id}, {wobjCoord.tran.x} {wobjCoord.tran.y} {wobjCoord.tran.z} {wobjCoord.rpy.rx} {wobjCoord.rpy.ry} {wobjCoord.rpy.rz}");
 
                 // DescPose extoolCoord = new DescPose();
-                robot.GetExToolCoordWithID(id, ref extoolCoord);
+                robot.GetExToolCoordWithID(id, ref extoolCoord, ref _tc);
                 Console.WriteLine($"GetExToolCoordWithID {id}, {extoolCoord.tran.x} {extoolCoord.tran.y} {extoolCoord.tran.z} {extoolCoord.rpy.rx} {extoolCoord.rpy.ry} {extoolCoord.rpy.rz}");
 
                 // DescPose exAxisCoord = new DescPose();
-                robot.GetExAxisCoordWithID(id, ref exAxisCoord);
+                robot.GetExAxisCoordWithID(id, ref exAxisCoord, ref _axisCN, ref _calib);
                 Console.WriteLine($"GetExAxisCoordWithID {id}, {exAxisCoord.tran.x} {exAxisCoord.tran.y} {exAxisCoord.tran.z} {exAxisCoord.rpy.rx} {exAxisCoord.rpy.ry} {exAxisCoord.rpy.rz}");
           
                 robot.GetTargetPayloadWithID(id, ref weight, ref cog);
@@ -7158,19 +7161,21 @@ public void TestVelFeedForwardRatio()
                 int id = 1;
 
                 DescPose toolCoord = new DescPose();
-                robot.GetToolCoordWithID(id, ref toolCoord);
+                int _t=0,_i=0,_tid=0,_ln=0,_rf=0,_an=0,_cf=0;
+                DescPose _tc2 = new DescPose(0,0,0,0,0,0);
+                DescPose wobjCoord = new DescPose();
+                DescPose extoolCoord = new DescPose();
+                DescPose exAxisCoord = new DescPose();
+                robot.GetToolCoordWithID(id, ref toolCoord, ref _t, ref _i, ref _tid, ref _ln);
                 Console.WriteLine($"GetToolCoordWithID {id}, {toolCoord.tran.x} {toolCoord.tran.y} {toolCoord.tran.z} {toolCoord.rpy.rx} {toolCoord.rpy.ry} {toolCoord.rpy.rz}");
 
-                DescPose wobjCoord = new DescPose();
-                robot.GetWObjCoordWithID(id, ref wobjCoord);
+                robot.GetWObjCoordWithID(id, ref wobjCoord, ref _rf);
                 Console.WriteLine($"GetWObjCoordWithID {id}, {wobjCoord.tran.x} {wobjCoord.tran.y} {wobjCoord.tran.z} {wobjCoord.rpy.rx} {wobjCoord.rpy.ry} {wobjCoord.rpy.rz}");
 
-                DescPose extoolCoord = new DescPose();
-                robot.GetExToolCoordWithID(id, ref extoolCoord);
+                robot.GetExToolCoordWithID(id, ref extoolCoord, ref _tc2);
                 Console.WriteLine($"GetExToolCoordWithID {id}, {extoolCoord.tran.x} {extoolCoord.tran.y} {extoolCoord.tran.z} {extoolCoord.rpy.rx} {extoolCoord.rpy.ry} {extoolCoord.rpy.rz}");
 
-                DescPose exAxisCoord = new DescPose();
-                robot.GetExAxisCoordWithID(id, ref exAxisCoord);
+                robot.GetExAxisCoordWithID(id, ref exAxisCoord, ref _an, ref _cf);
                 Console.WriteLine($"GetExAxisCoordWithID {id}, {exAxisCoord.tran.x} {exAxisCoord.tran.y} {exAxisCoord.tran.z} {exAxisCoord.rpy.rx} {exAxisCoord.rpy.ry} {exAxisCoord.rpy.rz}");
 
                 double weight = 0.0;
@@ -10042,6 +10047,121 @@ public int RunTrajectoryJ(string localFilePath = "D://zUP/horse.txt", string rem
             Console.WriteLine("  SetDO(6,0) rtn={0}", rtn);
 
             Console.WriteLine("\n========== 静止跟踪测试完成 ==========");
+            return 0;
+        }
+
+        /// <summary>
+        /// 测试坐标系查询函数 (Get*WithID / GetCur* / Set*)
+        /// </summary>
+        public int TestCoord()
+        {
+            Console.WriteLine("\n========== 坐标系查询测试 ==========");
+
+            int rtn;
+            int id = 1;
+
+            // GetToolCoordWithID
+            DescPose toolCoord = new DescPose(0, 0, 0, 0, 0, 0);
+            int type = 0, install = 0, toolID = 0, loadNo = 0;
+            rtn = robot.GetToolCoordWithID(id, ref toolCoord, ref type, ref install, ref toolID, ref loadNo);
+            Console.WriteLine("GetToolCoordWithID {0}, {1:F3} {2:F3} {3:F3} {4:F3} {5:F3} {6:F3}, type={7}, install={8}, toolID={9}, loadNo={10}",
+                id, toolCoord.tran.x, toolCoord.tran.y, toolCoord.tran.z,
+                toolCoord.rpy.rx, toolCoord.rpy.ry, toolCoord.rpy.rz, type, install, toolID, loadNo);
+
+            // GetWObjCoordWithID
+            DescPose wobjCoord = new DescPose(0, 0, 0, 0, 0, 0);
+            int refFrame = 0;
+            rtn = robot.GetWObjCoordWithID(id, ref wobjCoord, ref refFrame);
+            Console.WriteLine("GetWObjCoordWithID {0}, {1:F3} {2:F3} {3:F3} {4:F3} {5:F3} {6:F3}, refFrame={7}",
+                id, wobjCoord.tran.x, wobjCoord.tran.y, wobjCoord.tran.z,
+                wobjCoord.rpy.rx, wobjCoord.rpy.ry, wobjCoord.rpy.rz, refFrame);
+
+            // GetExToolCoordWithID
+            DescPose extoolCoord = new DescPose(0, 0, 0, 0, 0, 0);
+            DescPose exworkpieceCoord = new DescPose(0, 0, 0, 0, 0, 0);
+            rtn = robot.GetExToolCoordWithID(21, ref extoolCoord, ref exworkpieceCoord);
+            Console.WriteLine("GetExToolCoordWithID 21, {0:F3} {1:F3} {2:F3} {3:F3} {4:F3} {5:F3}",
+                extoolCoord.tran.x, extoolCoord.tran.y, extoolCoord.tran.z,
+                extoolCoord.rpy.rx, extoolCoord.rpy.ry, extoolCoord.rpy.rz);
+            Console.WriteLine("  tcoord: {0:F3} {1:F3} {2:F3} {3:F3} {4:F3} {5:F3}",
+                exworkpieceCoord.tran.x, exworkpieceCoord.tran.y, exworkpieceCoord.tran.z,
+                exworkpieceCoord.rpy.rx, exworkpieceCoord.rpy.ry, exworkpieceCoord.rpy.rz);
+
+            // GetExAxisCoordWithID
+            DescPose exAxisCoord = new DescPose(0, 0, 0, 0, 0, 0);
+            int axisCoordNum = 0, calibFlag = 0;
+            rtn = robot.GetExAxisCoordWithID(id, ref exAxisCoord, ref axisCoordNum, ref calibFlag);
+            Console.WriteLine("GetExAxisCoordWithID {0}, {1:F3} {2:F3} {3:F3} {4:F3} {5:F3} {6:F3}, axisCoordNum={7}, calibFlag={8}",
+                id, exAxisCoord.tran.x, exAxisCoord.tran.y, exAxisCoord.tran.z,
+                exAxisCoord.rpy.rx, exAxisCoord.rpy.ry, exAxisCoord.rpy.rz, axisCoordNum, calibFlag);
+
+            // GetTargetPayloadWithID
+            double weight = 0.0;
+            DescTran cog = new DescTran(0, 0, 0);
+            rtn = robot.GetTargetPayloadWithID(id, ref weight, ref cog);
+            Console.WriteLine("GetTargetPayloadWithID {0}, {1:F3} {2:F3} {3:F3} {4:F3}",
+                id, weight, cog.x, cog.y, cog.z);
+
+            // GetCurToolCoord
+            rtn = robot.GetCurToolCoord(ref toolCoord);
+            Console.WriteLine("GetCurToolCoord {0:F3} {1:F3} {2:F3} {3:F3} {4:F3} {5:F3}",
+                toolCoord.tran.x, toolCoord.tran.y, toolCoord.tran.z,
+                toolCoord.rpy.rx, toolCoord.rpy.ry, toolCoord.rpy.rz);
+
+            // GetCurWObjCoord
+            rtn = robot.GetCurWObjCoord(ref wobjCoord);
+            Console.WriteLine("GetCurWObjCoord {0:F3} {1:F3} {2:F3} {3:F3} {4:F3} {5:F3}",
+                wobjCoord.tran.x, wobjCoord.tran.y, wobjCoord.tran.z,
+                wobjCoord.rpy.rx, wobjCoord.rpy.ry, wobjCoord.rpy.rz);
+
+            // GetCurExToolCoord
+            rtn = robot.GetCurExToolCoord(ref extoolCoord);
+            Console.WriteLine("GetCurExToolCoord {0:F3} {1:F3} {2:F3} {3:F3} {4:F3} {5:F3}",
+                extoolCoord.tran.x, extoolCoord.tran.y, extoolCoord.tran.z,
+                extoolCoord.rpy.rx, extoolCoord.rpy.ry, extoolCoord.rpy.rz);
+
+            // GetCurExAxisCoord
+            rtn = robot.GetCurExAxisCoord(ref exAxisCoord);
+            Console.WriteLine("GetCurExAxisCoord {0:F3} {1:F3} {2:F3} {3:F3} {4:F3} {5:F3}",
+                exAxisCoord.tran.x, exAxisCoord.tran.y, exAxisCoord.tran.z,
+                exAxisCoord.rpy.rx, exAxisCoord.rpy.ry, exAxisCoord.rpy.rz);
+
+            // GetTargetPayload / GetTargetPayloadCog
+            double weightT = 0.0;
+            DescTran cogT = new DescTran(0, 0, 0);
+            robot.GetTargetPayload(0, ref weightT);
+            robot.GetTargetPayloadCog(0, ref cogT);
+            Console.WriteLine("GetTargetPayload {0:F3} {1:F3} {2:F3} {3:F3}",
+                weightT, cogT.x, cogT.y, cogT.z);
+
+            // SetToolCoord
+            DescPose coordSet = new DescPose(0, 1, 2, 3, 4, 5);
+            rtn = robot.SetToolCoord(1, coordSet, 0, 0, 1, 0);
+            Console.WriteLine("SetToolCoord(1) rtn={0}", rtn);
+
+            // SetWObjCoord
+            rtn = robot.SetWObjCoord(1, coordSet, 0);
+            Console.WriteLine("SetWObjCoord(1) rtn={0}", rtn);
+
+            // SetLoadWeight + SetLoadCoord
+            rtn = robot.SetLoadWeight(1, 1.3f);
+            Console.WriteLine("SetLoadWeight(1,1.3) rtn={0}", rtn);
+
+            DescTran loadCog = new DescTran(10, 20, 30);
+            rtn = robot.SetLoadCoord(1, loadCog);
+            Console.WriteLine("SetLoadCoord(1,10,20,30) rtn={0}", rtn);
+
+            // SetExToolCoord
+            DescPose etcp = new DescPose(0, 0, 100, 0, 0, 0);
+            DescPose etool = new DescPose(0, 0, 50, 0, 0, 0);
+            rtn = robot.SetExToolCoord(21, etcp, etool);
+            Console.WriteLine("SetExToolCoord(21) rtn={0}", rtn);
+
+            // ExtAxisActiveECoordSys
+            rtn = robot.ExtAxisActiveECoordSys(1, 1, coordSet, 1);
+            Console.WriteLine("ExtAxisActiveECoordSys(1,1,..,1) rtn={0}", rtn);
+
+            Console.WriteLine("\n========== 坐标系查询测试完成 ==========");
             return 0;
         }
 

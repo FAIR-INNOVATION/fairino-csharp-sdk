@@ -21707,7 +21707,7 @@ namespace fairino
         /// <summary>
         /// 根据编号获取工具坐标系
         /// </summary>
-        public int GetToolCoordWithID(int id, ref DescPose coord)
+        public int GetToolCoordWithID(int id, ref DescPose coord, ref int type, ref int install, ref int toolID, ref int loadNo)
         {
             if (IsSockComError())
             {
@@ -21716,14 +21716,11 @@ namespace fairino
 
             if (id < 0 || id > 14)
             {
-                return 4;
+                return (int)RobotError.ERR_PARAM_VALUE;
             }
 
             try
             {
-                //object[] param = new object[1];
-                //param[0] = id;
-
                 object[] result = proxy.GetToolCoordWithID(id);
 
                 int errcode = (int)result[0];
@@ -21743,6 +21740,14 @@ namespace fairino
                     coord.rpy.rx = (double)result[4];
                     coord.rpy.ry = (double)result[5];
                     coord.rpy.rz = (double)result[6];
+
+                    if (result.Length >= 11)
+                    {
+                        type = (int)result[7];
+                        install = (int)result[8];
+                        toolID = (int)result[9];
+                        loadNo = (int)result[10];
+                    }
 
                     if (log != null)
                     {
@@ -21764,11 +21769,11 @@ namespace fairino
         /// <summary>
         /// 根据编号获取工件坐标系
         /// </summary>
-        public int GetWObjCoordWithID(int id, ref DescPose coord)
+        public int GetWObjCoordWithID(int id, ref DescPose coord, ref int refFrame)
         {
             if (id < 0 || id > 14)
             {
-                return 4;
+                return (int)RobotError.ERR_PARAM_VALUE;
             }
 
             if (IsSockComError())
@@ -21778,9 +21783,6 @@ namespace fairino
 
             try
             {
-                //object[] param = new object[1];
-                //param[0] = id;
-
                 object[] result = proxy.GetWObjCoordWithID(id);
 
                 int errcode = (int)result[0];
@@ -21800,6 +21802,11 @@ namespace fairino
                     coord.rpy.rx = (double)result[4];
                     coord.rpy.ry = (double)result[5];
                     coord.rpy.rz = (double)result[6];
+
+                    if (result.Length >= 8)
+                    {
+                        refFrame = (int)result[7];
+                    }
 
                     if (log != null)
                     {
@@ -21821,13 +21828,8 @@ namespace fairino
         /// <summary>
         /// 根据编号获取外部工具坐标系
         /// </summary>
-        public int GetExToolCoordWithID(int id, ref DescPose coord)
+        public int GetExToolCoordWithID(int id, ref DescPose coord, ref DescPose tcoord)
         {
-            if (id < 0 || id > 14)
-            {
-                return 4;
-            }
-
             if (IsSockComError())
             {
                 return g_sock_com_err;
@@ -21835,9 +21837,6 @@ namespace fairino
 
             try
             {
-                //object[] param = new object[1];
-                //param[0] = id;
-
                 object[] result = proxy.GetExToolCoordWithID(id);
 
                 int errcode = (int)result[0];
@@ -21857,6 +21856,16 @@ namespace fairino
                     coord.rpy.rx = (double)result[4];
                     coord.rpy.ry = (double)result[5];
                     coord.rpy.rz = (double)result[6];
+
+                    if (result.Length >= 13)
+                    {
+                        tcoord.tran.x = (double)result[7];
+                        tcoord.tran.y = (double)result[8];
+                        tcoord.tran.z = (double)result[9];
+                        tcoord.rpy.rx = (double)result[10];
+                        tcoord.rpy.ry = (double)result[11];
+                        tcoord.rpy.rz = (double)result[12];
+                    }
 
                     if (log != null)
                     {
@@ -21878,11 +21887,11 @@ namespace fairino
         /// <summary>
         /// 根据编号获取扩展轴坐标系
         /// </summary>
-        public int GetExAxisCoordWithID(int id, ref DescPose coord)
+        public int GetExAxisCoordWithID(int id, ref DescPose coord, ref int axisCoordNum, ref int calibFlag)
         {
             if (id < 0 || id > 4)
             {
-                return 4;
+                return (int)RobotError.ERR_PARAM_VALUE;
             }
 
             if (IsSockComError())
@@ -21892,9 +21901,6 @@ namespace fairino
 
             try
             {
-                //object[] param = new object[1];
-                //param[0] = id;
-
                 object[] result = proxy.GetExAxisCoordWithID(id);
 
                 int errcode = (int)result[0];
@@ -21914,6 +21920,12 @@ namespace fairino
                     coord.rpy.rx = (double)result[4];
                     coord.rpy.ry = (double)result[5];
                     coord.rpy.rz = (double)result[6];
+
+                    if (result.Length >= 9)
+                    {
+                        axisCoordNum = (int)result[7];
+                        calibFlag = (int)result[8];
+                    }
 
                     if (log != null)
                     {
