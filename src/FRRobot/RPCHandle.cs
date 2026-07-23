@@ -1482,6 +1482,12 @@ namespace fairino
         [XmlRpcMethod("GetLuaList")]
         object[] GetLuaList();
 
+        [XmlRpcMethod("GetLuaListPrepare")]
+        object[] GetLuaListPrepare();
+
+        [XmlRpcMethod("GetLuaNameWithID")]
+        object[] GetLuaNameWithID(int luaID);
+
         [XmlRpcMethod("LuaUpLoadUpdate")]
         object[] LuaUpLoadUpdate(string fileName);
 
@@ -1587,6 +1593,9 @@ namespace fairino
 
         [XmlRpcMethod("SetWeldMachineCtrlMode")]
         int SetWeldMachineCtrlMode(object[] param);
+
+        [XmlRpcMethod("GetWeldMachineCtrlMode")]
+        object[] GetWeldMachineCtrlMode();
 
         [XmlRpcMethod("ExtAxisMoveJ")]
         int ExtAxisMoveJ(int syncFlag, double pos1, double pos2, double pos3, double pos4, double ovl, double blendT);
@@ -1786,6 +1795,12 @@ namespace fairino
 
         [XmlRpcMethod("SetExtDIWeldBreakOffRecover")]
         int SetExtDIWeldBreakOffRecover(int reWeldDINum, int abortWeldDINum);
+
+        [XmlRpcMethod("GetExtDIConfig")]
+        object[] GetExtDIConfig();
+
+        [XmlRpcMethod("GetExtDOConfig")]
+        object[] GetExtDOConfig();
 
         [XmlRpcMethod("SetCollisionDetectionMethod")]
         int SetCollisionDetectionMethod(int method, int thresholdMode);

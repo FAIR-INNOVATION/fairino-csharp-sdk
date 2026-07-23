@@ -1515,9 +1515,14 @@ namespace testFrRobot
             robot.SetWeldMachineCtrlModeExtDoNum(17);
             for (int i = 0; i < 5; i++)
             {
+                int getCtrlMode = -1;
                 robot.SetWeldMachineCtrlMode(0);
+                robot.GetWeldMachineCtrlMode(ref getCtrlMode);
+                Console.WriteLine("GetWeldMachineCtrlMode {0}", getCtrlMode);
                 Thread.Sleep(1000);
                 robot.SetWeldMachineCtrlMode(1);
+                robot.GetWeldMachineCtrlMode(ref getCtrlMode);
+                Console.WriteLine("GetWeldMachineCtrlMode {0}", getCtrlMode);
                 Thread.Sleep(1000);
             }
         }
@@ -1695,6 +1700,15 @@ namespace testFrRobot
             robot.SetArcDoneExtDiNum(60);
             robot.SetExtDIWeldBreakOffRecover(70, 80);
             robot.SetWireSearchExtDIONum(0, 1);
+
+            int[] DIConfig = new int[16];
+            int[] DOConfig = new int[16];
+            int rtn = robot.GetExtDIConfig(ref DIConfig);
+            Console.WriteLine("GetExtDIConfig rtn={0}, welder ready={1}, arc done={2}, reweld start={3}, abort reweld={4}, wiresearch done={5}, laser state={6}, laser err={7}",
+                rtn, DIConfig[0], DIConfig[1], DIConfig[2], DIConfig[3], DIConfig[4], DIConfig[5], DIConfig[6]);
+            rtn = robot.GetExtDOConfig(ref DOConfig);
+            Console.WriteLine("GetExtDOConfig rtn={0}, arc start={1}, air test={2}, wire forward={3}, wire inverse={4}, wiresearch={5}, weld mode={6}, laser enable={7}, laser on={8}, laser reset={9}",
+                rtn, DOConfig[0], DOConfig[1], DOConfig[2], DOConfig[3], DOConfig[4], DOConfig[5], DOConfig[6], DOConfig[7], DOConfig[8]);
         }
 
         private void button52_Click(object sender, EventArgs e)
@@ -10055,7 +10069,6 @@ public int RunTrajectoryJ(string localFilePath = "D://zUP/horse.txt", string rem
         /// </summary>
         public int TestCoord()
         {
-            Console.WriteLine("\n========== 坐标系查询测试 ==========");
 
             int rtn;
             int id = 1;
@@ -10161,7 +10174,6 @@ public int RunTrajectoryJ(string localFilePath = "D://zUP/horse.txt", string rem
             rtn = robot.ExtAxisActiveECoordSys(1, 1, coordSet, 1);
             Console.WriteLine("ExtAxisActiveECoordSys(1,1,..,1) rtn={0}", rtn);
 
-            Console.WriteLine("\n========== 坐标系查询测试完成 ==========");
             return 0;
         }
 
