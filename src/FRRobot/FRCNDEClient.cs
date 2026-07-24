@@ -205,6 +205,7 @@ internal class FRCNDEClient
         { "socket_read_timeout", "socketReadTimeout" },
         { "ts_web_state_com_err", "tsWebStateComErr" },
         { "exaxis_coord_id", "exaxisCoordID" },
+        { "program_run_state", "programRunState" },
     };
 
     private static readonly Dictionary<string, string> CSharpToProtocolFieldMap;
@@ -358,6 +359,7 @@ internal class FRCNDEClient
         AddState(RobotState.SocketReadTimeout, "socket_read_timeout", "UINT8", "UINT8");
         AddState(RobotState.TsWebStateComErr, "ts_web_state_com_err", "UINT8", "UINT8");
         AddState(RobotState.ExaxisCoordID, "exaxis_coord_id", "UINT8", "UINT8");
+        AddState(RobotState.programRunState, "program_run_state", "UINT8", "UINT8");
     }
 
     private static void AddState(RobotState state, string protocolFieldName, string structType, string cndeType)
@@ -514,7 +516,7 @@ internal class FRCNDEClient
 
     public int SetCNDEStatePeriod(int period)
     {
-        if (period < 8 || period > 1000)
+        if (period < 4 || period > 1000)
             return ERR_PARAM_VALUE;
         _robotStatePeriod = period;
         return ERR_SUCCESS;
@@ -954,6 +956,8 @@ internal class FRCNDEClient
         byte[] pkgBuf = new byte[4096];
         DateTime lastReceiveTime = DateTime.Now;
         int frameCount = 0;
+        //DateTime prevFrameTime = DateTime.Now;
+
 
         while (_robotStateRunFlag)
         {
@@ -969,7 +973,7 @@ internal class FRCNDEClient
                 {
                     if (!_robotStateRunFlag) break;
 
-                    Console.WriteLine("[RecvRobotStateThread] 连接断开，尝试重连...");
+                    Console.WriteLine("[RecvRobotStateThread] Connection lost, reconnecting...");
 
                     // 重连+重新配置的重试循环
                     bool reconfigured = false;
@@ -984,13 +988,13 @@ internal class FRCNDEClient
                             if (SendCNDEOutputConfig() == 0 && SetCNDEStart() == 0)
                             {
                                 reconfigured = true;
-                                Console.WriteLine("[RecvRobotStateThread] 重连并重新配置成功");
+                                Console.WriteLine("[RecvRobotStateThread] Reconnect and reconfigure success");
                                 _errorCallback?.Invoke((int)RobotError.ERR_SUCCESS);
                                 break;
                             }
                             else
                             {
-                                Console.WriteLine($"[RecvRobotStateThread] 重连后配置失败，重试 {retry + 1}/{maxReconfigRetries}");
+                                 Console.WriteLine($"[RecvRobotStateThread] Reconfigure failed, retry {retry + 1}/{maxReconfigRetries}");
                                 // 配置失败，关闭当前连接（下次循环会重新 ReConnect）
                                 _rtClient.Close();
                                 Thread.Sleep(500);  // 等待后重试
@@ -998,14 +1002,14 @@ internal class FRCNDEClient
                         }
                         else
                         {
-                            Console.WriteLine($"[RecvRobotStateThread] 重连失败，重试 {retry + 1}/{maxReconfigRetries}");
+                            Console.WriteLine($"[RecvRobotStateThread] Reconnect failed, retry {retry + 1}/{maxReconfigRetries}");
                             Thread.Sleep(500);
                         }
                     }
 
                     if (!reconfigured)
                     {
-                        Console.WriteLine("[RecvRobotStateThread] 多次重连并重配置均失败，退出线程");
+                        Console.WriteLine("[RecvRobotStateThread] All reconnect retries failed, exit thread");
                         _errorCallback?.Invoke((int)RobotError.ERR_SOCKET_COM_FAILED);
                         break;
                     }
@@ -1023,13 +1027,18 @@ internal class FRCNDEClient
                         if (CNDEFrameHandle.FrameToCNDEPkg(validData, out CNDE_PKG pkg) == 0 && pkg.Type == CNDEFrameType.OUTPUT_STATE)
                         {
                             frameCount++;
+                            //DateTime now = DateTime.Now;
+                            //double interval = (now - prevFrameTime).TotalMilliseconds;
+                            //prevFrameTime = now;
+                            //if (frameCount > 1)
+                                //Console.WriteLine($"[CNDE] frame={frameCount} time={now:HH:mm:ss.fff} interval={interval:F2}ms");
                             lastReceiveTime = DateTime.Now;
                             _errorCallback?.Invoke((int)RobotError.ERR_SUCCESS);
                             ParseRobotState(pkg.Data);
                         }
                         else
                         {
-                            Console.WriteLine("[RecvRobotStateThread] 帧解析失败或不是 OUTPUT_STATE 帧");
+                            Console.WriteLine("[RecvRobotStateThread] Frame parse failed or not OUTPUT_STATE");
                         }
                         Array.Clear(pkgBuf, 0, pkgBuf.Length);
                     }
@@ -1037,7 +1046,7 @@ internal class FRCNDEClient
             }
             catch (SocketException ex)
             {
-                Console.WriteLine($"[RecvRobotStateThread] Socket异常: {ex.Message}");
+                Console.WriteLine($"[RecvRobotStateThread] Socket exception: {ex.Message}");
                 // 尝试重连+重配置（复用上面的逻辑，或简单处理）
                 bool reconfigured = false;
                 const int maxRetries = 3;
@@ -1063,7 +1072,7 @@ internal class FRCNDEClient
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[RecvRobotStateThread] 未知异常: {ex.Message}");
+                Console.WriteLine($"[RecvRobotStateThread] Unknown exception: {ex.Message}");
                 // 同样尝试重连
                 if (_rtClient.ReConnect())
                 {

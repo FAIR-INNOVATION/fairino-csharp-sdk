@@ -559,6 +559,19 @@ namespace fairino
         int SetWObjList(int id, double[] coord, int refFrame);
 
         /**
+        * @brief  工件坐标系点位转换开始
+        * @param  [in] workpieceID 工件号[0-14]
+        * @return  错误码
+        */[XmlRpcMethod("WorkPieceTrsfStart")]
+        int WorkPieceTrsfStart(int workpieceID);
+
+        /**
+        * @brief  工件坐标系点位转换结束
+        * @return  错误码
+        */[XmlRpcMethod("WorkPieceTrsfEnd")]
+        int WorkPieceTrsfEnd();
+
+        /**
         * @brief  设置末端负载重量
         * @param  [in] loadNum 负载编号
         * @param  [in] weight  负载重量，单位kg
@@ -1304,6 +1317,15 @@ namespace fairino
         int ConveyorSetParam(double[] param, int followType, int startDis, int endDis);
 
         /**
+        * @brief  静止跟踪参数配置
+        * @param  [in] trackMode 0-时间；1-距离；2-时间和距离任意满足一个
+        * @param  [in] trackTime 跟踪时间，单位s
+        * @param  [in] trackDis 跟踪距离
+        * @return  错误码
+        */[XmlRpcMethod("SetStationaryTrackPara")]
+        int SetStationaryTrackPara(int trackMode, double trackTime, int trackDis);
+
+        /**
         * @brief 传动带抓取点补偿
         * @param [in] cmp 补偿位置 
         * @return 错误码
@@ -1460,6 +1482,12 @@ namespace fairino
         [XmlRpcMethod("GetLuaList")]
         object[] GetLuaList();
 
+        [XmlRpcMethod("GetLuaListPrepare")]
+        object[] GetLuaListPrepare();
+
+        [XmlRpcMethod("GetLuaNameWithID")]
+        object[] GetLuaNameWithID(int luaID);
+
         [XmlRpcMethod("LuaUpLoadUpdate")]
         object[] LuaUpLoadUpdate(string fileName);
 
@@ -1565,6 +1593,9 @@ namespace fairino
 
         [XmlRpcMethod("SetWeldMachineCtrlMode")]
         int SetWeldMachineCtrlMode(object[] param);
+
+        [XmlRpcMethod("GetWeldMachineCtrlMode")]
+        object[] GetWeldMachineCtrlMode();
 
         [XmlRpcMethod("ExtAxisMoveJ")]
         int ExtAxisMoveJ(int syncFlag, double pos1, double pos2, double pos3, double pos4, double ovl, double blendT);
@@ -1764,6 +1795,12 @@ namespace fairino
 
         [XmlRpcMethod("SetExtDIWeldBreakOffRecover")]
         int SetExtDIWeldBreakOffRecover(int reWeldDINum, int abortWeldDINum);
+
+        [XmlRpcMethod("GetExtDIConfig")]
+        object[] GetExtDIConfig();
+
+        [XmlRpcMethod("GetExtDOConfig")]
+        object[] GetExtDOConfig();
 
         [XmlRpcMethod("SetCollisionDetectionMethod")]
         int SetCollisionDetectionMethod(int method, int thresholdMode);
@@ -2267,6 +2304,9 @@ namespace fairino
         // 原地空运动方法的RPC句柄
         [XmlRpcMethod("MoveStationary")]
         int MoveStationary();
+
+        [XmlRpcMethod("WaitStationaryMotionDone")]
+        int WaitStationaryMotionDone();
 
         [XmlRpcMethod("FT_RotInsertion")]
         int FT_RotInsertion(int rcs, double angVelRot, double ft, double max_angle, int orn, double max_angAcc, int rotorn, int strategy);
