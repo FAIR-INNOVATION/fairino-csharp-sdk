@@ -2133,7 +2133,11 @@ namespace testFrRobot
             //TestGripperAndForceSensorStates();
             //TestRobotERRStatusStates();
             //TestErrorCodeInterfaces();
+<<<<<<< HEAD
             TestNormalFeedbackAndPeriod();
+=======
+            //TestNormalFeedbackAndPeriod();
+>>>>>>> 3.9.8
             //TestInvalidStateConfig();
             //TestSquareMotionWithMoveL();
             // 循环获取并打印实时状态
@@ -2346,6 +2350,7 @@ namespace testFrRobot
                 robot.CloseRPC();
             }
         }
+<<<<<<< HEAD
         private async void TestNormalFeedbackAndPeriod()
         {
             int ret = 0;
@@ -2449,6 +2454,111 @@ namespace testFrRobot
             Console.WriteLine("\n测试结束，断开连接...");
             robot.CloseRPC();
         }
+=======
+        //private async void TestNormalFeedbackAndPeriod()
+        //{
+        //    int ret = 0;
+        //    // 设置需要反馈的状态：关节位置、TCP位姿、机器人时间、负载质量及质心、关节指令位置
+        //    //List<RobotState> states = new List<RobotState>
+        //    //{
+        //    //    RobotState.JointCurPos,
+        //    //    RobotState.ToolCurPos,
+        //    //    RobotState.RobotTime,
+        //    //    RobotState.Load,
+        //    //    RobotState.LoadCog,
+        //    //    RobotState.TargetJointPos,   // 关节指令位置
+        //    //    RobotState.CollisionLevel
+        //    //};
+        //    // 配置CNDE状态和4ms周期
+        //    // List<RobotState> states = new List<RobotState>
+        //    // {
+        //    //     RobotState.JointCurPos,
+        //    //     RobotState.ToolCurPos,
+        //    //     RobotState.CollisionLevel
+        //    // };
+        //    // int periodMs = 4;
+        //    // int cfgRet = robot.SetRobotRealtimeStateConfig(states, periodMs);
+        //    // Console.WriteLine($"SetRobotRealtimeStateConfig(period={periodMs}ms) = {cfgRet}");
+
+        //    //Console.WriteLine($"配置状态结果: {ret}");
+
+        //    // 建立 RPC 连接
+        //    // ret = robot.RPC("192.168.58.2");
+        //    // if (ret != 0)
+        //    // {
+        //    //     Console.WriteLine($"RPC 连接失败: {ret}");
+        //    //     return;
+        //    // }
+        //    // Console.WriteLine("RPC 连接成功，开始接收数据，周期 4ms...");
+
+        //    // 记录上一帧时间戳，用于计算间隔
+        //    DateTime lastTimestamp = DateTime.Now;
+        //    int frameCount = 0;
+
+        //    // 循环接收至1000帧，同时记录每帧时间间隔
+        //    DateTime startTime = DateTime.Now;
+        //    int maxFrames = 10000;
+        //    // 用于统计
+        //    List<double> intervals = new List<double>();
+        //    while (frameCount < maxFrames)
+        //    {
+        //        ROBOT_STATE_PKG pkg = new ROBOT_STATE_PKG();
+        //        ret = robot.GetRobotRealTimeState(ref pkg);
+        //        DateTime now = DateTime.Now;
+        //        double interval = (now - lastTimestamp).TotalMilliseconds;
+        //        lastTimestamp = now;
+        //        frameCount++;
+
+        //        // 记录间隔用于统计
+        //        intervals.Add(interval);
+        //        // 前20帧打印详细间隔
+        //        if (frameCount <= 1000)
+        //            Console.WriteLine($"[帧 {frameCount}] 间隔: {interval:F2} ms");
+        //        //printCNDE();
+        //        //// 碰撞等级
+        //        //if (pkg.collisionLevel != null && pkg.collisionLevel.Length >= 6)
+        //        //    Console.WriteLine($"碰撞等级: J1={pkg.collisionLevel[0]}, J2={pkg.collisionLevel[1]}, J3={pkg.collisionLevel[2]}, J4={pkg.collisionLevel[3]}, J5={pkg.collisionLevel[4]}, J6={pkg.collisionLevel[5]}");
+
+        //        // 每100帧打印一次关节位置和TCP位姿(含时间戳和帧间隔)
+        //        if (frameCount % 100 == 0)
+        //        {
+        //            Console.WriteLine($"\n--- 帧 {frameCount} 详细数据 [时间: {now:HH:mm:ss.fff} 间隔: {interval:F2}ms] ---");
+        //            if (pkg.jt_cur_pos != null && pkg.jt_cur_pos.Length >= 6)
+        //                Console.WriteLine($"  关节位置(°): J1={pkg.jt_cur_pos[0]:F3}, J2={pkg.jt_cur_pos[1]:F3}, J3={pkg.jt_cur_pos[2]:F3}, J4={pkg.jt_cur_pos[3]:F3}, J5={pkg.jt_cur_pos[4]:F3}, J6={pkg.jt_cur_pos[5]:F3}");
+        //            if (pkg.tl_cur_pos != null && pkg.tl_cur_pos.Length >= 6)
+        //                Console.WriteLine($"  TCP位姿(mm/°): X={pkg.tl_cur_pos[0]:F3}, Y={pkg.tl_cur_pos[1]:F3}, Z={pkg.tl_cur_pos[2]:F3}, RX={pkg.tl_cur_pos[3]:F3}, RY={pkg.tl_cur_pos[4]:F3}, RZ={pkg.tl_cur_pos[5]:F3}");
+        //        }
+
+        //        // 不加延迟，让CNDE推送决定读取速率
+        //        // 如果读取太快（无新帧），GetRobotRealTimeState会阻塞等待
+        //        Thread.Sleep(1);
+        //    }
+
+        //    // 统计报告
+        //    if (intervals.Count > 0)
+        //    {
+        //        intervals.Sort();
+        //        double min = intervals[0];
+        //        double max = intervals[intervals.Count - 1];
+        //        double avg = intervals.Average();
+        //        double median = intervals[intervals.Count / 2];
+        //        double total = intervals.Sum();
+        //        Console.WriteLine($"\n========== CNDE 帧间隔统计 (周期=4ms) ==========");
+        //        Console.WriteLine($"  总帧数: {intervals.Count}");
+        //        Console.WriteLine($"  总时长: {total:F0} ms ({total/1000:F1} s)");
+        //        Console.WriteLine($"  最小间隔: {min:F2} ms");
+        //        Console.WriteLine($"  最大间隔: {max:F2} ms");
+        //        Console.WriteLine($"  平均间隔: {avg:F2} ms");
+        //        Console.WriteLine($"  中位间隔: {median:F2} ms");
+        //        Console.WriteLine($"  理论周期: 4 ms");
+        //        Console.WriteLine($"  偏差: {Math.Abs(avg - 4):F2} ms");
+        //        Console.WriteLine("===================================================");
+        //    }
+
+        //    Console.WriteLine("\n测试结束，断开连接...");
+        //    robot.CloseRPC();
+        //}
+>>>>>>> 3.9.8
 
 
         private async void TestInvalidStateConfig()

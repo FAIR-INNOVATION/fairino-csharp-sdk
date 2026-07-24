@@ -34,7 +34,11 @@ namespace fairino
     {
         ICallSupervisor proxy = null;
 
+<<<<<<< HEAD
         const string SDK_VERSION = " C#SDK-V1.2.8  Web-3.9.7";
+=======
+        const string SDK_VERSION = " C#SDK-V1.2.7  Web-3.9.8";
+>>>>>>> 3.9.8
 
         private string robot_ip = "192.168.57.2";//机器人ip
         private int g_sock_com_err = (int)RobotError.ERR_SUCCESS;
@@ -3743,7 +3747,7 @@ namespace fairino
 
         /**
          * @brief  设置外部工具坐标系
-         * @param  [in] id 坐标系编号，范围[0~14]
+         * @param  [in] id 坐标系编号，20-39对应外部工具坐标系0-19
          * @param  [in] etcp  工具中心点相对末端法兰中心位姿
          * @param  [in] etool  待定
          * @return  错误码
@@ -3786,7 +3790,7 @@ namespace fairino
 
         /**
          * @brief  设置外部工具坐标系列表
-         * @param  [in] id 坐标系编号，范围[0~14]
+         * @param  [in] id 坐标系编号，20-39对应外部工具坐标系0-19
          * @param  [in] etcp  工具中心点相对末端法兰中心位姿
          * @param  [in] etool  待定
          * @return  错误码
@@ -4004,6 +4008,62 @@ namespace fairino
                     log.LogWarn($"RPC non-communication exception: {ex.Message}");
                 }
                 return (int)RobotError.ERR_RPC_ERROR;
+<<<<<<< HEAD
+=======
+            }
+        }
+
+        /**
+         * @brief  工件坐标系点位转换开始
+         * @param  [in] workpieceID 工件号[0-14]
+         * @return  错误码，成功返回0
+         */
+        public int WorkPieceTrsfStart(int workpieceID)
+        {
+            if (IsSockComError())
+                return g_sock_com_err;
+
+            try
+            {
+                int errcode = proxy.WorkPieceTrsfStart(workpieceID);
+                if (errcode != 0)
+                {
+                    log?.LogError($"execute WorkPieceTrsfStart fail {errcode}");
+                    return errcode;
+                }
+                return errcode;
+            }
+            catch (Exception ex)
+            {
+                log?.LogError($"RPC exception: {ex.Message}");
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief  工件坐标系点位转换结束
+         * @return  错误码，成功返回0
+         */
+        public int WorkPieceTrsfEnd()
+        {
+            if (IsSockComError())
+                return g_sock_com_err;
+
+            try
+            {
+                int errcode = proxy.WorkPieceTrsfEnd();
+                if (errcode != 0)
+                {
+                    log?.LogError($"execute WorkPieceTrsfEnd fail {errcode}");
+                    return errcode;
+                }
+                return errcode;
+            }
+            catch (Exception ex)
+            {
+                log?.LogError($"RPC exception: {ex.Message}");
+                return (int)RobotError.ERR_RPC_ERROR;
+>>>>>>> 3.9.8
             }
         }
 
@@ -8969,9 +9029,12 @@ namespace fairino
         * @param [in] para[3] 工件坐标系编号 针对跟踪运动功能选择工件坐标系编号，跟踪抓取、TPD跟踪设为0
         * @param [in] para[4] 是否配视觉  0 不配  1 配
         * @param [in] para[5] 速度比  针对传送带跟踪抓取选项（1-100）  其他选项默认为1 
+<<<<<<< HEAD
         * @param [in] followType 跟踪运动类型，0-跟踪运动；1-追检运动
         * @param [in] startDis 追检抓取需要设置， 跟踪起始距离， -1：自动计算(工件到达机器人下方后自动追检)，单位mm， 默认值0
         * @param [in] endDis 追检抓取需要设置，跟踪终止距离， 单位mm， 默认值100
+=======
+>>>>>>> 3.9.8
         * @return 错误码
         */
 
@@ -9004,6 +9067,35 @@ namespace fairino
                     return g_sock_com_err;
 
                 }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief  传送带原地跟踪参数配置
+         * @param  [in] trackMode 0-时间；1-距离；2-时间和距离任意满足一个
+         * @param  [in] trackTime 跟踪时间，单位s
+         * @param  [in] trackDis 跟踪距离
+         * @return  错误码
+         */
+        public int SetStationaryTrackPara(int trackMode, double trackTime, int trackDis)
+        {
+            if (IsSockComError())
+                return g_sock_com_err;
+
+            try
+            {
+                int errcode = proxy.SetStationaryTrackPara(trackMode, trackTime, trackDis);
+                if (errcode != 0)
+                {
+                    log?.LogError($"execute SetStationaryTrackPara fail {errcode}");
+                    return errcode;
+                }
+                return errcode;
+            }
+            catch (Exception ex)
+            {
+                log?.LogError($"RPC exception: {ex.Message}");
                 return (int)RobotError.ERR_RPC_ERROR;
             }
         }
@@ -11507,25 +11599,44 @@ namespace fairino
 
             try
             {
-                int luaNum = 0;
-                string luaNameStr = "";
-                object[] result = proxy.GetLuaList();
-                if ((int)result[0] == 0)
+                // Step 1: 获取 lua 文件总数
+                object[] result = proxy.GetLuaListPrepare();
+                int errcode = (int)result[0];
+                if (errcode != 0)
                 {
-                    luaNum = (int)result[1];
-                    luaNameStr = (string)result[2];
-                    string[] names = luaNameStr.Split(';');
-                    for (int i = 0; i < luaNum; i++)
+                    if (log != null)
                     {
-                        luaNames.Add(names[i]);
+                        log.LogError($"Execute GetLuaListPrepare fail: {errcode}");
                     }
-
+                    return errcode;
                 }
+
+                int luaNum = (int)result[1];
+
+                // Step 2: 逐个获取文件名
+                for (int i = 0; i < luaNum; i++)
+                {
+                    object[] nameResult = proxy.GetLuaNameWithID(i);
+                    errcode = (int)nameResult[0];
+                    if (errcode == 0)
+                    {
+                        luaNames.Add((string)nameResult[1]);
+                    }
+                    else
+                    {
+                        if (log != null)
+                        {
+                            log.LogError($"Execute GetLuaNameWithID fail: {errcode}");
+                        }
+                        return errcode;
+                    }
+                }
+
                 if (log != null)
                 {
-                    log.LogInfo($"GetLuaList(ref {luaNameStr}) : {(int)result[0]}");
+                    log.LogInfo($"GetLuaList: {luaNum} files");
                 }
-                return (int)result[0];
+                return 0;
             }
             catch
             {
@@ -11536,7 +11647,10 @@ namespace fairino
                         log.LogError($"RPC exception");
                     }
                     return g_sock_com_err;
+<<<<<<< HEAD
 
+=======
+>>>>>>> 3.9.8
                 }
                 return (int)RobotError.ERR_RPC_ERROR;
             }
@@ -12909,6 +13023,45 @@ namespace fairino
         }
 
         /**
+<<<<<<< HEAD
+=======
+        * @brief 获取焊机控制模式
+        * @param [out] mode 焊机控制模式;0-直流一元模式；1-脉冲一元模式；2-JOB模式；3-近控模式；4-分别模式；5-CC/CV模式；6-TIG；7-CMT
+        * @return 错误码
+        */
+        public int GetWeldMachineCtrlMode(ref int mode)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+                object[] result = proxy.GetWeldMachineCtrlMode();
+                int errcode = (int)result[0];
+                if (errcode == 0)
+                {
+                    mode = (int)result[1];
+                }
+                else
+                {
+                    log?.LogError($"execute GetWeldMachineCtrlMode fail {errcode}");
+                }
+                return errcode;
+            }
+            catch
+            {
+                if (IsSockComError())
+                {
+                    log?.LogError($"RPC exception");
+                    return g_sock_com_err;
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+>>>>>>> 3.9.8
         * @brief UDP扩展轴运动
         * @param [in] pos 目标位置
         * @param [in] ovl 速度百分比
@@ -15704,6 +15857,87 @@ namespace fairino
                     }
                     return g_sock_com_err;
 
+<<<<<<< HEAD
+=======
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+        * @brief 获取扩展DI功能配置
+        * @param [out] DIConfig 扩展DI输入配置；[0]-焊机准备；[1]-起弧成功；[2]-焊接中断恢复；[3]-焊接中断退出；[4]-焊丝寻位成功；[5]-激光焊机运行状态；[6]-激光焊机故障状态；[7-15]-预留
+        * @return  错误码
+        */
+        public int GetExtDIConfig(ref int[] DIConfig)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+                object[] result = proxy.GetExtDIConfig();
+                int errcode = (int)result[0];
+                if (errcode == 0)
+                {
+                    for (int i = 0; i < 16; i++)
+                    {
+                        DIConfig[i] = (int)result[i + 1];
+                    }
+                }
+                else
+                {
+                    log?.LogError($"execute GetExtDIConfig fail {errcode}");
+                }
+                return errcode;
+            }
+            catch
+            {
+                if (IsSockComError())
+                {
+                    log?.LogError($"RPC exception");
+                    return g_sock_com_err;
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+        * @brief 获取扩展DO功能配置
+        * @param [out] DOConfig 扩展DO输入配置；[0]-焊机起弧；[1]-气体检测；[2]-正向送丝；[3]-反向送丝；[4]-焊丝寻位；[5]-焊机控制模式；[6]-激光焊机使能；[7]-激光焊机启动；[8]-激光焊机复位；[9-15]-预留
+        * @return  错误码
+        */
+        public int GetExtDOConfig(ref int[] DOConfig)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+                object[] result = proxy.GetExtDOConfig();
+                int errcode = (int)result[0];
+                if (errcode == 0)
+                {
+                    for (int i = 0; i < 16; i++)
+                    {
+                        DOConfig[i] = (int)result[i + 1];
+                    }
+                }
+                else
+                {
+                    log?.LogError($"execute GetExtDOConfig fail {errcode}");
+                }
+                return errcode;
+            }
+            catch
+            {
+                if (IsSockComError())
+                {
+                    log?.LogError($"RPC exception");
+                    return g_sock_com_err;
+>>>>>>> 3.9.8
                 }
                 return (int)RobotError.ERR_RPC_ERROR;
             }
@@ -21625,10 +21859,24 @@ namespace fairino
         }
 
 
+<<<<<<< HEAD
         /// <summary>
         /// 根据编号获取工具坐标系
         /// </summary>
         public int GetToolCoordWithID(int id, ref DescPose coord)
+=======
+        /**
+        * @brief 根据编号获取工具坐标系
+        * @param [in] id 工具坐标系编号
+		* @param [out] coord 坐标系数值
+		* @param [out] type 工具类型 0-工具；1-传感器
+		* @param [out] install 安装位置 0-机器人末端；1-机器人外部
+		* @param [out] toolID 工具ID
+		* @param [out] loadNo 负载编号
+        * @return 错误码
+        */
+        public int GetToolCoordWithID(int id, ref DescPose coord, ref int type, ref int install, ref int toolID, ref int loadNo)
+>>>>>>> 3.9.8
         {
             if (IsSockComError())
             {
@@ -21637,14 +21885,21 @@ namespace fairino
 
             if (id < 0 || id > 14)
             {
+<<<<<<< HEAD
                 return 4;
+=======
+                return (int)RobotError.ERR_PARAM_VALUE;
+>>>>>>> 3.9.8
             }
 
             try
             {
+<<<<<<< HEAD
                 //object[] param = new object[1];
                 //param[0] = id;
 
+=======
+>>>>>>> 3.9.8
                 object[] result = proxy.GetToolCoordWithID(id);
 
                 int errcode = (int)result[0];
@@ -21665,6 +21920,17 @@ namespace fairino
                     coord.rpy.ry = (double)result[5];
                     coord.rpy.rz = (double)result[6];
 
+<<<<<<< HEAD
+=======
+                    if (result.Length >= 11)
+                    {
+                        type = (int)result[7];
+                        install = (int)result[8];
+                        toolID = (int)result[9];
+                        loadNo = (int)result[10];
+                    }
+
+>>>>>>> 3.9.8
                     if (log != null)
                     {
                         log.LogInfo($"GetToolCoordWithID executed successfully: {errcode}");
@@ -21682,6 +21948,7 @@ namespace fairino
             }
         }
 
+<<<<<<< HEAD
         /// <summary>
         /// 根据编号获取工件坐标系
         /// </summary>
@@ -21690,6 +21957,20 @@ namespace fairino
             if (id < 0 || id > 14)
             {
                 return 4;
+=======
+		/**
+		* @brief 根据编号获取工件坐标系
+		* @param [in] id 工件坐标系编号
+		* @param [out] coord 坐标系数值
+		* @param [out] refFrame 参考坐标系
+		* @return 错误码
+		*/
+        public int GetWObjCoordWithID(int id, ref DescPose coord, ref int refFrame)
+        {
+            if (id < 0 || id > 14)
+            {
+                return (int)RobotError.ERR_PARAM_VALUE;
+>>>>>>> 3.9.8
             }
 
             if (IsSockComError())
@@ -21699,9 +21980,12 @@ namespace fairino
 
             try
             {
+<<<<<<< HEAD
                 //object[] param = new object[1];
                 //param[0] = id;
 
+=======
+>>>>>>> 3.9.8
                 object[] result = proxy.GetWObjCoordWithID(id);
 
                 int errcode = (int)result[0];
@@ -21722,6 +22006,14 @@ namespace fairino
                     coord.rpy.ry = (double)result[5];
                     coord.rpy.rz = (double)result[6];
 
+<<<<<<< HEAD
+=======
+                    if (result.Length >= 8)
+                    {
+                        refFrame = (int)result[7];
+                    }
+
+>>>>>>> 3.9.8
                     if (log != null)
                     {
                         log.LogInfo($"GetWObjCoordWithID executed successfully: {errcode}");
@@ -21738,6 +22030,7 @@ namespace fairino
                 return (int)RobotError.ERR_RPC_ERROR;
             }
         }
+<<<<<<< HEAD
 
         /// <summary>
         /// 根据编号获取外部工具坐标系
@@ -21749,6 +22042,17 @@ namespace fairino
                 return 4;
             }
 
+=======
+		/**
+		* @brief 根据编号获取外部工具坐标系
+		* @param [in] index 外部工具坐标系编号，20-39对应外部工具坐标系0-19
+		* @param [out] coor d 坐标系数值
+		* @param [out] tcoord 机器人末端安装工件坐标系位姿
+		* @return 错误码
+		*/
+        public int GetExToolCoordWithID(int id, ref DescPose coord, ref DescPose tcoord)
+        {
+>>>>>>> 3.9.8
             if (IsSockComError())
             {
                 return g_sock_com_err;
@@ -21756,9 +22060,12 @@ namespace fairino
 
             try
             {
+<<<<<<< HEAD
                 //object[] param = new object[1];
                 //param[0] = id;
 
+=======
+>>>>>>> 3.9.8
                 object[] result = proxy.GetExToolCoordWithID(id);
 
                 int errcode = (int)result[0];
@@ -21779,6 +22086,19 @@ namespace fairino
                     coord.rpy.ry = (double)result[5];
                     coord.rpy.rz = (double)result[6];
 
+<<<<<<< HEAD
+=======
+                    if (result.Length >= 13)
+                    {
+                        tcoord.tran.x = (double)result[7];
+                        tcoord.tran.y = (double)result[8];
+                        tcoord.tran.z = (double)result[9];
+                        tcoord.rpy.rx = (double)result[10];
+                        tcoord.rpy.ry = (double)result[11];
+                        tcoord.rpy.rz = (double)result[12];
+                    }
+
+>>>>>>> 3.9.8
                     if (log != null)
                     {
                         log.LogInfo($"GetExToolCoordWithID executed successfully: {errcode}");
@@ -21796,6 +22116,7 @@ namespace fairino
             }
         }
 
+<<<<<<< HEAD
         /// <summary>
         /// 根据编号获取扩展轴坐标系
         /// </summary>
@@ -21804,6 +22125,22 @@ namespace fairino
             if (id < 0 || id > 4)
             {
                 return 4;
+=======
+
+		/**
+		* @brief 根据编号获取扩展轴坐标系
+		* @param [in] index 外部工具坐标系编号
+		* @param [out] coord 坐标系数值
+		* @param [out] axisCoordNum 扩展轴号；bit0-bit3对应扩展轴1-扩展轴4；如axisCoordNum值为3,对应应用扩展轴[1，2]
+		* @param [out] calibFlag 标定标志；0-未标定；1-已标定
+		* @return 错误码
+		*/
+        public int GetExAxisCoordWithID(int id, ref DescPose coord, ref int axisCoordNum, ref int calibFlag)
+        {
+            if (id < 0 || id > 4)
+            {
+                return (int)RobotError.ERR_PARAM_VALUE;
+>>>>>>> 3.9.8
             }
 
             if (IsSockComError())
@@ -21813,9 +22150,12 @@ namespace fairino
 
             try
             {
+<<<<<<< HEAD
                 //object[] param = new object[1];
                 //param[0] = id;
 
+=======
+>>>>>>> 3.9.8
                 object[] result = proxy.GetExAxisCoordWithID(id);
 
                 int errcode = (int)result[0];
@@ -21836,6 +22176,15 @@ namespace fairino
                     coord.rpy.ry = (double)result[5];
                     coord.rpy.rz = (double)result[6];
 
+<<<<<<< HEAD
+=======
+                    if (result.Length >= 9)
+                    {
+                        axisCoordNum = (int)result[7];
+                        calibFlag = (int)result[8];
+                    }
+
+>>>>>>> 3.9.8
                     if (log != null)
                     {
                         log.LogInfo($"GetExAxisCoordWithID executed successfully: {errcode}");
@@ -23917,6 +24266,36 @@ namespace fairino
         }
 
         /**
+<<<<<<< HEAD
+=======
+         * @brief 等待原地空运动完成
+         * @return 错误码
+         */
+        public int WaitStationaryMotionDone()
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+                int errcode = proxy.WaitStationaryMotionDone();
+                if (errcode != 0)
+                {
+                    log?.LogError($"execute WaitStationaryMotionDone fail {errcode}");
+                    return errcode;
+                }
+                return errcode;
+            }
+            catch (Exception ex)
+            {
+                log?.LogError($"RPC exception: {ex.Message}");
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+>>>>>>> 3.9.8
         * @brief 旋转插入
         * @param [in] rcs 参考坐标系，0-工具坐标系，1-基坐标系
         * @param [in] angVelRot 旋转角速度，单位deg/s
@@ -25366,13 +25745,21 @@ namespace fairino
          * @param [in] enable 0-关；1-手动模式启用；2-所有模式启用(不支持自动限速)
          * @param [in] maxTCPVel 限制最大TCP速度;[0-1000]mm/s
          * @param [in] strategy 超速后策略；0-停止报警；1-自动限速；2-停止报警并去使能
+<<<<<<< HEAD
          * @return 错误码
          */
         public int SetVelReducePara(int enable, double maxTCPVel, int strategy)
+=======
+         * @param [in] maxJointVel 6个关节最大速度(°/s) 默认为45°/s
+         * @return 错误码
+         */
+        public int SetVelReducePara(int enable, double maxTCPVel, int strategy, double[] maxJointVel = null)
+>>>>>>> 3.9.8
         {
             if (IsSockComError())
                 return g_sock_com_err;
 
+<<<<<<< HEAD
             if (GetSafetyCode() != 0)
                 return GetSafetyCode();
 
@@ -25382,11 +25769,27 @@ namespace fairino
                 return (int)RobotError.ERR_PARAM_VALUE;
             }
             object[] input = new object[3] { enable, maxTCPVel, strategy };
+=======
+            if (maxJointVel == null)
+                maxJointVel = new double[] { 45.0, 45.0, 45.0, 45.0, 45.0, 45.0 };
+
+            // 参数有效性检查（与 C++ 一致）
+            if (enable == 2 && strategy == 1)
+                return (int)RobotError.ERR_PARAM_VALUE;
+
+            object[] input = new object[9]
+            {
+                enable, maxTCPVel, strategy,
+                maxJointVel[0], maxJointVel[1], maxJointVel[2],
+                maxJointVel[3], maxJointVel[4], maxJointVel[5]
+            };
+>>>>>>> 3.9.8
             try
             {
                 int errcode = proxy.SetVelReducePara(input);
                 if (errcode != 0)
                 {
+<<<<<<< HEAD
                     Console.WriteLine($"errcode : {errcode}");
                     log?.LogError($"execute SetVelReducePara fail {errcode}");
                     return errcode;
@@ -25396,6 +25799,11 @@ namespace fairino
                 if ((robot_state_pkg.main_code != 0 || robot_state_pkg.sub_code != 0) && errcode == 0)
                     errcode = 14;
 
+=======
+                    log?.LogError($"execute SetVelReducePara fail {errcode}");
+                    return errcode;
+                }
+>>>>>>> 3.9.8
                 return errcode;
             }
             catch (Exception ex)
@@ -25404,6 +25812,11 @@ namespace fairino
                 return (int)RobotError.ERR_RPC_ERROR;
             }
         }
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> 3.9.8
         /**
          * @brief 定点摆动开始
          * @param [in] weaveNum 摆动编号[0-7]
