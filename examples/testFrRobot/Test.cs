@@ -703,8 +703,8 @@ namespace testFrRobot
             int rtn = robot.ComputeExTCF(ref coordRtn);
             Console.WriteLine($"ComputeExTCF                   {rtn}  coord is {coordRtn.tran.x} {coordRtn.tran.y} {coordRtn.tran.z} {coordRtn.rpy.rx} {coordRtn.rpy.ry} {coordRtn.rpy.rz}");
 
-            robot.SetExToolCoord(1, coordRtn, offdese);
-            robot.SetExToolList(1, coordRtn, offdese);
+            robot.SetExToolCoord(21, coordRtn, offdese);
+            robot.SetExToolList(21, coordRtn, offdese);
         }
 
         private void button21_Click(object sender, EventArgs e)
@@ -10173,6 +10173,9 @@ public int RunTrajectoryJ(string localFilePath = "D://zUP/horse.txt", string rem
             DescPose etool = new DescPose(0, 0, 50, 0, 0, 0);
             rtn = robot.SetExToolCoord(21, etcp, etool);
             Console.WriteLine("SetExToolCoord(21) rtn={0}", rtn);
+            // SetExToolList
+            robot.SetExToolList(21, etcp, etool);
+            Console.WriteLine("SetExToolList(21) rtn={0}", rtn);
 
             // ExtAxisActiveECoordSys
             rtn = robot.ExtAxisActiveECoordSys(1, 1, coordSet, 1);
