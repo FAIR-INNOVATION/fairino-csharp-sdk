@@ -24160,6 +24160,33 @@ namespace fairino
         }
 
         /**
+         * @brief 等待原地空运动完成
+         * @return 错误码
+         */
+        public int WaitStationaryMotionDone()
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+                int errcode = proxy.WaitStationaryMotionDone();
+                if (errcode != 0)
+                {
+                    log?.LogError($"execute WaitStationaryMotionDone fail {errcode}");
+                    return errcode;
+                }
+                return errcode;
+            }
+            catch (Exception ex)
+            {
+                log?.LogError($"RPC exception: {ex.Message}");
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
         * @brief 旋转插入
         * @param [in] rcs 参考坐标系，0-工具坐标系，1-基坐标系
         * @param [in] angVelRot 旋转角速度，单位deg/s

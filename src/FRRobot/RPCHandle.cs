@@ -2305,6 +2305,9 @@ namespace fairino
         [XmlRpcMethod("MoveStationary")]
         int MoveStationary();
 
+        [XmlRpcMethod("WaitStationaryMotionDone")]
+        int WaitStationaryMotionDone();
+
         [XmlRpcMethod("FT_RotInsertion")]
         int FT_RotInsertion(int rcs, double angVelRot, double ft, double max_angle, int orn, double max_angAcc, int rotorn, int strategy);
 

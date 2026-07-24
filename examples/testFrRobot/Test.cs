@@ -4563,7 +4563,7 @@ namespace testFrRobot
         private void button104_Click(object sender, EventArgs e)
         {
             //TestCoord();
-            //TestStationaryTrack();
+            TestStationaryTrack();
             //TestWorkPieceTrsf();
             //TestWeaveSpeedAndOffset();
             //TestCoordMain5();
@@ -9996,13 +9996,13 @@ public int RunTrajectoryJ(string localFilePath = "D://zUP/horse.txt", string rem
         }
 
         /// <summary>
-        /// 测试静止跟踪 (SetStationaryTrackPara + MoveStationary)
+        /// Test stationary tracking (SetStationaryTrackPara + MoveStationary)
         /// SetDO(6,1) → ConveyorTrackStart → ConveyorIODetect → ConveyorGetTrackData
-        /// → SetStationaryTrackPara → MoveStationary → ConveyorTrackEnd → SetDO(6,0)
+        /// → SetStationaryTrackPara → MoveStationary → WaitStationaryMotionDone → ConveyorTrackEnd → SetDO(6,0)
         /// </summary>
         public int TestStationaryTrack()
         {
-            Console.WriteLine("\n========== 传送带静止跟踪测试 ==========");
+            Console.WriteLine("\n========== Stationary Track Test ==========");
 
             int rtn;
 
@@ -10017,50 +10017,54 @@ public int RunTrajectoryJ(string localFilePath = "D://zUP/horse.txt", string rem
 
             rtn = robot.ConveyorSetParam(0, 10000, 200, 0, 0, 10);
 
-
             robot.MoveJ(j1, d1, tool, workpiece, 100, 100, 100, ex, -1, 0, zeroOff);
 
-            // Step 1: SetDO 控制信号
+            // Step 1: SetDO control signal ON
             Console.WriteLine("--- Step 1: SetDO(6,1) ---");
             rtn = robot.SetDO(6, 1, 0, 0);
             Console.WriteLine("  SetDO(6,1) rtn={0}", rtn);
 
-            // Step 2: 传送带跟踪开始
+            // Step 2: Conveyor tracking start
             Console.WriteLine("--- Step 2: ConveyorTrackStart(2) ---");
             rtn = robot.ConveyorTrackStart(2);
             Console.WriteLine("  ConveyorTrackStart(2) rtn={0}", rtn);
 
-            // Step 3: 工件IO检测
+            // Step 3: Workpiece IO detect
             Console.WriteLine("--- Step 3: ConveyorIODetect(10000) ---");
             rtn = robot.ConveyorIODetect(10000);
             Console.WriteLine("  ConveyorIODetect(10000) rtn={0}", rtn);
 
-            // Step 4: 获取跟踪数据
+            // Step 4: Get track data
             Console.WriteLine("--- Step 4: ConveyorGetTrackData(2) ---");
             rtn = robot.ConveyorGetTrackData(2);
             Console.WriteLine("  ConveyorGetTrackData(2) rtn={0}", rtn);
 
-            // Step 5: 静止跟踪参数配置 (时间模式, 200s, 距离5)
+            // Step 5: Set stationary track parameters (time mode, 200s, distance 5)
             Console.WriteLine("--- Step 5: SetStationaryTrackPara(0,200,5) ---");
             rtn = robot.SetStationaryTrackPara(0, 5, 5);
             Console.WriteLine("  SetStationaryTrackPara(0,200,5) rtn={0}", rtn);
 
-            // Step 6: 执行静止跟踪运动
+            // Step 6: Execute stationary motion
             Console.WriteLine("--- Step 6: MoveStationary() ---");
             rtn = robot.MoveStationary();
             Console.WriteLine("  MoveStationary() rtn={0}", rtn);
 
-            // Step 7: 传送带跟踪结束
-            Console.WriteLine("--- Step 7: ConveyorTrackEnd() ---");
+            // Step 7: Wait for stationary motion done
+            Console.WriteLine("--- Step 7: WaitStationaryMotionDone() ---");
+            rtn = robot.WaitStationaryMotionDone();
+            Console.WriteLine("  WaitStationaryMotionDone() rtn={0}", rtn);
+
+            // Step 8: Conveyor tracking end
+            Console.WriteLine("--- Step 8: ConveyorTrackEnd() ---");
             rtn = robot.ConveyorTrackEnd();
             Console.WriteLine("  ConveyorTrackEnd() rtn={0}", rtn);
 
-            // Step 8: SetDO 关闭信号
-            Console.WriteLine("--- Step 8: SetDO(6,0) ---");
+            // Step 9: SetDO control signal OFF
+            Console.WriteLine("--- Step 9: SetDO(6,0) ---");
             rtn = robot.SetDO(6, 0, 0, 0);
             Console.WriteLine("  SetDO(6,0) rtn={0}", rtn);
 
-            Console.WriteLine("\n========== 静止跟踪测试完成 ==========");
+            Console.WriteLine("\n========== Stationary Track Test Complete ==========");
             return 0;
         }
 

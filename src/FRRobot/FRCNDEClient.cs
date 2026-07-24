@@ -205,6 +205,7 @@ internal class FRCNDEClient
         { "socket_read_timeout", "socketReadTimeout" },
         { "ts_web_state_com_err", "tsWebStateComErr" },
         { "exaxis_coord_id", "exaxisCoordID" },
+        { "program_run_state", "programRunState" },
     };
 
     private static readonly Dictionary<string, string> CSharpToProtocolFieldMap;
@@ -358,6 +359,7 @@ internal class FRCNDEClient
         AddState(RobotState.SocketReadTimeout, "socket_read_timeout", "UINT8", "UINT8");
         AddState(RobotState.TsWebStateComErr, "ts_web_state_com_err", "UINT8", "UINT8");
         AddState(RobotState.ExaxisCoordID, "exaxis_coord_id", "UINT8", "UINT8");
+        AddState(RobotState.programRunState, "program_run_state", "UINT8", "UINT8");
     }
 
     private static void AddState(RobotState state, string protocolFieldName, string structType, string cndeType)
