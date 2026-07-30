@@ -11,7 +11,7 @@ internal class StatusTCPClient
     private int port;
 
     public Socket mSocket;
-    private NetworkStream mNetworkStream;
+
     private bool isConnected = false;
     private bool reconnEnable = true;  // 重连使能  
     private int reconnTimes = 100;     // 重连次数  

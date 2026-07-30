@@ -34,7 +34,7 @@ namespace fairino
     {
         ICallSupervisor proxy = null;
 
-        const string SDK_VERSION = " C#SDK-V1.2.9  Web-3.9.8";
+        const string SDK_VERSION = " C#SDK-V1.3.0  Web-3.9.9";
 
         private string robot_ip = "192.168.57.2";//机器人ip
         private int g_sock_com_err = (int)RobotError.ERR_SUCCESS;
@@ -56,9 +56,7 @@ namespace fairino
 
         private bool reconnEnable = true;  // 重连使能  
         private int reconnTimes = 1000;     // 重连次数  
-        private int curReconnTimes = 0;    // 当前重连次数  
-        private int reconnPeriod = 200;    // 重连时间间隔（毫秒）  
-        private bool reconnState = false;  // 当前重连状态  
+        private int reconnPeriod = 200;    // 重连时间间隔（毫秒）
 
         private ROBOT_STATE_PKG robot_state_pkg;//状态反馈结构体
 
@@ -26960,6 +26958,33 @@ namespace fairino
 
             is_sendcmd = true;
             log?.LogInfo($"SetSpeedInstant({vel})");
+            return 0;
+        }
+
+        /**
+         * @brief 获取当前上位机系统时间并发送给机器人，同步 QNX 系统时间（由于QNX系统限制，同步精度为分钟级）
+         * @return 错误码
+         */
+        public int SetRobottime()
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            while (is_sendcmd == true)
+            {
+                Thread.Sleep(10);
+            }
+
+            DateTime now = DateTime.Now;
+            string dateStr = now.ToString("dd MM yyyy");
+            string timeStr = now.ToString("HHmm");
+
+            string command = $"SetQNXSystemTime(\"{dateStr}\",\"{timeStr}\")";
+            g_sendbuf = $"/f/bIII{frameCnt++}III343III{command.Length}III{command}III/b/f";
+            is_sendcmd = true;
+            log?.LogInfo($"SetRobottime() : {g_sendbuf}");
             return 0;
         }
     }

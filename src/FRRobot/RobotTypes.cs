@@ -233,7 +233,7 @@ namespace fairino
         public byte second;
         public UInt16 millisecond;
 
-        public string ToString()
+        public override string ToString()
         {
             return $"{year}-{mouth}-{day}  {hour}:{minute}:{second}.{millisecond}";
         }
