@@ -4381,6 +4381,100 @@ namespace fairino
         }
 
         /**
+         * @brief  获取安全配置参数校验和
+         * @param  [out] status 校验状态，0-有效，1-校验中，2-校验失败
+         * @param  [out] checksum 校验和 8位16进制
+         * @return  错误码
+         */
+        public int GetSafetyParamsCheckSum(ref int status, ref uint checksum)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            try
+            {
+                object[] result = proxy.GetSafetyParamsCheckSum();
+                int errcode = Convert.ToInt32(result[0]);
+                if (errcode == 0)
+                {
+                    status = Convert.ToInt32(result[1]);
+                    checksum = (uint)(Convert.ToInt64(result[2]) & 0xFFFFFFFF);
+                }
+                else
+                {
+                    if (log != null)
+                    {
+                        log.LogError($"execute GetSafetyParamsCheckSum fail {errcode}");
+                    }
+                }
+
+                if (log != null)
+                {
+                    log.LogInfo($"GetSafetyParamsCheckSum(ref {status},ref 0x{checksum:X8}) : {errcode}");
+                }
+                return errcode;
+            }
+            catch (Exception ex)
+            {
+                if (IsSockComError())
+                {
+                    if (log != null)
+                    {
+                        log.LogError($"RPC exception: {ex.Message}");
+                    }
+                    return g_sock_com_err;
+                }
+                if (log != null)
+                {
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief  安全操作密码校验
+         * @param  [in] status 校验，0-开启，1-关闭
+         * @param  [in] password 密码
+         * @return  错误码
+         */
+        public int SafetyOPPasswordCheck(int status, string password)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            try
+            {
+                int rtn = proxy.SafetyOPPasswordCheck(status, password);
+                if (log != null)
+                {
+                    log.LogInfo($"SafetyOPPasswordCheck({status},{password}) : {rtn}");
+                }
+                return rtn;
+            }
+            catch (Exception ex)
+            {
+                if (IsSockComError())
+                {
+                    if (log != null)
+                    {
+                        log.LogError($"RPC exception: {ex.Message}");
+                    }
+                    return g_sock_com_err;
+                }
+                if (log != null)
+                {
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
          * @brief  设置正限位
          * @param  [in] limit 六个关节位置，单位deg
          * @return  错误码
@@ -7365,7 +7459,7 @@ namespace fairino
         /**
          * @brief  获取夹爪运动状态
          * @param  [out] fault  0-无错误，1-有错误
-         * @param  [out] staus  0-运动未完成，1-运动完成
+         * @param  [out] staus  0-运动未完成，1-运动完成未检测到物体 2-运动完成检测到物体
          * @return  错误码
          */
         public int GetGripperMotionDone(ref int fault, ref int status)
@@ -7388,6 +7482,48 @@ namespace fairino
                     log.LogInfo($"GetGripperMotionDone(ref {fault},ref {status}) : {(int)result[0]}");
                 }
                 return (int)result[0];
+            }
+            catch (Exception ex)
+            {
+                if (IsSockComError())
+                {
+                    if (log != null)
+                    {
+                        log.LogError($"RPC exception: {ex.Message}");
+                    }
+                    return g_sock_com_err;
+                }
+                if (log != null)
+                {
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief  等待夹爪运动状态
+         * @param  [in]  staus  0-运动未完成，1-运动完成未检测到物体 2-运动完成检测到物体
+         * @param  [in] timeout 超时时间（ms） -1永久等待
+         * @param  [in] strategy  0-停止报错，1-继续运行
+         * @param  [in] type  0-平行夹爪，1-旋转夹爪
+         * @return  错误码
+         */
+        public int GripperWaitMotionDone(int staus, int timeout, int strategy, int type)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            try
+            {
+                int rtn = proxy.GripperWaitMotionDone(staus, timeout, strategy, type);
+                if (log != null)
+                {
+                    log.LogInfo($"GripperWaitMotionDone({staus},{timeout},{strategy},{type}) : {rtn}");
+                }
+                return rtn;
             }
             catch (Exception ex)
             {
@@ -10233,7 +10369,7 @@ namespace fairino
 
             try
             {
-                int rtn = proxy.WeldingSetCurrent(ioType, current, AOIndex, blend = 0);
+                int rtn = proxy.WeldingSetCurrent(ioType, current, AOIndex, blend);
                 if (log != null)
                 {
                     log.LogInfo($"WeldingSetCurrent({ioType},{current},{AOIndex},{blend}) : {rtn}");
@@ -13768,11 +13904,11 @@ namespace fairino
                 if ((int)result[0] == 0)
                 {
                     coord.tran.x = (double)result[1];
-                    coord.tran.y = (double)result[1];
-                    coord.tran.z = (double)result[1];
-                    coord.rpy.rx = (double)result[1];
-                    coord.rpy.ry = (double)result[1];
-                    coord.rpy.rz = (double)result[1];
+                    coord.tran.y = (double)result[2];
+                    coord.tran.z = (double)result[3];
+                    coord.rpy.rx = (double)result[4];
+                    coord.rpy.ry = (double)result[5];
+                    coord.rpy.rz = (double)result[6];
                 }
                 if (log != null)
                 {
@@ -24411,10 +24547,11 @@ namespace fairino
         * @param  [in] exaxis 扩展轴位置
         * @param  [in] tool 工具号
         * @param  [in] workPiece 工件号
+        * @param [in] config -1：自动求解，0-7对应八组解
         * @param  [out] joint_pos 关节位置
         * @return  错误码
         */
-        public int GetInverseKinExaxis(int type, DescPose desc_pos, ExaxisPos exaxis, int tool, int workPiece, ref JointPos joint_pos)
+        public int GetInverseKinExaxis(int type, DescPose desc_pos, ExaxisPos exaxis, int tool, int workPiece, ref JointPos joint_pos, int config = -1)
         {
             if (IsSockComError())
             {
@@ -24439,7 +24576,7 @@ namespace fairino
             exaxis.ePos[2],
             exaxis.ePos[3]
              };
-                object[] result = proxy.GetInverseKinExaxis(type, descPos, exaxisPos, tool, workPiece);
+                object[] result = proxy.GetInverseKinExaxis(type, descPos, exaxisPos, tool, workPiece, config);
 
                 int errcode = (int)result[0];
 
@@ -24466,7 +24603,7 @@ namespace fairino
                     log.LogInfo($"GetInverseKinExaxis({type}," +
                                $"{descPos[0]},{descPos[1]},{descPos[2]},{descPos[3]},{descPos[4]},{descPos[5]}," +
                                $"{exaxisPos[0]},{exaxisPos[1]},{exaxisPos[2]},{exaxisPos[3]}," +
-                               $"{tool},{workPiece}," +
+                               $"{tool},{workPiece},{config}," +
                                $"ref {joint_pos.jPos[0]},ref {joint_pos.jPos[1]},ref {joint_pos.jPos[2]}," +
                                $"ref {joint_pos.jPos[3]},ref {joint_pos.jPos[4]},ref {joint_pos.jPos[5]}) : {errcode}");
                 }

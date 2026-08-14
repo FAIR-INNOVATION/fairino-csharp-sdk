@@ -1353,10 +1353,10 @@
 
         #endregion
 
-        private System.Windows.Forms.Button btnSetModeAuto;
-        private System.Windows.Forms.Button btnSetModeHand;
-        private System.Windows.Forms.Button btnGetVersion;
-        private System.Windows.Forms.TextBox txtVersion;
+        //private System.Windows.Forms.Button btnSetModeAuto;
+        //private System.Windows.Forms.Button btnSetModeHand;
+        //private System.Windows.Forms.Button btnGetVersion;
+        //private System.Windows.Forms.TextBox txtVersion;
         private System.Windows.Forms.Button btnStandard;
         private System.Windows.Forms.Button btnJOG;
         private System.Windows.Forms.Button btnMovetest;

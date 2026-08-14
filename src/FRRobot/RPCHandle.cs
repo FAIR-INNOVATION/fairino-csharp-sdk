@@ -626,6 +626,22 @@ namespace fairino
         int SetCollisionStrategy(int strategy, int safeTime, int safeDistance, int safeVel ,int[] safetyMargin);
 
         /**
+        * @brief  获取安全配置参数校验和
+        * @param  [out] status 校验状态，0-有效，1-校验中，2-校验失败
+        * @param  [out] checksum 校验和 8位16进制
+        * @return  错误码
+        */[XmlRpcMethod("GetSafetyParamsCheckSum")]
+        object[] GetSafetyParamsCheckSum();
+
+        /**
+        * @brief  安全操作密码校验
+        * @param  [in] status 校验，0-开启，1-关闭
+        * @param  [in] password 密码
+        * @return  错误码
+        */[XmlRpcMethod("SafetyOPPasswordCheck")]
+        int SafetyOPPasswordCheck(int status, string password);
+
+        /**
         * @brief  设置正限位
         * @param  [in] limit 六个关节位置，单位deg
         * @return  错误码
@@ -1050,6 +1066,16 @@ namespace fairino
          * @return  错误码
          */[XmlRpcMethod("GetGripperMotionDone")]
         object[] GetGripperMotionDone();
+
+        /**
+         * @brief  等待夹爪运动状态
+         * @param  [in]  staus  0-运动未完成，1-运动完成未检测到物体 2-运动完成检测到物体
+         * @param  [in] timeout 超时时间（ms） -1永久等待
+         * @param  [in] strategy  0-停止报错，1-继续运行
+         * @param  [in] type  0-平行夹爪，1-旋转夹爪
+         * @return  错误码
+         */[XmlRpcMethod("GripperWaitMotionDone")]
+        int GripperWaitMotionDone(int staus, int timeout, int strategy, int type);
 
         /**
         * @brief  计算预抓取点-视觉
@@ -1691,8 +1717,8 @@ namespace fairino
         [XmlRpcMethod("ArcWeldTraceExtAIChannelConfig")]
         int ArcWeldTraceExtAIChannelConfig(int channel);
 
-        [XmlRpcMethod("EndForceDragControl")]
-        int EndForceDragControl(int status, int asaptiveFlag, int interfereDragFlag, int ingularityConstraintsFlag,double[] M, double[] B, double[] K, double[] F, double Fmax, double Vmax);
+        //[XmlRpcMethod("EndForceDragControl")]
+        //int EndForceDragControl(int status, int asaptiveFlag, int interfereDragFlag, int ingularityConstraintsFlag,double[] M, double[] B, double[] K, double[] F, double Fmax, double Vmax);
 
         [XmlRpcMethod("SetForceSensorDragAutoFlag")]
         int SetForceSensorDragAutoFlag(int status);
@@ -2031,8 +2057,8 @@ namespace fairino
         int SetFocusCalibPoint(int pointNum, double[] desc);
 
 
-        [XmlRpcMethod("ComputeFocusCalib")]
-        object[] ComputeFocusCalib(int pointNum, ref DescTran resultPos, ref double accuracy);
+        //[XmlRpcMethod("ComputeFocusCalib")]
+        //object[] ComputeFocusCalib(int pointNum, ref DescTran resultPos, ref double accuracy);
 
 
         [XmlRpcMethod("ComputeFocusCalib")]
@@ -2330,7 +2356,7 @@ namespace fairino
         object[] GetWeavebackCenterConfig();
 
         [XmlRpcMethod("GetInverseKinExaxis")]
-        object[] GetInverseKinExaxis(int type, double[] desc_pos, double[] exaxis, int tool, int workPiece);
+        object[] GetInverseKinExaxis(int type, double[] desc_pos, double[] exaxis, int tool, int workPiece, int config);
 
         [XmlRpcMethod("MoveToTPDStart")]
         int MoveToTPDStart(string name, int moveType, double ovl);

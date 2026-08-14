@@ -4563,7 +4563,7 @@ namespace testFrRobot
         private void button104_Click(object sender, EventArgs e)
         {
             //TestCoord();
-            TestStationaryTrack();
+            //TestStationaryTrack();
             //TestWorkPieceTrsf();
             //TestWeaveSpeedAndOffset();
             //TestCoordMain5();
@@ -4656,6 +4656,8 @@ namespace testFrRobot
             //TestRotInsert();
 
             //TestInverseKinExaxis();
+            //TestSafetyParamsCheckSum();
+            TestGripperWaitMotionDone();
             //TestServoCart();
 
             //TestDOReset();
@@ -4692,26 +4694,16 @@ namespace testFrRobot
         public void TestInverseKinExaxis()
         {
             ROBOT_STATE_PKG pkg = new ROBOT_STATE_PKG();
-
-
-            //DescPose desc = new DescPose(99.957f, -0.002f, 29.994f, -176.569f, -6.757f, -167.462f);
-            DescPose desc = new DescPose(199.968, -542.109, 333.659, 90.072, 2.027, 92.026);
-            
-            ExaxisPos exaxis = new ExaxisPos(100.0f, 0.0f, 0.0f, 0.0f);
-            JointPos jointPos = new JointPos(0,0,0,0,0,0);
-            DescPose offsetPos = new DescPose(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
             robot.GetRobotRealTimeState(ref pkg);
             int toolnum = pkg.tool;
             int workPcsNum = pkg.user;
 
-            robot.GetInverseKinExaxis(0, desc, exaxis, toolnum, workPcsNum, ref jointPos);
+            DescPose desc = new DescPose(-547.469, -47.361, 184.149, 169.843, 4.579, 82.557);
+            ExaxisPos exaxis = new ExaxisPos(0.0, 0.0, 0.0, 0.0);
+            JointPos jointPos = new JointPos(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+
+            robot.GetInverseKinExaxis(0, desc, exaxis, toolnum, workPcsNum, ref jointPos, 0);
             Console.WriteLine($"GetInverseKinExaxis joint is {jointPos.jPos[0]}, {jointPos.jPos[1]}, {jointPos.jPos[2]}, {jointPos.jPos[3]}, {jointPos.jPos[4]}, {jointPos.jPos[5]}");
-
-            //robot.ExtAxisMove(exaxis, 100, -1);
-
-            robot.MoveJ(jointPos, desc, toolnum, workPcsNum, (float)100.0, (float)100.0, (float)100.0, exaxis, -1, 0, offsetPos);
-
-
         }
 
         public void TestServoCart()
@@ -10182,6 +10174,60 @@ public int RunTrajectoryJ(string localFilePath = "D://zUP/horse.txt", string rem
             Console.WriteLine("ExtAxisActiveECoordSys(1,1,..,1) rtn={0}", rtn);
 
             return 0;
+        }
+
+        public void TestGripperWaitMotionDone()
+        {
+            int rtn;
+            ROBOT_STATE_PKG pkg = new ROBOT_STATE_PKG();
+
+
+            // 夹爪张开
+            rtn = robot.MoveGripper(1, 50, 50, 100, 30000, 0, 0, 0, 0, 0);
+            Console.WriteLine("MoveGripper(张开) ret={0}", rtn);
+            Thread.Sleep(2000);
+            robot.GetRobotRealTimeState(ref pkg);
+            Console.WriteLine(" gripper_motiondone {0})", pkg.gripper_motiondone);
+            // 夹爪闭合
+            rtn = robot.MoveGripper(1, 90, 100, 100, 30000, 0, 0, 0, 0, 0);
+            Console.WriteLine("MoveGripper(闭合) ret={0}", rtn);
+            Thread.Sleep(2000);
+            robot.GetRobotRealTimeState(ref pkg);
+            Console.WriteLine(" gripper_motiondone {0}", pkg.gripper_motiondone);
+            // 等待运动完成未检测到物体，超时30s，停止报错
+            rtn = robot.GripperWaitMotionDone(2, -1, 0, 0);
+            Console.WriteLine("GripperWaitMotionDone(等待完成未检测到物体) ret={0}", rtn);
+
+            // 夹爪张开
+            rtn = robot.MoveGripper(1, 0, 100, 100, 30000, 0, 0, 0, 0, 0);
+            Console.WriteLine("MoveGripper(张开) ret={0}", rtn);
+        }
+
+        public void TestSafetyParamsCheckSum()
+        {
+            int status = 0;
+            uint checksum = 0;
+
+            int error = robot.GetSafetyParamsCheckSum(ref status, ref checksum);
+            Console.WriteLine("GetSafetyParamsCheckSum: error={0}, status={1}, hex_code={2:X8}", error, status, checksum);
+            Thread.Sleep(3000);
+
+            error = robot.SafetyOPPasswordCheck(0, "12345678");
+            Console.WriteLine("SafetyOPPasswordCheck: error={0}", error);
+
+            if (error == 0)
+            {
+                error = robot.SetAnticollision(0, new double[] { 2.0, 2.0, 2.0, 2.0, 2.0, 2.0 }, 1);
+                Console.WriteLine("SetAnticollision: error={0}", error);
+
+                error = robot.SetCollisionStrategy(0, 1000, 150, 0, new int[] { 10, 10, 10, 10, 10, 10 });
+                Console.WriteLine("SetCollisionStrategy: error={0}", error);
+            }
+
+            Thread.Sleep(1000);
+
+            error = robot.GetSafetyParamsCheckSum(ref status, ref checksum);
+            Console.WriteLine("GetSafetyParamsCheckSum(again): error={0}, status={1}, hex_code={2:X8}", error, status, checksum);
         }
 
     }

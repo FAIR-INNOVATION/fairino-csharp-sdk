@@ -21,8 +21,8 @@ namespace testFrRobot
 
         ROBOT_STATE_PKG currentState = new ROBOT_STATE_PKG();
         object stateLock = new object();
-        bool isRunning = true;
-        Thread stateUpdateThread;
+        //bool isRunning = true;
+        //Thread stateUpdateThread;
 
         public FrmFT(Robot ro)
         {
