@@ -7458,7 +7458,7 @@ namespace fairino
 
         /**
          * @brief  获取夹爪运动状态
-         * @param  [out] fault  0-无错误，1-有错误
+         * @param  [out] fault  0-无错误，其他-有错误
          * @param  [out] staus  0-运动未完成，1-运动完成未检测到物体 2-运动完成检测到物体
          * @return  错误码
          */
@@ -27099,7 +27099,7 @@ namespace fairino
         }
 
         /**
-         * @brief 获取当前上位机系统时间并发送给机器人，同步 QNX 系统时间（由于QNX系统限制，同步精度为分钟级）
+         * @brief 获取当前上位机系统时间并发送给机器人，同步系统时间（由于QNX系统限制，同步精度为分钟级）
          * @return 错误码
          */
         public int SetRobottime()

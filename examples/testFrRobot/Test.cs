@@ -10230,6 +10230,59 @@ public int RunTrajectoryJ(string localFilePath = "D://zUP/horse.txt", string rem
             Console.WriteLine("GetSafetyParamsCheckSum(again): error={0}, status={1}, hex_code={2:X8}", error, status, checksum);
         }
 
+        public void testSetAndGetRobotTime()
+        {
+            double t_ms = 0.0;
+
+            int ret = robot.GetSystemClock(ref t_ms);
+            if (ret == 0)
+            {
+                Console.WriteLine($"system clock : {t_ms}");
+                // Convert millisecond timestamp to DateTime (UTC time)
+                DateTime utcTime = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddMilliseconds(t_ms);
+                Console.WriteLine($"BEFORE UTC Time   : {utcTime:yyyy-MM-dd HH:mm:ss}");
+            }
+            else
+            {
+                Console.WriteLine($"GetSystemClock failed,ret:{ret}");
+            }
+
+            robot.SetRobottime();
+
+            // Get the robot time after setting
+            double t_ms_after = 0;
+            ret = robot.GetSystemClock(ref t_ms_after);
+            if (ret == 0)
+            {
+                Console.WriteLine($"system clock : {t_ms}");
+                DateTime robotTimeAfter = DateTimeOffset.FromUnixTimeMilliseconds((long)t_ms_after).UtcDateTime;
+
+                // Get the PC time before setting (as expected value)
+                DateTime pcTimeBefore = DateTime.Now;
+
+                // Truncate both expected time (PC time) and robot time to minutes
+                DateTime pcMinute = new DateTime(pcTimeBefore.Year, pcTimeBefore.Month, pcTimeBefore.Day,
+                                                 pcTimeBefore.Hour, pcTimeBefore.Minute, 0, DateTimeKind.Utc);
+                DateTime robotMinute = new DateTime(robotTimeAfter.Year, robotTimeAfter.Month, robotTimeAfter.Day,
+                                                    robotTimeAfter.Hour, robotTimeAfter.Minute, 0, DateTimeKind.Utc);
+
+                // Compare consistency
+                bool isConsistent = (pcMinute == robotMinute);
+                if (isConsistent)
+                {
+                    Console.WriteLine($"Consistent     | PC time: {pcMinute:yyyy-MM-dd HH:mm}  | Robot time: {robotMinute:yyyy-MM-dd HH:mm}");
+                }
+                else
+                {
+                    Console.WriteLine($"[Inconsistent | PC time: {pcMinute:yyyy-MM-dd HH:mm}  | Robot time: {robotMinute:yyyy-MM-dd HH:mm}");
+                }
+            }
+            else
+            {
+                Console.WriteLine($"GetSystemClock failed,ret:{ret}");
+            }
+        }
+
     }
 
     /// <summary>
