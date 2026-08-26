@@ -18,6 +18,7 @@ using System.Diagnostics;
 using System.Runtime;
 using System.Drawing.Drawing2D;
 using System.Security.Cryptography;
+using System.IO;
 using static System.Net.Mime.MediaTypeNames;
 namespace testFrRobot
 {
@@ -4657,10 +4658,14 @@ namespace testFrRobot
 
             //TestInverseKinExaxis();
             //TestSafetyParamsCheckSum();
-            TestGripperWaitMotionDone();
+            //TestGripperWaitMotionDone();
             //TestServoCart();
-
+            //TestServoJPath();
+            //TestFTStrategy();
             //TestDOReset();
+
+            TestLaserReproduceNormalWeave();
+            //TestLaserRecordReplayExaxisWithWave();
         }
         public void TestDOReset()
         {
@@ -4702,7 +4707,7 @@ namespace testFrRobot
             ExaxisPos exaxis = new ExaxisPos(0.0, 0.0, 0.0, 0.0);
             JointPos jointPos = new JointPos(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
 
-            robot.GetInverseKinExaxis(0, desc, exaxis, toolnum, workPcsNum, ref jointPos, 0);
+            robot.GetInverseKinExaxis(0, desc, exaxis, toolnum, workPcsNum, ref jointPos, 1);
             Console.WriteLine($"GetInverseKinExaxis joint is {jointPos.jPos[0]}, {jointPos.jPos[1]}, {jointPos.jPos[2]}, {jointPos.jPos[3]}, {jointPos.jPos[4]}, {jointPos.jPos[5]}");
         }
 
@@ -4792,6 +4797,59 @@ namespace testFrRobot
             robot.GetRobotRealTimeState(ref pkg);
             Console.WriteLine("robot errcode " + pkg.main_code + "  " + pkg.sub_code);
         }
+
+        public void TestFTStrategy()
+        {
+            int rtn;
+
+            //========== FT_SpiralSearch: strategy 0 / 1 ==========
+            Console.WriteLine("=== FT_SpiralSearch strategy=0 ===");
+            rtn = robot.FT_SpiralSearch(0, 0.7f, 5.0f, 3000.0f, 3.0f, 0);
+            Console.WriteLine("FT_SpiralSearch(0) rtn is " + rtn);
+            Thread.Sleep(5000);
+            robot.ResetAllError();
+            Thread.Sleep(2000);
+
+            Console.WriteLine("=== FT_SpiralSearch strategy=1 ===");
+            rtn = robot.FT_SpiralSearch(0, 0.7f, 1.0f, 3000.0f, 3.0f, 1);
+            Console.WriteLine("FT_SpiralSearch(1) rtn is " + rtn);
+            Thread.Sleep(5000);
+            robot.ResetAllError();
+            Thread.Sleep(2000);
+
+            // ========== FT_LinInsertion: strategy 0/1 ==========
+            Console.WriteLine("=== FT_LinInsertion strategy=0 ===");
+            rtn = robot.FT_LinInsertion(0, 20.0f, 15.0f, 1.0f, 10.0f, 1, 0);
+            Console.WriteLine("FT_LinInsertion(0) rtn is " + rtn);
+            Thread.Sleep(5000);
+            robot.ResetAllError();
+            Thread.Sleep(2000);
+
+            Console.WriteLine("=== FT_LinInsertion strategy=1 ===");
+            rtn = robot.FT_LinInsertion(0, 20.0f, 15.0f, 1.0f, 10.0f, 1, 1);
+            Console.WriteLine("FT_LinInsertion(1) rtn is " + rtn);
+            Thread.Sleep(5000);
+            robot.ResetAllError();
+            Thread.Sleep(2000);
+
+            // ========== FT_FindSurface: strategy 0/1 ==========
+            Console.WriteLine("=== FT_FindSurface strategy=0 ===");
+            rtn = robot.FT_FindSurface(0, 1, 1, 15.0f, 0.0f, 50.0f, 20.0f, 0);
+            Console.WriteLine("FT_FindSurface(0) rtn is " + rtn);
+            Thread.Sleep(10000);
+            robot.ResetAllError();
+            Thread.Sleep(5000);
+
+            Console.WriteLine("=== FT_FindSurface strategy=1 ===");
+            rtn = robot.FT_FindSurface(0, 1, 1, 15.0f, 0.0f, 50.0f, 20.0f, 1);
+            Console.WriteLine("FT_FindSurface(1) rtn is " + rtn);
+            Thread.Sleep(10000);
+            robot.ResetAllError();
+
+            Console.WriteLine("finish");
+        }
+
+
         public void TestCPUStressImpactHigh()
         {
             Console.WriteLine("=== 测试2：CPU压力对连接的影响（高强度版）===");
@@ -7444,6 +7502,137 @@ public void TestVelFeedForwardRatio()
                 Console.WriteLine($"完成次数 : {i + 1} 次");
             }
 
+        }
+
+        // 激光记录复现 + 扩展轴异步运动 + 定点摆动
+        void TestLaserRecordReplayExaxisWithWave()
+        {
+            JointPos startjointPos = new JointPos(106.245, -63.397, -93.331, -80.809, 80.389, 134.561);
+            DescPose startdescPose = new DescPose(33.534, 516.527, 371.029, 14.712, -31.379, 71.734);
+            JointPos endjointPos = new JointPos(105.534, -64.685, -93.681, -79.071, 80.772, 133.952);
+            DescPose enddescPose = new DescPose(33.536, 528.536, 364.924, 14.712, -31.379, 71.734);
+            DescPose offdese = new DescPose(0, 0, 0, 0, 0, 0);
+            int rtn = 0;
+
+            // MoveJ 到安全点(扩展轴 0,174.957,0,0)
+            rtn = robot.MoveJ(startjointPos, startdescPose, 5, 0, 100, 100, 50, new ExaxisPos(0, 174.957, 0, 0), -1, 0, offdese);
+            Console.WriteLine($"MoveJ start: {rtn}");
+
+            // 扩展轴异步运动到 105.003 起始点
+            rtn = robot.ExtAxisMove(new ExaxisPos(0, 105.003, 0, 0), 50, -1);
+            Console.WriteLine($"ExtAxisMove 105.003: {rtn}");
+            Thread.Sleep(3000);
+
+            // MoveL 到起始点
+            rtn = robot.MoveL(endjointPos, enddescPose, 5, 0, 100, 100, 50, -1, 0, new ExaxisPos(0, 105.003, 0, 0), 0, 0, offdese, 100, 0, 0, 10);
+            Console.WriteLine($"MoveL end: {rtn}");
+
+            // 开始激光记录
+            rtn = robot.LaserSensorRecord1(2, 10);
+            Console.WriteLine($"LaserSensorRecord start: {rtn}");
+
+            // 记录过程中扩展轴运动到 174.957
+            rtn = robot.ExtAxisMove(new ExaxisPos(0, 174.957, 0, 0), 50, -1);
+            Console.WriteLine($"ExtAxisMove 174.957: {rtn}");
+            Thread.Sleep(3000);
+
+            // 停止激光记录
+            rtn = robot.LaserSensorRecord1(0, 10);
+            Console.WriteLine($"LaserSensorRecord stop: {rtn}");
+
+
+            // 扩展轴回到 105.003，MoveL 回起始点
+            rtn = robot.ExtAxisMove(new ExaxisPos(0, 105.003, 0, 0), 50, -1);
+            Console.WriteLine($"ExtAxisMove back: {rtn}");
+
+            // MoveL 到起始点
+            rtn = robot.MoveL(endjointPos, enddescPose, 5, 0, 100, 100, 50, -1, 0, new ExaxisPos(0, 105.003, 0, 0), 0, 0, offdese, 100, 0, 0, 10);
+            Console.WriteLine($"MoveL back: {rtn}");
+
+            // PTP 运动到焊缝记录起点
+            rtn = robot.MoveToLaserRecordStart(0, 30);
+            Console.WriteLine($"MoveToLaserRecordStart: {rtn}");
+
+            // 开始复现
+            rtn = robot.LaserSensorRecord1(3, 10);
+            Console.WriteLine($"LaserSensorRecord replay: {rtn}");
+
+            // 定点摆动开始
+            DescPose refPoint = new DescPose(61.087, 512.431, 370.523, 14.335, -31.333, 69.014);
+            rtn = robot.OriginPointWeaveStart(0, 1, refPoint, 5);
+            Console.WriteLine($"OriginPointWeaveStart: {rtn}");
+
+            // 摆动过程中扩展轴运动到 174.957
+            rtn = robot.ExtAxisMove(new ExaxisPos(0, 174.957, 0, 0), 50, -1);
+            Console.WriteLine($"ExtAxisMove replay: {rtn}");
+
+            // 摆动结束
+            rtn = robot.OriginPointWeaveEnd();
+            Console.WriteLine($"OriginPointWeaveEnd: {rtn}");
+
+            // 停止复现
+            rtn = robot.LaserSensorRecord1(0, 10);
+            Console.WriteLine($"LaserSensorRecord stop: {rtn}");
+        }
+
+        // 激光记录复现+普通摆动 
+        void TestLaserReproduceNormalWeave()
+        {
+            JointPos startjointPos = new JointPos(69.655, -71.524, -119.568, -76.454, 91.188, 138.014);
+            DescPose startdescPose = new DescPose(214.765, 311.139, 41.255, 7.693, -0.287, 37.080);
+            JointPos endjointPos = new JointPos(58.803, -79.528, -113.688, -74.599, 91.637, 127.167);
+            DescPose enddescPose = new DescPose(294.942, 311.153, 41.302, 7.701, -0.283, 37.081);
+            DescPose offdese = new DescPose(0, 0, 0, 0, 0, 0);
+            int rtn = 0;
+
+            // WaitMs(1000)
+            Thread.Sleep(1000);
+
+            // MoveL 到起始位(扩展轴 0,174.957,0,0, oacc=100)
+            rtn = robot.MoveL(startjointPos, startdescPose, 5, 0, 100, 100, 100, -1, 0, new ExaxisPos(0, 174.957, 0, 0), 0, 0, offdese, 100, 0, 0, 10);
+
+            Console.WriteLine($"MoveL start: {rtn}");
+
+            // 开始激光记录
+            rtn = robot.LaserSensorRecord1(2, 10);
+            Console.WriteLine($"LaserSensorRecord start: {rtn}");
+
+            // MoveL 到结束位
+            rtn = robot.MoveL(endjointPos, enddescPose, 5, 0, 100, 100, 100, -1, 0, new ExaxisPos(0, 174.957, 0, 0), 0, 0, offdese, 100, 0, 0, 10);
+            Console.WriteLine($"MoveL end: {rtn}");
+
+            // 停止激光记录
+            rtn = robot.LaserSensorRecord1(0, 10);
+            Console.WriteLine($"LaserSensorRecord stop: {rtn}");
+
+            // MoveL 回起始位
+            rtn = robot.MoveL(startjointPos, startdescPose, 5, 0, 100, 100, 100, -1, 0, new ExaxisPos(0, 174.957, 0, 0), 0, 0, offdese, 100, 0, 0, 10);
+            Console.WriteLine($"MoveL back: {rtn}");
+
+            // LIN 运动到焊缝记录起点
+            rtn = robot.MoveToLaserRecordStart(1, 30);
+            Console.WriteLine($"MoveToLaserRecordStart: {rtn}");
+
+            // 普通摆动开始
+            rtn = robot.WeaveStart(0);
+            Console.WriteLine($"WeaveStart: {rtn}");
+
+            // 开始复现记录
+            rtn = robot.LaserSensorRecord1(3, 10);
+            Console.WriteLine($"LaserSensorRecord replay: {rtn}");
+
+            // 激光跟踪复现运动
+            rtn = robot.MoveLTR();
+            Console.WriteLine($"MoveLTR: {rtn}");
+            Thread.Sleep(3000);
+
+            // 停止复现记录
+            rtn = robot.LaserSensorRecord1(0, 10);
+            Console.WriteLine($"LaserSensorRecord stop: {rtn}");
+
+            // 普通摆动结束
+            rtn = robot.WeaveEnd(0);
+            Console.WriteLine($"WeaveEnd: {rtn}");
         }
 
         void testLasertrack()
@@ -10228,6 +10417,89 @@ public int RunTrajectoryJ(string localFilePath = "D://zUP/horse.txt", string rem
 
             error = robot.GetSafetyParamsCheckSum(ref status, ref checksum);
             Console.WriteLine("GetSafetyParamsCheckSum(again): error={0}, status={1}, hex_code={2:X8}", error, status, checksum);
+        }
+
+        public void TestServoJPath()
+        {
+            // 读取 ServoJ 路径文件，每行取第2~7列作为6个关节位置
+            string filePath = "D://zUP/ServoJPath.txt";
+            List<JointPos> allJointData = new List<JointPos>();
+            using (StreamReader reader = new StreamReader(filePath))
+            {
+                string line;
+                while ((line = reader.ReadLine()) != null)
+                {
+                    string[] cols = line.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+                    if (cols.Length < 7)
+                        continue;
+                    JointPos pose = new JointPos(0, 0, 0, 0, 0, 0);
+                    pose.jPos[0] = double.Parse(cols[1]);
+                    pose.jPos[1] = double.Parse(cols[2]);
+                    pose.jPos[2] = double.Parse(cols[3]);
+                    pose.jPos[3] = double.Parse(cols[4]);
+                    pose.jPos[4] = double.Parse(cols[5]);
+                    pose.jPos[5] = double.Parse(cols[6]);
+                    allJointData.Add(pose);
+                }
+            }
+            Console.WriteLine($"一共读取到 {allJointData.Count} 组关节位置");
+            if (allJointData.Count == 0)
+                return;
+
+            // 构建往返路径：正序 + 反序
+            List<JointPos> backForthPath = new List<JointPos>(allJointData);
+            for (int i = allJointData.Count - 2; i >= 0; i--)
+            {
+                backForthPath.Add(allJointData[i]);
+            }
+
+            ExaxisPos epos = new ExaxisPos(0.0, 0.0, 0.0, 0.0);
+            DescPose offsetPos = new DescPose(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+            robot.MoveJ(allJointData[0], 0, 0, 100, 100, 100, epos, -1, 0, offsetPos);
+
+            robot.Sleep(1000);
+
+            ROBOT_STATE_PKG pkg = new ROBOT_STATE_PKG();
+            while (true)
+            {
+                robot.ResetAllError();
+                robot.MoveJ(allJointData[0], 0, 0, 100, 100, 100, epos, -1, 0, offsetPos);
+                int moveCount = 0;
+                while (moveCount < backForthPath.Count - 10)
+                {
+                    robot.GetRobotRealTimeState(ref pkg);
+
+                    int singleServoJCount = 50 - pkg.mc_queue_len;
+                    if (singleServoJCount <= 0)
+                    {
+                        robot.Sleep(100);
+                        continue;
+                    }
+                    if (singleServoJCount > 10)
+                    {
+                        singleServoJCount = 10;
+                    }
+
+                    List<JointPos> jointPos = new List<JointPos>();
+                    for (int j = 0; j < singleServoJCount; j++)
+                    {
+                        jointPos.Add(backForthPath[moveCount]);
+                        moveCount++;
+                    }
+
+                    Console.WriteLine($"下发 {singleServoJCount} 个点位, moveCount={moveCount}");
+
+                    ExaxisPos axisPos = new ExaxisPos(0.0, 0.0, 0.0, 0.0);
+                    int servoJCmdCount = 0;
+                    int rtn = robot.ServoJ(jointPos, axisPos, 100.0f, 100.0f, 0.008f, 0.008f, 1.0f, ref servoJCmdCount);
+                    if (rtn != 0)
+                    {
+                        Console.WriteLine($"ServoJ failed: {rtn}");
+                        break;
+                    }
+                }
+                robot.Sleep(4000);
+            }
         }
 
         public void testSetAndGetRobotTime()

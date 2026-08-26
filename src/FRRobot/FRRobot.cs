@@ -2040,7 +2040,9 @@ namespace fairino
                 {
                     double[] jointPos = joint_pos.jPos;
                     double[] axis = axisPos.ePos;
-                    int rtn = proxy.ServoJ(jointPos, axis, acc, vel, cmdT, filterT, gain, id);
+                    object result = proxy.ServoJ(jointPos, axis, acc, vel, cmdT, filterT, gain, id);
+                    // 兼容返回值：可能是数组(result[0]为错误码)或纯int
+                    int rtn = ParseServoJResult(result);
                     log?.LogInfo($"ServoJ() : {rtn}");
                     return rtn;
                 }
@@ -2086,6 +2088,125 @@ namespace fairino
                 }
                 return (int)RobotError.ERR_RPC_ERROR;
             }
+        }
+
+        /**
+        * @brief 关节空间伺服模式运动(支持多点位一次输入)
+        * @param [in] joint_pos 目标关节位置集合(最多支持10组),单位deg
+        * @param [in] axisPos 外部轴位置,单位mm
+        * @param [in] acc 加速度百分比，范围[0~100],暂不开放，默认为0
+        * @param [in] vel 速度百分比，范围[0~100]，暂不开放，默认为0
+        * @param [in] cmdT 指令下发周期，单位s，建议范围[0.001~0.0016]
+        * @param [in] filterT 滤波时间，单位s，暂不开放，默认为0
+        * @param [in] gain 目标位置的比例放大器，暂不开放，默认为0
+        * @param [out] servoJCmdCount ServoJ指令点位计数[0-10000]
+        * @param [in] id servoJ指令ID,默认为0
+        * @param [in] comType 指令下发类型；0-xmlrpc；1-UDP(对应机器人20007端口)
+        * @return 错误码
+        */
+        public int ServoJ(List<JointPos> joint_pos, ExaxisPos axisPos, float acc, float vel, float cmdT, float filterT, float gain, ref int servoJCmdCount, int id = 0, int comType = 0)
+        {
+            if (joint_pos == null || joint_pos.Count == 0 || joint_pos.Count > 10)
+            {
+                log?.LogError($"ServoJ point num invalid: {joint_pos?.Count}");
+                return (int)RobotError.ERR_PARAM_NUM;
+            }
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            if (GetSafetyCode() != 0)
+            {
+                return GetSafetyCode();
+            }
+
+            try
+            {
+                if (comType == 0)
+                {
+                    double[] jointPos = new double[joint_pos.Count * 6];
+                    for (int i = 0; i < joint_pos.Count; i++)
+                    {
+                        Array.Copy(joint_pos[i].jPos, 0, jointPos, i * 6, 6);
+                    }
+                    double[] axis = axisPos.ePos;
+                    object result = proxy.ServoJ(jointPos, axis, acc, vel, cmdT, filterT, gain, id);
+
+                    if (result != null && result.GetType().Name == "Int32[]")
+                    {
+                        int[] arr = (int[])result;
+                        if (arr.Length > 0)
+                        {
+                            servoJCmdCount = arr.Length > 1 ? arr[1] : 0;
+                            log?.LogInfo($"ServoJ() count : {servoJCmdCount}");
+                            return arr[0];
+                        }
+                    }
+                    return Convert.ToInt32(result);
+                }
+                else if (comType == 1)
+                {
+                    // 多点位拼接：{j1..j6},{j1..j6},...
+                    StringBuilder jointSb = new StringBuilder();
+                    for (int i = 0; i < joint_pos.Count; i++)
+                    {
+                        if (i > 0)
+                            jointSb.Append(",");
+                        jointSb.Append(FormatDoubleArray(joint_pos[i].jPos, 3));
+                    }
+                    string axisStr = FormatDoubleArray(axisPos.ePos, 3);
+
+                    string cmdStr = $"ServoJ({jointSb},{axisStr},{acc:F3},{vel:F3},{cmdT:F3},{filterT:F3},{gain:F3},{id})";
+
+                    FRAME frame = new FRAME
+                    {
+                        count = frameCnt++,
+                        cmdID = 376,
+                        content = cmdStr,
+                        contentLen = cmdStr.Length,
+                        head = "/f/b",
+                        tail = "/b/f"
+                    };
+                    string frameStr = FrameHandle.PackFrame(frame);
+                    int sendResult = udpCmdClient.SendFrame(frameStr);
+                    if (sendResult != 0)
+                    {
+                        log?.LogError($"ServoJ UDP send failed: {sendResult}");
+                        return (int)RobotError.ERR_SOCKET_SEND_FAILED;
+                    }
+                    return 0;
+                }
+                else
+                {
+                    log?.LogError($"ServoJ invalid comType: {comType}");
+                    return (int)RobotError.ERR_PARAM_VALUE;
+                }
+            }
+            catch (Exception ex)
+            {
+                if (IsSockComError())
+                {
+                    log?.LogError($"RPC exception: {ex.Message}");
+                    return g_sock_com_err;
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /// <summary>
+        /// 解析 ServoJ 返回值，兼容纯int和Int32[]两种返回类型
+        /// </summary>
+        private int ParseServoJResult(object result)
+        {
+            if (result != null && result.GetType().Name == "Int32[]")
+            {
+                int[] arr = (int[])result;
+                if (arr.Length > 0)
+                {
+                    return arr[0];
+                }
+            }
+            return Convert.ToInt32(result);
         }
 
         /**
@@ -7457,7 +7578,7 @@ namespace fairino
         }
 
         /**
-         * @brief  获取夹爪运动状态
+         * @brief  获取夹爪运动状态（仅末端开放协议定义，已适配设备获取的运动状态为透传值）
          * @param  [out] fault  0-无错误，其他-有错误
          * @param  [out] staus  0-运动未完成，1-运动完成未检测到物体 2-运动完成检测到物体
          * @return  错误码
@@ -7502,7 +7623,7 @@ namespace fairino
         }
 
         /**
-         * @brief  等待夹爪运动状态
+         * @brief  等待夹爪运动状态（仅末端开放协议定义，已适配设备status定义透传各夹爪厂商）
          * @param  [in]  staus  0-运动未完成，1-运动完成未检测到物体 2-运动完成检测到物体
          * @param  [in] timeout 超时时间（ms） -1永久等待
          * @param  [in] strategy  0-停止报错，1-继续运行
@@ -24365,16 +24486,16 @@ namespace fairino
         }
 
         /**
-        * @brief  直线插入
-        * @param  [in] rcs 参考坐标系，0-工具坐标系，1-基坐标系
-        * @param  [in] ft  力/扭矩阈值，fx,fy,fz,tx,ty,tz，范围[0~100]
-        * @param  [in] lin_v 直线速度，单位mm/s
-        * @param  [in] lin_a 直线加速度，单位mm/s^2，暂不使用
-        * @param  [in] max_dis 最大插入距离，单位mm
-        * @param  [in] linorn  插入方向，0-负方向，1-正方向
-        * @return  错误码
-        */
-        public int FT_LinInsertion(int rcs, float ft, float lin_v, float lin_a, float max_dis, byte linorn)
+         * @brief  螺旋线探索
+         * @param  [in] rcs 参考坐标系，0-工具坐标系，1-基坐标系
+         * @param  [in] dr 每圈半径进给量
+         * @param  [in] ft 力/扭矩阈值，fx,fy,fz,tx,ty,tz，范围[0~100]
+         * @param  [in] max_t_ms 最大探索时间，单位ms
+         * @param  [in] max_vel 最大线速度，单位mm/s
+         * @param  [in] strategy 未检测到力/力矩的处理策略，0-报错；1-警告，继续运动
+         * @return  错误码
+         */
+        public int FT_SpiralSearch(int rcs, float dr, float ft, float max_t_ms, float max_vel, int strategy = 0)
         {
             if (IsSockComError())
             {
@@ -24388,7 +24509,50 @@ namespace fairino
 
             try
             {
-                int rtn = proxy.FT_LinInsertion(rcs, ft, lin_v, lin_a, max_dis, linorn);
+                int rtn = proxy.FT_SpiralSearch(rcs, dr, ft, max_t_ms, max_vel, strategy);
+
+                if (log != null)
+                {
+                    log.LogInfo($"FT_SpiralSearch: {rtn}");
+                }
+                return rtn;
+            }
+            catch
+            {
+                if (log != null)
+                {
+                    log.LogError("RPC exception");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+        * @brief  直线插入
+        * @param  [in] rcs 参考坐标系，0-工具坐标系，1-基坐标系
+        * @param  [in] ft  力/扭矩阈值，fx,fy,fz,tx,ty,tz，范围[0~100]
+        * @param  [in] lin_v 直线速度，单位mm/s
+        * @param  [in] lin_a 直线加速度，单位mm/s^2，暂不使用
+        * @param  [in] max_dis 最大插入距离，单位mm
+        * @param  [in] linorn  插入方向，0-负方向，1-正方向
+        * @param  [in] strategy 未检测到力/力矩的处理策略，0-报错；1-警告，继续运动
+        * @return  错误码
+        */
+        public int FT_LinInsertion(int rcs, float ft, float lin_v, float lin_a, float max_dis, byte linorn, int stragety = 0)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            if (GetSafetyCode() != 0)
+            {
+                return GetSafetyCode();
+            }
+
+            try
+            {
+                int rtn = proxy.FT_LinInsertion(rcs, ft, lin_v, lin_a, max_dis, linorn, stragety);
 
                 if (log != null)
                 {
@@ -24415,9 +24579,10 @@ namespace fairino
         * @param  [in] lin_a 探索直线加速度，单位mm/s^2，暂不使用，默认为0
         * @param  [in] max_dis 最大探索距离，单位mm
         * @param  [in] ft  动作终止力/扭矩阈值，fx,fy,fz,tx,ty,tz
+        * @param  [in] strategy 未检测到力/力矩的处理策略，0-报错；1-警告，继续运动
         * @return  错误码
         */
-        public int FT_FindSurface(int rcs, byte dir, byte axis, float lin_v, float lin_a, float max_dis, float ft)
+        public int FT_FindSurface(int rcs, byte dir, byte axis, float lin_v, float lin_a, float max_dis, float ft, int stragety = 0)
         {
             if (IsSockComError())
             {
@@ -24431,7 +24596,7 @@ namespace fairino
 
             try
             {
-                int rtn = proxy.FT_FindSurface(rcs, dir, axis, lin_v, lin_a, max_dis, ft);
+                int rtn = proxy.FT_FindSurface(rcs, dir, axis, lin_v, lin_a, max_dis, ft, stragety);
 
                 if (log != null)
                 {

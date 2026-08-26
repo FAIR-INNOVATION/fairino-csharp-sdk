@@ -228,7 +228,7 @@ namespace fairino
         * @return  错误码
         */
         [XmlRpcMethod("ServoJ")]
-        int ServoJ(double[] joint_pos, double[] axisPos, double acc, double vel, double cmdT, double filterT, double gain, int id);
+        object ServoJ(double[] joint_pos, double[] axisPos, double acc, double vel, double cmdT, double filterT, double gain, int id);
 
         /**
         * @brief  笛卡尔空间伺服模式运动
@@ -2040,7 +2040,7 @@ namespace fairino
         object[] ExtAxisGetCoord();
 
         [XmlRpcMethod("FT_SpiralSearch")]
-        int FT_SpiralSearch(int rcs, float dr, float ft, float max_t_ms, float max_vel);
+        int FT_SpiralSearch(int rcs, double dr, double ft, double max_t_ms, double max_vel, int strategy);
 
         [XmlRpcMethod("EndForceDragControl")]
         int EndForceDragControl(int status, int asaptiveFlag, int interfereDragFlag, int ingularityConstraintsFlag, int forceCollisionFlag, double[] M, double[] B, double[] K, double[] F, double Fmax, double Vmax);
@@ -2338,10 +2338,10 @@ namespace fairino
         int FT_RotInsertion(int rcs, double angVelRot, double ft, double max_angle, int orn, double max_angAcc, int rotorn, int strategy);
 
         [XmlRpcMethod("FT_LinInsertion")]
-        int FT_LinInsertion(int rcs, double ft, double lin_v, double lin_a, double max_dis, int linorn);
+        int FT_LinInsertion(int rcs, double ft, double lin_v, double lin_a, double max_dis, int linorn, int stragety);
 
         [XmlRpcMethod("FT_FindSurface")]
-        int FT_FindSurface(int rcs, int dir, int axis, double lin_v, double lin_a, double max_dis, double ft);
+        int FT_FindSurface(int rcs, int dir, int axis, double lin_v, double lin_a, double max_dis, double ft, int stragety);
 
         [XmlRpcMethod("FT_CalCenterStart")]
         int FT_CalCenterStart();
