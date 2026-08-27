@@ -20470,7 +20470,6 @@ namespace fairino
 
                 return GetSafetyCode();
             }
-
             DescPose desc_pos = new DescPose(0, 0, 0, 0, 0, 0);
             int errcode = GetForwardKin(joint_pos, ref desc_pos);
             if (errcode != 0)
@@ -20479,7 +20478,7 @@ namespace fairino
                 return errcode;
             }
 
-
+            Console.WriteLine($"movej2222: ");
             errcode = MoveJ(joint_pos, desc_pos, tool, user, vel, acc, ovl, epos, blendT, offset_flag, offset_pos);
 
             return errcode;
@@ -25114,7 +25113,8 @@ namespace fairino
          18-光电检测信号X;19-光电检测信号Y;20-外部急停输入信号1;21-外部急停输入信号2;
          22-一级缩减模式;23-二级缩减模式;24-三级缩减模式(停止);25-恢复焊接;26-终止焊接;
          27-辅助拖动开启;28-辅助拖动关闭;29-辅助拖动开启/关闭;30-清除所有错误;
-         31-手自动切换(高低电平);32-使能;33-去使能;34-使能/去使能(上升下降沿);35-定点跟踪开始/结束
+         31-手自动切换(高低电平);32-使能;33-去使能;34-使能/去使能(上升下降沿);35-定点跟踪开始/结束;
+         36-进入安全速度移动;37-电流环拖动锁定;38-力传感器辅助锁定
          * @return 错误码
          */
         public int SetDIConfig(int[] config)
@@ -25156,7 +25156,12 @@ namespace fairino
          18-光电检测信号X;19-光电检测信号Y;20-外部急停输入信号1;21-外部急停输入信号2;
          22-一级缩减模式;23-二级缩减模式;24-三级缩减模式(停止);25-恢复焊接;26-终止焊接;
          27-辅助拖动开启;28-辅助拖动关闭;29-辅助拖动开启/关闭;30-清除所有错误;
-         31-手自动切换(高低电平);32-使能;33-去使能;34-使能/去使能(上升下降沿);35-定点跟踪开始/结束
+         31-手自动切换(高低电平);32-使能;33-去使能;34-使能/去使能(上升下降沿);35-定点跟踪开始/结束;
+         36-进入安全速度移动;37-电流环拖动锁定;38-力传感器辅助锁定
+         201-外部急停输入信号1-双通道; 202-外部急停输入信号2-双通道; 203-一级缩减模式-双通道;
+         204-二级缩减模式-双通道; 205-三级缩减模式-双通道; 206-常规停止-双通道; 207-安全墙1-双通道; 208-安全墙2-双通道;
+         209-安全墙3-双通道; 210-安全墙4-双通道; 211-安全墙5-双通道; 212-安全墙6-双通道; 213-安全墙7-双通道;
+         214-安全墙8-双通道; 215-安全停止重置-双通道;
          * @return 错误码
          */
         public int GetDIConfig(out int[] config)
@@ -25210,6 +25215,8 @@ namespace fairino
             39-机器人报错-驱动器通信错误;40-机器人报错-参数错误;41-机器人报错-外部轴超出软限位错误;42-机器人警告-警告;
             43-机器人警告-安全门警告;44-机器人警告-运动警告;45-机器人警告-干涉区警告;46-机器人警告-安全墙警告;
             47-使能状态;48-断线自动抬升中;49-立方体1干涉警告;50-立方体2干涉警告;51-立方体3干涉警告;52-立方体4干涉警告;
+            201-急停输出信号1-双通道; 202-急停输出信号2-双通道; 203-安全状态输出-双通道; 204-保护性停止状态输出-双通道; 205-机器人运动中-双通道;
+            206-机器人缩减模式-双通道; 207-机器人非缩减模式-双通道;
          * @return 错误码
          */
         public int SetDOConfig(int[] config)
@@ -25255,6 +25262,8 @@ namespace fairino
         39-机器人报错-驱动器通信错误;40-机器人报错-参数错误;41-机器人报错-外部轴超出软限位错误;42-机器人警告-警告;
         43-机器人警告-安全门警告;44-机器人警告-运动警告;45-机器人警告-干涉区警告;46-机器人警告-安全墙警告;
         47-使能状态;48-断线自动抬升中;49-立方体1干涉警告;50-立方体2干涉警告;51-立方体3干涉警告;52-立方体4干涉警告;
+        201-急停输出信号1-双通道; 202-急停输出信号2-双通道; 203-安全状态输出-双通道; 204-保护性停止状态输出-双通道; 205-机器人运动中-双通道;
+        206-机器人缩减模式-双通道; 207-机器人非缩减模式-双通道;
         * @return 错误码
         */
         public int GetDOConfig(out int[] config)
@@ -25281,6 +25290,116 @@ namespace fairino
                 for (int i = 0; i < 8; i++)
                 {
                     config[i] = Convert.ToInt32(result[i + 1]);
+                }
+
+                if ((robot_state_pkg.main_code != 0 || robot_state_pkg.sub_code != 0) && errcode == 0)
+                    errcode = 14;
+
+                return errcode;
+            }
+            catch
+            {
+                log?.LogError("RPC exception");
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief 安全双通道CI功能配置
+         * @param [in] ID 双通道ID; [0-3]
+         * @param [in] config 功能配置; 0-无配置; 201-外部急停输入信号1; 202-外部急停输入信号2; 203-一级缩减模式; 204-二级缩减模式; 205-三级缩减模式;
+                               206-常规停止; 207-安全墙1; 208-安全墙2; 209-安全墙3; 210-安全墙4; 211-安全墙5; 212-安全墙6; 213-安全墙7;
+                               214-安全墙8; 215-安全停止重置;
+         * @return 错误码
+         */
+        public int SetSafetyDIConfig(int ID, int config)
+        {
+            if (IsSockComError())
+                return g_sock_com_err;
+
+            if (GetSafetyCode() != 0)
+                return GetSafetyCode();
+
+            try
+            {
+                int errcode = proxy.SetSafetyDIConfig(ID, config);
+                if (errcode != 0)
+                {
+                    Console.WriteLine($"errcode : {errcode}");
+                    log?.LogError($"execute SetSafetyDIConfig fail {errcode}");
+                    return errcode;
+                }
+
+                if ((robot_state_pkg.main_code != 0 || robot_state_pkg.sub_code != 0) && errcode == 0)
+                    errcode = 14;
+
+                return errcode;
+            }
+            catch
+            {
+                log?.LogError("RPC exception");
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief 安全双通道CO功能配置
+         * @param [in] ID 双通道ID; [0-3]
+         * @param [in] config 功能配置; 0-无配置; 201-急停输出信号1; 202-急停输出信号2; 203-安全状态输出; 204-保护性停止状态输出; 205-机器人运动中;
+                               206-机器人缩减模式; 207-机器人非缩减模式;
+         * @return 错误码
+         */
+        public int SetSafetyDOConfig(int ID, int config)
+        {
+            if (IsSockComError())
+                return g_sock_com_err;
+
+            if (GetSafetyCode() != 0)
+                return GetSafetyCode();
+
+            try
+            {
+                int errcode = proxy.SetSafetyDOConfig(ID, config);
+                if (errcode != 0)
+                {
+                    Console.WriteLine($"errcode : {errcode}");
+                    log?.LogError($"execute SetSafetyDOConfig fail {errcode}");
+                    return errcode;
+                }
+
+                if ((robot_state_pkg.main_code != 0 || robot_state_pkg.sub_code != 0) && errcode == 0)
+                    errcode = 14;
+
+                return errcode;
+            }
+            catch
+            {
+                log?.LogError("RPC exception");
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief 切换手动高速模式
+         * @param [in] state 0-退出手动高速；1-进入手动高速
+         * @return 错误码
+         */
+        public int HiSpeedManualSwitch(int state)
+        {
+            if (IsSockComError())
+                return g_sock_com_err;
+
+            if (GetSafetyCode() != 0)
+                return GetSafetyCode();
+
+            try
+            {
+                int errcode = proxy.HiSpeedManualSwitch(state);
+                if (errcode != 0)
+                {
+                    Console.WriteLine($"errcode : {errcode}");
+                    log?.LogError($"execute HiSpeedManualSwitch fail {errcode}");
+                    return errcode;
                 }
 
                 if ((robot_state_pkg.main_code != 0 || robot_state_pkg.sub_code != 0) && errcode == 0)

@@ -2388,6 +2388,15 @@ namespace fairino
         [XmlRpcMethod("GetDOConfig")]
         object[] GetDOConfig(int[] param);
 
+        [XmlRpcMethod("SetSafetyDIConfig")]
+        int SetSafetyDIConfig(int ID, int config);
+
+        [XmlRpcMethod("SetSafetyDOConfig")]
+        int SetSafetyDOConfig(int ID, int config);
+
+        [XmlRpcMethod("HiSpeedManualSwitch")]
+        int HiSpeedManualSwitch(int state);
+
         [XmlRpcMethod("SetToolDIConfig")]
         int SetToolDIConfig(int[] config);
 

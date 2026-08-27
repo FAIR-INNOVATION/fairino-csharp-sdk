@@ -4581,7 +4581,7 @@ namespace testFrRobot
             //testled();
             //TestSetVelReducePara();
             //TestOriginPointWeave();
-            //TestServoJUDP();
+            TestServoJUDP();
             //ServoJTWithSafetyUDP();
             //ServoMITtest();
             //ServoJVtest();
@@ -4663,9 +4663,12 @@ namespace testFrRobot
             //TestServoJPath();
             //TestFTStrategy();
             //TestDOReset();
-
-            TestLaserReproduceNormalWeave();
+            //激光摆动
+            //TestLaserReproduceNormalWeave();
             //TestLaserRecordReplayExaxisWithWave();
+            //功能安全
+            //TestHiSpeedManualSwitch();
+            //TestSafetyIOConfig();
         }
         public void TestDOReset()
         {
@@ -6620,13 +6623,15 @@ public void TestVelFeedForwardRatio()
             int count = 300;
             float dt = 0.1f;
             int cmdID = 0;
-
+            Console.WriteLine($"111111: ");
             while (true)
             {
                 JointPos j = new JointPos(0, -90, 90, 0, 0, 0);
                 ExaxisPos epos = new ExaxisPos(0, 0, 0, 0);
                 DescPose offset_pos = new DescPose(0, -90, 90, 0, 0, 0);
+                Console.WriteLine($"010101: ");
                 robot.MoveJ(j, 0, 0, 100, 100, 100, epos, -1, 0, offset_pos);
+                Console.WriteLine($"222222: ");
                 int ret = robot.GetActualJointPosDegree(flag, ref j);
                 if (ret == 0)
                 {
@@ -10417,6 +10422,76 @@ public int RunTrajectoryJ(string localFilePath = "D://zUP/horse.txt", string rem
 
             error = robot.GetSafetyParamsCheckSum(ref status, ref checksum);
             Console.WriteLine("GetSafetyParamsCheckSum(again): error={0}, status={1}, hex_code={2:X8}", error, status, checksum);
+        }
+
+        // 切换手动高速模式
+        public void TestHiSpeedManualSwitch()
+        {
+            int rtn = 0;
+
+            rtn = robot.HiSpeedManualSwitch(1);
+            Console.WriteLine($"change high speed mode {rtn}");
+            Thread.Sleep(10000);
+
+            rtn = robot.HiSpeedManualSwitch(0);
+            Console.WriteLine($"change low speed mode {rtn}");
+            Thread.Sleep(1000);
+        }
+
+        // 安全双通道CI/CO功能配置设置-读取-清零验证
+        public void TestSafetyIOConfig()
+        {
+            int rtn = 0;
+
+            rtn = robot.SetSafetyDIConfig(0, 201);
+            Console.WriteLine($"SetSafetyDIConfig rtn is {rtn}");
+            rtn = robot.SetSafetyDIConfig(1, 202);
+            Console.WriteLine($"SetSafetyDIConfig rtn is {rtn}");
+            rtn = robot.SetSafetyDIConfig(2, 203);
+            Console.WriteLine($"SetSafetyDIConfig rtn is {rtn}");
+            rtn = robot.SetSafetyDIConfig(3, 204);
+            Console.WriteLine($"SetSafetyDIConfig rtn is {rtn}");
+
+            int[] getDIConfig = new int[8];
+            rtn = robot.GetDIConfig(out getDIConfig);
+            Console.WriteLine($"GetDIConfig rtn is {rtn}, value is {string.Join(" ", getDIConfig)}");
+
+            rtn = robot.SetSafetyDIConfig(0, 0);
+            Console.WriteLine($"SetSafetyDIConfig rtn is {rtn}");
+            rtn = robot.SetSafetyDIConfig(1, 0);
+            Console.WriteLine($"SetSafetyDIConfig rtn is {rtn}");
+            rtn = robot.SetSafetyDIConfig(2, 0);
+            Console.WriteLine($"SetSafetyDIConfig rtn is {rtn}");
+            rtn = robot.SetSafetyDIConfig(3, 0);
+            Console.WriteLine($"SetSafetyDIConfig rtn is {rtn}");
+
+            rtn = robot.GetDIConfig(out getDIConfig);
+            Console.WriteLine($"GetDIConfig rtn is {rtn}, value is {string.Join(" ", getDIConfig)}");
+
+            rtn = robot.SetSafetyDOConfig(0, 204);
+            Console.WriteLine($"SetSafetyDOConfig rtn is {rtn}");
+            rtn = robot.SetSafetyDOConfig(1, 205);
+            Console.WriteLine($"SetSafetyDOConfig rtn is {rtn}");
+            rtn = robot.SetSafetyDOConfig(2, 206);
+            Console.WriteLine($"SetSafetyDOConfig rtn is {rtn}");
+            rtn = robot.SetSafetyDOConfig(3, 207);
+            Console.WriteLine($"SetSafetyDOConfig rtn is {rtn}");
+
+            int[] getDOConfig = new int[8];
+            rtn = robot.GetDOConfig(out getDOConfig);
+            Console.WriteLine($"GetDOConfig rtn is {rtn}, value is {string.Join(" ", getDOConfig)}");
+
+            rtn = robot.SetSafetyDOConfig(0, 0);
+            Console.WriteLine($"SetSafetyDOConfig rtn is {rtn}");
+            rtn = robot.SetSafetyDOConfig(1, 0);
+            Console.WriteLine($"SetSafetyDOConfig rtn is {rtn}");
+            rtn = robot.SetSafetyDOConfig(2, 0);
+            Console.WriteLine($"SetSafetyDOConfig rtn is {rtn}");
+            rtn = robot.SetSafetyDOConfig(3, 0);
+            Console.WriteLine($"SetSafetyDOConfig rtn is {rtn}");
+
+            rtn = robot.GetDOConfig(out getDOConfig);
+            Console.WriteLine($"GetDOConfig rtn is {rtn}, value is {string.Join(" ", getDOConfig)}");
         }
 
         public void TestServoJPath()
