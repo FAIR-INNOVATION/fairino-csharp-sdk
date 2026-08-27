@@ -13,3 +13,10 @@ D:\C#SDK\各版本sdk\fairino-csharp_-sdk-3.9.8\src\FRRobot\dlls\.NETFramework4.
 D:\C#SDK\各版本sdk\fairino-csharp_-sdk-3.9.8\src\FRRobot\dlls\.NETFramework4.8.1\System.ValueTuple.dll
 D:\C#SDK\各版本sdk\fairino-csharp_-sdk-3.9.8\dlls\.NETFramework4.8.1\libfairino.dll
 D:\C#SDK\各版本sdk\fairino-csharp_-sdk-3.9.8\dlls\.NETFramework4.8.1\libfairino.pdb
+D:\C#SDK\各版本sdk\fairino-csharp_-sdk-main\dlls\.NETFramework4.8.1\libfairino.dll
+D:\C#SDK\各版本sdk\fairino-csharp_-sdk-main\dlls\.NETFramework4.8.1\libfairino.pdb
+D:\C#SDK\各版本sdk\fairino-csharp_-sdk-main\src\FRRobot\obj\x64\net481\Debug\FRRobot.csproj.AssemblyReference.cache
+D:\C#SDK\各版本sdk\fairino-csharp_-sdk-main\src\FRRobot\obj\x64\net481\Debug\FRRobot.csproj.CoreCompileInputs.cache
+D:\C#SDK\各版本sdk\fairino-csharp_-sdk-main\src\FRRobot\obj\x64\net481\Debug\FRRobot.csproj.Up2Date
+D:\C#SDK\各版本sdk\fairino-csharp_-sdk-main\src\FRRobot\obj\x64\net481\Debug\libfairino.dll
+D:\C#SDK\各版本sdk\fairino-csharp_-sdk-main\src\FRRobot\obj\x64\net481\Debug\libfairino.pdb
