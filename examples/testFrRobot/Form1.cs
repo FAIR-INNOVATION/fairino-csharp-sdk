@@ -48,6 +48,7 @@ namespace testFrRobot
             rrpc = robot.RPC("192.168.58.2"); //与控制箱建立连接
                                               //20004端口接收超时时间
                                               //robot.SetReceivePortTimeout(40);
+            
 
 
         }

@@ -20,6 +20,7 @@ using System.Drawing.Drawing2D;
 using System.Security.Cryptography;
 using System.IO;
 using static System.Net.Mime.MediaTypeNames;
+using System.Reflection;
 namespace testFrRobot
 {
     public partial class Test : Form
@@ -4563,6 +4564,10 @@ namespace testFrRobot
 
         private void button104_Click(object sender, EventArgs e)
         {
+            //TestMoveJSpeedLoop();
+            //TestMoveLSpeedLoop();
+            //TestMoveCSpeedLoop();
+            TestCircleSpeedLoop();
             //TestCoord();
             //TestStationaryTrack();
             //TestWorkPieceTrsf();
@@ -4581,7 +4586,7 @@ namespace testFrRobot
             //testled();
             //TestSetVelReducePara();
             //TestOriginPointWeave();
-            TestServoJUDP();
+            //TestServoJUDP();
             //ServoJTWithSafetyUDP();
             //ServoMITtest();
             //ServoJVtest();
@@ -4629,7 +4634,8 @@ namespace testFrRobot
             //TestLua();
             //TestIntersectLineMove();
             //TestFTControlWithAdjustCoeff();
-            //TestRotInsert();
+
+            // TestRotInsert();
             //TestMove();
             //TestSegWeld1();
             //TestPhotoelectricSensorTCPCalib();
@@ -4775,7 +4781,15 @@ namespace testFrRobot
             DescPose desc_p1 = new DescPose(159.473, -316.570, 334.560, -179.718, -3.352, 171.400);
             ExaxisPos epos = new ExaxisPos(0.0f, 0.0f, 0.0f, 0.0f);
             DescPose offset_pos = new DescPose(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-
+            DescPose desc_tst = new DescPose(159.473, -316.570, 334.560, -179.718, -3.352, 171.400);
+            //Robot robot = null; // 故意不实例化
+            //DescPose desc_pos = default;
+            //Thread.Sleep(2000);
+            //FieldInfo f = typeof(Robot).GetField("_cndeClient", BindingFlags.NonPublic | BindingFlags.Instance);
+            //f.SetValue(robot, null);
+            //FieldInfo f2 = typeof(Robot).GetField("sock_cli_cmd", BindingFlags.NonPublic | BindingFlags.Instance);
+            //f2.SetValue(robot, null);
+            Thread.Sleep(2000);
             robot.MoveL(j1, desc_p1, 2, 0, 100.0f, 180.0f, 100.0f, -1.0f, 0, epos, (byte)0, (byte)1, offset_pos);
 
             byte[] select3 = { 0, 0, 1, 0, 0, 0 };
@@ -7512,6 +7526,7 @@ public void TestVelFeedForwardRatio()
         // 激光记录复现 + 扩展轴异步运动 + 定点摆动
         void TestLaserRecordReplayExaxisWithWave()
         {
+            
             JointPos startjointPos = new JointPos(106.245, -63.397, -93.331, -80.809, 80.389, 134.561);
             DescPose startdescPose = new DescPose(33.534, 516.527, 371.029, 14.712, -31.379, 71.734);
             JointPos endjointPos = new JointPos(105.534, -64.685, -93.681, -79.071, 80.772, 133.952);
@@ -7580,7 +7595,188 @@ public void TestVelFeedForwardRatio()
             Console.WriteLine($"LaserSensorRecord stop: {rtn}");
         }
 
-        // 激光记录复现+普通摆动 
+        // Lua 往返运动 + 速度递增测试:
+        //   SetSpeed(20)
+        //   MoveJ(点1)  →  while(1): MoveJ(点2)/SetSpeed(30)/MoveJ(点1)/SetSpeed(40)
+        void TestMoveJSpeedLoop()
+        {
+            // Lua 点1 关节: 23.424,-76.529,114.134,-113.992,46.783,-69.413
+            JointPos pos1 = new JointPos(23.424, -76.529, 114.134, -113.992, 46.783, -69.413);
+            // Lua 点1 笛卡尔: -416.922,-366.417,371.091,-37.336,27.024,-139.857
+            DescPose pose1 = new DescPose(-416.922, -366.417, 371.091, -37.336, 27.024, -139.857);
+            // Lua 点2(循环内) 关节: 仅 j5 不同 = -153.191
+            JointPos pos2 = new JointPos(23.424, -76.529, 114.134, -113.992, -153.191, -69.413);
+            // Lua 点2(循环内) 笛卡尔: -454.146,-210.648,256.427,116.099,-4.858,-165.734
+            DescPose pose2 = new DescPose(-454.146, -210.648, 256.427, 116.099, -4.858, -165.734);
+            DescPose offdese = new DescPose(0, 0, 0, 0, 0, 0);
+            // Lua 扩展轴: 0.000,0.000,0.000,0.000
+            ExaxisPos epos = new ExaxisPos(0, 0, 0, 0);
+            int rtn = 0;
+
+            // SetSpeed(20)
+            rtn = robot.SetSpeed(20);
+            Console.WriteLine($"SetSpeed(20): {rtn}");
+
+            // 初始 MoveJ 到点1 (tool=8, user=0, vel/acc/ovl=100, blendT=-1 运动到位, 无偏移)
+            rtn = robot.MoveJ(pos1, pose1, 8, 0, 100, 100, 100, epos, -1, 0, offdese);
+            Console.WriteLine($"MoveJ pos1: {rtn}");
+
+            // while(1) do ... end —— 死循环往返运动，速度递增 20→30→40
+            while (true)
+            {
+                // MoveJ 到点2
+                rtn = robot.MoveJ(pos2, pose2, 8, 0, 100, 100, 100, epos, -1, 0, offdese);
+                Console.WriteLine($"MoveJ pos2: {rtn}");
+
+                // SetSpeed(30)
+                rtn = robot.SetSpeed(30);
+                Console.WriteLine($"SetSpeed(30): {rtn}");
+
+                // MoveJ 回点1
+                rtn = robot.MoveJ(pos1, pose1, 8, 0, 100, 100, 100, epos, -1, 0, offdese);
+                Console.WriteLine($"MoveJ pos1: {rtn}");
+
+                // SetSpeed(40)
+                rtn = robot.SetSpeed(40);
+                Console.WriteLine($"SetSpeed(40): {rtn}");
+            }
+        }
+
+        // Python test_moveL_speed_loop: MoveL 往返运动, 速度 20->30->40 递增
+        void TestMoveLSpeedLoop()
+        {
+            // 点1 关节: 52.055,-53.917,83.053,-119.137,-90.000,-40.315
+            JointPos pos1 = new JointPos(52.055, -53.917, 83.053, -119.137, -90.000, -40.315);
+            // 点1 笛卡尔: -348.348,-612.635,203.147,-180.000,-0.000,-177.630
+            DescPose pose1 = new DescPose(-348.348, -612.635, 203.147, -180.000, -0.000, -177.630);
+            // 点2 关节: -51.966,-68.141,106.161,-128.021,-90.000,-144.338
+            JointPos pos2 = new JointPos(-51.966, -68.141, 106.161, -128.021, -90.000, -144.338);
+            // 点2 笛卡尔: -432.405,387.234,203.149,179.999,-0.000,-177.628
+            DescPose pose2 = new DescPose(-432.405, 387.234, 203.149, 179.999, -0.000, -177.628);
+            DescPose offdese = new DescPose(0, 0, 0, 0, 0, 0);
+            // 扩展轴全 0
+            ExaxisPos epos = new ExaxisPos(0, 0, 0, 0);
+            int rtn = 0;
+
+            // SetSpeed(20)
+            rtn = robot.SetSpeed(20);
+            Console.WriteLine($"SetSpeed(20): {rtn}");
+
+            // 初始 MoveJ 到点1 (tool=8, user=0, vel/acc/ovl=100, blendT=-1 运动到位, 无偏移)
+            rtn = robot.MoveJ(pos1, pose1, 8, 0, 100, 100, 100, epos, -1, 0, offdese);
+            Console.WriteLine($"MoveJ pos1: {rtn}");
+
+            // while True: MoveL 往返, 速度递增 20->30->40
+            // 注: Python config=-1(参考当前关节逆解), C# 16参数 MoveL 重载无 config 参数
+            while (true)
+            {
+                // MoveL 到点2 (blendR=-1 运动到位, blendMode=0, search=0, 无偏移, oacc=100)
+                rtn = robot.MoveL(pos2, pose2, 8, 0, 100, 100, 100, -1, 0, epos, 0, 0, offdese, 100, 0, 0, 10);
+                Console.WriteLine($"MoveL pos2: {rtn}");
+
+                // SetSpeed(30)
+                rtn = robot.SetSpeed(30);
+                Console.WriteLine($"SetSpeed(30): {rtn}");
+
+                // MoveL 回点1
+                rtn = robot.MoveL(pos1, pose1, 8, 0, 100, 100, 100, -1, 0, epos, 0, 0, offdese, 100, 0, 0, 10);
+                Console.WriteLine($"MoveL pos1: {rtn}");
+
+                // SetSpeed(40)
+                rtn = robot.SetSpeed(40);
+                Console.WriteLine($"SetSpeed(40): {rtn}");
+            }
+        }
+
+        // Python test_moveC_speed_loop: MoveC 往返运动, 速度 20->30->40 递增
+        void TestMoveCSpeedLoop()
+        {
+            // 起点/end1 关节与笛卡尔: -90.489,-84.415,127.849,-133.531,-90.000,-74.001 / -98.324,431.220,203.588,-179.974,-0.093,73.512
+            JointPos posStart = new JointPos(-90.489, -84.415, 127.849, -133.531, -90.000, -74.001);
+            DescPose poseStart = new DescPose(-98.324, 431.220, 203.588, -179.974, -0.093, 73.512);
+            // 中间点: -108.333,-61.555,95.797,-124.336,-89.971,-91.845 / 101.649,631.196,203.595,-179.974,-0.094,73.512
+            JointPos posMid = new JointPos(-108.333, -61.555, 95.797, -124.336, -89.971, -91.845);
+            DescPose poseMid = new DescPose(101.649, 631.196, 203.595, -179.974, -0.094, 73.512);
+            // end2: -90.253,-35.630,49.719,-104.188,-90.001,-73.765 / -98.326,831.170,203.600,-179.973,-0.094,73.512
+            JointPos posEnd2 = new JointPos(-90.253, -35.630, 49.719, -104.188, -90.001, -73.765);
+            DescPose poseEnd2 = new DescPose(-98.326, 831.170, 203.600, -179.973, -0.094, 73.512);
+            DescPose offdese = new DescPose(0, 0, 0, 0, 0, 0);
+            ExaxisPos epos = new ExaxisPos(0, 0, 0, 0);
+            int rtn = 0;
+
+            // SetSpeed(20)
+            rtn = robot.SetSpeed(20);
+            Console.WriteLine($"SetSpeed(20): {rtn}");
+
+            // 初始 MoveJ 到起点
+            rtn = robot.MoveJ(posStart, poseStart, 8, 0, 100, 100, 100, epos, -1, 0, offdese);
+            Console.WriteLine($"MoveJ start: {rtn}");
+
+            // while True: MoveC 往返(mid->end2 / mid->start), 速度递增
+            // 注: Python config=-1, C# 22参数 MoveC 重载无 config 参数
+            while (true)
+            {
+                // 第一轮: MoveC mid -> end2 (ovl=100, blendR=-1, oacc=100, 无偏移)
+                rtn = robot.MoveC(posMid, poseMid, 8, 0, 100, 100, epos, 0, offdese, posEnd2, poseEnd2, 8, 0, 100, 100, epos, 0, offdese, 100, -1, 100, 0);
+                Console.WriteLine($"MoveC mid->end2: {rtn}");
+
+                // SetSpeed(30)
+                rtn = robot.SetSpeed(30);
+                Console.WriteLine($"SetSpeed(30): {rtn}");
+
+                // 第二轮: MoveC mid -> start(=end1, 回到起点)
+                rtn = robot.MoveC(posMid, poseMid, 8, 0, 100, 100, epos, 0, offdese, posStart, poseStart, 8, 0, 100, 100, epos, 0, offdese, 100, -1, 100, 0);
+                Console.WriteLine($"MoveC mid->start: {rtn}");
+
+                // SetSpeed(40)
+                rtn = robot.SetSpeed(40);
+                Console.WriteLine($"SetSpeed(40): {rtn}");
+            }
+        }
+
+        // Python test_circle_speed_loop: Circle 运动, 速度 30/40 递增
+        void TestCircleSpeedLoop()
+        {
+            // 起点: -90.489,-84.415,127.849,-133.531,-90.000,-74.001 / -98.324,431.220,203.588,-179.974,-0.093,73.512
+            JointPos posStart = new JointPos(-90.489, -84.415, 127.849, -133.531, -90.000, -74.001);
+            DescPose poseStart = new DescPose(-98.324, 431.220, 203.588, -179.974, -0.093, 73.512);
+            // 中间点: -108.333,-61.555,95.797,-124.336,-89.971,-91.845 / 101.649,631.196,203.595,-179.974,-0.094,73.512
+            JointPos posMid = new JointPos(-108.333, -61.555, 95.797, -124.336, -89.971, -91.845);
+            DescPose poseMid = new DescPose(101.649, 631.196, 203.595, -179.974, -0.094, 73.512);
+            // 终点: -90.253,-35.630,49.719,-104.188,-90.001,-73.765 / -98.326,831.170,203.600,-179.973,-0.094,73.512
+            JointPos posEnd = new JointPos(-90.253, -35.630, 49.719, -104.188, -90.001, -73.765);
+            DescPose poseEnd = new DescPose(-98.326, 831.170, 203.600, -179.973, -0.094, 73.512);
+            DescPose offdese = new DescPose(0, 0, 0, 0, 0, 0);
+            ExaxisPos epos = new ExaxisPos(0, 0, 0, 0);
+            int rtn = 0;
+
+            // SetSpeed(20)
+            rtn = robot.SetSpeed(20);
+            Console.WriteLine($"SetSpeed(20): {rtn}");
+
+            // 初始 MoveJ 到起点
+            rtn = robot.MoveJ(posStart, poseStart, 8, 0, 100, 100, 100, epos, -1, 0, offdese);
+            Console.WriteLine($"MoveJ start: {rtn}");
+
+            // while True: Circle(mid->end), 速度 30/40 交替
+            // 注: Python config=-1, C# 20参数 Circle 重载无 config 参数
+            while (true)
+            {
+                // SetSpeed(30)
+                rtn = robot.SetSpeed(30);
+                Console.WriteLine($"SetSpeed(30): {rtn}");
+
+                // Circle mid -> end (ovl=100, blendR=-1, oacc=100, 无偏移)
+                rtn = robot.Circle(posMid, poseMid, 8, 0, 100, 100, epos, posEnd, poseEnd, 8, 0, 100, 100, epos, 100, 0, offdese, 100, -1, 0);
+                Console.WriteLine($"Circle mid->end: {rtn}");
+
+                // SetSpeed(40)
+                rtn = robot.SetSpeed(40);
+                Console.WriteLine($"SetSpeed(40): {rtn}");
+            }
+        }
+
+        // 激光记录复现+普通摆动
         void TestLaserReproduceNormalWeave()
         {
             JointPos startjointPos = new JointPos(69.655, -71.524, -119.568, -76.454, 91.188, 138.014);

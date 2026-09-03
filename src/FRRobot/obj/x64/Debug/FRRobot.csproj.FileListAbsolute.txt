@@ -32,3 +32,13 @@ D:\C#SDK\各版本sdk\fairino-csharp_-sdk-3.9.8\src\FRRobot\bin\x64\net471\Debug
 D:\C#SDK\各版本sdk\fairino-csharp_-sdk-3.9.8\src\FRRobot\bin\x64\net471\Debug\libfairino.pdb
 D:\C#SDK\各版本sdk\fairino-csharp_-sdk-3.9.8\src\FRRobot\bin\x64\net471\Debug\CookComputing.XmlRpcV2.dll
 D:\C#SDK\各版本sdk\fairino-csharp_-sdk-3.9.8\src\FRRobot\bin\x64\net471\Debug\System.ValueTuple.dll
+d:\C#SDK\各版本sdk\fairino-csharp_-sdk-main\src\FRRobot\bin\x64\Debug\libfairino.dll
+d:\C#SDK\各版本sdk\fairino-csharp_-sdk-main\src\FRRobot\bin\x64\Debug\libfairino.pdb
+d:\C#SDK\各版本sdk\fairino-csharp_-sdk-main\src\FRRobot\bin\x64\Debug\CookComputing.XmlRpcV2.dll
+d:\C#SDK\各版本sdk\fairino-csharp_-sdk-main\src\FRRobot\bin\x64\Debug\System.ValueTuple.dll
+d:\C#SDK\各版本sdk\fairino-csharp_-sdk-main\src\FRRobot\bin\x64\Debug\System.ValueTuple.xml
+d:\C#SDK\各版本sdk\fairino-csharp_-sdk-main\src\FRRobot\obj\x64\Debug\FRRobot.csproj.AssemblyReference.cache
+d:\C#SDK\各版本sdk\fairino-csharp_-sdk-main\src\FRRobot\obj\x64\Debug\FRRobot.csproj.CoreCompileInputs.cache
+d:\C#SDK\各版本sdk\fairino-csharp_-sdk-main\src\FRRobot\obj\x64\Debug\FRRobot.csproj.Up2Date
+d:\C#SDK\各版本sdk\fairino-csharp_-sdk-main\src\FRRobot\obj\x64\Debug\libfairino.dll
+d:\C#SDK\各版本sdk\fairino-csharp_-sdk-main\src\FRRobot\obj\x64\Debug\libfairino.pdb
