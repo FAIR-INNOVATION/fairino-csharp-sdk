@@ -74,6 +74,7 @@ D:\C#SDK\各版本sdk\fairino-csharp_-sdk-3.9.8\src\FRRobot\obj\Debug\libfairino
 D:\C#SDK\各版本sdk\fairino-csharp_-sdk-3.9.8\src\FRRobot\obj\Debug\libfairino.pdb
 D:\C#SDK\各版本sdk\fairino-csharp_-sdk-main\src\FRRobot\bin\Debug\libfairino.dll
 D:\C#SDK\各版本sdk\fairino-csharp_-sdk-main\src\FRRobot\bin\Debug\libfairino.pdb
+D:\C#SDK\各版本sdk\fairino-csharp_-sdk-main\src\FRRobot\bin\Debug\BouncyCastle.Crypto.dll
 D:\C#SDK\各版本sdk\fairino-csharp_-sdk-main\src\FRRobot\bin\Debug\CookComputing.XmlRpcV2.dll
 D:\C#SDK\各版本sdk\fairino-csharp_-sdk-main\src\FRRobot\bin\Debug\System.ValueTuple.dll
 D:\C#SDK\各版本sdk\fairino-csharp_-sdk-main\src\FRRobot\bin\Debug\System.ValueTuple.xml

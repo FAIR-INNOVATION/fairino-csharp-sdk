@@ -118,11 +118,27 @@ namespace Fairino
             try
             {
                 this.mSocket.Connect(iPEndPoint);
-                //Console.WriteLine("连接成功");
-                //mNetworkStream = new NetworkStream(mSocket);
-                //mSocket.NoDelay = true;
-                //mSocket.ReceiveTimeout = reconnPeriod;
-                //mSocket.SendTimeout = reconnPeriod;
+
+                /* 发送超时 3s：拔线时 send 快速失败，触发重连（不用等 keepalive 判死） */
+                this.mSocket.SendTimeout = 3000;
+
+                /* TCP keepalive 最短参数：空闲 1s 开始探测、每 1s 一次，
+                 * Windows 重试次数默认 5 → 判死 ≈ 1 + 1×5 = 6 秒。
+                 * 拔线半开连接的 FIN 会丢失，双方靠 keepalive 发现断线 */
+                this.mSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
+                try
+                {
+                    byte[] kv = new byte[12];
+                    BitConverter.GetBytes((uint)1).CopyTo(kv, 0);      /* 开启探测 */
+                    BitConverter.GetBytes((uint)1000).CopyTo(kv, 4);   /* 空闲 1s */
+                    BitConverter.GetBytes((uint)1000).CopyTo(kv, 8);   /* 间隔 1s */
+                    this.mSocket.IOControl(IOControlCode.KeepAliveValues, kv, null);
+                }
+                catch
+                {
+                    /* 不支持 IOControl 时仅基础 keepalive（系统默认参数，周期长） */
+                }
+
                 this.isConnected = true;
                 return this.isConnected;
             }

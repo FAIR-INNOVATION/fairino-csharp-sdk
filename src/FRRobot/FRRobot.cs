@@ -8,6 +8,7 @@ using System.Threading;
 using System.IO;
 using System.Net.Sockets;
 using System.Net;
+using System.Net.Security;
 using System.Net.Http;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -75,7 +76,24 @@ namespace fairino
         private int ReceivePortTimeout = 20000;//20004端口接受超时时间
 
         private FRUdpClient udpCmdClient;          // UDP客户端实例
+        private MtlsLink mtlsLink;                 // mTLS 链路（certs/ 证书齐全时启用）
+        private SslStream cmdSslStream;            // TCP 8080 加密通道（握手成功后有效）
+        private readonly object reconnectLock = new object();  // 收发线程共用，防并发重连
+        private DateTime lastReconnectAt = DateTime.MinValue;  // 上次重连完成时刻（防连环重连）
+        private int reconnFailCnt = 0;                         // 握手失败计数（降噪打印）
+
+        /// <summary>mTLS 是否启用（工作目录 certs/ 存在 client.crt/client.key/ca.crt 时自动启用）</summary>
+        public bool IsEncryptEnabled
+        {
+            get { return mtlsLink != null && mtlsLink.Enabled; }
+        }
+
+        /// <summary>mTLS 总开关：默认 false；在 RPC 初始化前置 false 强制明文模式</summary>
+        public bool EnableMtls { get; set; } = false;
                                                    // 公开事件，外部可订阅
+        /// <summary>TCP 8080 应答帧事件（解密后的原协议帧，mTLS/明文模式均触发）</summary>
+        public event Action<string> OnTcpFrameReceived;
+
         public event UdpFrameReceivedHandler OnUdpFrameReceived
         {
             add { udpCmdClient.OnFrameReceived += value; }
@@ -402,6 +420,7 @@ namespace fairino
         private void RobotInstCmdSendRoutineThread()
         {
             int sendbyte = 0;
+            int sendWaitMs = 0;   /* 加密会话未就绪的累计等待时间（超时触发重连） */
 
             /* 建立通讯 */
             sock_cli_cmd = new TCPClient(robot_ip, ROBOT_CMD_PORT);
@@ -418,6 +437,26 @@ namespace fairino
                 return;
             }
 
+            /* ---------- TCP 8080 mTLS 握手（连接建立后立即执行） ---------- */
+            cmdSslStream = null;
+            if (mtlsLink != null && mtlsLink.Enabled)
+            {
+                try
+                {
+                    cmdSslStream = mtlsLink.WrapTcp(sock_cli_cmd.mSocket, robot_ip);
+                    Console.WriteLine("[FRRobot 8080 mTLS] #############TCP 8080 mTLS handshake OK###############");
+                }
+                catch (Exception ex)
+                {
+                    /* 握手失败：保持加密模式不降级，直接报错提醒 */
+                    Console.WriteLine($"[FRRobot] 错误：TCP mTLS handshake failed: {ex.Message}");
+                    Console.WriteLine("[FRRobot] 错误：握手失败，保持加密模式不降级——" +
+                                      "请检查①机器人端加密开关是否开启 ②证书是否被吊销/过期 ③两端证书是否同一套");
+                    cmdSslStream = null;
+                    /* mtlsLink / udpCmdClient.Mtls 保持不动：后续以加密模式重试 */
+                }
+            }
+
             try
             {
                 while (robot_instcmd_send_exit == 0)
@@ -427,9 +466,37 @@ namespace fairino
                         if (is_sendcmd && g_sendbuf.Length > 0)
                         {
                             byte[] sendCmdBytes = System.Text.Encoding.UTF8.GetBytes(g_sendbuf);
-                            Console.WriteLine("now send bytes");
-                            sendbyte = sock_cli_cmd.mSocket.Send(sendCmdBytes);
-                            Console.WriteLine("sendbyte：" + sendbyte);
+                            if (cmdSslStream != null)
+                            {
+                                /* mTLS 模式：原帧直发，通道自动加密（无长度前缀） */
+                                cmdSslStream.Write(sendCmdBytes, 0, sendCmdBytes.Length);
+                                sendbyte = sendCmdBytes.Length;
+                            }
+                            else if (mtlsLink != null && mtlsLink.Enabled)
+                            {
+                                /* 加密模式下会话未就绪（cmdSslStream 为 null）：
+                                 * 绝不走明文 Send——明文帧会被机器人判 wrong version
+                                 * number 拒掉并污染正在握手的新连接。
+                                 * 等待累计 300ms 未恢复则主动触发重连（与 CNDE 同节奏） */
+                                sendWaitMs += 10;
+                                if (sendWaitMs >= 300)
+                                {
+                                    sendWaitMs = 0;
+                                    if (!ReconnectTls())
+                                    {
+                                        Console.WriteLine("[FRRobot] 错误：重连失败，加密连接不可用——" +
+                                                          "请检查机器人端加密开关与证书");
+                                        g_sock_com_err = (int)RobotError.ERR_SOCKET_COM_FAILED;
+                                        return;
+                                    }
+                                }
+                                Thread.Sleep(10);
+                                continue;
+                            }
+                            else
+                            {
+                                sendbyte = sock_cli_cmd.mSocket.Send(sendCmdBytes);
+                            }
                             if (sendbyte < 0)
                             {
                                 sock_cli_cmd.Close();
@@ -449,9 +516,8 @@ namespace fairino
                     }
                     catch
                     {
-                        if (sock_cli_cmd.ReConnect())
+                        if (ReconnectTls())
                         {
-                            g_sock_com_err = (int)RobotError.ERR_SUCCESS;
                             //continue;
                         }
                         else
@@ -484,6 +550,55 @@ namespace fairino
                 g_sock_com_err = (int)RobotError.ERR_SOCKET_COM_FAILED;
             }
         }
+        /* 断线重连 + mTLS 重新握手（发送/接收线程共用）。
+         * 注意：TCPClient.ReConnect 只重建 TCP socket，不重做握手——不补这一手，
+         * 重连后 cmdSslStream 仍绑在旧 socket 上，C# 在新连接上永远不发
+         * ClientHello，机器人端表现为 handshake REJECTED (no error detail)。 */
+        private bool ReconnectTls()
+        {
+            lock (reconnectLock)
+            {
+                /* 8 秒内刚完成过重连：本次是另一线程的旧异常触发，
+                 * 跳过防连环重连（否则收发两线程互相把对方刚建好的连接又关掉） */
+                if (cmdSslStream != null && (DateTime.Now - lastReconnectAt).TotalSeconds < 8)
+                    return true;
+
+                Console.WriteLine("[FRRobot] TCP 8080 连接断开，正在重连...");
+                if (cmdSslStream != null)
+                {
+                    try { cmdSslStream.Dispose(); } catch { }
+                    cmdSslStream = null;
+                }
+                if (!sock_cli_cmd.ReConnect())
+                {
+                    return false;   /* ReConnect 内部循环重试，静默 */
+                }
+                if (mtlsLink != null && mtlsLink.Enabled)
+                {
+                    try
+                    {
+                        cmdSslStream = mtlsLink.WrapTcp(sock_cli_cmd.mSocket, robot_ip);
+                        reconnFailCnt = 0;
+                        Console.WriteLine("[FRRobot] TCP 8080 重连成功");
+                    }
+                    catch (Exception ex)
+                    {
+                        /* 重连期间的握手失败属正常重试过程：降噪打印，
+                         * 只在第 1 次和第 10 次提示，避免刷屏误导 */
+                        cmdSslStream = null;
+                        reconnFailCnt++;
+                        if (reconnFailCnt == 1 || reconnFailCnt % 10 == 0)
+                            Console.WriteLine($"[FRRobot] TCP 8080 加密通道不可用，自动重试中" +
+                                              $"（第 {reconnFailCnt} 次）：{ex.Message}");
+                        /* mtlsLink 保持：继续以加密模式等待下次重连 */
+                    }
+                }
+                g_sock_com_err = (int)RobotError.ERR_SUCCESS;
+                lastReconnectAt = DateTime.Now;
+                return true;
+            }
+        }
+
         private void RobotInstCmdRecvRoutineThread()
         {
             int recvbyte;
@@ -493,32 +608,64 @@ namespace fairino
                 while (robot_instcmd_recv_exit == 0)
                 {
                     g_recvbuf = "";
-                    byte[] recvBytes = new byte[BUFFER_SIZE];
                     try
                     {
-                        Console.WriteLine($"now recv 8080 cmd");
-                        recvbyte = sock_cli_cmd.mSocket.Receive(recvBytes);
-                        if (recvbyte < 0)
+                        //Console.WriteLine($"now recv 8080 cmd");
+                        if (cmdSslStream != null)
                         {
-                            sock_cli_cmd.Close();
-                            g_sock_com_err = (int)RobotError.ERR_SOCKET_COM_FAILED;
-                            if (log != null)
+                            /* mTLS 模式：SSL 通道读，读到即原协议帧 */
+                            byte[] recvBytes = new byte[BUFFER_SIZE];
+                            recvbyte = cmdSslStream.Read(recvBytes, 0, recvBytes.Length);
+                            if (recvbyte < 0)
                             {
-                                log.LogError("recv cmd fail");
+                                sock_cli_cmd.Close();
+                                g_sock_com_err = (int)RobotError.ERR_SOCKET_COM_FAILED;
+                                if (log != null)
+                                {
+                                    log.LogError("recv cmd fail");
+                                }
+                                return;
                             }
-                            return;
+                            g_recvbuf = System.Text.Encoding.UTF8.GetString(recvBytes, 0, recvbyte);
+                            try { OnTcpFrameReceived?.Invoke(g_recvbuf); } catch { }
                         }
-                        g_recvbuf = System.Text.Encoding.UTF8.GetString(recvBytes);
+                        else if (mtlsLink != null && mtlsLink.Enabled)
+                        {
+                            /* 加密模式但会话未就绪（初始握手失败/重连中）：
+                             * 不做明文 recv——等待发送线程或异常路径触发重连 */
+                            Thread.Sleep(200);
+                            continue;
+                        }
+                        else
+                        {
+                            byte[] recvBytes = new byte[BUFFER_SIZE];
+                            recvbyte = sock_cli_cmd.mSocket.Receive(recvBytes);
+                            if (recvbyte < 0)
+                            {
+                                sock_cli_cmd.Close();
+                                g_sock_com_err = (int)RobotError.ERR_SOCKET_COM_FAILED;
+                                if (log != null)
+                                {
+                                    log.LogError("recv cmd fail");
+                                }
+                                return;
+                            }
+                            if (recvbyte == 0)
+                            {
+                                /* 明文模式下连接被机器人主动关闭：机器人端开启加密时
+                                 * 会拒绝明文连接（握手失败即关），表现为 recv 返回 0 */
+                                Console.WriteLine("[FRRobot] 连接被机器人关闭——机器人端可能已开启加密，" +
+                                                  "SDK 当前为明文模式。请检查两端加密开关是否一致");
+                                throw new IOException("peer closed connection (robot may have encryption enabled)");
+                            }
+                            g_recvbuf = System.Text.Encoding.UTF8.GetString(recvBytes, 0, recvbyte);
+                            try { OnTcpFrameReceived?.Invoke(g_recvbuf); } catch { }
+                        }
 
                     }
                     catch (Exception)
                     {
-                        if (sock_cli_cmd.mSocket != null)
-                        {
-                            sock_cli_cmd.mSocket.Close();
-
-                        }
-                        if (sock_cli_cmd.ReConnect())
+                        if (ReconnectTls())
                         {
                             continue;
                         }
@@ -633,28 +780,44 @@ namespace fairino
                 // 如果已有实例，先关闭
                 udpCmdClient?.Close();
                 udpCmdClient = new FRUdpClient();
+
+                /* ---------- mTLS 初始化（必须在 Connect 之前：Connect 内做 DTLS 握手） ----------
+                 * EnableMtls=false 时强制明文模式；否则 certs/ 三件套齐全则启用 */
+                
+                try
+                {
+                    if (!EnableMtls)
+                    {
+                        Console.WriteLine("[FRRobot] mTLS disabled by switch, plaintext mode");
+                    }
+                    else
+                    {
+                        mtlsLink = new MtlsLink();   /* 默认：SDK dll 同目录下的 certs/ */
+                        if (mtlsLink.Enabled)
+                        {
+                            udpCmdClient.Mtls = mtlsLink;
+                            Console.WriteLine("[FRRobot] mTLS enabled (certs found)");
+                            log?.LogInfo("mTLS enabled");
+                        }
+                        else
+                        {
+                            Console.WriteLine("[FRRobot] certs not found, plaintext mode");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[FRRobot] mTLS init failed: {ex.Message}, plaintext mode");
+                    mtlsLink = null;
+                }
                 if (log == null)
                 {
                     Console.WriteLine("log in rpc is null");
-                }
-                else
-                {
-                    Console.WriteLine("log in rpc is not null");
-                    log.LogInfo($"UDP连接成功 {ip}:20007");
                 }
                 int udpResult = udpCmdClient.Connect(ip, 20007);
                 if (udpResult == 0)
                 {
                     udpConnected = true;
-                    if(log == null)
-                    {
-                        Console.WriteLine("log in rpc is null");
-                    }
-                    else
-                    {
-                        Console.WriteLine("log in rpc is not null");
-                        log.LogInfo($"UDP连接成功 {ip}:20007");
-                    }
                     log?.LogInfo($"UDP连接成功 {ip}:20007");
                 }
                 else
@@ -670,6 +833,8 @@ namespace fairino
                 log?.LogError($"UDP连接异常：{ex.Message}");
             }
 
+            /* （mTLS 初始化已前移到 UDP Connect 之前——见下方） */
+
             //Thread stateThread = new Thread(RobotStateRoutineThread);
             //stateThread.Start();
             Thread cmdsendThread = new Thread(RobotInstCmdSendRoutineThread);
@@ -682,10 +847,8 @@ namespace fairino
                     log.LogInfo($"RPC {ip}");
                 }
 
-                Console.WriteLine("RPC Fail." + g_sock_com_err);
                 return g_sock_com_err;
             }
-            Console.WriteLine("RPC ");
             Thread cmdrecvThread = new Thread(RobotInstCmdRecvRoutineThread);
             cmdrecvThread.Start();
             Thread taskThread = new Thread(RobotTaskRoutineThread);
@@ -2610,6 +2773,26 @@ namespace fairino
                 }
                 return (int)RobotError.ERR_RPC_ERROR;
             }
+        }
+
+        /**
+         * @brief 通过 TCP 8080 发送自定义指令帧（mTLS 模式下自动经加密通道）
+         * @param frame 完整指令帧，如 "/f/bIII52III236III7IIIMode(0)III/b/f"
+         * @return 错误码
+         */
+        public int SendTCPFrame(string frame)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            while (is_sendcmd == true) /* 等上一条指令发完 */
+            {
+                Thread.Sleep(10);
+            }
+            g_sendbuf = frame;
+            is_sendcmd = true;
+            return 0;
         }
 
         /**
@@ -20478,7 +20661,7 @@ namespace fairino
                 return errcode;
             }
 
-            Console.WriteLine($"movej2222: ");
+            //Console.WriteLine($"movej2222: ");
             errcode = MoveJ(joint_pos, desc_pos, tool, user, vel, acc, ovl, epos, blendT, offset_flag, offset_pos);
 
             return errcode;

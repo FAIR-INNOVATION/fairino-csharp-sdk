@@ -43,14 +43,13 @@ namespace testFrRobot
             Console.WriteLine($"最终配置状态数量: {finalStates.Count}");
             foreach (var s in finalStates) Console.WriteLine($"  {s}");
             Console.WriteLine($"最终周期: {finalPeriod} ms");
-            robot.SetReconnectParam(true, 100, 1000);//断线重连参数
+            robot.SetReconnectParam(true, 1000, 500);//断线重连参数
+           
+            robot.EnableMtls = false;
 
             rrpc = robot.RPC("192.168.58.2"); //与控制箱建立连接
                                               //20004端口接收超时时间
                                               //robot.SetReceivePortTimeout(40);
-            
-
-
         }
 
         public void cndeconfigtest()

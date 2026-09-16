@@ -203,6 +203,7 @@ D:\C#SDK\各版本sdk\fairino-csharp_-sdk-main\examples\testFrRobot\bin\Debug\te
 D:\C#SDK\各版本sdk\fairino-csharp_-sdk-main\examples\testFrRobot\bin\Debug\testFrRobot.pdb
 D:\C#SDK\各版本sdk\fairino-csharp_-sdk-main\examples\testFrRobot\bin\Debug\CookComputing.XmlRpcV2.dll
 D:\C#SDK\各版本sdk\fairino-csharp_-sdk-main\examples\testFrRobot\bin\Debug\libfairino.dll
+D:\C#SDK\各版本sdk\fairino-csharp_-sdk-main\examples\testFrRobot\bin\Debug\BouncyCastle.Crypto.dll
 D:\C#SDK\各版本sdk\fairino-csharp_-sdk-main\examples\testFrRobot\bin\Debug\libfairino.pdb
 D:\C#SDK\各版本sdk\fairino-csharp_-sdk-main\examples\testFrRobot\obj\Debug\testFrRobot.csproj.AssemblyReference.cache
 D:\C#SDK\各版本sdk\fairino-csharp_-sdk-main\examples\testFrRobot\obj\Debug\testFrRobot.Form1.resources

@@ -21,6 +21,7 @@ using System.Security.Cryptography;
 using System.IO;
 using static System.Net.Mime.MediaTypeNames;
 using System.Reflection;
+using static System.Windows.Forms.AxHost;
 namespace testFrRobot
 {
     public partial class Test : Form
@@ -4564,10 +4565,12 @@ namespace testFrRobot
 
         private void button104_Click(object sender, EventArgs e)
         {
+            //TestSendModeTcp();
+
             //TestMoveJSpeedLoop();
             //TestMoveLSpeedLoop();
             //TestMoveCSpeedLoop();
-            TestCircleSpeedLoop();
+            //TestCircleSpeedLoop();
             //TestCoord();
             //TestStationaryTrack();
             //TestWorkPieceTrsf();
@@ -4586,7 +4589,8 @@ namespace testFrRobot
             //testled();
             //TestSetVelReducePara();
             //TestOriginPointWeave();
-            //TestServoJUDP();
+            TestServoJUDP();
+            TestServoJTcp();
             //ServoJTWithSafetyUDP();
             //ServoMITtest();
             //ServoJVtest();
@@ -6618,12 +6622,133 @@ public void TestVelFeedForwardRatio()
             //robot.CloseRPC();
         }
 
+        /**
+         * @brief TCP 8080 版 ServoJ 指令下发测试。
+         *        组包与 ServoJ(comType=1) 的 UDP 组包完全一致
+         *        （ServoMoveStart cmdID=689 / ServoJ cmdID=376 / ServoMoveEnd cmdID=690），
+         *        仅发送通道从 UDP 20007 换成 TCP 8080（robot.SendTCPFrame）。
+         * 用途：验证 mTLS 加密下 TCP 通道的伺服指令闭环。
+         */
+        public void TestServoJTcp()
+        {
+            /* 本地数组格式化（与 SDK 内 FormatDoubleArray 等价，保留 3 位小数） */
+            Func<double[], string> fmtArr = a =>
+            {
+                string[] s = new string[a.Length];
+                for (int i = 0; i < a.Length; i++)
+                    s[i] = a[i].ToString("F3");
+                return string.Join(",", s);
+            };
+
+            /* 订阅回调：打印 TCP 回复的完整数据帧（解密后的原协议帧） */
+            int tcpRcvCnt = 0;
+            robot.OnTcpFrameReceived += frame =>
+            {
+                tcpRcvCnt++;
+                Console.WriteLine($"[TCP 回复 #{tcpRcvCnt}] {DateTime.Now:HH:mm:ss.fff} {frame}");
+            };
+
+            ROBOT_STATE_PKG pkg = new ROBOT_STATE_PKG();
+
+            float vel = 0.0f;
+            float acc = 0.0f;
+            float cmdT = 0.008f;
+            float filterT = 0.0f;
+            float gain = 0.0f;
+            byte flag = 0;
+            int count = 500;
+            float dt = 0.1f;
+            int cmdID = 0;
+            int frameCount = 0;   /* 帧计数自增 */
+
+            while (true)
+            {
+                JointPos j = new JointPos(0, -90, 90, 0, 0, 0);
+                ExaxisPos epos = new ExaxisPos(0, 0, 0, 0);
+                DescPose offset_pos = new DescPose(0, -90, 90, 0, 0, 0);
+                robot.MoveJ(j, 0, 0, 100, 100, 100, epos, -1, 0, offset_pos);
+                int ret = robot.GetActualJointPosDegree(flag, ref j);
+                if (ret == 0)
+                {
+                    count = 500;
+                    cmdID += 1;
+
+                    /* ---------- TCP 版 ServoMoveStart（cmdID=689） ---------- */
+                    {
+                        string s = "ServoMoveStart()";
+                        FRAME f = new FRAME
+                        {
+                            count = frameCount++,
+                            cmdID = 689,
+                            content = s,
+                            contentLen = s.Length,
+                            head = "/f/b",
+                            tail = "/b/f"
+                        };
+                        robot.SendTCPFrame(FrameHandle.PackFrame(f));
+                    }
+
+                    while (count > 0)
+                    {
+                        /* ---------- TCP 版 ServoJ（cmdID=376，组包同 comType=1） ---------- */
+                        {
+                            string jointStr = fmtArr(j.jPos);
+                            string axisStr = fmtArr(epos.ePos);
+                            string s = $"ServoJ({jointStr},{axisStr},{acc:F3},{vel:F3},{cmdT:F3},{filterT:F3},{gain:F3},{cmdID})";
+                            FRAME f = new FRAME
+                            {
+                                count = frameCount++,
+                                cmdID = 376,
+                                content = s,
+                                contentLen = s.Length,
+                                head = "/f/b",
+                                tail = "/b/f"
+                            };
+                            robot.SendTCPFrame(FrameHandle.PackFrame(f));
+                        }
+
+                        j.jPos[0] += dt;
+                        j.jPos[3] += dt;
+                        j.jPos[4] += dt;
+                        j.jPos[5] += dt;
+                        epos.ePos[0] += dt;
+                        count -= 1;
+                        Thread.Sleep(1);
+                        robot.GetRobotRealTimeState(ref pkg);
+                        Console.WriteLine($"Servoj命令数量: {pkg.servoJCmdNum}");
+                        Console.WriteLine($"Servoj Count {pkg.servoJCmdNum}; last pos is {pkg.lastServoTarget[0]} {pkg.lastServoTarget[1]} {pkg.lastServoTarget[2]} {pkg.lastServoTarget[3]} {pkg.lastServoTarget[4]} {pkg.lastServoTarget[5]}");
+                    }
+
+                    /* ---------- TCP 版 ServoMoveEnd（cmdID=690） ---------- */
+                    {
+                        string s = "ServoMoveEnd()";
+                        FRAME f = new FRAME
+                        {
+                            count = frameCount++,
+                            cmdID = 690,
+                            content = s,
+                            contentLen = s.Length,
+                            head = "/f/b",
+                            tail = "/b/f"
+                        };
+                        robot.SendTCPFrame(FrameHandle.PackFrame(f));
+                    }
+
+                    Thread.Sleep(1000);
+                }
+            }
+        }
+
         public void TestServoJUDP()
         {
-            // 订阅回调
+            // 订阅回调：打印 UDP 回复的完整数据帧（解密后的原协议帧）
+            int udpRcvCnt = 0;
             robot.OnUdpFrameReceived += (comType, frameCount, frameCmdID, contentLen, content) =>
             {
-                Console.WriteLine($"[] comType={comType}, count={frameCount}, cmdID={frameCmdID}, content={content}");
+                udpRcvCnt++;
+                Console.WriteLine($"[UDP 回复 #{udpRcvCnt}] {DateTime.Now:HH:mm:ss.fff} comType={comType}");
+                Console.WriteLine($"  完整帧: /f/bIII{frameCount}III{frameCmdID}III{contentLen}III{content}III/b/f");
+                Console.WriteLine($"  字段: count={frameCount}, cmdID={frameCmdID}, contentLen={contentLen}, content={content}");
             };
 
             ROBOT_STATE_PKG pkg = new ROBOT_STATE_PKG();
@@ -6637,27 +6762,25 @@ public void TestVelFeedForwardRatio()
             int count = 300;
             float dt = 0.1f;
             int cmdID = 0;
-            Console.WriteLine($"111111: ");
+            int comtype = 1;
             while (true)
             {
                 JointPos j = new JointPos(0, -90, 90, 0, 0, 0);
                 ExaxisPos epos = new ExaxisPos(0, 0, 0, 0);
                 DescPose offset_pos = new DescPose(0, -90, 90, 0, 0, 0);
-                Console.WriteLine($"010101: ");
                 robot.MoveJ(j, 0, 0, 100, 100, 100, epos, -1, 0, offset_pos);
-                Console.WriteLine($"222222: ");
                 int ret = robot.GetActualJointPosDegree(flag, ref j);
                 if (ret == 0)
                 {
                     count = 300;
                     cmdID += 1;
-                    robot.ServoMoveStart(0);
+                    robot.ServoMoveStart(comtype);
 
                     while (count > 0)
                     {
-                        robot.ServoJ(j, epos, acc, vel, cmdT, filterT, gain, cmdID, 0);
+                        robot.ServoJ(j, epos, acc, vel, cmdT, filterT, gain, cmdID, comtype);
                         j.jPos[0] += dt;
-                        j.jPos[1] += dt;
+                        j.jPos[2] += dt;
                         j.jPos[3] += dt;
                         j.jPos[4] += dt;
                         j.jPos[5] += dt;
@@ -6667,26 +6790,26 @@ public void TestVelFeedForwardRatio()
                         robot.GetRobotRealTimeState(ref pkg);
                         Console.WriteLine($"Servoj命令数量: {pkg.servoJCmdNum}");
                         Console.WriteLine($"Servoj Count {pkg.servoJCmdNum}; last pos is {pkg.lastServoTarget[0]} {pkg.lastServoTarget[1]} {pkg.lastServoTarget[2]} {pkg.lastServoTarget[3]} {pkg.lastServoTarget[4]} {pkg.lastServoTarget[5]}");
-                        if (pkg.jt_cur_pos != null && pkg.jt_cur_pos.Length >= 6)
-                        {
-                            Console.WriteLine($"  关节位置(°): J1={pkg.jt_cur_pos[0]:F2}, J2={pkg.jt_cur_pos[1]:F2}, J3={pkg.jt_cur_pos[2]:F2}, J4={pkg.jt_cur_pos[3]:F2}, J5={pkg.jt_cur_pos[4]:F2}, J6={pkg.jt_cur_pos[5]:F2}");
-                        }
-                        if (pkg.tl_cur_pos != null && pkg.tl_cur_pos.Length >= 6)
-                        {
-                            Console.WriteLine($"  工具位姿: X={pkg.tl_cur_pos[0]:F2}mm, Y={pkg.tl_cur_pos[1]:F2}mm, Z={pkg.tl_cur_pos[2]:F2}mm, RX={pkg.tl_cur_pos[3]:F2}°, RY={pkg.tl_cur_pos[4]:F2}°, RZ={pkg.tl_cur_pos[5]:F2}°");
-                        }
+                        //if (pkg.jt_cur_pos != null && pkg.jt_cur_pos.Length >= 6)
+                        //{
+                        //    Console.WriteLine($"  关节位置(°): J1={pkg.jt_cur_pos[0]:F2}, J2={pkg.jt_cur_pos[1]:F2}, J3={pkg.jt_cur_pos[2]:F2}, J4={pkg.jt_cur_pos[3]:F2}, J5={pkg.jt_cur_pos[4]:F2}, J6={pkg.jt_cur_pos[5]:F2}");
+                        //}
+                        //if (pkg.tl_cur_pos != null && pkg.tl_cur_pos.Length >= 6)
+                        //{
+                        //    Console.WriteLine($"  工具位姿: X={pkg.tl_cur_pos[0]:F2}mm, Y={pkg.tl_cur_pos[1]:F2}mm, Z={pkg.tl_cur_pos[2]:F2}mm, RX={pkg.tl_cur_pos[3]:F2}°, RY={pkg.tl_cur_pos[4]:F2}°, RZ={pkg.tl_cur_pos[5]:F2}°");
+                        //}
 
                     }
-                    robot.ServoMoveEnd(0);
+                    robot.ServoMoveEnd(comtype);
 
-                    Thread.Sleep(1000);
+                    Thread.Sleep(3000);
                     count = 300;
-                    robot.ServoMoveStart(0);
+                    robot.ServoMoveStart(comtype);
                     while (count > 0)
                     {
-                        robot.ServoJ(j, epos, acc, vel, cmdT, filterT, gain, cmdID, 0);
+                        robot.ServoJ(j, epos, acc, vel, cmdT, filterT, gain, cmdID, comtype);
                         j.jPos[0] -= dt;
-                        j.jPos[1] -= dt;
+                        j.jPos[2] -= dt;
                         j.jPos[3] -= dt;
                         j.jPos[4] -= dt;
                         j.jPos[5] -= dt;
@@ -6696,23 +6819,173 @@ public void TestVelFeedForwardRatio()
                         robot.GetRobotRealTimeState(ref pkg);
                         Console.WriteLine($"Servoj命令数量: {pkg.servoJCmdNum}");
                         Console.WriteLine($"Servoj Count {pkg.servoJCmdNum}; last pos is {pkg.lastServoTarget[0]} {pkg.lastServoTarget[1]} {pkg.lastServoTarget[2]} {pkg.lastServoTarget[3]} {pkg.lastServoTarget[4]} {pkg.lastServoTarget[5]}");
-                        if (pkg.jt_cur_pos != null && pkg.jt_cur_pos.Length >= 6)
-                        {
-                            Console.WriteLine($"  关节位置(°): J1={pkg.jt_cur_pos[0]:F2}, J2={pkg.jt_cur_pos[1]:F2}, J3={pkg.jt_cur_pos[2]:F2}, J4={pkg.jt_cur_pos[3]:F2}, J5={pkg.jt_cur_pos[4]:F2}, J6={pkg.jt_cur_pos[5]:F2}");
-                        }
-                        if (pkg.tl_cur_pos != null && pkg.tl_cur_pos.Length >= 6)
-                        {
-                            Console.WriteLine($"  工具位姿: X={pkg.tl_cur_pos[0]:F2}mm, Y={pkg.tl_cur_pos[1]:F2}mm, Z={pkg.tl_cur_pos[2]:F2}mm, RX={pkg.tl_cur_pos[3]:F2}°, RY={pkg.tl_cur_pos[4]:F2}°, RZ={pkg.tl_cur_pos[5]:F2}°");
-                        }
+                        //if (pkg.jt_cur_pos != null && pkg.jt_cur_pos.Length >= 6)
+                        //{
+                        //    Console.WriteLine($"  关节位置(°): J1={pkg.jt_cur_pos[0]:F2}, J2={pkg.jt_cur_pos[1]:F2}, J3={pkg.jt_cur_pos[2]:F2}, J4={pkg.jt_cur_pos[3]:F2}, J5={pkg.jt_cur_pos[4]:F2}, J6={pkg.jt_cur_pos[5]:F2}");
+                        //}
+                        //if (pkg.tl_cur_pos != null && pkg.tl_cur_pos.Length >= 6)
+                        //{
+                        //    Console.WriteLine($"  工具位姿: X={pkg.tl_cur_pos[0]:F2}mm, Y={pkg.tl_cur_pos[1]:F2}mm, Z={pkg.tl_cur_pos[2]:F2}mm, RX={pkg.tl_cur_pos[3]:F2}°, RY={pkg.tl_cur_pos[4]:F2}°, RZ={pkg.tl_cur_pos[5]:F2}°");
+                        //}
 
                     }
-                    robot.ServoMoveEnd(0);
+                    robot.ServoMoveEnd(comtype);
                 }
                 else
                 {
                     Console.WriteLine($"GetActualJointPosDegree errcode:{ret}");
                 }
             }
+        }
+
+        /**
+         * @brief 加密通信验证测试（UDP 20007 通道）
+         * 原理：ServoJ(comType=1) 经 UDP 20007 下发；加密模式下发送自动密封，
+         *       机器人应答经解封成功后触发 OnUdpFrameReceived 回调——能收到回调
+         *       即证明加密收发双向正常。未启用加密时本函数退化为明文对照测试。
+         * 安全：目标位置取当前实际关节角（不产生运动），纯验证通信链路。
+         */
+        public void TestEncryptComm()
+        {
+            Console.WriteLine("========== 加密通信验证开始 ==========");
+            Console.WriteLine(robot.IsEncryptEnabled
+                ? "[状态] 加密链路已启用（工作目录存在 robot_master.key）"
+                : "[状态] 明文模式（未找到 robot_master.key——本测试作为对照）");
+
+            int recvCount = 0;
+            robot.OnUdpFrameReceived += (comType, frameCount, frameCmdID, contentLen, content) =>
+            {
+                recvCount++;
+                Console.WriteLine($"[应答 {recvCount}] 解封成功: comType={comType} count={frameCount} " +
+                                  $"cmdID={frameCmdID} len={contentLen} content={content}");
+            };
+
+            /* 取当前实际关节角作为目标（不产生运动） */
+            JointPos j = new JointPos(0, 0, 0, 0, 0, 0);
+            int ret = robot.GetActualJointPosDegree(0, ref j);
+            if (ret != 0)
+            {
+                Console.WriteLine($"[失败] GetActualJointPosDegree errcode={ret}");
+                return;
+            }
+            Console.WriteLine($"[目标] 当前关节角: J1={j.jPos[0]:F2} J2={j.jPos[1]:F2} J3={j.jPos[2]:F2} " +
+                              $"J4={j.jPos[3]:F2} J5={j.jPos[4]:F2} J6={j.jPos[5]:F2}");
+
+            ExaxisPos epos = new ExaxisPos(0, 0, 0, 0);
+            int sendCount = 3;
+
+            robot.ServoMoveStart(0);
+            for (int i = 0; i < sendCount; i++)
+            {
+                int r = robot.ServoJ(j, epos, 0, 0, 0.008f, 0, 0, i, 1); /* comType=1 -> UDP 20007 */
+                Console.WriteLine($"[发送 {i + 1}/{sendCount}] ServoJ(comType=1) 返回码={r}");
+                Thread.Sleep(100);
+            }
+            robot.ServoMoveEnd(0);
+
+            Thread.Sleep(500); /* 等应答回调收齐 */
+
+            Console.WriteLine("---------- 验证汇总 ----------");
+            Console.WriteLine($"[发送] {sendCount} 条指令（UDP 20007，加密模式={(robot.IsEncryptEnabled ? "ON" : "OFF(明文对照)")}）");
+            Console.WriteLine($"[应答] 收到并解封 {recvCount} 条");
+            Console.WriteLine(recvCount >= sendCount
+                ? "[结论] 加密通信链路验证通过"
+                : "[结论] 应答不足——加密开启时检查机器人端开关/钥匙是否一致；明文模式检查原有 UDP 链路");
+            Console.WriteLine("========== 加密通信验证结束 ==========");
+        }
+
+        /**
+         * @brief Mode 指令双通道加密验证：UDP 20007 + TCP 8080 各发
+         *        Mode(0)/Mode(1) 两条指令，打印解密后的机器人应答。
+         * 前提：mTLS 已启用（exe 目录有 certs/ 三件套且与机器人同一套）；
+         *       未启用时本测试作为明文对照组。
+         */
+        public void TestSendMode()
+        {
+            Console.WriteLine("========== Mode 指令双通道验证 ==========");
+            Console.WriteLine(robot.IsEncryptEnabled ? "[状态] mTLS 已启用" : "[状态] 明文模式（对照）");
+
+            /* 订阅两条通道的解密应答 */
+            robot.OnTcpFrameReceived += frame =>
+                Console.WriteLine($"[TCP 应答] {frame}");
+            robot.OnUdpFrameReceived += (comType, frameCount, frameCmdID, contentLen, content) =>
+                Console.WriteLine($"[UDP 应答] count={frameCount} cmdID={frameCmdID} content={content}");
+
+            string mode0 = "/f/bIII52III236III7IIIMode(0)III/b/f";
+            string mode1 = "/f/bIII52III236III7IIIMode(1)III/b/f";
+
+            /* ---------- UDP 20007 通道 ---------- */
+            Console.WriteLine("\n-- UDP 20007 --");
+            Console.WriteLine($"[发送] {mode0}");
+            robot.SendUDPFrame(mode0);
+            Thread.Sleep(300);
+            Console.WriteLine($"[发送] {mode1}");
+            robot.SendUDPFrame(mode1);
+            Thread.Sleep(300);
+
+            /* ---------- TCP 8080 通道 ---------- */
+            Console.WriteLine("\n-- TCP 8080 --");
+            Console.WriteLine($"[发送] {mode0}");
+            robot.SendTCPFrame(mode0);
+            Thread.Sleep(300);
+            Console.WriteLine($"[发送] {mode1}");
+            robot.SendTCPFrame(mode1);
+
+            Thread.Sleep(1000); /* 等应答收齐 */
+
+            Console.WriteLine("========== 验证结束（应答见上方打印） ==========");
+        }
+
+        /**
+         * @brief 仅 TCP 8080 通道验证
+         */
+        public void TestSendModeTcp()
+        {
+            string program_name = "mtls.lua";
+            string loaded_name = "";
+            byte state = 0;
+            int line = 0;
+
+            Console.WriteLine("========== Mode 指令 TCP 8080 通道验证 ==========");
+            Console.WriteLine(robot.IsEncryptEnabled ? "[状态] mTLS 已启用" : "[状态] 明文模式（对照）");
+
+            robot.OnTcpFrameReceived += frame =>
+                Console.WriteLine($"[TCP 应答] {frame}");
+
+            string mode0 = "/f/bIII52III236III7IIIMode(0)III/b/f";
+            string mode1 = "/f/bIII52III236III7IIIMode(1)III/b/f";
+
+            Console.WriteLine($"[发送] {mode0}");
+            robot.SendTCPFrame(mode0);
+            Thread.Sleep(1000);
+            Console.WriteLine($"[发送] {mode1}");
+            robot.SendTCPFrame(mode1);
+            Thread.Sleep(1000);
+            Console.WriteLine($"[发送] {mode0}");
+            robot.SendTCPFrame(mode0);
+
+            robot.Mode(0);
+            robot.LoadDefaultProgConfig(0, program_name);
+            robot.ProgramLoad(program_name);
+
+            robot.SetSpeedInstant(50);
+
+            robot.ProgramRun();
+            Thread.Sleep(5000);
+            robot.PauseMotion();
+            robot.GetProgramState(ref state);
+            Console.WriteLine("program state:{0}\n", state);
+            robot.GetCurrentLine(ref line);
+            Console.WriteLine("current line:{0}\n", line);
+            robot.GetLoadedProgram(ref loaded_name);
+            Console.WriteLine("program name:{0}\n", loaded_name);
+
+            robot.ResumeMotion();
+            Thread.Sleep(2000);
+            robot.PauseMotion();
+            Thread.Sleep(2000);
+
+            Console.WriteLine("========== TCP 验证结束（应答见上方打印） ==========");
         }
 
         //robot.CloseRPC();
