@@ -146,6 +146,14 @@ namespace fairino
             if (recvThread != null && recvThread.IsAlive)
                 recvThread.Join(1000);
 
+            /* 新增：优雅关闭 DTLS（发 close_notify，机器人可感知主动断开） */
+            if (Mtls != null && Mtls.Enabled)
+            {
+                try { Mtls.Dispose(); } catch { }
+                Mtls = null;
+            }
+
+
             if (udpSocket != null)
             {
                 udpSocket.Close();
@@ -189,7 +197,7 @@ namespace fairino
                             if (udpIdleTimeout >= 15)
                             {
                                 udpIdleTimeout = 0;
-                                //RehandshakeDtls();
+                                RehandshakeDtls();
                             }
                             continue;
                         }

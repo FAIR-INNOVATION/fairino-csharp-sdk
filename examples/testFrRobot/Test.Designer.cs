@@ -150,6 +150,8 @@
             this.TestMovePhy = new System.Windows.Forms.Button();
             this.TestDragSwitchDetect = new System.Windows.Forms.Button();
             this.button104 = new System.Windows.Forms.Button();
+            this.btnSetSpeed_Click = new System.Windows.Forms.Button();
+            this.PhySetSpeed = new System.Windows.Forms.TextBox();
             this.flowLayoutPanel1.SuspendLayout();
             this.flowLayoutPanel2.SuspendLayout();
             this.flowLayoutPanel3.SuspendLayout();
@@ -1347,6 +1349,8 @@
             this.flowLayoutPanel8.Controls.Add(this.TestMovePhy);
             this.flowLayoutPanel8.Controls.Add(this.TestDragSwitchDetect);
             this.flowLayoutPanel8.Controls.Add(this.button104);
+            this.flowLayoutPanel8.Controls.Add(this.btnSetSpeed_Click);
+            this.flowLayoutPanel8.Controls.Add(this.PhySetSpeed);
             this.flowLayoutPanel8.Location = new System.Drawing.Point(883, 24);
             this.flowLayoutPanel8.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.flowLayoutPanel8.Name = "flowLayoutPanel8";
@@ -1592,9 +1596,28 @@
             this.button104.Name = "button104";
             this.button104.Size = new System.Drawing.Size(268, 66);
             this.button104.TabIndex = 49;
-            this.button104.Text = "Text";
+            this.button104.Text = "Test";
             this.button104.UseVisualStyleBackColor = true;
             this.button104.Click += new System.EventHandler(this.button104_Click);
+            // 
+            // btnSetSpeed_Click
+            // 
+            this.btnSetSpeed_Click.Location = new System.Drawing.Point(4, 623);
+            this.btnSetSpeed_Click.Margin = new System.Windows.Forms.Padding(4);
+            this.btnSetSpeed_Click.Name = "btnSetSpeed_Click";
+            this.btnSetSpeed_Click.Size = new System.Drawing.Size(180, 41);
+            this.btnSetSpeed_Click.TabIndex = 58;
+            this.btnSetSpeed_Click.Text = "SetPhySpeedInstant";
+            this.btnSetSpeed_Click.UseVisualStyleBackColor = true;
+            this.btnSetSpeed_Click.Click += new System.EventHandler(this.btnSetSpeed_Click_Click);
+            // 
+            // PhySetSpeed
+            // 
+            this.PhySetSpeed.Location = new System.Drawing.Point(191, 622);
+            this.PhySetSpeed.Name = "PhySetSpeed";
+            this.PhySetSpeed.Size = new System.Drawing.Size(54, 25);
+            this.PhySetSpeed.TabIndex = 59;
+            this.PhySetSpeed.Text = "20";
             // 
             // Test
             // 
@@ -1624,6 +1647,7 @@
             this.flowLayoutPanel6.ResumeLayout(false);
             this.flowLayoutPanel7.ResumeLayout(false);
             this.flowLayoutPanel8.ResumeLayout(false);
+            this.flowLayoutPanel8.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1753,5 +1777,7 @@
         private System.Windows.Forms.Button button104;
         private System.Windows.Forms.Button btnLaserWeld;
         private System.Windows.Forms.Button button105;
+        private System.Windows.Forms.Button btnSetSpeed_Click;
+        private System.Windows.Forms.TextBox PhySetSpeed;
     }
 }

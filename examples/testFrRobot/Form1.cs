@@ -45,7 +45,7 @@ namespace testFrRobot
             Console.WriteLine($"最终周期: {finalPeriod} ms");
             robot.SetReconnectParam(true, 1000, 500);//断线重连参数
            
-            robot.EnableMtls = false;
+            robot.EnableMtls = true;
 
             rrpc = robot.RPC("192.168.58.2"); //与控制箱建立连接
                                               //20004端口接收超时时间

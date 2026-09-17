@@ -69,3 +69,4 @@ d:\C#SDK\各版本sdk\fairino-csharp_-sdk-main\examples\testFrRobot\obj\x64\Debu
 d:\C#SDK\各版本sdk\fairino-csharp_-sdk-main\examples\testFrRobot\obj\x64\Debug\testFrRo.66D88683.Up2Date
 d:\C#SDK\各版本sdk\fairino-csharp_-sdk-main\examples\testFrRobot\obj\x64\Debug\testFrRobot.exe
 d:\C#SDK\各版本sdk\fairino-csharp_-sdk-main\examples\testFrRobot\obj\x64\Debug\testFrRobot.pdb
+d:\C#SDK\各版本sdk\fairino-csharp_-sdk-main\examples\testFrRobot\bin\x64\Debug\BouncyCastle.Crypto.dll

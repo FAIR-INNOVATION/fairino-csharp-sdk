@@ -27566,6 +27566,21 @@ namespace fairino
         }
 
         /**
+        * @brief  即时设置物理速度(指令帧，低延迟)
+        * @param [in] speed 物理速度值, mm/s
+        * @return  错误码
+        */
+        public int SetPhySpeedInstant(double speed)
+        {
+            string content = string.Format("SetPhySpeed({0})", speed);
+            string frameStr = string.Format("/f/bIII{0}III983III{1}III{2}III/b/f",
+                frameCnt++, content.Length, content);
+
+            log?.LogInfo($"SetPhySpeedInstant({speed})");
+            return SendTCPFrame(frameStr);
+        }
+
+        /**
          * @brief 获取当前上位机系统时间并发送给机器人，同步系统时间（由于QNX系统限制，同步精度为分钟级）
          * @return 错误码
          */

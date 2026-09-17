@@ -22,6 +22,7 @@ using System.IO;
 using static System.Net.Mime.MediaTypeNames;
 using System.Reflection;
 using static System.Windows.Forms.AxHost;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.Rebar;
 namespace testFrRobot
 {
     public partial class Test : Form
@@ -4565,6 +4566,7 @@ namespace testFrRobot
 
         private void button104_Click(object sender, EventArgs e)
         {
+            //TestSetPhySpeedInstant();
             //TestSendModeTcp();
 
             //TestMoveJSpeedLoop();
@@ -4589,7 +4591,7 @@ namespace testFrRobot
             //testled();
             //TestSetVelReducePara();
             //TestOriginPointWeave();
-            TestServoJUDP();
+            //TestServoJUDP();
             TestServoJTcp();
             //ServoJTWithSafetyUDP();
             //ServoMITtest();
@@ -8049,6 +8051,10 @@ public void TestVelFeedForwardRatio()
             }
         }
 
+
+
+
+
         // 激光记录复现+普通摆动
         void TestLaserReproduceNormalWeave()
         {
@@ -11099,6 +11105,52 @@ public int RunTrajectoryJ(string localFilePath = "D://zUP/horse.txt", string rem
             }
         }
 
+        // 后台线程：MoveL 往返循环持续运动（blendR=-1 阻塞，每段运动完成返回）
+        void MoveLBackForthThread()
+        {
+            JointPos j1 = new JointPos(-60.206, -49.449, 79.476, -124.322, -88.416, -45.209);
+            DescPose d1 = new DescPose(-412.929, 510.912, 94.557, -175.850, -1.933, 74.992);
+            JointPos j2 = new JointPos(-141.282, -40.962, 62.359, -110.496, -85.512, -126.379);
+            DescPose d2 = new DescPose(586.847, 510.915, 94.560, -175.851, -1.934, 74.991);
+
+            ExaxisPos ex = new ExaxisPos(0, 0, 0, 0);
+            DescPose zeroOff = new DescPose(0, 0, 0, 0, 0, 0);
+
+            int tool = 1;
+            int workpiece = 0;
+            float blend = -1.0f;
+            int rtn = 0;
+
+            while (true)
+            {
+                rtn = robot.MoveL(j1, d1, tool, workpiece, 100, 100, 50, blend, 0, ex, 0, 1, zeroOff, 0, 90);
+                Console.WriteLine($"MoveL pos1: {rtn}");
+                rtn = robot.MoveL(j2, d2, tool, workpiece, 100, 100, 50, blend, 0, ex, 0, 1, zeroOff, 0, 90);
+                Console.WriteLine($"MoveL pos2: {rtn}");
+            }
+        }
+
+        // 按钮+输入值调用：运动中实时设置物理速度 (mm/s)
+        void SetPhySpeedInstantInput(double speed)
+        {
+            int rtn = robot.SetPhySpeedInstant(speed);
+            Console.WriteLine($"SetPhySpeedInstant({speed}) : {rtn}");
+        }
+
+        // 测试入口：后台线程先跑 MoveL 往返循环，主线程返回；
+        // 之后通过按钮输入值调用 SetPhySpeedInstantInput 实时调速
+        void TestSetPhySpeedInstant()
+        {
+            Thread moveThread = new Thread(MoveLBackForthThread);
+            moveThread.IsBackground = true;
+            moveThread.Start();
+        }
+
+        private void btnSetSpeed_Click_Click(object sender, EventArgs e)
+        {
+            double speed = double.Parse(PhySetSpeed.Text);
+            SetPhySpeedInstantInput(speed);
+        }
     }
 
     /// <summary>
