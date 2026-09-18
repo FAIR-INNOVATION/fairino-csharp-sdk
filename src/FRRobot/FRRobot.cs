@@ -4044,6 +4044,81 @@ namespace fairino
         }
 
         /**
+         * @brief  获取8组逆解
+         * @param [in] tcp_pose 笛卡尔位姿 
+         * @param [in] tool 工具坐标系
+         * @param [in] workpiece 工件坐标系
+         * @param [in] exPos 扩展轴位置
+         * @param [out] jPos 输出8组关节角度
+         * @return 错误码
+         */
+        public int TCFToAllJoint( DescPose tcp_pose, int tool, int workpiece, ExaxisPos exPos , ref JointPos[] jPos)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            if (GetSafetyCode() != 0)
+            {
+
+                return GetSafetyCode();
+            }
+            try
+            {
+                double[] joint_Pos = new double[6] { tcp_pose.tran.x, tcp_pose.tran.y, tcp_pose.tran.z, tcp_pose.rpy.rx, tcp_pose.rpy.ry, tcp_pose.rpy.rz };
+
+                double[] ex_Pos = new double[4] { exPos.ePos[0], exPos.ePos[1], exPos.ePos[2], exPos.ePos[3] };
+                object[] result = proxy.TCFToAllJoint(joint_Pos,  tool,  workpiece, ex_Pos);
+                if ((int)result[0] == 0)
+                {
+                    string paramStr = (string)result[1];
+                    string[] parS = paramStr.Split(',');
+                    if (parS.Length != 48)
+                    {
+                        log?.LogError($"TCFToAllJoint size fail, expected 48 but got {parS.Length}");
+                        return -1;
+                    }
+
+                    for (int i = 0; i < 8; i++)
+                    {
+                        // 取第 i 组6个关节角度
+                        jPos[i].jPos[0] = double.Parse(parS[i * 6 + 0]);
+                        jPos[i].jPos[1] = double.Parse(parS[i * 6 + 1]);
+                        jPos[i].jPos[2] = double.Parse(parS[i * 6 + 2]);
+                        jPos[i].jPos[3] = double.Parse(parS[i * 6 + 3]);
+                        jPos[i].jPos[4] = double.Parse(parS[i * 6 + 4]);
+                        jPos[i].jPos[5] = double.Parse(parS[i * 6 + 5]);
+                    }
+
+                }
+                if (log != null)
+                {
+                    log.LogInfo($"TCFToAllJoint(tcp_pose: [{tcp_pose.tran.x}, {tcp_pose.tran.y}, {tcp_pose.tran.z}, {tcp_pose.rpy.rx}, {tcp_pose.rpy.ry}, {tcp_pose.rpy.rz}], " +
+                                $"tool: {tool}, workpiece: {workpiece}, " +
+                                $"exPos: [{exPos.ePos[0]}, {exPos.ePos[1]}, {exPos.ePos[2]}, {exPos.ePos[3]}]) : {(int)result[0]}");
+                }
+                return (int)result[0];
+            }
+            catch (Exception ex)
+            {
+                if (IsSockComError())
+                {
+                    if (log != null)
+                    {
+                        log.LogError($"RPC exception: {ex.Message}");
+                    }
+                    return g_sock_com_err;
+                }
+                if (log != null)
+                {
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+        
+
+        /**
          * @brief  设置外部工具坐标系
          * @param  [in] id 坐标系编号，20-39对应外部工具坐标系0-19
          * @param  [in] etcp  工具中心点相对末端法兰中心位姿

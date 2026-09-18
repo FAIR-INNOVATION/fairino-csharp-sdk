@@ -507,13 +507,22 @@ namespace fairino
         */[XmlRpcMethod("ComputeExTCF")]
         object[] ComputeExTCF();
 
+
+        /**
+        * @brief  计算外部工具坐标系
+        * @param [out] tcp_pose 外部工具坐标系
+        * @return 错误码
+        */
+        [XmlRpcMethod("TCFToAllJoint")]
+        object[] TCFToAllJoint(double[] jPos, int tool, int workpiece, double[] exPos);
         /**
         * @brief  设置外部工具坐标系
         * @param  [in] id 坐标系编号，范围[1~15]
         * @param  [in] etcp  工具中心点相对末端法兰中心位姿
         * @param  [in] etool  待定
         * @return  错误码
-        */[XmlRpcMethod("SetExToolCoord")]
+        */
+        [XmlRpcMethod("SetExToolCoord")]
         int SetExToolCoord(int id, double[] etcp, double[] etool);
 
         /**

@@ -4566,13 +4566,17 @@ namespace testFrRobot
 
         private void button104_Click(object sender, EventArgs e)
         {
+            //400测试函数
+            TestTCFToAllJoint();
             //TestSetPhySpeedInstant();
             //TestSendModeTcp();
-
             //TestMoveJSpeedLoop();
             //TestMoveLSpeedLoop();
             //TestMoveCSpeedLoop();
             //TestCircleSpeedLoop();
+            //TestServoJUDP();
+            //TestServoJTcp();
+
             //TestCoord();
             //TestStationaryTrack();
             //TestWorkPieceTrsf();
@@ -4591,8 +4595,7 @@ namespace testFrRobot
             //testled();
             //TestSetVelReducePara();
             //TestOriginPointWeave();
-            //TestServoJUDP();
-            TestServoJTcp();
+
             //ServoJTWithSafetyUDP();
             //ServoMITtest();
             //ServoJVtest();
@@ -11151,6 +11154,63 @@ public int RunTrajectoryJ(string localFilePath = "D://zUP/horse.txt", string rem
             double speed = double.Parse(PhySetSpeed.Text);
             SetPhySpeedInstantInput(speed);
         }
+
+        public int TestTCFToAllJoint()
+        {
+
+            // 获取当前 TCP 位姿
+            DescPose curTcp = new DescPose(0, 0, 0, 0, 0, 0);
+            int rtn = robot.GetActualTCPPose(1, ref curTcp);
+            if (rtn != 0)
+            {
+                return rtn;
+            }
+            Console.WriteLine($"当前TCP位姿: x={curTcp.tran.x:F3}, y={curTcp.tran.y:F3}, z={curTcp.tran.z:F3}, " +
+                              $"a={curTcp.rpy.rx:F3}, b={curTcp.rpy.ry:F3}, c={curTcp.rpy.rz:F3}");
+
+            // 扩展轴位置，此处全 0
+            ExaxisPos exPos = new ExaxisPos(0, 0, 0, 0);
+
+            // 8 组逆解结果
+            JointPos[] allJoints = new JointPos[8];
+            for (int i = 0; i < 8; i++)
+            {
+                allJoints[i] = new JointPos(0, 0, 0, 0, 0, 0);
+            }
+
+            // 调用 TCFToAllJoint 求 8 组逆解，tool=0，workpiece=0
+            rtn = robot.TCFToAllJoint(curTcp, 0, 0, exPos, ref allJoints);
+            if (rtn != 0)
+            {
+                return rtn;
+            }
+
+            // 逐组正解验证
+            for (int i = 0; i < 8; i++)
+            {
+                JointPos joint = allJoints[i];
+
+                Console.WriteLine($"JOINT{i + 1}: " +
+                                  $"j1={joint.jPos[0]:F3}, j2={joint.jPos[1]:F3}, j3={joint.jPos[2]:F3}, " +
+                                  $"j4={joint.jPos[3]:F3}, j5={joint.jPos[4]:F3}, j6={joint.jPos[5]:F3}");
+
+                // 第 i 组逆解对应的笛卡尔位姿
+                DescPose pos = new DescPose(0, 0, 0, 0, 0, 0);
+                rtn = robot.GetForwardKin(joint, ref pos);
+                if (rtn != 0)
+                {
+                    // 某组正解失败不影响其他组
+                    continue;
+                }
+
+                Console.WriteLine($"POS{i + 1}: " +
+                                  $"x={pos.tran.x:F3}, y={pos.tran.y:F3}, z={pos.tran.z:F3}, " +
+                                  $"a={pos.rpy.rx:F3}, b={pos.rpy.ry:F3}, c={pos.rpy.rz:F3}");
+            }
+
+            return 0;
+        }
+
     }
 
     /// <summary>

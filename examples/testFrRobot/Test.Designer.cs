@@ -1354,7 +1354,7 @@
             this.flowLayoutPanel8.Location = new System.Drawing.Point(883, 24);
             this.flowLayoutPanel8.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.flowLayoutPanel8.Name = "flowLayoutPanel8";
-            this.flowLayoutPanel8.Size = new System.Drawing.Size(313, 668);
+            this.flowLayoutPanel8.Size = new System.Drawing.Size(313, 683);
             this.flowLayoutPanel8.TabIndex = 50;
             this.flowLayoutPanel8.Paint += new System.Windows.Forms.PaintEventHandler(this.flowLayoutPanel8_Paint);
             // 
