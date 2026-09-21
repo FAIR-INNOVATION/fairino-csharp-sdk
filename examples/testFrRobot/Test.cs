@@ -4567,14 +4567,14 @@ namespace testFrRobot
         private void button104_Click(object sender, EventArgs e)
         {
             //400测试函数
-            TestTCFToAllJoint();
+            //TestTCFToAllJoint();
             //TestSetPhySpeedInstant();
             //TestSendModeTcp();
             //TestMoveJSpeedLoop();
             //TestMoveLSpeedLoop();
             //TestMoveCSpeedLoop();
             //TestCircleSpeedLoop();
-            //TestServoJUDP();
+            TestServoJUDP();
             //TestServoJTcp();
 
             //TestCoord();

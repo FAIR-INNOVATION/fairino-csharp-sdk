@@ -82,14 +82,17 @@ namespace fairino
         private DateTime lastReconnectAt = DateTime.MinValue;  // 上次重连完成时刻（防连环重连）
         private int reconnFailCnt = 0;                         // 握手失败计数（降噪打印）
 
-        /// <summary>mTLS 是否启用（工作目录 certs/ 存在 client.crt/client.key/ca.crt 时自动启用）</summary>
+        /// <summary>mTLS 是否启用（证书目录存在 client.crt/client.key/ca.crt 时自动启用）</summary>
         public bool IsEncryptEnabled
         {
             get { return mtlsLink != null && mtlsLink.Enabled; }
         }
 
-        /// <summary>mTLS 总开关：默认 false；在 RPC 初始化前置 false 强制明文模式</summary>
+        //mTLS 总开关：默认 false；在 RPC 初始化前置 false 强制明文模式
         public bool EnableMtls { get; set; } = false;
+
+        //mTLS 证书目录：默认 null = SDK dll 同目录下的 certs/；须在 RPC() 之前设置
+        public string MtlsCertDir { get; set; }
                                                    // 公开事件，外部可订阅
         /// <summary>TCP 8080 应答帧事件（解密后的原协议帧，mTLS/明文模式均触发）</summary>
         public event Action<string> OnTcpFrameReceived;
@@ -792,7 +795,7 @@ namespace fairino
                     }
                     else
                     {
-                        mtlsLink = new MtlsLink();   /* 默认：SDK dll 同目录下的 certs/ */
+                        mtlsLink = new MtlsLink(MtlsCertDir);   /* 默认：SDK dll 同目录下的 certs/ */
                         if (mtlsLink.Enabled)
                         {
                             udpCmdClient.Mtls = mtlsLink;
@@ -4517,11 +4520,11 @@ namespace fairino
         }
 
         /**
- * @brief  设置末端负载质心坐标
- * @param  [in] loadNum 负载编号
- * @param  [in] coord 质心坐标，单位mm
- * @return  错误码
- */
+		 * @brief  设置末端负载质心坐标
+		 * @param  [in] loadNum 负载编号
+		 * @param  [in] coord 质心坐标，单位mm
+		 * @return  错误码
+		 */
         public int SetLoadCoord(int loadNum, DescTran coord)
         {
             if (IsSockComError())
@@ -13482,7 +13485,7 @@ namespace fairino
 
         /**
          * @brief 设置焊机控制模式
-         * @param [in] mode 焊机控制模式;0-直流一元模式；1-脉冲一元模式；2-JOB模式；3-近控模式；4-分别模式；5-CC/CV模式；6-TIG；7-CMT
+         * @param [in] mode 焊机控制模式;0-直流一元模式；1-脉冲一元模式；2-JOB模式；3-近控模式；4-分别模式；5-CC/CV模式；6-TIG；7-CMT, 8-松下-有脉冲模式，9-松下-无脉冲模式
          * @param [in] ioType 控制类型；0-控制箱IO；1-数字通信协议(UDP);2-数字通信协议(ModbusTCP)
          * @return 错误码
          */
@@ -20736,7 +20739,6 @@ namespace fairino
                 return errcode;
             }
 
-            //Console.WriteLine($"movej2222: ");
             errcode = MoveJ(joint_pos, desc_pos, tool, user, vel, acc, ovl, epos, blendT, offset_flag, offset_pos);
 
             return errcode;
