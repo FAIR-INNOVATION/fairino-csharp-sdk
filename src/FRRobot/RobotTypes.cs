@@ -623,6 +623,7 @@ namespace fairino
         ERR_ARCLENGTHTOOSMALL = 153,           //圆弧指令点间距太小
 
 
+        ERR_CMD_TLS_ENABLE_STATE = -22,   /* SDK与服务端指令协议加密状态不一致 */
         ERR_TOO_MANY_STATES = -20,
         ERR_NEED_AT_LEAST_ONE_STATE = -19,
         ERR_STATE_ALREADY_EXISTS = -17,

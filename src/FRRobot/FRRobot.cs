@@ -35,7 +35,7 @@ namespace fairino
     {
         ICallSupervisor proxy = null;
 
-        const string SDK_VERSION = " C#SDK-V1.3.0  Web-3.9.9";
+        const string SDK_VERSION = " C#SDK-V1.3.1  Web-4.0.0";
 
         private string robot_ip = "192.168.57.2";//机器人ip
         private int g_sock_com_err = (int)RobotError.ERR_SUCCESS;
@@ -775,7 +775,42 @@ namespace fairino
             robot_ip = ip;
             robot_ip = ip;
             g_sock_com_err = (int)RobotError.ERR_SUCCESS;
-            
+
+            /* ---- CNDE 连接（端口 20005）提前：先建好实时状态通道 ---- */
+            _cndeClient.SetReconnectParam(reconnEnable, reconnTimes, reconnPeriod);
+            int cndeRet = ConnectCNDE(ip, 20005);
+            if (cndeRet != 0)
+            {
+                log?.LogError($"CNDE 连接失败，错误码：{cndeRet}");
+                g_sock_com_err = (int)RobotError.ERR_SOCKET_COM_FAILED; ;
+                return (int)RobotError.ERR_SOCKET_COM_FAILED;   /* 保持原有语义：CNDE 连接失败返回 -2 */
+            }
+            else
+            {
+                log?.LogInfo($"CNDE 连接成功 {ip}:20005");
+            }
+
+            /* ---- 指令协议加密状态一致性校验（必须在 UDP/DTLS 握手之前）----
+             * SDK 端 EnableMtls 与服务端 TLS 使能状态必须一致：
+             * 不一致时继续连接只会得到难查的握手失败，直接返回错误码 */
+            bool robotServerTLSEnable = false;
+            int tlsRtn = GetTLSEnableState(ref robotServerTLSEnable);
+            if (tlsRtn == (int)RobotError.ERR_RPC_ERROR)
+            {
+                /* 老固件无 GetTLSEnableState 接口：视为服务端未使能，继续按明文连接 */
+                log?.LogWarn("GetTLSEnableState unsupported by controller, assume plaintext");
+                robotServerTLSEnable = false;
+            }
+            else if (tlsRtn != 0)
+            {
+                return tlsRtn;
+            }
+            if (robotServerTLSEnable != EnableMtls)
+            {
+                log?.LogError($"TLS enable state mismatch: sdk={EnableMtls}, server={robotServerTLSEnable}");
+                g_sock_com_err = (int)RobotError.ERR_CMD_TLS_ENABLE_STATE;
+                return g_sock_com_err;
+            }
 
             // 初始化 UDP 客户端并连接（端口固定为20007）
             try
@@ -861,18 +896,6 @@ namespace fairino
                 log.LogInfo($"RPC {ip}");
             }
 
-            //// 启动 CNDE 连接（端口 20005）
-            _cndeClient.SetReconnectParam(reconnEnable, reconnTimes, reconnPeriod);
-            int cndeRet = ConnectCNDE(ip, 20005);
-            if (cndeRet != 0)
-            {
-                log?.LogError($"CNDE 连接失败，错误码：{cndeRet}");
-                g_sock_com_err = -2;
-            }
-            else
-            {
-                log?.LogInfo($"CNDE 连接成功 {ip}:20005");
-            }
 
             return g_sock_com_err;
         }
@@ -922,6 +945,43 @@ namespace fairino
             return 0;
         }
 
+        /**
+        * @brief  获取机器人指令协议服务端TLS加密使能状态
+        * @param [out] enable 0-未使能；1-使能
+        * @return 错误码
+        */
+        public int GetTLSEnableState(ref bool enable)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+                object[] result = proxy.GetTLSEnableState();
+                int errcode = Convert.ToInt32(result[0]);
+                if (errcode == 0)
+                {
+                    enable = Convert.ToInt32(result[1]) == 1;
+                }
+                else
+                {
+                    log?.LogError($"execute GetTLSEnableState fail {errcode}");
+                }
+                log?.LogInfo($"GetTLSEnableState(ref {enable}) : {errcode}");
+                return errcode;
+            }
+            catch (Exception ex)
+            {
+                if (IsSockComError())
+                {
+                    log?.LogError($"RPC exception: {ex.Message}");
+                    return g_sock_com_err;
+                }
+                log?.LogWarn($"RPC non-communication exception: {ex.Message}");
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
 
         /**
          * @brief  查询SDK版本号

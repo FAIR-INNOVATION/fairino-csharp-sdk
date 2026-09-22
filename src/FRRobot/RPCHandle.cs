@@ -29,6 +29,14 @@ namespace fairino
         int CloseRPC();
 
         /**
+        * @brief  获取机器人指令协议服务端TLS加密使能状态
+        * @param [out] enable 0-未使能；1-使能
+        * @return 错误码
+        */
+        [XmlRpcMethod("GetTLSEnableState")]
+        object[] GetTLSEnableState();
+
+        /**
          * @brief  获取控制器IP
          * @param  [out] ip  控制器IP
          * @return  错误码
