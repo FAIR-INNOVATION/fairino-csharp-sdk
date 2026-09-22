@@ -45,7 +45,7 @@ namespace testFrRobot
             Console.WriteLine($"最终周期: {finalPeriod} ms");
             robot.SetReconnectParam(true, 1000, 500);//断线重连参数
            
-            robot.EnableMtls = true;
+            robot.EnableMtls = false;
             robot.MtlsCertDir = @"D:\C#SDK\MTLS-certs";   // 证书不设路径则默认在  <libfairino.dll 所在目录>\certs
             rrpc = robot.RPC("192.168.58.2"); //与控制箱建立连接
                                               //20004端口接收超时时间

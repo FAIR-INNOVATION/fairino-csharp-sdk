@@ -99,8 +99,8 @@ namespace fairino
 
         public event UdpFrameReceivedHandler OnUdpFrameReceived
         {
-            add { udpCmdClient.OnFrameReceived += value; }
-            remove { udpCmdClient.OnFrameReceived -= value; }
+            add { if (udpCmdClient != null) udpCmdClient.OnFrameReceived += value; }
+            remove { if (udpCmdClient != null) udpCmdClient.OnFrameReceived -= value; }
         }
 
         private UInt16 frameCnt = 0;               // 帧计数器
@@ -782,7 +782,7 @@ namespace fairino
             if (cndeRet != 0)
             {
                 log?.LogError($"CNDE 连接失败，错误码：{cndeRet}");
-                g_sock_com_err = (int)RobotError.ERR_SOCKET_COM_FAILED; ;
+                g_sock_com_err = (int)RobotError.ERR_SOCKET_COM_FAILED;
                 return (int)RobotError.ERR_SOCKET_COM_FAILED;   /* 保持原有语义：CNDE 连接失败返回 -2 */
             }
             else
@@ -808,6 +808,7 @@ namespace fairino
             if (robotServerTLSEnable != EnableMtls)
             {
                 log?.LogError($"TLS enable state mismatch: sdk={EnableMtls}, server={robotServerTLSEnable}");
+                DisconnectCNDE();   /* 已连上的 20005 通道一并断开，避免下次 RPC 复用旧状态 */
                 g_sock_com_err = (int)RobotError.ERR_CMD_TLS_ENABLE_STATE;
                 return g_sock_com_err;
             }
@@ -914,7 +915,7 @@ namespace fairino
             DisconnectCNDE();
             Thread.Sleep(100);
 
-            udpCmdClient.Close();
+            udpCmdClient?.Close();   /* RPC 在 CNDE/TLS 校验阶段提前返回时 udpCmdClient 尚未创建 */
 
             if (sock_cli_cmd.mSocket != null)
             {
