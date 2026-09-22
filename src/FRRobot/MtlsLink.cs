@@ -11,6 +11,7 @@ using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.Crypto.Tls;
 using Org.BouncyCastle.OpenSsl;
+using Org.BouncyCastle.Pkcs;
 using Org.BouncyCastle.Security;
 
 using BcX509 = Org.BouncyCastle.X509.X509Certificate;
@@ -112,25 +113,32 @@ namespace fairino
         }
 
         /// <summary>BouncyCastle 解析 PEM 私钥（.NET Framework 不支持 PEM 私钥导入）</summary>
-        private RSA LoadClientRsa()
+        private RsaPrivateCrtKeyParameters LoadClientKeyParams()
         {
             var r = new PemReader(File.OpenText(Path.Combine(CertDir, "client.key")));
             object obj = r.ReadObject();
-            var key = obj as RsaPrivateCrtKeyParameters
-                      ?? ((AsymmetricCipherKeyPair)obj).Private as RsaPrivateCrtKeyParameters;
-            var rsa = RSA.Create();
-            rsa.ImportParameters(DotNetUtilities.ToRSAParameters(key));
-            return rsa;
+            return obj as RsaPrivateCrtKeyParameters
+                   ?? ((AsymmetricCipherKeyPair)obj).Private as RsaPrivateCrtKeyParameters;
         }
 
+        /// <summary>组装带私钥的客户端证书。用 BouncyCastle 走 PKCS#12 往返：
+        /// X509Certificate2.CopyWithPrivateKey 只有 .NET 4.7.2+ 才有，4.5.1/4.6.1/4.7.1 编译不过；
+        /// PFX 往返与原来的 Export(Pkcs12) 等价，各框架行为一致</summary>
         private X509Certificate2Collection LoadClientCertificate()
         {
-            var cert = new X509Certificate2(Path.Combine(CertDir, "client.crt"));
-            using (var rsa = LoadClientRsa())
+            var store = new Pkcs12Store();
+            BcX509 bcCert = new Org.BouncyCastle.X509.X509CertificateParser()
+                .ReadCertificate(File.ReadAllBytes(Path.Combine(CertDir, "client.crt")));
+            var entry = new X509CertificateEntry(bcCert);
+            store.SetCertificateEntry("client", entry);
+            store.SetKeyEntry("client", new AsymmetricKeyEntry(LoadClientKeyParams()),
+                              new X509CertificateEntry[] { entry });
+
+            const string pwd = "fairino";   /* 内存中一次性使用，不落盘 */
+            using (var ms = new MemoryStream())
             {
-                var withKey = cert.CopyWithPrivateKey(rsa);
-                return new X509Certificate2Collection(
-                    new X509Certificate2(withKey.Export(X509ContentType.Pkcs12)));
+                store.Save(ms, pwd.ToCharArray(), new SecureRandom());
+                return new X509Certificate2Collection(new X509Certificate2(ms.ToArray(), pwd));
             }
         }
 
@@ -138,7 +146,9 @@ namespace fairino
         /// 证书不绑 IP：机器人换 IP 无需重新签发，SDK 侧也只验证"对方持有本 CA 签发的证书"。</summary>
         private bool VerifyServer(X509Certificate cert)
         {
-            using (var c2 = new X509Chain())
+            /* 不用 using：X509Chain 在 .NET 4.7.2 以下未实现 IDisposable */
+            var c2 = new X509Chain();
+            try
             {
                 var ca = LoadCaCert();
                 c2.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
@@ -148,6 +158,10 @@ namespace fairino
                     return false;
                 X509Certificate2 root = c2.ChainElements[c2.ChainElements.Count - 1].Certificate;
                 return root.Thumbprint.Equals(ca.Thumbprint, StringComparison.OrdinalIgnoreCase);
+            }
+            finally
+            {
+                c2.Reset();
             }
         }
 
