@@ -624,6 +624,7 @@ namespace fairino
 
 
         ERR_CMD_TLS_ENABLE_STATE = -22,   /* SDK与服务端指令协议加密状态不一致 */
+        ERR_CMD_TLS_CERT_NOT_FOUND = -23, /* 已开启mTLS但证书文件缺失(client.crt/client.key/ca.crt) */
         ERR_TOO_MANY_STATES = -20,
         ERR_NEED_AT_LEAST_ONE_STATE = -19,
         ERR_STATE_ALREADY_EXISTS = -17,

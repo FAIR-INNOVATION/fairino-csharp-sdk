@@ -56,11 +56,22 @@ namespace fairino
                 }
             }
             CertDir = certDir;
-            Enabled = File.Exists(Path.Combine(CertDir, "client.crt")) &&
-                      File.Exists(Path.Combine(CertDir, "client.key")) &&
-                      File.Exists(Path.Combine(CertDir, "ca.crt"));
+            Enabled = MissingCerts.Length == 0;
             if (Enabled)
                 PrintClientCertInfo();
+        }
+
+        /// <summary>缺失的证书文件名（Enabled=false 时有意义），用于启动时报错提示</summary>
+        public string MissingCerts
+        {
+            get
+            {
+                string miss = "";
+                if (!File.Exists(Path.Combine(CertDir, "client.crt"))) miss += "client.crt ";
+                if (!File.Exists(Path.Combine(CertDir, "client.key"))) miss += "client.key ";
+                if (!File.Exists(Path.Combine(CertDir, "ca.crt"))) miss += "ca.crt ";
+                return miss.Trim();
+            }
         }
 
         /// <summary>打印当前 client 证书信息：证书目录 + 序列号 + 到期时间 + 名称（CN）</summary>

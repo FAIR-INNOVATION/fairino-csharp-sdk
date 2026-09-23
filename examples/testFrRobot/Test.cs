@@ -4574,8 +4574,8 @@ namespace testFrRobot
             //TestMoveLSpeedLoop();
             //TestMoveCSpeedLoop();
             //TestCircleSpeedLoop();
-            //TestServoJUDP();
-            TestServoJTcp();
+            TestServoJUDP();
+            //TestServoJTcp();
 
             //TestCoord();
             //TestStationaryTrack();

@@ -99,9 +99,18 @@ namespace fairino
 
         public event UdpFrameReceivedHandler OnUdpFrameReceived
         {
-            add { if (udpCmdClient != null) udpCmdClient.OnFrameReceived += value; }
-            remove { if (udpCmdClient != null) udpCmdClient.OnFrameReceived -= value; }
+            add
+            {
+                udpFrameHandlers += value;   /* 暂存：RPC 每次都会重建 udpCmdClient，不能只挂在实例上 */
+                if (udpCmdClient != null) udpCmdClient.OnFrameReceived += value;
+            }
+            remove
+            {
+                udpFrameHandlers -= value;
+                if (udpCmdClient != null) udpCmdClient.OnFrameReceived -= value;
+            }
         }
+        private UdpFrameReceivedHandler udpFrameHandlers;  // UDP 帧订阅者（跨 RPC 存活）
 
         private UInt16 frameCnt = 0;               // 帧计数器
         private bool udpConnected;           // UDP 连接状态标志
@@ -776,6 +785,22 @@ namespace fairino
             robot_ip = ip;
             g_sock_com_err = (int)RobotError.ERR_SUCCESS;
 
+            /* ---- mTLS 证书校验（本地检查，放最前）：开了加密但证书缺失必须报错，
+             * 不能静默按明文连下去——否则客户以为走的是加密链路 ---- */
+            if (EnableMtls)
+            {
+                mtlsLink = new MtlsLink(MtlsCertDir);
+                if (!mtlsLink.Enabled)
+                {
+                    string msg = $"mTLS 已开启但证书缺失：{mtlsLink.CertDir} 缺少 {mtlsLink.MissingCerts}，" +
+                                  "请放入 client.crt/client.key/ca.crt，或将 EnableMtls 置 false 走明文";
+                    Console.WriteLine($"[FRRobot] {msg}");
+                    log?.LogError(msg);
+                    g_sock_com_err = (int)RobotError.ERR_CMD_TLS_CERT_NOT_FOUND;
+                    return g_sock_com_err;
+                }
+            }
+
             /* ---- CNDE 连接（端口 20005）提前：先建好实时状态通道 ---- */
             _cndeClient.SetReconnectParam(reconnEnable, reconnTimes, reconnPeriod);
             int cndeRet = ConnectCNDE(ip, 20005);
@@ -803,6 +828,9 @@ namespace fairino
             }
             else if (tlsRtn != 0)
             {
+                /* 置错误码锁死 SDK：否则后续调用会打到半初始化状态
+                 * （CNDE 已连、8080 线程与 UDP 未起），卡在 XML-RPC 超时上 */
+                g_sock_com_err = tlsRtn;
                 return tlsRtn;
             }
             if (robotServerTLSEnable != EnableMtls)
@@ -819,35 +847,22 @@ namespace fairino
                 // 如果已有实例，先关闭
                 udpCmdClient?.Close();
                 udpCmdClient = new FRUdpClient();
-
-                /* ---------- mTLS 初始化（必须在 Connect 之前：Connect 内做 DTLS 握手） ----------
-                 * EnableMtls=false 时强制明文模式；否则 certs/ 三件套齐全则启用 */
-                
-                try
+                if (udpFrameHandlers != null)
                 {
-                    if (!EnableMtls)
-                    {
-                        Console.WriteLine("[FRRobot] mTLS disabled by switch, plaintext mode");
-                    }
-                    else
-                    {
-                        mtlsLink = new MtlsLink(MtlsCertDir);   /* 默认：SDK dll 同目录下的 certs/ */
-                        if (mtlsLink.Enabled)
-                        {
-                            udpCmdClient.Mtls = mtlsLink;
-                            Console.WriteLine("[FRRobot] mTLS enabled (certs found)");
-                            log?.LogInfo("mTLS enabled");
-                        }
-                        else
-                        {
-                            Console.WriteLine("[FRRobot] certs not found, plaintext mode");
-                        }
-                    }
+                    udpCmdClient.OnFrameReceived += udpFrameHandlers;   /* 补挂 RPC 之前/上一轮已订阅的回调 */
                 }
-                catch (Exception ex)
+
+                /* ---------- mTLS 挂载（必须在 Connect 之前：Connect 内做 DTLS 握手） ----------
+                 * EnableMtls=true 时证书已在 RPC 开头校验齐全，这里只挂链路 */
+                if (!EnableMtls)
                 {
-                    Console.WriteLine($"[FRRobot] mTLS init failed: {ex.Message}, plaintext mode");
-                    mtlsLink = null;
+                    Console.WriteLine("[FRRobot] mTLS disabled by switch, plaintext mode");
+                }
+                else
+                {
+                    udpCmdClient.Mtls = mtlsLink;
+                    Console.WriteLine("[FRRobot] mTLS enabled (certs found)");
+                    log?.LogInfo("mTLS enabled");
                 }
                 if (log == null)
                 {
