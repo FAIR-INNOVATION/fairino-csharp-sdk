@@ -4566,15 +4566,22 @@ namespace testFrRobot
 
         private void button104_Click(object sender, EventArgs e)
         {
+            //401测试函数
+            TestServoCartwithParam();
+            //TestServoJwithParam();
+            //TestGetGripperMotionDone();
+
             //400测试函数
             //TestTCFToAllJoint();
             //TestSetPhySpeedInstant();
-            //TestSendModeTcp();
+
+            //TestGripperWaitMotionDone();
             //TestMoveJSpeedLoop();
             //TestMoveLSpeedLoop();
             //TestMoveCSpeedLoop();
             //TestCircleSpeedLoop();
-            TestServoJUDP();
+            //TestSendModeTcp();
+            //TestServoJUDP();
             //TestServoJTcp();
 
             //TestCoord();
@@ -6760,7 +6767,7 @@ public void TestVelFeedForwardRatio()
 
             float vel = 0.0f;
             float acc = 0.0f;
-            float cmdT = 0.008f;
+            float cmdT = 0.010f;
             float filterT = 0.0f;
             float gain = 0.0f;
             byte flag = 0;
@@ -6808,7 +6815,7 @@ public void TestVelFeedForwardRatio()
                     robot.ServoMoveEnd(comtype);
 
                     Thread.Sleep(3000);
-                    count = 300;
+                    count = 0;
                     robot.ServoMoveStart(comtype);
                     while (count > 0)
                     {
@@ -6957,19 +6964,6 @@ public void TestVelFeedForwardRatio()
             robot.OnTcpFrameReceived += frame =>
                 Console.WriteLine($"[TCP 应答] {frame}");
 
-            string mode0 = "/f/bIII52III236III7IIIMode(0)III/b/f";
-            string mode1 = "/f/bIII52III236III7IIIMode(1)III/b/f";
-
-            Console.WriteLine($"[发送] {mode0}");
-            robot.SendTCPFrame(mode0);
-            Thread.Sleep(1000);
-            Console.WriteLine($"[发送] {mode1}");
-            robot.SendTCPFrame(mode1);
-            Thread.Sleep(1000);
-            Console.WriteLine($"[发送] {mode0}");
-            robot.SendTCPFrame(mode0);
-
-            robot.Mode(0);
             robot.LoadDefaultProgConfig(0, program_name);
             robot.ProgramLoad(program_name);
 
@@ -6984,9 +6978,9 @@ public void TestVelFeedForwardRatio()
             Console.WriteLine("current line:{0}\n", line);
             robot.GetLoadedProgram(ref loaded_name);
             Console.WriteLine("program name:{0}\n", loaded_name);
-
+            Thread.Sleep(5000);
             robot.ResumeMotion();
-            Thread.Sleep(2000);
+            Thread.Sleep(5000);
             robot.PauseMotion();
             Thread.Sleep(2000);
 
@@ -10875,6 +10869,45 @@ public int RunTrajectoryJ(string localFilePath = "D://zUP/horse.txt", string rem
             Console.WriteLine("MoveGripper(张开) ret={0}", rtn);
         }
 
+        public void TestGetGripperMotionDone()
+        {
+            int rtn;
+            int status = 0;
+            int fault = 0;
+            ROBOT_STATE_PKG pkg = new ROBOT_STATE_PKG();
+
+
+            // 夹爪张开
+            rtn = robot.MoveGripper(2, 50, 50, 100, 30000, 0, 0, 0, 0, 0);
+            Console.WriteLine("MoveGripper(张开) ret={0}", rtn);
+            Thread.Sleep(2000);
+            robot.GetRobotRealTimeState(ref pkg);
+            Console.WriteLine(" gripper_motiondone {0})", pkg.gripper_motiondone);
+            // 夹爪闭合
+            rtn = robot.MoveGripper(2, 90, 100, 100, 30000, 0, 0, 0, 0, 0);
+            Console.WriteLine("MoveGripper(闭合) ret={0}", rtn);
+            Thread.Sleep(2000);
+            robot.GetRobotRealTimeState(ref pkg);
+            Console.WriteLine(" gripper_motiondone {0}", pkg.gripper_motiondone);
+            // 等待运动完成未检测到物体，超时5s，停止报错
+            rtn = robot.GripperWaitMotionDone(2, 5000, 0, 0);
+            Console.WriteLine("GripperWaitMotionDone(等待完成未检测到物体) ret={0}", rtn);
+
+            while (true)
+            {
+
+                robot.GetGripperMotionDone(ref fault, ref status);
+                Console.WriteLine("motion status:{0},{1}\n", fault, status);
+                robot.GetRobotRealTimeState(ref pkg);
+                Console.WriteLine(" error code {0},{1}", pkg.main_code, pkg.sub_code);
+                Thread.Sleep(500);
+
+            }
+
+
+        }
+
+
         public void TestSafetyParamsCheckSum()
         {
             int status = 0;
@@ -11209,6 +11242,124 @@ public int RunTrajectoryJ(string localFilePath = "D://zUP/horse.txt", string rem
             }
 
             return 0;
+        }
+
+        public void TestServoCartwithParam()
+        {
+            ROBOT_STATE_PKG pkg = new ROBOT_STATE_PKG();
+
+            int rtn;
+            DescPose desc_pos_dt = new DescPose(-396, -202, 475, 90, 2, 0);
+
+            ExaxisPos exaxis = new ExaxisPos(0.0f, 0.0f, 0.0f, 0.0f);
+            double[] pos_gain = { 22.0, 22.0, 22.0, 22.0, 22.0, 22.0 };  // ServoCart 自己的增益参数
+            int mode = 0;
+            float vel = 0.0f;
+            float acc = 0.0f;
+            float cmdT = 0.008f;
+            float filterT = 0.0f;
+            float gain = 0.0f;
+            int count = 5000;
+
+            // ===== ServoMoveStart 参数 =====
+            int comType = 0;                        // 0-xmlrpc；1-UDP(20007)
+            int filtertime = 0;                     // 滤波时间 ms，0 表示不启用；示例 5ms
+            double[] jointGain = { 22.0, 22.0, 22.0, 22.0, 22.0, 22.0 };
+            // jointGain：J1~J6 位置环增益，-1 表示沿用默认；按需改为实际增益，如 { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 }
+
+            robot.SetSpeed(20);
+
+            JointPos j = new JointPos(0, -90, 90, 0, 1, 0);
+            ExaxisPos epos = new ExaxisPos(0, 0, 0, 0);
+            DescPose offset_pos = new DescPose(0, 0, 0, 0, 0, 0);
+            robot.MoveJ(j, 0, 0, 100, 100, 100, epos, -1, 0, offset_pos);
+            robot.Sleep(2000);
+            robot.GetActualTCPPose(0, ref desc_pos_dt);
+
+            // 开始伺服运动：下发滤波时间与各关节位置环增益
+            rtn = robot.ServoMoveStart(comType, filtertime, jointGain);
+            Console.WriteLine($"ServoMoveStart rtn is {rtn}");
+
+            while (count > 0)
+            {
+                rtn = robot.ServoCart(mode, desc_pos_dt, exaxis, pos_gain, acc, vel, cmdT, filterT, gain);
+                Console.WriteLine($"ServoCart rtn is {rtn}");
+                count -= 1;
+                desc_pos_dt.tran.x += 0.05f;
+                //exaxis.ePos[0] += 0.01f;
+            }
+
+            // 结束伺服运动
+            rtn = robot.ServoMoveEnd(comType);
+            Console.WriteLine($"ServoMoveEnd rtn is {rtn}");
+        }
+
+        public void TestServoJwithParam()
+        {
+            // 订阅回调：打印 UDP 回复的完整数据帧（解密后的原协议帧）
+            int udpRcvCnt = 0;
+            robot.OnUdpFrameReceived += (comType, frameCount, frameCmdID, contentLen, content) =>
+            {
+                udpRcvCnt++;
+                Console.WriteLine($"[UDP 回复 #{udpRcvCnt}] {DateTime.Now:HH:mm:ss.fff} comType={comType}");
+                Console.WriteLine($"  完整帧: /f/bIII{frameCount}III{frameCmdID}III{contentLen}III{content}III/b/f");
+                Console.WriteLine($"  字段: count={frameCount}, cmdID={frameCmdID}, contentLen={contentLen}, content={content}");
+            };
+
+            ROBOT_STATE_PKG pkg = new ROBOT_STATE_PKG();
+
+            float vel = 0.0f;
+            float acc = 0.0f;
+            float cmdT = 0.010f;
+            float filterT = 0.0f;
+            float gain = 0.0f;
+            byte flag = 0;
+            int count = 300;
+            float dt = 0.1f;
+            int cmdID = 0;
+            int comtype = 0;
+
+            // ===== ServoMoveStart 参数 =====
+            int filtertime = 0;                     // 滤波时间 ms，0 表示不启用；示例 5ms
+            double[] jointGain = { 20.0, 20.0, 20.0, 20.0, 20.0, 20.0 };
+            // jointGain：J1~J6 位置环增益，-1 表示沿用默认；按需改为实际增益
+
+                JointPos j = new JointPos(0, -90, 90, 0, 0, 0);
+                ExaxisPos epos = new ExaxisPos(0, 0, 0, 0);
+                DescPose offset_pos = new DescPose(0, -90, 90, 0, 0, 0);
+                robot.MoveJ(j, 0, 0, 100, 100, 100, epos, -1, 0, offset_pos);
+                int ret = robot.GetActualJointPosDegree(flag, ref j);
+                if (ret == 0)
+                {
+                    count = 300;
+                    cmdID += 1;
+                    // 下发滤波时间与各关节位置环增益
+                    robot.ServoMoveStart(comtype, filtertime, jointGain);
+
+                    while (count > 0)
+                    {
+                        robot.ServoJ(j, epos, acc, vel, cmdT, filterT, gain, cmdID, comtype);
+                        j.jPos[0] += dt;
+                        j.jPos[2] += dt;
+                        j.jPos[3] += dt;
+                        j.jPos[4] += dt;
+                        j.jPos[5] += dt;
+                        epos.ePos[0] += dt;
+                        count -= 1;
+                        Thread.Sleep(1);
+                        robot.GetRobotRealTimeState(ref pkg);
+                        Console.WriteLine($"Servoj命令数量: {pkg.servoJCmdNum}");
+                        Console.WriteLine($"Servoj Count {pkg.servoJCmdNum}; last pos is {pkg.lastServoTarget[0]} {pkg.lastServoTarget[1]} {pkg.lastServoTarget[2]} {pkg.lastServoTarget[3]} {pkg.lastServoTarget[4]} {pkg.lastServoTarget[5]}");
+
+                    }
+                    robot.ServoMoveEnd(comtype);
+                    robot.MoveJ(j, 0, 0, 100, 100, 100, epos, -1, 0, offset_pos);
+
+                }
+                else
+                {
+                    Console.WriteLine($"GetActualJointPosDegree errcode:{ret}");
+                }
         }
 
     }

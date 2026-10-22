@@ -35,7 +35,7 @@ namespace fairino
     {
         ICallSupervisor proxy = null;
 
-        const string SDK_VERSION = " C#SDK-V1.3.1  Web-4.0.0";
+        const string SDK_VERSION = " C#SDK-V1.3.2  Web-4.0.1";
 
         private string robot_ip = "192.168.57.2";//机器人ip
         private int g_sock_com_err = (int)RobotError.ERR_SUCCESS;
@@ -7915,9 +7915,9 @@ namespace fairino
         }
 
         /**
-         * @brief  获取夹爪运动状态（仅末端开放协议定义，已适配设备获取的运动状态为透传值）
+         * @brief  获取夹爪运动状态（401版本起，末端协议与已适配设备夹爪运动状态反馈定义统一）
          * @param  [out] fault  0-无错误，其他-有错误
-         * @param  [out] staus  0-运动未完成，1-运动完成未检测到物体 2-运动完成检测到物体
+         * @param  [out] staus  0-运动未完成，1-运动完成未检测到物体 2-运动完成检测到物体 3-运动完成检测到物体掉落
          * @return  错误码
          */
         public int GetGripperMotionDone(ref int fault, ref int status)
@@ -7960,8 +7960,8 @@ namespace fairino
         }
 
         /**
-         * @brief  等待夹爪运动状态（仅末端开放协议定义，已适配设备status定义透传各夹爪厂商）
-         * @param  [in]  staus  0-运动未完成，1-运动完成未检测到物体 2-运动完成检测到物体
+         * @brief  等待夹爪运动状态（401版本起，末端协议与已适配设备夹爪运动状态反馈定义统一）
+         * @param  [in]  staus  0-运动未完成，1-运动完成未检测到物体 2-运动完成检测到物体 3-运动完成检测到物体掉落
          * @param  [in] timeout 超时时间（ms） -1永久等待
          * @param  [in] strategy  0-停止报错，1-继续运行
          * @param  [in] type  0-平行夹爪，1-旋转夹爪
@@ -16661,10 +16661,18 @@ namespace fairino
         /**
         * @brief 伺服运动开始，配合ServoJ、ServoCart指令使用
         * @param[in] comType 指令下发类型；0-xmlrpc；1-UDP(对应机器人20007端口)
+        * @param[in] filtertime 滤波时间，单位ms，默认0
+        * @param[in] gain位置环增益数组，长度应为6，依次对应J1~J6关节位置环增益；传null时使用默认值{ -1.0, -1.0, -1.0, -1.0, -1.0, -1.0 }
         * @return  错误码
         */
-        public int ServoMoveStart(int comType = 0)
+        public int ServoMoveStart(int comType = 0, int filtertime = 0, double[] gain = null )
         {
+            // 未传 gain 时给默认值
+            if (gain == null)
+            {
+                gain = new double[6] { -1.0, -1.0, -1.0, -1.0, -1.0, -1.0 };
+            }
+
             if (IsSockComError())
             {
                 return g_sock_com_err;
@@ -16678,7 +16686,7 @@ namespace fairino
             {
                 if (comType == 0)
                 {
-                    int rtn = proxy.ServoMoveStart();
+                    int rtn = proxy.ServoMoveStart(filtertime, gain[0], gain[1], gain[2], gain[3], gain[4], gain[5]);
                     log?.LogInfo($"ServoMoveStart() : {rtn}");
                     return rtn;
                 }

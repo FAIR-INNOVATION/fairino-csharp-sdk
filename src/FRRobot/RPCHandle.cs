@@ -216,7 +216,7 @@ namespace fairino
         * @brief 伺服运动开始，配合ServoJ、ServoCart指令使用
         * @return  错误码
         */[XmlRpcMethod("ServoMoveStart")]
-        int ServoMoveStart();
+        int ServoMoveStart(int filtertime,double gain1, double gain2, double gain3, double gain4, double gain5, double gain6);
 
         /**
         * @brief 伺服运动结束，配合ServoJ、ServoCart指令使用
