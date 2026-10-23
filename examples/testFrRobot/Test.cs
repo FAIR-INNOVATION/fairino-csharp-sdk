@@ -4567,9 +4567,11 @@ namespace testFrRobot
         private void button104_Click(object sender, EventArgs e)
         {
             //401测试函数
-            TestServoCartwithParam();
+            //TestServoCartwithParam();
             //TestServoJwithParam();
             //TestGetGripperMotionDone();
+            //TestDataPackageUpgrade();
+            TestJointAllParamUpgrade();
 
             //400测试函数
             //TestTCFToAllJoint();
@@ -11360,6 +11362,50 @@ public int RunTrajectoryJ(string localFilePath = "D://zUP/horse.txt", string rem
                 {
                     Console.WriteLine($"GetActualJointPosDegree errcode:{ret}");
                 }
+        }
+
+        /// <summary>
+        /// 数据备份包上传升级 + 升级进度查询
+        /// </summary>
+        public void TestDataPackageUpgrade()
+        {
+            int rtn = robot.DataPackageUpgrade("D://zUP/upgrade/FR5/fr_user_data.tar.gz");
+            Console.WriteLine($"robot DataPackageUpgrade rtn is {rtn}");
+
+            int upgradeProgress = 0;
+            while (upgradeProgress < 100)
+            {
+                int ret = robot.GetDataPackageUpgradeProgress(ref upgradeProgress);
+                Console.WriteLine($"robot data package upgrade progress : {upgradeProgress}, rtn : {ret}");
+                if (ret != 0 || upgradeProgress == -1)
+                {
+                    break;
+                }
+                Thread.Sleep(200);
+            }
+        }
+
+        /// <summary>
+        /// 关节全参数升级 + 升级进度查询（升级前需下使能）
+        /// </summary>
+        public void TestJointAllParamUpgrade()
+        {
+            robot.RobotEnable(0);
+            Thread.Sleep(200);
+            int rtn = robot.JointAllParamUpgrade("D://zUP/upgrade/FR5/jointallparameters.db");
+            Console.WriteLine($"robot JointAllParamUpgrade rtn is {rtn}");
+
+            int upgradeProgress = 0;
+            while (upgradeProgress < 100)
+            {
+                int ret = robot.GetJointAllParamUpgradeProgress(ref upgradeProgress);
+                Console.WriteLine($"robot joint all param upgrade progress : {upgradeProgress}, rtn : {ret}");
+                if (ret != 0 || upgradeProgress == -1)
+                {
+                    break;
+                }
+                Thread.Sleep(200);
+            }
         }
 
     }

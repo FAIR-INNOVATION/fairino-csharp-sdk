@@ -20644,6 +20644,111 @@ namespace fairino
             return errcode;
         }
 
+        /**
+         * @brief 数据备份包上传升级
+         * @param [in] filePath 上传数据备份包文件路径；D://zUP/fr_user_data.tar.gz
+         * @return 错误码
+         */
+        public int DataPackageUpgrade(string filePath)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            int errcode = FileUpLoad(7, filePath);
+            if (0 == errcode)
+            {
+                try
+                {
+                    int rtn = proxy.DataPackageUpgrade();
+                    if (rtn != 0)
+                    {
+                        log?.LogError($"DataPackageUpgrade failed error code is: {rtn}");
+                    }
+                    return rtn;
+                }
+                catch
+                {
+                    if (IsSockComError())
+                    {
+                        log?.LogError("RPC exception");
+                        return g_sock_com_err;
+                    }
+                    return (int)RobotError.ERR_RPC_ERROR;
+                }
+            }
+
+            log?.LogError($"DataPackageUpgrade upload file fail. errcode is: {errcode}.");
+            return errcode;
+        }
+
+        /**
+         * @brief 获取数据备份包升级进度百分比
+         * @param [out] progress 升级进度百分比[0-100], -1:升级失败
+         * @return 错误码
+         */
+        public int GetDataPackageUpgradeProgress(ref int progress)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            try
+            {
+                object[] result = proxy.GetDataPackageUpgradeProgress();
+                int errcode = Convert.ToInt32(result[0]);
+                if (errcode == 0)
+                {
+                    progress = Convert.ToInt32(result[1]);
+                }
+                else
+                {
+                    log?.LogError($"execute GetDataPackageUpgradeProgress fail {errcode}");
+                }
+                return errcode;
+            }
+            catch (Exception ex)
+            {
+                log?.LogError($"GetDataPackageUpgradeProgress exception: {ex.Message}");
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief 获取关节全参数升级进度百分比
+         * @param [out] progress 升级进度百分比[0-100], -1:升级失败
+         * @return 错误码
+         */
+        public int GetJointAllParamUpgradeProgress(ref int progress)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            try
+            {
+                object[] result = proxy.GetJointAllParamUpgradeProgress();
+                int errcode = Convert.ToInt32(result[0]);
+                if (errcode == 0)
+                {
+                    progress = Convert.ToInt32(result[1]);
+                }
+                else
+                {
+                    log?.LogError($"execute GetJointAllParamUpgradeProgress fail {errcode}");
+                }
+                return errcode;
+            }
+            catch (Exception ex)
+            {
+                log?.LogError($"GetJointAllParamUpgradeProgress exception: {ex.Message}");
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
 
         /**
         * @brief 激光传感器记录点

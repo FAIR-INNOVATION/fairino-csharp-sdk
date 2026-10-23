@@ -2098,6 +2098,15 @@ namespace fairino
         [XmlRpcMethod("JointAllParamUpgrade")]
         int JointAllParamUpgrade();
 
+        [XmlRpcMethod("DataPackageUpgrade")]
+        int DataPackageUpgrade();
+
+        [XmlRpcMethod("GetDataPackageUpgradeProgress")]
+        object[] GetDataPackageUpgradeProgress();
+
+        [XmlRpcMethod("GetJointAllParamUpgradeProgress")]
+        object[] GetJointAllParamUpgradeProgress();
+
 
         [XmlRpcMethod("LaserRecordPoint")]
         object[] LaserRecordPoint(int coordID, int x, int y);
