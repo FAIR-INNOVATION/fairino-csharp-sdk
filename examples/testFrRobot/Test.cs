@@ -4567,10 +4567,10 @@ namespace testFrRobot
         private void button104_Click(object sender, EventArgs e)
         {
             //401测试函数
-            //TestServoCartwithParam();
-            //TestServoJwithParam();
-            //TestGetGripperMotionDone();
-            //TestDataPackageUpgrade();
+            TestServoCartwithParam();
+            TestServoJwithParam();
+            TestGetGripperMotionDone();
+            TestDataPackageUpgrade();
             TestJointAllParamUpgrade();
 
             //400测试函数
@@ -10905,8 +10905,6 @@ public int RunTrajectoryJ(string localFilePath = "D://zUP/horse.txt", string rem
                 Thread.Sleep(500);
 
             }
-
-
         }
 
 
@@ -11321,7 +11319,6 @@ public int RunTrajectoryJ(string localFilePath = "D://zUP/horse.txt", string rem
             int cmdID = 0;
             int comtype = 0;
 
-            // ===== ServoMoveStart 参数 =====
             int filtertime = 0;                     // 滤波时间 ms，0 表示不启用；示例 5ms
             double[] jointGain = { 20.0, 20.0, 20.0, 20.0, 20.0, 20.0 };
             // jointGain：J1~J6 位置环增益，-1 表示沿用默认；按需改为实际增益
