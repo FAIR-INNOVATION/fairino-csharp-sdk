@@ -4568,15 +4568,16 @@ namespace testFrRobot
         {
             //402测试函数
 
-            TestGetRobotDHParam();
+            //TestGetRobotDHParam();
             TestWeaveSetParaWithParam();
+            //TestSetCartOffsetRT();   // 死循环+控制台输入，单独测试时打开
 
             //401测试函数
-            TestServoCartwithParam();
-            TestServoJwithParam();
-            TestGetGripperMotionDone();
-            TestDataPackageUpgrade();
-            TestJointAllParamUpgrade();
+            //TestServoCartwithParam();
+            //TestServoJwithParam();
+            //TestGetGripperMotionDone();
+            //TestDataPackageUpgrade();
+            //TestJointAllParamUpgrade();
 
             //400测试函数
             //TestTCFToAllJoint();
@@ -11461,8 +11462,8 @@ public int RunTrajectoryJ(string localFilePath = "D://zUP/horse.txt", string rem
             int rtn;
 
             // 旧调用方式（不传摇枪参数，默认0），验证参数兼容
-            rtn = robot.WeaveSetPara(0, 0, 2.0, 0, 10.0, 0.0, 0.0, 0, 0, 0, 0, 0, 60.0);
-            Console.WriteLine($"WeaveSetPara(14 params) rtn is {rtn}");
+            //rtn = robot.WeaveSetPara(0, 0, 2.0, 0, 10.0, 0.0, 0.0, 0, 0, 0, 0, 0, 60.0);
+            //Console.WriteLine($"WeaveSetPara(14 params) rtn is {rtn}");
 
             // 新调用方式：摆动类型10(摇枪摆动) + 摆长20mm、摆角15°
             rtn = robot.WeaveSetPara(0, 10, 1.0, 0, 2.0, 0.0, 0.0, 0, 50, 80, 0, 1, 0.0, 0.0, 20.0, 15.0);
@@ -11501,6 +11502,57 @@ public int RunTrajectoryJ(string localFilePath = "D://zUP/horse.txt", string rem
 
             rtn = robot.WeaveEnd(0);
             Console.WriteLine($"WeaveEnd rtn is {rtn}");
+        }
+
+        /// <summary>
+        /// 设置运动实时偏移：后台线程读取 y 偏移量，主线程 MoveL 往返，观察实时偏移效果。
+        /// 注意：本测试为死循环且需要控制台输入，请单独调用（WinForms 无控制台时后台线程等待，不会空转）
+        /// </summary>
+        public void TestSetCartOffsetRT()
+        {
+            Thread th = new Thread(() =>
+            {
+                while (true)
+                {
+                    Console.Write("Please input offset y value: ");
+                    string line = Console.ReadLine();
+                    if (line == null)
+                    {
+                        Thread.Sleep(500);
+                        continue;
+                    }
+                    double inputVal;
+                    if (double.TryParse(line, out inputVal))
+                    {
+                        DescPose offsetPos = new DescPose(0, 0, 0, 0, 0, 0);
+                        offsetPos.tran.y = (float)inputVal;
+                        int ret = robot.SetCartOffsetRT(1, offsetPos);
+                        Console.WriteLine($"SetCartOffsetRT rtn is {ret}");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Invalid number!");
+                    }
+                }
+            });
+            th.IsBackground = true;
+            th.Start();
+
+            JointPos j1 = new JointPos(-72.561f, -38.933f, 92.047f, -143.101f, -90.000f, 17.439f);
+            JointPos j2 = new JointPos(-100.211f, -44.358f, 105.565f, -151.192f, -90.007f, -10.211f);
+            DescPose d1 = new DescPose(-300.008f, 599.999f, -199.999f, -0.013f, -0.004f, 0.000f);
+            DescPose d2 = new DescPose(-0.004f, 599.977f, -200.038f, -0.017f, -0.004f, 0.000f);
+            ExaxisPos ex = new ExaxisPos(0.0f, 0.0f, 0.0f, 0.0f);
+            DescPose zeroOff = new DescPose(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+            int rtn;
+
+            while (true)
+            {
+                rtn = robot.MoveL(j1, d1, 1, 0, 100, 100, 100, -1, 0, ex, 0, 0, zeroOff, 100, 0, 0, 10);
+                Console.WriteLine($"moveL errcode:{rtn}");
+                rtn = robot.MoveL(j2, d2, 1, 0, 100, 100, 100, -1, 0, ex, 0, 0, zeroOff, 100, 0, 0, 10);
+                Console.WriteLine($"moveL errcode:{rtn}");
+            }
         }
 
     }

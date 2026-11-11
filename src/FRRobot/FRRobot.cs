@@ -27921,6 +27921,30 @@ namespace fairino
         }
 
         /**
+        * @brief  设置运动实时偏移
+        * @param [in] mode 偏移坐标系；0-工件坐标系；1-基坐标系；2-工具坐标系；3-摆动坐标系
+        * @param [in] offset 实时偏移量[mm，°]
+        * @return  错误码
+        */
+        public int SetCartOffsetRT(int mode, DescPose offset)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            string content = string.Format(CultureInfo.InvariantCulture,
+                "SetCartOffsetRT({0},{1:F6},{2:F6},{3:F6},{4:F6},{5:F6},{6:F6})",
+                mode, offset.tran.x, offset.tran.y, offset.tran.z,
+                offset.rpy.rx, offset.rpy.ry, offset.rpy.rz);
+            string frameStr = string.Format("/f/bIII{0}III1368III{1}III{2}III/b/f",
+                frameCnt++, content.Length, content);
+
+            log?.LogInfo($"SetCartOffsetRT({mode})");
+            return SendTCPFrame(frameStr);
+        }
+
+        /**
         * @brief  设置速度(指令帧，低延迟)
         * @param [in] vel 速度百分比，范围[0~100]
         * @return  错误码
