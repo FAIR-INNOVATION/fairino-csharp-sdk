@@ -4569,8 +4569,8 @@ namespace testFrRobot
             //402测试函数
 
             //TestGetRobotDHParam();
-            TestWeaveSetParaWithParam();
-            //TestSetCartOffsetRT();   // 死循环+控制台输入，单独测试时打开
+            //TestWeaveSetParaWithParam();
+            TestSetCartOffsetRT();   // 弹窗输入 y 偏移(后台MoveL往返)，点取消结束
 
             //401测试函数
             //TestServoCartwithParam();
@@ -11505,53 +11505,69 @@ public int RunTrajectoryJ(string localFilePath = "D://zUP/horse.txt", string rem
         }
 
         /// <summary>
-        /// 设置运动实时偏移：后台线程读取 y 偏移量，主线程 MoveL 往返，观察实时偏移效果。
-        /// 注意：本测试为死循环且需要控制台输入，请单独调用（WinForms 无控制台时后台线程等待，不会空转）
+        /// 设置运动实时偏移：后台线程 MoveL 往返，UI 线程弹窗输入 y 偏移量并实时下发；
+        /// 输入框点“取消”(或关闭弹窗)结束运动并退出。请单独调用，避免与其它测试并行。
         /// </summary>
         public void TestSetCartOffsetRT()
         {
-            Thread th = new Thread(() =>
-            {
-                while (true)
-                {
-                    Console.Write("Please input offset y value: ");
-                    string line = Console.ReadLine();
-                    if (line == null)
-                    {
-                        Thread.Sleep(500);
-                        continue;
-                    }
-                    double inputVal;
-                    if (double.TryParse(line, out inputVal))
-                    {
-                        DescPose offsetPos = new DescPose(0, 0, 0, 0, 0, 0);
-                        offsetPos.tran.y = (float)inputVal;
-                        int ret = robot.SetCartOffsetRT(1, offsetPos);
-                        Console.WriteLine($"SetCartOffsetRT rtn is {ret}");
-                    }
-                    else
-                    {
-                        Console.WriteLine("Invalid number!");
-                    }
-                }
-            });
-            th.IsBackground = true;
-            th.Start();
-
             JointPos j1 = new JointPos(-72.561f, -38.933f, 92.047f, -143.101f, -90.000f, 17.439f);
             JointPos j2 = new JointPos(-100.211f, -44.358f, 105.565f, -151.192f, -90.007f, -10.211f);
             DescPose d1 = new DescPose(-300.008f, 599.999f, -199.999f, -0.013f, -0.004f, 0.000f);
             DescPose d2 = new DescPose(-0.004f, 599.977f, -200.038f, -0.017f, -0.004f, 0.000f);
             ExaxisPos ex = new ExaxisPos(0.0f, 0.0f, 0.0f, 0.0f);
             DescPose zeroOff = new DescPose(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-            int rtn;
 
+            bool running = true;
+
+            // 后台线程：MoveL 往返，让机器人持续运动，实时偏移才能叠加生效
+            Thread motion = new Thread(() =>
+            {
+                while (running)
+                {
+                    int rtn = robot.MoveL(j1, d1, 1, 0, 100, 100, 100, -1, 0, ex, 0, 0, zeroOff, 100, 0, 0, 10);
+                    Console.WriteLine($"moveL errcode:{rtn}");
+                    if (!running)
+                    {
+                        break;
+                    }
+                    rtn = robot.MoveL(j2, d2, 1, 0, 100, 100, 100, -1, 0, ex, 0, 0, zeroOff, 100, 0, 0, 10);
+                    Console.WriteLine($"moveL errcode:{rtn}");
+                }
+            });
+            motion.IsBackground = true;
+            motion.Start();
+
+            // UI 线程：弹窗输入 y 偏移量(mm)，回车下发；点取消/关闭弹窗结束测试
             while (true)
             {
-                rtn = robot.MoveL(j1, d1, 1, 0, 100, 100, 100, -1, 0, ex, 0, 0, zeroOff, 100, 0, 0, 10);
-                Console.WriteLine($"moveL errcode:{rtn}");
-                rtn = robot.MoveL(j2, d2, 1, 0, 100, 100, 100, -1, 0, ex, 0, 0, zeroOff, 100, 0, 0, 10);
-                Console.WriteLine($"moveL errcode:{rtn}");
+                string input = Interaction.InputBox("Please input offset y value (mm):",
+                    "SetCartOffsetRT 实时偏移(mode=1 基坐标系)", "0");
+                if (string.IsNullOrEmpty(input))
+                {
+                    break;
+                }
+
+                double inputVal;
+                if (double.TryParse(input, out inputVal))
+                {
+                    DescPose offsetPos = new DescPose(0, 0, 0, 0, 0, 0);
+                    offsetPos.tran.y = (float)inputVal;
+                    int ret = robot.SetCartOffsetRT(1, offsetPos);
+                    Console.WriteLine($"SetCartOffsetRT y={inputVal} rtn is {ret}");
+                }
+                else
+                {
+                    MessageBox.Show("Invalid number!", "SetCartOffsetRT");
+                }
+            }
+
+            // 结束：先归零偏移，再停止往返运动
+            int clearRtn = robot.SetCartOffsetRT(1, new DescPose(0, 0, 0, 0, 0, 0));
+            Console.WriteLine($"SetCartOffsetRT clear rtn is {clearRtn}");
+            running = false;
+            for (int i = 0; i < 100 && motion.IsAlive; i++)
+            {
+                Thread.Sleep(100);
             }
         }
 
