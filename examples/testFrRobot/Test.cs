@@ -4567,6 +4567,7 @@ namespace testFrRobot
         private void button104_Click(object sender, EventArgs e)
         {
             //402测试函数
+
             TestGetRobotDHParam();
             TestWeaveSetParaWithParam();
 
@@ -11452,17 +11453,54 @@ public int RunTrajectoryJ(string localFilePath = "D://zUP/horse.txt", string rem
         }
 
         /// <summary>
-        /// 摆动参数设置：验证新增摇枪摆长/摆角参数，以及旧的 14 参数调用方式仍可编译
+        /// 摆动参数设置：验证新增摇枪摆长/摆角参数与旧 14 参数调用兼容性，
+        /// 并按 C++ 示例用摆动类型10（摇枪摆动）实跑 MoveJ + WeaveStart + MoveL + WeaveEnd
         /// </summary>
         public void TestWeaveSetParaWithParam()
         {
+            int rtn;
+
             // 旧调用方式（不传摇枪参数，默认0），验证参数兼容
-            int rtn = robot.WeaveSetPara(0, 0, 2.0, 0, 10.0, 0.0, 0.0, 0, 0, 0, 0, 0, 60.0);
+            rtn = robot.WeaveSetPara(0, 0, 2.0, 0, 10.0, 0.0, 0.0, 0, 0, 0, 0, 0, 60.0);
             Console.WriteLine($"WeaveSetPara(14 params) rtn is {rtn}");
 
-            // 新调用方式：平面正弦波摆动 + 摇枪摆长80mm、摆角30°
-            rtn = robot.WeaveSetPara(1, 4, 2.0, 0, 12.0, 0.0, 0.0, 0, 100, 100, 0, 1, 0.0, 0.0, 80.0, 30.0);
+            // 新调用方式：摆动类型10(摇枪摆动) + 摆长20mm、摆角15°
+            rtn = robot.WeaveSetPara(0, 10, 1.0, 0, 2.0, 0.0, 0.0, 0, 50, 80, 0, 1, 0.0, 0.0, 20.0, 15.0);
             Console.WriteLine($"WeaveSetPara(16 params) rtn is {rtn}");
+
+            JointPos j1 = new JointPos(-72.561f, -38.933f, 92.047f, -143.101f, -90.000f, 17.439f);
+            JointPos j2 = new JointPos(-100.211f, -44.358f, 105.565f, -151.192f, -90.007f, -10.211f);
+
+            DescPose desc_pos1 = new DescPose(-300.008f, 599.999f, -199.999f, -0.013f, -0.004f, 0.000f);
+            DescPose desc_pos2 = new DescPose(-0.004f, 599.977f, -200.038f, -0.017f, -0.004f, 0.000f);
+
+            DescPose offset_pos = new DescPose(0, 0, 0, 0, 0, 0);
+            ExaxisPos epos = new ExaxisPos(0, 0, 0, 0);
+            int tool = 1;
+            int user = 0;
+            float vel = 100.0f;
+            float acc = 100.0f;
+            float ovl = 100.0f;
+            float oacc = 100.0f;
+            float blendT = -1.0f;
+            float blendR = -1.0f;
+            byte flag = 0;
+            byte search = 0;
+            int blendMode = 0;
+            int velAccMode = 0;
+            robot.SetSpeed(5);
+
+            rtn = robot.MoveJ(j1, desc_pos1, tool, user, vel, acc, ovl, epos, blendT, flag, offset_pos);
+            Console.WriteLine($"movej errcode:{rtn}");
+
+            rtn = robot.WeaveStart(0);
+            Console.WriteLine($"WeaveStart rtn is {rtn}");
+
+            rtn = robot.MoveL(j2, desc_pos2, tool, user, vel, acc, ovl, blendR, blendMode, epos, search, flag, offset_pos, oacc, velAccMode, 0, 10);
+            Console.WriteLine($"movel errcode:{rtn}");
+
+            rtn = robot.WeaveEnd(0);
+            Console.WriteLine($"WeaveEnd rtn is {rtn}");
         }
 
     }
