@@ -1,4 +1,4 @@
-﻿using fairino;
+using fairino;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -4566,6 +4566,10 @@ namespace testFrRobot
 
         private void button104_Click(object sender, EventArgs e)
         {
+            //402测试函数
+            TestGetRobotDHParam();
+            TestWeaveSetParaWithParam();
+
             //401测试函数
             TestServoCartwithParam();
             TestServoJwithParam();
@@ -11403,6 +11407,62 @@ public int RunTrajectoryJ(string localFilePath = "D://zUP/horse.txt", string rem
                 }
                 Thread.Sleep(200);
             }
+        }
+
+        /// <summary>
+        /// 获取机器人 DH 补偿模型及参数：DH1.0 返回补偿值，DH2.0 返回完整 DH 参数
+        /// </summary>
+        public void TestGetRobotDHParam()
+        {
+            int compenMode = 0;
+            int rtn = robot.GetDHCompenMode(ref compenMode);
+            Console.WriteLine($"GetDHCompenMode rtn is {rtn}, compenMode is {compenMode}");
+
+            if (rtn != 0)
+            {
+                return;
+            }
+
+            if (compenMode == 0)
+            {
+                double[] dh = new double[6];
+                rtn = robot.GetDHCompensation(ref dh);
+                Console.WriteLine($"GetDHCompensation rtn is {rtn}");
+                Console.WriteLine($"dh is: {dh[0]} {dh[1]} {dh[2]} {dh[3]} {dh[4]} {dh[5]}");
+            }
+            else if (compenMode == 1)
+            {
+                double[] d = new double[6];
+                double[] a = new double[6];
+                double[] alpha = new double[6];
+                double[] beta = new double[6];
+                double[] theta = new double[6];
+                rtn = robot.GetDHAllParam(ref d, ref a, ref alpha, ref beta, ref theta);
+                Console.WriteLine($"GetDHAllParam rtn is {rtn}");
+                Console.WriteLine($"GetDHAllParam d     {d[0]} {d[1]} {d[2]} {d[3]} {d[4]} {d[5]}");
+                Console.WriteLine($"GetDHAllParam a     {a[0]} {a[1]} {a[2]} {a[3]} {a[4]} {a[5]}");
+                Console.WriteLine($"GetDHAllParam alpha {alpha[0]} {alpha[1]} {alpha[2]} {alpha[3]} {alpha[4]} {alpha[5]}");
+                Console.WriteLine($"GetDHAllParam beta  {beta[0]} {beta[1]} {beta[2]} {beta[3]} {beta[4]} {beta[5]}");
+                Console.WriteLine($"GetDHAllParam theta {theta[0]} {theta[1]} {theta[2]} {theta[3]} {theta[4]} {theta[5]}");
+            }
+            else
+            {
+                Console.WriteLine($"GetDHCompenMode unknown mode: {compenMode}");
+            }
+        }
+
+        /// <summary>
+        /// 摆动参数设置：验证新增摇枪摆长/摆角参数，以及旧的 14 参数调用方式仍可编译
+        /// </summary>
+        public void TestWeaveSetParaWithParam()
+        {
+            // 旧调用方式（不传摇枪参数，默认0），验证参数兼容
+            int rtn = robot.WeaveSetPara(0, 0, 2.0, 0, 10.0, 0.0, 0.0, 0, 0, 0, 0, 0, 60.0);
+            Console.WriteLine($"WeaveSetPara(14 params) rtn is {rtn}");
+
+            // 新调用方式：平面正弦波摆动 + 摇枪摆长80mm、摆角30°
+            rtn = robot.WeaveSetPara(1, 4, 2.0, 0, 12.0, 0.0, 0.0, 0, 100, 100, 0, 1, 0.0, 0.0, 80.0, 30.0);
+            Console.WriteLine($"WeaveSetPara(16 params) rtn is {rtn}");
         }
 
     }

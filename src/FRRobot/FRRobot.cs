@@ -1,4 +1,4 @@
-﻿using CookComputing.XmlRpc;
+using CookComputing.XmlRpc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,7 +35,7 @@ namespace fairino
     {
         ICallSupervisor proxy = null;
 
-        const string SDK_VERSION = " C#SDK-V1.3.2  Web-4.0.1";
+        const string SDK_VERSION = " C#SDK-V1.3.2  Web-4.0.2";
 
         private string robot_ip = "192.168.57.2";//机器人ip
         private int g_sock_com_err = (int)RobotError.ERR_SUCCESS;
@@ -9974,6 +9974,108 @@ namespace fairino
             }
         }
 
+        /**
+        * @brief 获取机器人DH补偿模型
+        * @param [out] mode 0-DH1.0；1-DH2.0
+        * @return 错误码
+        */
+        public int GetDHCompenMode(ref int mode)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            try
+            {
+                object[] result = proxy.GetDHCompenMode();
+                int errcode = Convert.ToInt32(result[0]);
+                if (errcode == 0)
+                {
+                    mode = Convert.ToInt32(result[1]);
+                }
+                else
+                {
+                    log?.LogError($"execute GetDHCompenMode fail {errcode}");
+                }
+                log?.LogInfo($"GetDHCompenMode(ref {mode}) : {errcode}");
+                return errcode;
+            }
+            catch (Exception ex)
+            {
+                if (IsSockComError())
+                {
+                    log?.LogError($"RPC exception: {ex.Message}");
+                    return g_sock_com_err;
+                }
+                log?.LogWarn($"RPC non-communication exception: {ex.Message}");
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+        * @brief 获取机器人DH2.0参数
+        * @param [out] d 连杆偏距(mm)
+        * @param [out] a 连杆长度(mm)
+        * @param [out] alpha 连杆扭角(°)
+        * @param [out] beta 连杆偏角(°)
+        * @param [out] theta 关节零位(°)
+        * @return 错误码
+        */
+        public int GetDHAllParam(ref double[] d, ref double[] a, ref double[] alpha, ref double[] beta, ref double[] theta)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            if (d == null || a == null || alpha == null || beta == null || theta == null ||
+                d.Length < 6 || a.Length < 6 || alpha.Length < 6 || beta.Length < 6 || theta.Length < 6)
+            {
+                log?.LogError("GetDHAllParam invalid output array, each array length must be at least 6");
+                return (int)RobotError.ERR_PARAM_NUM;
+            }
+
+            try
+            {
+                object[] result = proxy.GetDHAllParam();
+                int errcode = Convert.ToInt32(result[0]);
+                if (errcode == 0)
+                {
+                    string paramStr = (string)result[1];
+                    string[] parS = paramStr.Split(',');
+                    if (parS.Length != 30)
+                    {
+                        log?.LogError($"get DH all param size fail: {parS.Length}");
+                        return -1;
+                    }
+                    for (int i = 0; i < 6; i++)
+                    {
+                        d[i] = double.Parse(parS[i]);
+                        a[i] = double.Parse(parS[i + 6]);
+                        alpha[i] = double.Parse(parS[i + 12]);
+                        beta[i] = double.Parse(parS[i + 18]);
+                        theta[i] = double.Parse(parS[i + 24]);
+                    }
+                }
+                else
+                {
+                    log?.LogError($"execute GetDHAllParam fail {errcode}");
+                }
+                log?.LogInfo($"GetDHAllParam(ref d,ref a,ref alpha,ref beta,ref theta) : {errcode}");
+                return errcode;
+            }
+            catch (Exception ex)
+            {
+                if (IsSockComError())
+                {
+                    log?.LogError($"RPC exception: {ex.Message}");
+                    return g_sock_com_err;
+                }
+                log?.LogWarn($"RPC non-communication exception: {ex.Message}");
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
         /** 
          * @brief 下载点位表数据库 
          * @param [in] pointTableName 要下载的点位表名称    pointTable1.db
@@ -10903,9 +11005,12 @@ namespace fairino
            * @param [in] weaveCircleRadio 圆形摆动-回调比率(0-100%)
            * @param [in] weaveStationary 摆动位置等待，0-等待时间内位置继续移动；1-等待时间内位置静止
            * @param [in] weaveYawAngle 摆动方向方位角(绕摆动Z轴旋转)，单位°
+           * @param [in] weaveRotAngle 摆动方向侧倾角(绕摆动X轴偏转)，单位°[-180-180]，默认0
+           * @param [in] weavePendulumLength 摇枪摆动的摆长，单位mm，默认0(不启用摇枪摆动)
+           * @param [in] weavePendulumAngle 摇枪摆动的摆角，单位°，默认0(不启用摇枪摆动)
            * @return 错误码 
            */
-        public int WeaveSetPara(int weaveNum, int weaveType, double weaveFrequency, int weaveIncStayTime, double weaveRange, double weaveLeftRange, double weaveRightRange, int additionalStayTime, int weaveLeftStayTime, int weaveRightStayTime, int weaveCircleRadio, int weaveStationary, double weaveYawAngle, double weaveRotAngle=0)
+        public int WeaveSetPara(int weaveNum, int weaveType, double weaveFrequency, int weaveIncStayTime, double weaveRange, double weaveLeftRange, double weaveRightRange, int additionalStayTime, int weaveLeftStayTime, int weaveRightStayTime, int weaveCircleRadio, int weaveStationary, double weaveYawAngle, double weaveRotAngle = 0, double weavePendulumLength = 0, double weavePendulumAngle = 0)
         {
             if (IsSockComError())
             {
@@ -10914,10 +11019,20 @@ namespace fairino
 
             try
             {
-                int rtn = proxy.WeaveSetPara(weaveNum, weaveType, weaveFrequency, weaveIncStayTime, weaveRange, weaveLeftRange, weaveRightRange, additionalStayTime, weaveLeftStayTime, weaveRightStayTime, weaveCircleRadio, weaveStationary, weaveYawAngle, weaveRotAngle);
+                int rtn;
+                // 摆长/摆角均为默认值0时沿用14参数接口，兼容未升级固件的控制器；
+                // 只有实际启用摇枪摆动时才下发16参数
+                if (weavePendulumLength == 0 && weavePendulumAngle == 0)
+                {
+                    rtn = proxy.WeaveSetPara(weaveNum, weaveType, weaveFrequency, weaveIncStayTime, weaveRange, weaveLeftRange, weaveRightRange, additionalStayTime, weaveLeftStayTime, weaveRightStayTime, weaveCircleRadio, weaveStationary, weaveYawAngle, weaveRotAngle);
+                }
+                else
+                {
+                    rtn = proxy.WeaveSetParaEx(weaveNum, weaveType, weaveFrequency, weaveIncStayTime, weaveRange, weaveLeftRange, weaveRightRange, additionalStayTime, weaveLeftStayTime, weaveRightStayTime, weaveCircleRadio, weaveStationary, weaveYawAngle, weaveRotAngle, weavePendulumLength, weavePendulumAngle);
+                }
                 if (log != null)
                 {
-                    log.LogInfo($"WeaveSetPara({weaveNum},{weaveType},{weaveFrequency},{weaveIncStayTime},{weaveRange},{weaveLeftRange}, {weaveRightRange}, {additionalStayTime},{weaveLeftStayTime},{weaveRightStayTime},{weaveCircleRadio},{weaveStationary}, {weaveYawAngle},{weaveRotAngle})) : {rtn}");
+                    log.LogInfo($"WeaveSetPara({weaveNum},{weaveType},{weaveFrequency},{weaveIncStayTime},{weaveRange},{weaveLeftRange}, {weaveRightRange}, {additionalStayTime},{weaveLeftStayTime},{weaveRightStayTime},{weaveCircleRadio},{weaveStationary}, {weaveYawAngle},{weaveRotAngle},{weavePendulumLength},{weavePendulumAngle})) : {rtn}");
                 }
                 return rtn;
             }

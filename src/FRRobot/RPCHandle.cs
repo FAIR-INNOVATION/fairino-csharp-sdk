@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data.SqlTypes;
 using System.Linq;
@@ -1444,6 +1444,14 @@ namespace fairino
         [XmlRpcMethod("GetDHCompensation")]
         object[] GetDHCompensation();
 
+        /** 获取DH补偿模型：0-DH1.0；1-DH2.0 */
+        [XmlRpcMethod("GetDHCompenMode")]
+        object[] GetDHCompenMode();
+
+        /** 获取DH2.0参数，返回值 result[1] 为逗号分隔的 30 个值：d[6],a[6],alpha[6],beta[6],theta[6] */
+        [XmlRpcMethod("GetDHAllParam")]
+        object[] GetDHAllParam();
+
         [XmlRpcMethod("PointTableDownload")]
         int PointTableDownload(string pointTableName);
 
@@ -1491,6 +1499,10 @@ namespace fairino
 
         [XmlRpcMethod("WeaveSetPara")]
         int WeaveSetPara(int weaveNum, int weaveType, double weaveFrequency, int weaveIncStayTime, double weaveRange, double weaveLeftRange, double weaveRightRange, int additionalStayTime, int weaveLeftStayTime, int weaveRightStayTime, int weaveCircleRadio, int weaveStationary, double weaveYawAngle, double weaveRotAngle);
+
+        /** 16参数版本：在14参数基础上追加摇枪摆长、摆角；仅在启用摇枪摆动时调用，兼容未升级固件 */
+        [XmlRpcMethod("WeaveSetPara")]
+        int WeaveSetParaEx(int weaveNum, int weaveType, double weaveFrequency, int weaveIncStayTime, double weaveRange, double weaveLeftRange, double weaveRightRange, int additionalStayTime, int weaveLeftStayTime, int weaveRightStayTime, int weaveCircleRadio, int weaveStationary, double weaveYawAngle, double weaveRotAngle, double weavePendulumLength, double weavePendulumAngle);
 
         [XmlRpcMethod("WeaveOnlineSetPara")]
         int WeaveOnlineSetPara(int weaveNum, int weaveType, double weaveFrequency, int weaveIncStayTime, double weaveRange, int weaveLeftStayTime, int weaveRightStayTime, int weaveCircleRadio, int weaveStationary);
