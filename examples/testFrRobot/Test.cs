@@ -4570,6 +4570,8 @@ namespace testFrRobot
 
             //TestGetRobotDHParam();
             //TestWeaveSetParaWithParam();
+            TestWeldParamSet();      // 4.0.2 焊接参数接口
+            TestAxleSucker();        // 4.0.2 末端吸盘接口
             TestSetCartOffsetRT();   // 弹窗输入 y 偏移(后台MoveL往返)，点取消结束
 
             //401测试函数
@@ -11569,6 +11571,99 @@ public int RunTrajectoryJ(string localFilePath = "D://zUP/horse.txt", string rem
             {
                 Thread.Sleep(100);
             }
+        }
+
+        /// <summary>
+        /// 4.0.2 焊接参数接口测试：类型、厂商、送丝速度/弧长/电弧控制/程序槽号/禁止焊接、
+        /// 各 UDP 自定义控制字序号、协同状态扩展 DI/DO、焊接协同状态查询
+        /// </summary>
+        public void TestWeldParamSet()
+        {
+            int rtn;
+
+            rtn = robot.SetWeldType(0);                 // 0-电弧焊；1-激光焊
+            Console.WriteLine($"SetWeldType: {rtn}");
+
+            rtn = robot.SetWeldCompany(101);            // 101-麦格米特；102-OTC；103-松下；104-米勒；1001-everlast激光焊
+            Console.WriteLine($"SetWeldCompany: {rtn}");
+
+            rtn = robot.SetWeldWFS(0, 5.0);             // io_type=0(IO)，送丝速度 5.0
+            Console.WriteLine($"SetWeldWFS: {rtn}");
+
+            rtn = robot.SetWeldArcLen(0, 10);           // 弧长
+            Console.WriteLine($"SetWeldArcLen: {rtn}");
+
+            rtn = robot.SetWeldArcCtrl(0, 0);           // 电弧控制值
+            Console.WriteLine($"SetWeldArcCtrl: {rtn}");
+
+            rtn = robot.SetWeldSlot(0, 1);              // 程序槽号
+            Console.WriteLine($"SetWeldSlot: {rtn}");
+
+            rtn = robot.SetWeldDisable(0, 0);           // 0-关闭"禁止焊接"；1-开启
+            Console.WriteLine($"SetWeldDisable: {rtn}");
+
+            rtn = robot.SetWeldWFSUdpNum(44);           // 送丝速度 UDP 控制字序号，默认44
+            Console.WriteLine($"SetWeldWFSUdpNum: {rtn}");
+
+            rtn = robot.SetWeldArcLenUdpNum(45);        // 弧长 UDP 控制字序号，默认45
+            Console.WriteLine($"SetWeldArcLenUdpNum: {rtn}");
+
+            rtn = robot.SetWeldArcCtrlUdpNum(46);       // 电弧控制 UDP 控制字序号，默认46
+            Console.WriteLine($"SetWeldArcCtrlUdpNum: {rtn}");
+
+            rtn = robot.SetWeldSlotUdpNum(47);          // 程序槽号 UDP 控制字序号，默认47
+            Console.WriteLine($"SetWeldSlotUdpNum: {rtn}");
+
+            rtn = robot.SetWeldDisableExtDoNum(18);     // "禁止焊接" UDP 扩展DO序号，默认18
+            Console.WriteLine($"SetWeldDisableExtDoNum: {rtn}");
+
+            rtn = robot.SetWeldSynStateExtDINum(-1);    // "协同状态" UDP 扩展DI序号，-1 不启用
+            Console.WriteLine($"SetWeldSynStateExtDINum: {rtn}");
+
+            rtn = robot.SetWeldWfsFeedbackUdpNum(47);   // 送丝速度反馈 UDP 状态字序号，默认47
+            Console.WriteLine($"SetWeldWfsFeedbackUdpNum: {rtn}");
+
+            int synState = -1;
+            rtn = robot.GetWeldSynState(0, ref synState);   // 0-非协同；1-协同
+            Console.WriteLine($"GetWeldSynState rtn={rtn}, synState={synState}");
+        }
+
+        /// <summary>
+        /// 4.0.2 末端吸盘接口测试：功能码设置/读取、控制参数、激活、状态查询、等待吸附完成
+        /// 注意：minPress/maxPress 为实际真空度阈值，示例用 0，联调时按吸盘参数修改
+        /// </summary>
+        public void TestAxleSucker()
+        {
+            int rtn;
+            int id = 0;                                 // 站号
+
+            // 功能码 bit0~bit10 全部启用
+            rtn = robot.SetAxleSuckerFunc(id, 0x7FF);
+            Console.WriteLine($"SetAxleSuckerFunc: {rtn}");
+
+            int funcValue = 0;
+            rtn = robot.GetAxleSuckerFunc(id, ref funcValue);
+            Console.WriteLine($"GetAxleSuckerFunc rtn={rtn}, value=0x{funcValue:X}");
+
+            int[] channel = { 1, 1, 1, 1 };             // 1-使能；0-不使能
+            int[] minPress = { 0, 0, 0, 0 };            // 最小真空度
+            int[] maxPress = { 0, 0, 0, 0 };            // 最大真空度(吸盘错误码)
+            rtn = robot.SetAxleSuckerCtrl(id, channel, minPress, maxPress, 5000);
+            Console.WriteLine($"SetAxleSuckerCtrl: {rtn}");
+
+            rtn = robot.SetAxleSuckerAct(id, 1);        // 1-激活；0-复位
+            Console.WriteLine($"SetAxleSuckerAct: {rtn}");
+
+            int enable = 0;
+            int done = 0;
+            int vacuumValue = 0;
+            int error = 0;
+            rtn = robot.GetAxleSuckerState(0, ref enable, ref done, ref vacuumValue, ref error);
+            Console.WriteLine($"GetAxleSuckerState rtn={rtn}, enable={enable}, done={done}, vacuumValue={vacuumValue}, error={error}");
+
+            // 等待通道0吸附物体：state=1，超时5000ms，策略1(超时继续)
+            rtn = robot.WaitAxleSuckerState(0, 1, 5000, 1);
+            Console.WriteLine($"WaitAxleSuckerState: {rtn}");
         }
 
     }

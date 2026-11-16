@@ -2553,6 +2553,71 @@ namespace fairino
 
         [XmlRpcMethod("GetDexterousHandsFunc")]
         object[] GetDexterousHandsFunc(int p1);
+
+        // === 4.0.2 焊接参数接口 ===
+        [XmlRpcMethod("SetWeldType")]
+        int SetWeldType(int type);
+
+        [XmlRpcMethod("SetWeldCompany")]
+        int SetWeldCompany(int value);
+
+        [XmlRpcMethod("SetWeldWFS")]
+        int SetWeldWFS(int io_type, double status);
+
+        [XmlRpcMethod("SetWeldArcLen")]
+        int SetWeldArcLen(int io_type, int status);
+
+        [XmlRpcMethod("SetWeldArcCtrl")]
+        int SetWeldArcCtrl(int io_type, int status);
+
+        [XmlRpcMethod("SetWeldSlot")]
+        int SetWeldSlot(int io_type, int status);
+
+        [XmlRpcMethod("SetWeldDisable")]
+        int SetWeldDisable(int io_type, int status);
+
+        [XmlRpcMethod("SetWeldWFSUdpNum")]
+        int SetWeldWFSUdpNum(int udpNum);
+
+        [XmlRpcMethod("SetWeldArcLenUdpNum")]
+        int SetWeldArcLenUdpNum(int udpNum);
+
+        [XmlRpcMethod("SetWeldArcCtrlUdpNum")]
+        int SetWeldArcCtrlUdpNum(int udpNum);
+
+        [XmlRpcMethod("SetWeldSlotUdpNum")]
+        int SetWeldSlotUdpNum(int udpNum);
+
+        [XmlRpcMethod("SetWeldDisableExtDoNum")]
+        int SetWeldDisableExtDoNum(int DONum);
+
+        [XmlRpcMethod("SetWeldSynStateExtDINum")]
+        int SetWeldSynStateExtDINum(int DINum);
+
+        [XmlRpcMethod("GetWeldSynState")]
+        object[] GetWeldSynState(int io_type);
+
+        [XmlRpcMethod("SetWeldWfsFeedbackUdpNum")]
+        int SetWeldWfsFeedbackUdpNum(int udpNum);
+
+        // === 4.0.2 末端吸盘接口 ===
+        [XmlRpcMethod("SetAxleSuckerFunc")]
+        int SetAxleSuckerFunc(int id, int value);
+
+        [XmlRpcMethod("GetAxleSuckerFunc")]
+        object[] GetAxleSuckerFunc(int id);
+
+        [XmlRpcMethod("SetAxleSuckerCtrl")]
+        int SetAxleSuckerCtrl(int id, int[] channel, int[] minPress, int[] maxPress, int time);
+
+        [XmlRpcMethod("SetAxleSuckerAct")]
+        int SetAxleSuckerAct(int id, int act);
+
+        [XmlRpcMethod("GetAxleSuckerState")]
+        object[] GetAxleSuckerState(int channel);
+
+        [XmlRpcMethod("WaitAxleSuckerState")]
+        int WaitAxleSuckerState(int channel, int state, int timeout, int strategy);
     }
     internal class RPCHandle
     {

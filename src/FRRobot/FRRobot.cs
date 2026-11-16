@@ -28011,6 +28011,644 @@ namespace fairino
             log?.LogInfo($"SetRobottime() : {g_sendbuf}");
             return 0;
         }
+
+        // ==================== 4.0.2 焊接参数接口 ====================
+
+        /**
+         * @brief 设置焊接类型
+         * @param [in] type 0-电弧焊；1-激光焊
+         * @return 错误码
+         */
+        public int SetWeldType(int type)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+                int rtn = proxy.SetWeldType(type);
+                log?.LogInfo($"SetWeldType({type}) : {rtn}");
+                return rtn;
+            }
+            catch
+            {
+                if (IsSockComError())
+                {
+                    log?.LogError("RPC exception");
+                    return g_sock_com_err;
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief 设置焊机厂商
+         * @param [in] value 101-麦格米特；102-OTC；103-松下；104-米勒；1001-everlast激光焊
+         * @return 错误码
+         */
+        public int SetWeldCompany(int value)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+                int rtn = proxy.SetWeldCompany(value);
+                log?.LogInfo($"SetWeldCompany({value}) : {rtn}");
+                return rtn;
+            }
+            catch
+            {
+                if (IsSockComError())
+                {
+                    log?.LogError("RPC exception");
+                    return g_sock_com_err;
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief 设置送丝速度
+         * @param [in] io_type 0-IO；1-UDP；2-modbusTCP
+         * @param [in] status 送丝速度值
+         * @return 错误码
+         */
+        public int SetWeldWFS(int io_type, double status)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+                int rtn = proxy.SetWeldWFS(io_type, status);
+                log?.LogInfo($"SetWeldWFS({io_type},{status}) : {rtn}");
+                return rtn;
+            }
+            catch
+            {
+                if (IsSockComError())
+                {
+                    log?.LogError("RPC exception");
+                    return g_sock_com_err;
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief 设置焊接弧长
+         * @param [in] io_type 0-IO；1-UDP；2-modbusTCP
+         * @param [in] status 弧长
+         * @return 错误码
+         */
+        public int SetWeldArcLen(int io_type, int status)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+                int rtn = proxy.SetWeldArcLen(io_type, status);
+                log?.LogInfo($"SetWeldArcLen({io_type},{status}) : {rtn}");
+                return rtn;
+            }
+            catch
+            {
+                if (IsSockComError())
+                {
+                    log?.LogError("RPC exception");
+                    return g_sock_com_err;
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief 设置电弧控制值
+         * @param [in] io_type 0-IO；1-UDP；2-modbusTCP
+         * @param [in] status 电弧控制值
+         * @return 错误码
+         */
+        public int SetWeldArcCtrl(int io_type, int status)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+                int rtn = proxy.SetWeldArcCtrl(io_type, status);
+                log?.LogInfo($"SetWeldArcCtrl({io_type},{status}) : {rtn}");
+                return rtn;
+            }
+            catch
+            {
+                if (IsSockComError())
+                {
+                    log?.LogError("RPC exception");
+                    return g_sock_com_err;
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief 设置程序槽号
+         * @param [in] io_type 0-IO；1-UDP；2-modbusTCP
+         * @param [in] status 程序槽号值
+         * @return 错误码
+         */
+        public int SetWeldSlot(int io_type, int status)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+                int rtn = proxy.SetWeldSlot(io_type, status);
+                log?.LogInfo($"SetWeldSlot({io_type},{status}) : {rtn}");
+                return rtn;
+            }
+            catch
+            {
+                if (IsSockComError())
+                {
+                    log?.LogError("RPC exception");
+                    return g_sock_com_err;
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief 设置"禁止焊接"DO
+         * @param [in] io_type 0-IO；1-UDP；2-modbusTCP
+         * @param [in] status 0-关闭"禁止焊接"；1-开启"禁止焊接"
+         * @return 错误码
+         */
+        public int SetWeldDisable(int io_type, int status)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+                int rtn = proxy.SetWeldDisable(io_type, status);
+                log?.LogInfo($"SetWeldDisable({io_type},{status}) : {rtn}");
+                return rtn;
+            }
+            catch
+            {
+                if (IsSockComError())
+                {
+                    log?.LogError("RPC exception");
+                    return g_sock_com_err;
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief 设置送丝速度UDP自定义控制字序号
+         * @param [in] udpNum UDP自定义控制字序号，默认44
+         * @return 错误码
+         */
+        public int SetWeldWFSUdpNum(int udpNum)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+                int rtn = proxy.SetWeldWFSUdpNum(udpNum);
+                log?.LogInfo($"SetWeldWFSUdpNum({udpNum}) : {rtn}");
+                return rtn;
+            }
+            catch
+            {
+                if (IsSockComError())
+                {
+                    log?.LogError("RPC exception");
+                    return g_sock_com_err;
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief 设置弧长UDP自定义控制字序号
+         * @param [in] udpNum UDP自定义控制字序号，默认45
+         * @return 错误码
+         */
+        public int SetWeldArcLenUdpNum(int udpNum)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+                int rtn = proxy.SetWeldArcLenUdpNum(udpNum);
+                log?.LogInfo($"SetWeldArcLenUdpNum({udpNum}) : {rtn}");
+                return rtn;
+            }
+            catch
+            {
+                if (IsSockComError())
+                {
+                    log?.LogError("RPC exception");
+                    return g_sock_com_err;
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief 设置电弧控制UDP自定义控制字序号
+         * @param [in] udpNum UDP自定义控制字序号，默认46
+         * @return 错误码
+         */
+        public int SetWeldArcCtrlUdpNum(int udpNum)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+                int rtn = proxy.SetWeldArcCtrlUdpNum(udpNum);
+                log?.LogInfo($"SetWeldArcCtrlUdpNum({udpNum}) : {rtn}");
+                return rtn;
+            }
+            catch
+            {
+                if (IsSockComError())
+                {
+                    log?.LogError("RPC exception");
+                    return g_sock_com_err;
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief 设置程序槽号UDP自定义控制字序号
+         * @param [in] udpNum UDP自定义控制字序号，默认47
+         * @return 错误码
+         */
+        public int SetWeldSlotUdpNum(int udpNum)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+                int rtn = proxy.SetWeldSlotUdpNum(udpNum);
+                log?.LogInfo($"SetWeldSlotUdpNum({udpNum}) : {rtn}");
+                return rtn;
+            }
+            catch
+            {
+                if (IsSockComError())
+                {
+                    log?.LogError("RPC exception");
+                    return g_sock_com_err;
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief 设置"禁止焊接"UDP扩展DO序号
+         * @param [in] DONum UDP扩展DO序号，默认18
+         * @return 错误码
+         */
+        public int SetWeldDisableExtDoNum(int DONum)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+                int rtn = proxy.SetWeldDisableExtDoNum(DONum);
+                log?.LogInfo($"SetWeldDisableExtDoNum({DONum}) : {rtn}");
+                return rtn;
+            }
+            catch
+            {
+                if (IsSockComError())
+                {
+                    log?.LogError("RPC exception");
+                    return g_sock_com_err;
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief 设置"协同状态"UDP扩展DI序号
+         * @param [in] DINum UDP扩展DI序号，默认-1不启用
+         * @return 错误码
+         */
+        public int SetWeldSynStateExtDINum(int DINum)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+                int rtn = proxy.SetWeldSynStateExtDINum(DINum);
+                log?.LogInfo($"SetWeldSynStateExtDINum({DINum}) : {rtn}");
+                return rtn;
+            }
+            catch
+            {
+                if (IsSockComError())
+                {
+                    log?.LogError("RPC exception");
+                    return g_sock_com_err;
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief 获取"协同状态"
+         * @param [in] io_type 0-IO；1-UDP；2-modbusTCP
+         * @param [out] synState 0-非协同；1-协同
+         * @return 错误码
+         */
+        public int GetWeldSynState(int io_type, ref int synState)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            try
+            {
+                object[] result = proxy.GetWeldSynState(io_type);
+                int errcode = (int)result[0];
+                if (errcode != 0)
+                {
+                    log?.LogError($"Execute GetWeldSynState fail: {errcode}");
+                    return errcode;
+                }
+                synState = (int)result[1];
+                log?.LogInfo($"GetWeldSynState({io_type}) : {synState}");
+                return errcode;
+            }
+            catch (Exception ex)
+            {
+                log?.LogError($"RPC exception in GetWeldSynState: {ex.Message}");
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief 设置"送丝速度"UDP自定义状态字序号
+         * @param [in] udpNum UDP自定义状态字序号，默认47
+         * @return 错误码
+         */
+        public int SetWeldWfsFeedbackUdpNum(int udpNum)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+                int rtn = proxy.SetWeldWfsFeedbackUdpNum(udpNum);
+                log?.LogInfo($"SetWeldWfsFeedbackUdpNum({udpNum}) : {rtn}");
+                return rtn;
+            }
+            catch
+            {
+                if (IsSockComError())
+                {
+                    log?.LogError("RPC exception");
+                    return g_sock_com_err;
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        // ==================== 4.0.2 末端吸盘接口 ====================
+
+        /**
+         * @brief 设置启用末端吸盘动作控制功能码
+         * @param [in] id 站号
+         * @param [in] value 功能码：Bit0-吸盘初始化；Bit1-设置通道一最大真空度；Bit2-设置通道一最小真空度；
+         * Bit3-设置通道二最大真空度；Bit4-设置通道二最小真空度；Bit5-读通道一状态；Bit6-读通道二状态；
+         * Bit7-读初始化状态；Bit8-读故障码；Bit9-读通道一实际真空度；Bit10-读通道二实际真空度。
+         * 设置内容 0-不启用；1-启用
+         * @return 错误码
+         */
+        public int SetAxleSuckerFunc(int id, int value)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+                int rtn = proxy.SetAxleSuckerFunc(id, value);
+                log?.LogInfo($"SetAxleSuckerFunc({id},{value}) : {rtn}");
+                return rtn;
+            }
+            catch
+            {
+                if (IsSockComError())
+                {
+                    log?.LogError("RPC exception");
+                    return g_sock_com_err;
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief 获取末端吸盘动作控制功能码
+         * @param [in] id 站号
+         * @param [out] value 功能码，位定义同 SetAxleSuckerFunc
+         * @return 错误码
+         */
+        public int GetAxleSuckerFunc(int id, ref int value)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+                object[] result = proxy.GetAxleSuckerFunc(id);
+                int errcode = (int)result[0];
+                if (errcode == 0)
+                {
+                    value = (int)result[1];
+                }
+                log?.LogInfo($"GetAxleSuckerFunc({id}, ref {value}) : {errcode}");
+                return errcode;
+            }
+            catch
+            {
+                if (IsSockComError())
+                {
+                    log?.LogError("RPC exception");
+                    return g_sock_com_err;
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief 设置末端吸盘控制参数
+         * @param [in] id 站号
+         * @param [in] channel 通道使能，长度4：channel[0]=1-使能，0-不使能
+         * @param [in] minPress 最小真空度，长度4
+         * @param [in] maxPress 最大真空度（吸盘错误码），长度4
+         * @param [in] time 超时时间(ms)
+         * @return 错误码
+         */
+        public int SetAxleSuckerCtrl(int id, int[] channel, int[] minPress, int[] maxPress, int time)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            if (channel == null || minPress == null || maxPress == null ||
+                channel.Length < 4 || minPress.Length < 4 || maxPress.Length < 4)
+            {
+                log?.LogError("SetAxleSuckerCtrl invalid array, each array length must be at least 4");
+                return (int)RobotError.ERR_PARAM_NUM;
+            }
+            try
+            {
+                int rtn = proxy.SetAxleSuckerCtrl(id, channel, minPress, maxPress, time);
+                log?.LogInfo($"SetAxleSuckerCtrl({id},...,{time}) : {rtn}");
+                return rtn;
+            }
+            catch
+            {
+                if (IsSockComError())
+                {
+                    log?.LogError("RPC exception");
+                    return g_sock_com_err;
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief 激活/复位吸盘
+         * @param [in] id 站号
+         * @param [in] act 1-激活；0-复位
+         * @return 错误码
+         */
+        public int SetAxleSuckerAct(int id, int act)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+                int rtn = proxy.SetAxleSuckerAct(id, act);
+                log?.LogInfo($"SetAxleSuckerAct({id},{act}) : {rtn}");
+                return rtn;
+            }
+            catch
+            {
+                if (IsSockComError())
+                {
+                    log?.LogError("RPC exception");
+                    return g_sock_com_err;
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief 获取末端吸盘状态
+         * @param [in] channel 吸盘通道；0-3
+         * @param [out] enable 激活状态
+         * @param [out] done 吸附完成状态
+         * @param [out] vacuumValue 真空度
+         * @param [out] error 吸盘错误码
+         * @return 错误码
+         */
+        public int GetAxleSuckerState(int channel, ref int enable, ref int done, ref int vacuumValue, ref int error)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+                object[] result = proxy.GetAxleSuckerState(channel);
+                int errcode = (int)result[0];
+                if (errcode == 0)
+                {
+                    enable = (int)result[1];
+                    done = (int)result[2];
+                    vacuumValue = (int)result[3];
+                    error = (int)result[4];
+                }
+                log?.LogInfo($"GetAxleSuckerState({channel}, ref {enable}, ref {done}, ref {vacuumValue}, ref {error}) : {errcode}");
+                return errcode;
+            }
+            catch
+            {
+                if (IsSockComError())
+                {
+                    log?.LogError("RPC exception");
+                    return g_sock_com_err;
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief 等待末端吸盘吸附完成信号
+         * @param [in] channel 吸盘通道；0-3
+         * @param [in] state 状态：0-未吸附物体；1-吸附物体；2-物体脱落
+         * @param [in] timeout 超时时间(ms)，-1 表示永远等待
+         * @param [in] strategy 超时策略：0-报错停止；1-继续运行
+         * @return 错误码
+         */
+        public int WaitAxleSuckerState(int channel, int state, int timeout, int strategy)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+                int rtn = proxy.WaitAxleSuckerState(channel, state, timeout, strategy);
+                log?.LogInfo($"WaitAxleSuckerState({channel},{state},{timeout},{strategy}) : {rtn}");
+                return rtn;
+            }
+            catch
+            {
+                if (IsSockComError())
+                {
+                    log?.LogError("RPC exception");
+                    return g_sock_com_err;
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
     }
 }
 
