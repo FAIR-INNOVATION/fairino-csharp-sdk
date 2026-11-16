@@ -4570,7 +4570,7 @@ namespace testFrRobot
 
             //TestGetRobotDHParam();
             //TestWeaveSetParaWithParam();
-            TestWeldParamSet();      // 4.0.2 焊接参数接口
+            TestWeldSetParam();      // 4.0.2 焊机设置测试(PLC D242~D249、D257.2)
             TestAxleSucker();        // 4.0.2 末端吸盘接口
             TestSetCartOffsetRT();   // 弹窗输入 y 偏移(后台MoveL往返)，点取消结束
 
@@ -11574,58 +11574,64 @@ public int RunTrajectoryJ(string localFilePath = "D://zUP/horse.txt", string rem
         }
 
         /// <summary>
-        /// 4.0.2 焊接参数接口测试：类型、厂商、送丝速度/弧长/电弧控制/程序槽号/禁止焊接、
-        /// 各 UDP 自定义控制字序号、协同状态扩展 DI/DO、焊接协同状态查询
+        /// 4.0.2 焊机设置测试（配合 PLC 观测 D242~D249、D257.2）：
+        /// 1) 选电弧焊 + 米勒焊机（后的 io_type=1 即走 UDP 链路）
+        /// 2) 默认控制字 44~47 → PLC D242~D245，看送丝速度/弧长/电弧控制/程序槽号是否实时更新
+        /// 3) 自定义控制字改为 48~51 → PLC D246~D249
+        /// 4) 再改数值，确认 D246~D249 跟随变化
+        /// 5) 禁止焊接：扩展 DO 默认 18 → D257.2，置 1 后 PLC 该位应为 1
         /// </summary>
-        public void TestWeldParamSet()
+        public void TestWeldSetParam()
         {
             int rtn;
 
+            // 1) 选择电弧焊、米勒焊机；之后 io_type=1 即按 UDP 链路下发
             rtn = robot.SetWeldType(0);                 // 0-电弧焊；1-激光焊
-            Console.WriteLine($"SetWeldType: {rtn}");
+            Console.WriteLine($"SetWeldType(电弧焊): {rtn}");
+            rtn = robot.SetWeldCompany(104);            // 104-米勒
+            Console.WriteLine($"SetWeldCompany(米勒): {rtn}");
 
-            rtn = robot.SetWeldCompany(101);            // 101-麦格米特；102-OTC；103-松下；104-米勒；1001-everlast激光焊
-            Console.WriteLine($"SetWeldCompany: {rtn}");
+            // 2) 默认控制字 44~47 → D242~D245
+            rtn = robot.SetWeldWFS(1, 300.0);           // 送丝速度 300（double）
+            Console.WriteLine($"SetWeldWFS(300): {rtn}");
+            rtn = robot.SetWeldArcLen(1, 0);            // 弧长 0（500 为中值）
+            Console.WriteLine($"SetWeldArcLen(0): {rtn}");
+            rtn = robot.SetWeldArcCtrl(1, 25);          // 电弧控制 25（默认值）
+            Console.WriteLine($"SetWeldArcCtrl(25): {rtn}");
+            rtn = robot.SetWeldSlot(1, 1);              // 程序槽号 1
+            Console.WriteLine($"SetWeldSlot(1): {rtn}");
+            Console.WriteLine(">>> 请确认 PLC D242~D245 已更新为 300/0/25/1");
 
-            rtn = robot.SetWeldWFS(0, 5.0);             // io_type=0(IO)，送丝速度 5.0
-            Console.WriteLine($"SetWeldWFS: {rtn}");
+            // 3) 自定义控制字改为 48~51 → D246~D249
+            rtn = robot.SetWeldWFSUdpNum(48);
+            Console.WriteLine($"SetWeldWFSUdpNum(48): {rtn}");
+            rtn = robot.SetWeldArcLenUdpNum(49);
+            Console.WriteLine($"SetWeldArcLenUdpNum(49): {rtn}");
+            rtn = robot.SetWeldArcCtrlUdpNum(50);
+            Console.WriteLine($"SetWeldArcCtrlUdpNum(50): {rtn}");
+            rtn = robot.SetWeldSlotUdpNum(51);
+            Console.WriteLine($"SetWeldSlotUdpNum(51): {rtn}");
 
-            rtn = robot.SetWeldArcLen(0, 10);           // 弧长
-            Console.WriteLine($"SetWeldArcLen: {rtn}");
+            // 4) 修改数值，确认 D246~D249 跟随变化（D242~D245 保持原值）
+            rtn = robot.SetWeldWFS(1, 350.0);
+            Console.WriteLine($"SetWeldWFS(350): {rtn}");
+            rtn = robot.SetWeldArcLen(1, 10);
+            Console.WriteLine($"SetWeldArcLen(10): {rtn}");
+            rtn = robot.SetWeldArcCtrl(1, 30);
+            Console.WriteLine($"SetWeldArcCtrl(30): {rtn}");
+            rtn = robot.SetWeldSlot(1, 2);
+            Console.WriteLine($"SetWeldSlot(2): {rtn}");
+            Console.WriteLine(">>> 请确认 PLC D246~D249 已更新为 350/10/30/2");
 
-            rtn = robot.SetWeldArcCtrl(0, 0);           // 电弧控制值
-            Console.WriteLine($"SetWeldArcCtrl: {rtn}");
-
-            rtn = robot.SetWeldSlot(0, 1);              // 程序槽号
-            Console.WriteLine($"SetWeldSlot: {rtn}");
-
-            rtn = robot.SetWeldDisable(0, 0);           // 0-关闭"禁止焊接"；1-开启
-            Console.WriteLine($"SetWeldDisable: {rtn}");
-
-            rtn = robot.SetWeldWFSUdpNum(44);           // 送丝速度 UDP 控制字序号，默认44
-            Console.WriteLine($"SetWeldWFSUdpNum: {rtn}");
-
-            rtn = robot.SetWeldArcLenUdpNum(45);        // 弧长 UDP 控制字序号，默认45
-            Console.WriteLine($"SetWeldArcLenUdpNum: {rtn}");
-
-            rtn = robot.SetWeldArcCtrlUdpNum(46);       // 电弧控制 UDP 控制字序号，默认46
-            Console.WriteLine($"SetWeldArcCtrlUdpNum: {rtn}");
-
-            rtn = robot.SetWeldSlotUdpNum(47);          // 程序槽号 UDP 控制字序号，默认47
-            Console.WriteLine($"SetWeldSlotUdpNum: {rtn}");
-
-            rtn = robot.SetWeldDisableExtDoNum(18);     // "禁止焊接" UDP 扩展DO序号，默认18
-            Console.WriteLine($"SetWeldDisableExtDoNum: {rtn}");
-
-            rtn = robot.SetWeldSynStateExtDINum(-1);    // "协同状态" UDP 扩展DI序号，-1 不启用
-            Console.WriteLine($"SetWeldSynStateExtDINum: {rtn}");
-
-            rtn = robot.SetWeldWfsFeedbackUdpNum(47);   // 送丝速度反馈 UDP 状态字序号，默认47
-            Console.WriteLine($"SetWeldWfsFeedbackUdpNum: {rtn}");
-
-            int synState = -1;
-            rtn = robot.GetWeldSynState(0, ref synState);   // 0-非协同；1-协同
-            Console.WriteLine($"GetWeldSynState rtn={rtn}, synState={synState}");
+            // 5) 禁止焊接：扩展DO序号默认18，对应 D257 的 bit2
+            rtn = robot.SetWeldDisableExtDoNum(18);
+            Console.WriteLine($"SetWeldDisableExtDoNum(18): {rtn}");
+            rtn = robot.SetWeldDisable(1, 1);
+            Console.WriteLine($"SetWeldDisable(1): {rtn}");
+            Console.WriteLine(">>> 请确认 PLC D257.2 已置 1，5 秒后自动恢复为 0");
+            Thread.Sleep(5000);
+            rtn = robot.SetWeldDisable(1, 0);
+            Console.WriteLine($"SetWeldDisable(0): {rtn}");
         }
 
         /// <summary>
