@@ -28444,6 +28444,45 @@ namespace fairino
             }
         }
 
+        /**
+        * @brief 获取"送丝速度"当前值
+        * @param [in] io_type 0-IO；1-UDP；2-modbusTCP
+        * @param [out] weldWfsFdbk 当前送丝速度
+        * @return 错误码
+        */
+        public int GetWeldWfsFeedback(int io_type, ref double weldWfsFdbk)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            try
+            {
+                object[] result = proxy.GetWeldWfsFeedback(io_type);
+                int errcode = 0;
+                // 服务端返回 [errcode, value] 时按两段解析；仅返回数值时按成功处理
+                if (result.Length >= 2)
+                {
+                    errcode = Convert.ToInt32(result[0]);
+                    if (errcode == 0)
+                    {
+                        weldWfsFdbk = Convert.ToDouble(result[1]);
+                    }
+                }
+                else if (result.Length == 1)
+                {
+                    weldWfsFdbk = Convert.ToDouble(result[0]);
+                }
+                log?.LogInfo($"GetWeldWfsFeedback({io_type}, ref {weldWfsFdbk}) : {errcode}");
+                return errcode;
+            }
+            catch (Exception ex)
+            {
+                log?.LogError($"RPC exception in GetWeldWfsFeedback: {ex.Message}");
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
         // ==================== 4.0.2 末端吸盘接口 ====================
 
         /**

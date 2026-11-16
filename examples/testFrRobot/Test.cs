@@ -4571,6 +4571,7 @@ namespace testFrRobot
             //TestGetRobotDHParam();
             //TestWeaveSetParaWithParam();
             TestWeldSetParam();      // 4.0.2 焊机设置测试(PLC D242~D249、D257.2)
+            TestWeldFeedback();      // 4.0.2 焊机反馈打印测试(电压/电流/送丝/协同/故障码)
             TestAxleSucker();        // 4.0.2 末端吸盘接口
             TestSetCartOffsetRT();   // 弹窗输入 y 偏移(后台MoveL往返)，点取消结束
 
@@ -11590,6 +11591,8 @@ public int RunTrajectoryJ(string localFilePath = "D://zUP/horse.txt", string rem
             Console.WriteLine($"SetWeldType(电弧焊): {rtn}");
             rtn = robot.SetWeldCompany(104);            // 104-米勒
             Console.WriteLine($"SetWeldCompany(米勒): {rtn}");
+            rtn = robot.ExtDevLoadUDPDriver();          // 建立机器人 UDP 外设通信
+            Console.WriteLine($"ExtDevLoadUDPDriver: {rtn}");
 
             // 2) 默认控制字 44~47 → D242~D245
             rtn = robot.SetWeldWFS(1, 300.0);           // 送丝速度 300（double）
@@ -11632,6 +11635,48 @@ public int RunTrajectoryJ(string localFilePath = "D://zUP/horse.txt", string rem
             Thread.Sleep(5000);
             rtn = robot.SetWeldDisable(1, 0);
             Console.WriteLine($"SetWeldDisable(0): {rtn}");
+        }
+
+        /// <summary>
+        /// 4.0.2 焊机反馈打印测试：
+        /// 1) 选电弧焊 + 米勒焊机，建立 UDP 外设通信
+        /// 2) 循环读取电压/电流(机器人实时状态)、实际送丝速度、协同状态，在 PLC 端修改数值观察打印
+        /// 3) 同一循环打印主/子故障码，PLC 同步故障码后观察打印
+        /// 循环 600 次 × 100ms ≈ 60s，可按需修改 count
+        /// </summary>
+        public void TestWeldFeedback()
+        {
+            int rtn;
+
+            rtn = robot.SetWeldType(0);                 // 0-电弧焊；1-激光焊
+            Console.WriteLine($"SetWeldType(电弧焊): {rtn}");
+            rtn = robot.SetWeldCompany(104);            // 104-米勒
+            Console.WriteLine($"SetWeldCompany(米勒): {rtn}");
+            rtn = robot.ExtDevLoadUDPDriver();          // 建立机器人 UDP 外设通信
+            Console.WriteLine($"ExtDevLoadUDPDriver: {rtn}");
+
+            ROBOT_STATE_PKG pkg = new ROBOT_STATE_PKG();
+            int count = 600;
+            for (int i = 0; i < count; i++)
+            {
+                int stateRtn = robot.GetRobotRealTimeState(ref pkg);
+
+                double wfs = 0;
+                int wfsRtn = robot.GetWeldWfsFeedback(1, ref wfs);      // io_type=1 UDP
+
+                int synState = -1;
+                int synRtn = robot.GetWeldSynState(1, ref synState);    // io_type=1 UDP
+
+                int mainCode = 0;
+                int subCode = 0;
+                int errRtn = robot.GetRobotErrorCode(ref mainCode, ref subCode);
+
+                Console.WriteLine($"[{i}] 电压={pkg.weldVoltage:F2}V 电流={pkg.weldCurrent:F2}A " +
+                    $"送丝速度={wfs:F2}(rtn={wfsRtn}) 协同={synState}(rtn={synRtn}) " +
+                    $"主故障={mainCode} 子故障={subCode}(rtn={errRtn}) 状态rtn={stateRtn}");
+
+                Thread.Sleep(100);
+            }
         }
 
         /// <summary>

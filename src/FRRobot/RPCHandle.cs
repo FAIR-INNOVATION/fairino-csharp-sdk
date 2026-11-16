@@ -2600,6 +2600,9 @@ namespace fairino
         [XmlRpcMethod("SetWeldWfsFeedbackUdpNum")]
         int SetWeldWfsFeedbackUdpNum(int udpNum);
 
+        [XmlRpcMethod("GetWeldWfsFeedback")]
+        object[] GetWeldWfsFeedback(int io_type);
+
         // === 4.0.2 末端吸盘接口 ===
         [XmlRpcMethod("SetAxleSuckerFunc")]
         int SetAxleSuckerFunc(int id, int value);
