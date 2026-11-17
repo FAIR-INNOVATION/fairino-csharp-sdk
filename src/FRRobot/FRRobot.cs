@@ -28220,7 +28220,7 @@ namespace fairino
          * @param [in] udpNum UDP自定义控制字序号，默认44
          * @return 错误码
          */
-        public int SetWeldWFSUdpNum(int udpNum)
+        public int SetweldWFSUdpNum(int udpNum)
         {
             if (IsSockComError())
             {
@@ -28228,8 +28228,8 @@ namespace fairino
             }
             try
             {
-                int rtn = proxy.SetWeldWFSUdpNum(udpNum);
-                log?.LogInfo($"SetWeldWFSUdpNum({udpNum}) : {rtn}");
+                int rtn = proxy.SetweldWFSUdpNum(udpNum);
+                log?.LogInfo($"SetweldWFSUdpNum({udpNum}) : {rtn}");
                 return rtn;
             }
             catch

@@ -2576,8 +2576,8 @@ namespace fairino
         [XmlRpcMethod("SetWeldDisable")]
         int SetWeldDisable(int io_type, int status);
 
-        [XmlRpcMethod("SetWeldWFSUdpNum")]
-        int SetWeldWFSUdpNum(int udpNum);
+        [XmlRpcMethod("SetweldWFSUdpNum")]
+        int SetweldWFSUdpNum(int udpNum);
 
         [XmlRpcMethod("SetWeldArcLenUdpNum")]
         int SetWeldArcLenUdpNum(int udpNum);

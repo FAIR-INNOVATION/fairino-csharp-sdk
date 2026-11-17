@@ -4571,9 +4571,9 @@ namespace testFrRobot
             //TestGetRobotDHParam();
             //TestWeaveSetParaWithParam();
             TestWeldSetParam();      // 4.0.2 焊机设置测试(PLC D242~D249、D257.2)
-            TestWeldFeedback();      // 4.0.2 焊机反馈打印测试(电压/电流/送丝/协同/故障码)
-            TestAxleSucker();        // 4.0.2 末端吸盘接口
-            TestSetCartOffsetRT();   // 弹窗输入 y 偏移(后台MoveL往返)，点取消结束
+            //TestWeldFeedback();      // 4.0.2 焊机反馈打印测试(电压/电流/送丝/协同/故障码)
+            //TestAxleSucker();        // 4.0.2 末端吸盘接口
+            //TestSetCartOffsetRT();   // 弹窗输入 y 偏移(后台MoveL往返)，点取消结束
 
             //401测试函数
             //TestServoCartwithParam();
@@ -11579,13 +11579,12 @@ public int RunTrajectoryJ(string localFilePath = "D://zUP/horse.txt", string rem
         /// 1) 选电弧焊 + 米勒焊机（后的 io_type=1 即走 UDP 链路）
         /// 2) 默认控制字 44~47 → PLC D242~D245，看送丝速度/弧长/电弧控制/程序槽号是否实时更新
         /// 3) 自定义控制字改为 48~51 → PLC D246~D249
-        /// 4) 再改数值，确认 D246~D249 跟随变化
+        /// 4) 同一组控制字(48~51)连续写10个循环，4个值每轮+1、间隔2秒，观察 D246~D249
         /// 5) 禁止焊接：扩展 DO 默认 18 → D257.2，置 1 后 PLC 该位应为 1
         /// </summary>
         public void TestWeldSetParam()
         {
             int rtn;
-
             // 1) 选择电弧焊、米勒焊机；之后 io_type=1 即按 UDP 链路下发
             rtn = robot.SetWeldType(0);                 // 0-电弧焊；1-激光焊
             Console.WriteLine($"SetWeldType(电弧焊): {rtn}");
@@ -11595,6 +11594,16 @@ public int RunTrajectoryJ(string localFilePath = "D://zUP/horse.txt", string rem
             Console.WriteLine($"ExtDevLoadUDPDriver: {rtn}");
 
             // 2) 默认控制字 44~47 → D242~D245
+            rtn = robot.SetweldWFSUdpNum(44);
+            Console.WriteLine($"SetweldWFSUdpNum(44): {rtn}");
+            rtn = robot.SetWeldArcLenUdpNum(45);
+            Console.WriteLine($"SetWeldArcLenUdpNum(45): {rtn}");
+            rtn = robot.SetWeldArcCtrlUdpNum(46);
+            Console.WriteLine($"SetWeldArcCtrlUdpNum(46): {rtn}");
+            rtn = robot.SetWeldSlotUdpNum(47);
+            Console.WriteLine($"SetWeldSlotUdpNum(47): {rtn}");
+            Thread.Sleep(2000);
+
             rtn = robot.SetWeldWFS(1, 300.0);           // 送丝速度 300（double）
             Console.WriteLine($"SetWeldWFS(300): {rtn}");
             rtn = robot.SetWeldArcLen(1, 0);            // 弧长 0（500 为中值）
@@ -11604,28 +11613,33 @@ public int RunTrajectoryJ(string localFilePath = "D://zUP/horse.txt", string rem
             rtn = robot.SetWeldSlot(1, 1);              // 程序槽号 1
             Console.WriteLine($"SetWeldSlot(1): {rtn}");
             Console.WriteLine(">>> 请确认 PLC D242~D245 已更新为 300/0/25/1");
-
+            Thread.Sleep(5000);
             // 3) 自定义控制字改为 48~51 → D246~D249
-            rtn = robot.SetWeldWFSUdpNum(48);
-            Console.WriteLine($"SetWeldWFSUdpNum(48): {rtn}");
+            rtn = robot.SetweldWFSUdpNum(48);
+            Console.WriteLine($"SetweldWFSUdpNum(48): {rtn}");
             rtn = robot.SetWeldArcLenUdpNum(49);
             Console.WriteLine($"SetWeldArcLenUdpNum(49): {rtn}");
             rtn = robot.SetWeldArcCtrlUdpNum(50);
             Console.WriteLine($"SetWeldArcCtrlUdpNum(50): {rtn}");
             rtn = robot.SetWeldSlotUdpNum(51);
             Console.WriteLine($"SetWeldSlotUdpNum(51): {rtn}");
+            Thread.Sleep(5000);
+            // 4) 连续10个循环写入同一组控制字(48~51)：4个值每轮+1，间隔2秒，便于PLC观察D246~D249
+            for (int i = 1; i <= 10; i++)
+            {
+                double wfs = 350.0 + i;
+                int arcLen = 10 + i;
+                int arcCtrl = 30 + i;
+                int slot = 2 + i;
 
-            // 4) 修改数值，确认 D246~D249 跟随变化（D242~D245 保持原值）
-            rtn = robot.SetWeldWFS(1, 350.0);
-            Console.WriteLine($"SetWeldWFS(350): {rtn}");
-            rtn = robot.SetWeldArcLen(1, 10);
-            Console.WriteLine($"SetWeldArcLen(10): {rtn}");
-            rtn = robot.SetWeldArcCtrl(1, 30);
-            Console.WriteLine($"SetWeldArcCtrl(30): {rtn}");
-            rtn = robot.SetWeldSlot(1, 2);
-            Console.WriteLine($"SetWeldSlot(2): {rtn}");
-            Console.WriteLine(">>> 请确认 PLC D246~D249 已更新为 350/10/30/2");
+                rtn = robot.SetWeldWFS(1, wfs);
+                rtn = robot.SetWeldArcLen(1, arcLen);
+                rtn = robot.SetWeldArcCtrl(1, arcCtrl);
+                rtn = robot.SetWeldSlot(1, slot);
 
+                Console.WriteLine($">>> [{i}/10] D246~D249 应更新为 {wfs}/{arcLen}/{arcCtrl}/{slot}");
+                Thread.Sleep(2000);
+            }
             // 5) 禁止焊接：扩展DO序号默认18，对应 D257 的 bit2
             rtn = robot.SetWeldDisableExtDoNum(18);
             Console.WriteLine($"SetWeldDisableExtDoNum(18): {rtn}");
@@ -11642,7 +11656,6 @@ public int RunTrajectoryJ(string localFilePath = "D://zUP/horse.txt", string rem
         /// 1) 选电弧焊 + 米勒焊机，建立 UDP 外设通信
         /// 2) 循环读取电压/电流(机器人实时状态)、实际送丝速度、协同状态，在 PLC 端修改数值观察打印
         /// 3) 同一循环打印主/子故障码，PLC 同步故障码后观察打印
-        /// 循环 600 次 × 100ms ≈ 60s，可按需修改 count
         /// </summary>
         public void TestWeldFeedback()
         {
@@ -11656,7 +11669,7 @@ public int RunTrajectoryJ(string localFilePath = "D://zUP/horse.txt", string rem
             Console.WriteLine($"ExtDevLoadUDPDriver: {rtn}");
 
             ROBOT_STATE_PKG pkg = new ROBOT_STATE_PKG();
-            int count = 600;
+            int count = 1800;
             for (int i = 0; i < count; i++)
             {
                 int stateRtn = robot.GetRobotRealTimeState(ref pkg);
