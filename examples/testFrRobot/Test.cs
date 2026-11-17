@@ -11579,7 +11579,7 @@ public int RunTrajectoryJ(string localFilePath = "D://zUP/horse.txt", string rem
         /// 1) 选电弧焊 + 米勒焊机（后的 io_type=1 即走 UDP 链路）
         /// 2) 默认控制字 44~47 → PLC D242~D245，看送丝速度/弧长/电弧控制/程序槽号是否实时更新
         /// 3) 自定义控制字改为 48~51 → PLC D246~D249
-        /// 4) 同一组控制字(48~51)连续写10个循环，4个值每轮+1、间隔2秒，观察 D246~D249
+        /// 4) 同一组控制字(48~51)连续写10个循环，4个值每轮+1、间隔2秒，观察 D246~D249（槽号在1~8内循环）
         /// 5) 禁止焊接：扩展 DO 默认 18 → D257.2，置 1 后 PLC 该位应为 1
         /// </summary>
         public void TestWeldSetParam()
@@ -11630,7 +11630,7 @@ public int RunTrajectoryJ(string localFilePath = "D://zUP/horse.txt", string rem
                 double wfs = 350.0 + i;
                 int arcLen = 10 + i;
                 int arcCtrl = 30 + i;
-                int slot = 2 + i;
+                int slot = 1 + (i - 1) % 8;             // 槽号范围 1~8，超出后回绕
 
                 rtn = robot.SetWeldWFS(1, wfs);
                 rtn = robot.SetWeldArcLen(1, arcLen);
