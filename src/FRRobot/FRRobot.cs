@@ -28554,7 +28554,7 @@ namespace fairino
         /**
          * @brief 设置末端吸盘控制参数
          * @param [in] id 站号
-         * @param [in] channel 通道使能，长度4：channel[0]=1-使能，0-不使能
+         * @param [in] channel 通道使能，长度4：channel[0]=1-使能，0-不使能（下标0-3对应通道1-通道4）
          * @param [in] minPress 最小真空度，长度4
          * @param [in] maxPress 最大真空度（吸盘错误码），长度4
          * @param [in] time 超时时间(ms)
@@ -28620,7 +28620,7 @@ namespace fairino
 
         /**
          * @brief 获取末端吸盘状态
-         * @param [in] channel 吸盘通道；0-3
+         * @param [in] channel 吸盘通道；0-3（对应通道1-通道4）
          * @param [out] enable 激活状态
          * @param [out] done 吸附完成状态
          * @param [out] vacuumValue 真空度
@@ -28660,7 +28660,7 @@ namespace fairino
 
         /**
          * @brief 等待末端吸盘吸附完成信号
-         * @param [in] channel 吸盘通道；0-3
+         * @param [in] channel 吸盘通道；0-3（对应通道1-通道4）
          * @param [in] timeout 超时时间(ms)，-1 表示永远等待
          * @param [in] state 状态：0-未吸附物体；1-吸附物体；2-物体脱落
          * @param [in] strategy 超时策略：0-报错停止；1-继续运行

@@ -11728,7 +11728,7 @@ public int RunTrajectoryJ(string localFilePath = "D://zUP/horse.txt", string rem
 
         /// <summary>
         /// 4.0.2 末端吸盘接口测试：功能码设置/读取、控制参数、激活、状态查询、等待吸附完成
-        /// 注意：minPress/maxPress 为实际真空度阈值，示例用 0，联调时按吸盘参数修改
+        /// 注意：channel 0~3 对应通道1~通道4；minPress/maxPress 为实际真空度阈值，示例用 0，联调时按吸盘参数修改
         /// </summary>
         public void TestAxleSucker()
         {
@@ -11750,23 +11750,33 @@ public int RunTrajectoryJ(string localFilePath = "D://zUP/horse.txt", string rem
             rtn = robot.SetAxleSuckerAct(id, 1);        // 1-激活
             Console.WriteLine($"SetAxleSuckerAct(1): {rtn}");
 
-            int[] channel = { 1, 1, 0, 0 };             // 1-使能；0-不使能
+            int[] channel = { 1, 1, 0, 0 };               // 1-使能；0-不使能
             int[] minPress = { 60, 60, 0, 0 };            // 最小真空度
             int[] maxPress = { 70, 70, 0, 0 };            // 最大真空度
             rtn = robot.SetAxleSuckerCtrl(id, channel, minPress, maxPress, 20000);
             Console.WriteLine($"SetAxleSuckerCtrl: {rtn}");
 
 
+            int count = 30;
+            for (int i = 0; i < count; i++)
+            {
+                // channel 0~3 依次对应通道1~通道4，这里打印前两个通道的数据
+                for (int ch = 0; ch < 2; ch++)
+                {
+                    int enable = 0;
+                    int done = 0;
+                    int vacuumValue = 0;
+                    int error = 0;
+                    rtn = robot.GetAxleSuckerState(ch, ref enable, ref done, ref vacuumValue, ref error);
+                    Console.WriteLine($"[{i + 1}/{count}] 通道{ch + 1}(channel={ch}) rtn={rtn}, enable={enable}, done={done}, vacuumValue={vacuumValue}, error={error}");
+                }
+                Thread.Sleep(500);
+            }
+            // 等待通道1(channel=0)吸附物体：
+            rtn = robot.WaitAxleSuckerState(0, 6000, 1, 0);
+            // 等待通道2(channel=1)吸附物体：
+            rtn = robot.WaitAxleSuckerState(1, 6000, 1, 0);
 
-            int enable = 0;
-            int done = 0;
-            int vacuumValue = 0;
-            int error = 0;
-            rtn = robot.GetAxleSuckerState(0, ref enable, ref done, ref vacuumValue, ref error);
-            Console.WriteLine($"GetAxleSuckerState rtn={rtn}, enable={enable}, done={done}, vacuumValue={vacuumValue}, error={error}");
-
-            // 等待通道0吸附物体：timeout=5000ms，state=1，策略1(超时继续)
-            rtn = robot.WaitAxleSuckerState(0, 5000, 1, 1);
             Console.WriteLine($"WaitAxleSuckerState: {rtn}");
         }
 
