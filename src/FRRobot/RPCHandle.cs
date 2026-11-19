@@ -2620,7 +2620,7 @@ namespace fairino
         object[] GetAxleSuckerState(int channel);
 
         [XmlRpcMethod("WaitAxleSuckerState")]
-        int WaitAxleSuckerState(int channel, int state, int timeout, int strategy);
+        int WaitAxleSuckerState(int channel, int timeout, int state, int strategy);
     }
     internal class RPCHandle
     {

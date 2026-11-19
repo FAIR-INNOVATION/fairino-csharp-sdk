@@ -28661,12 +28661,12 @@ namespace fairino
         /**
          * @brief 等待末端吸盘吸附完成信号
          * @param [in] channel 吸盘通道；0-3
-         * @param [in] state 状态：0-未吸附物体；1-吸附物体；2-物体脱落
          * @param [in] timeout 超时时间(ms)，-1 表示永远等待
+         * @param [in] state 状态：0-未吸附物体；1-吸附物体；2-物体脱落
          * @param [in] strategy 超时策略：0-报错停止；1-继续运行
          * @return 错误码
          */
-        public int WaitAxleSuckerState(int channel, int state, int timeout, int strategy)
+        public int WaitAxleSuckerState(int channel, int timeout, int state, int strategy)
         {
             if (IsSockComError())
             {
@@ -28674,8 +28674,8 @@ namespace fairino
             }
             try
             {
-                int rtn = proxy.WaitAxleSuckerState(channel, state, timeout, strategy);
-                log?.LogInfo($"WaitAxleSuckerState({channel},{state},{timeout},{strategy}) : {rtn}");
+                int rtn = proxy.WaitAxleSuckerState(channel, timeout, state, strategy);
+                log?.LogInfo($"WaitAxleSuckerState({channel},{timeout},{state},{strategy}) : {rtn}");
                 return rtn;
             }
             catch

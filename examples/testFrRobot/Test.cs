@@ -4570,9 +4570,13 @@ namespace testFrRobot
 
             //TestGetRobotDHParam();
             //TestWeaveSetParaWithParam();
-            TestWeldSetParam();      // 4.0.2 焊机设置测试(PLC D242~D249、D257.2)
-            //TestWeldFeedback();      // 4.0.2 焊机反馈打印测试(电压/电流/送丝/协同/故障码)
-            //TestAxleSucker();        // 4.0.2 末端吸盘接口
+            //for (int i = 1; i <= 10000000000; i++)
+            //{
+            //    TestWeldSetParam();      // 4.0.2 焊机设置测试(PLC D242~D249、D257.2)
+            //    TestWeldFeedback();      // 4.0.2 焊机反馈打印测试(电压/电流/送丝/协同/故障码)
+            //}
+
+            TestAxleSucker();        // 4.0.2 末端吸盘接口
             //TestSetCartOffsetRT();   // 弹窗输入 y 偏移(后台MoveL往返)，点取消结束
 
             //401测试函数
@@ -11584,6 +11588,19 @@ public int RunTrajectoryJ(string localFilePath = "D://zUP/horse.txt", string rem
         /// </summary>
         public void TestWeldSetParam()
         {
+
+            //JointPos j1 = new JointPos(-115.844, -49.503, 92.747, -133.077, -89.998, -25.868);
+            //JointPos j2 = new JointPos(-149.585, -45.684, 82.489, -126.665, -90.092, -59.608);
+            //DescPose d1 = new DescPose(198.357, 643.556, 103.910, 179.851, 0.075, 0.023);
+            //DescPose d2 = new DescPose(565.183, 449.906, 118.825, 179.849, 0.074, 0.023);
+
+            JointPos j1 = new JointPos(-143.902, -59.161, 101.339, -130.844, -90.116, -56.026);
+            JointPos j2 = new JointPos(-112.507, -77.118, 129.920, -141.195, -89.783, -24.639);
+            DescPose d1 = new DescPose(436.675, 437.436, 148.030, 178.907, 0.265, 1.550);
+            DescPose d2 = new DescPose(75.368, 437.428, 148.031, 178.907, 0.265, 1.549);
+            ExaxisPos ex = new ExaxisPos(0.0f, 0.0f, 0.0f, 0.0f);
+            DescPose zeroOff = new DescPose(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+
             int rtn;
             // 1) 选择电弧焊、米勒焊机；之后 io_type=1 即按 UDP 链路下发
             rtn = robot.SetWeldType(0);                 // 0-电弧焊；1-激光焊
@@ -11592,6 +11609,10 @@ public int RunTrajectoryJ(string localFilePath = "D://zUP/horse.txt", string rem
             Console.WriteLine($"SetWeldCompany(米勒): {rtn}");
             rtn = robot.ExtDevLoadUDPDriver();          // 建立机器人 UDP 外设通信
             Console.WriteLine($"ExtDevLoadUDPDriver: {rtn}");
+            Thread.Sleep(2000);
+
+            rtn = robot.MoveL(j1, d1, 0, 0, 100, 100, 100, -1, 0, ex, 0, 0, zeroOff, 100, 0, 0, 10);
+            Console.WriteLine($"moveL errcode:{rtn}");
 
             // 2) 默认控制字 44~47 → D242~D245
             rtn = robot.SetweldWFSUdpNum(44);
@@ -11602,7 +11623,7 @@ public int RunTrajectoryJ(string localFilePath = "D://zUP/horse.txt", string rem
             Console.WriteLine($"SetWeldArcCtrlUdpNum(46): {rtn}");
             rtn = robot.SetWeldSlotUdpNum(47);
             Console.WriteLine($"SetWeldSlotUdpNum(47): {rtn}");
-            Thread.Sleep(2000);
+            Thread.Sleep(3000);
 
             rtn = robot.SetWeldWFS(1, 300.0);           // 送丝速度 300（double）
             Console.WriteLine($"SetWeldWFS(300): {rtn}");
@@ -11613,7 +11634,11 @@ public int RunTrajectoryJ(string localFilePath = "D://zUP/horse.txt", string rem
             rtn = robot.SetWeldSlot(1, 1);              // 程序槽号 1
             Console.WriteLine($"SetWeldSlot(1): {rtn}");
             Console.WriteLine(">>> 请确认 PLC D242~D245 已更新为 300/0/25/1");
-            Thread.Sleep(5000);
+            Thread.Sleep(3000);
+
+            rtn = robot.MoveL(j2, d2, 0, 0, 100, 100, 100, -1, 0, ex, 0, 0, zeroOff, 100, 0, 0, 10);
+            Console.WriteLine($"moveL errcode:{rtn}");
+
             // 3) 自定义控制字改为 48~51 → D246~D249
             rtn = robot.SetweldWFSUdpNum(48);
             Console.WriteLine($"SetweldWFSUdpNum(48): {rtn}");
@@ -11623,7 +11648,7 @@ public int RunTrajectoryJ(string localFilePath = "D://zUP/horse.txt", string rem
             Console.WriteLine($"SetWeldArcCtrlUdpNum(50): {rtn}");
             rtn = robot.SetWeldSlotUdpNum(51);
             Console.WriteLine($"SetWeldSlotUdpNum(51): {rtn}");
-            Thread.Sleep(5000);
+            Thread.Sleep(3000);
             // 4) 连续10个循环写入同一组控制字(48~51)：4个值每轮+1，间隔2秒，便于PLC观察D246~D249
             for (int i = 1; i <= 10; i++)
             {
@@ -11638,17 +11663,22 @@ public int RunTrajectoryJ(string localFilePath = "D://zUP/horse.txt", string rem
                 rtn = robot.SetWeldSlot(1, slot);
 
                 Console.WriteLine($">>> [{i}/10] D246~D249 应更新为 {wfs}/{arcLen}/{arcCtrl}/{slot}");
-                Thread.Sleep(2000);
+                Thread.Sleep(500);
             }
+
+            rtn = robot.MoveL(j1, d1, 0, 0, 100, 100, 100, -1, 0, ex, 0, 0, zeroOff, 100, 0, 0, 10);
+            Console.WriteLine($"moveL errcode:{rtn}");
             // 5) 禁止焊接：扩展DO序号默认18，对应 D257 的 bit2
             rtn = robot.SetWeldDisableExtDoNum(18);
             Console.WriteLine($"SetWeldDisableExtDoNum(18): {rtn}");
             rtn = robot.SetWeldDisable(1, 1);
             Console.WriteLine($"SetWeldDisable(1): {rtn}");
             Console.WriteLine(">>> 请确认 PLC D257.2 已置 1，5 秒后自动恢复为 0");
-            Thread.Sleep(5000);
+            Thread.Sleep(1500);
             rtn = robot.SetWeldDisable(1, 0);
             Console.WriteLine($"SetWeldDisable(0): {rtn}");
+            rtn = robot.MoveL(j2, d2, 0, 0, 100, 100, 100, -1, 0, ex, 0, 0, zeroOff, 100, 0, 0, 10);
+            Console.WriteLine($"moveL errcode:{rtn}");
         }
 
         /// <summary>
@@ -11667,9 +11697,13 @@ public int RunTrajectoryJ(string localFilePath = "D://zUP/horse.txt", string rem
             Console.WriteLine($"SetWeldCompany(米勒): {rtn}");
             rtn = robot.ExtDevLoadUDPDriver();          // 建立机器人 UDP 外设通信
             Console.WriteLine($"ExtDevLoadUDPDriver: {rtn}");
-
+            rtn = robot.SetWeldSynStateExtDINum(0);  // 设置协同状态的DI
+            Console.WriteLine($"SetWeldSynStateExtDINum: {rtn}");
+            rtn = robot.SetWeldWfsFeedbackUdpNum(47);  // 设置送丝速度反馈的UDP状态字序号
+            Console.WriteLine($"SetWeldWfsFeedbackUdpNum(47): {rtn}");
+            Thread.Sleep(3000);
             ROBOT_STATE_PKG pkg = new ROBOT_STATE_PKG();
-            int count = 1800;
+            int count = 10;
             for (int i = 0; i < count; i++)
             {
                 int stateRtn = robot.GetRobotRealTimeState(ref pkg);
@@ -11688,7 +11722,7 @@ public int RunTrajectoryJ(string localFilePath = "D://zUP/horse.txt", string rem
                     $"送丝速度={wfs:F2}(rtn={wfsRtn}) 协同={synState}(rtn={synRtn}) " +
                     $"主故障={mainCode} 子故障={subCode}(rtn={errRtn}) 状态rtn={stateRtn}");
 
-                Thread.Sleep(100);
+                Thread.Sleep(500);
             }
         }
 
@@ -11699,7 +11733,7 @@ public int RunTrajectoryJ(string localFilePath = "D://zUP/horse.txt", string rem
         public void TestAxleSucker()
         {
             int rtn;
-            int id = 0;                                 // 站号
+            int id = 1;                                 // 站号
 
             // 功能码 bit0~bit10 全部启用
             rtn = robot.SetAxleSuckerFunc(id, 0x7FF);
@@ -11709,14 +11743,20 @@ public int RunTrajectoryJ(string localFilePath = "D://zUP/horse.txt", string rem
             rtn = robot.GetAxleSuckerFunc(id, ref funcValue);
             Console.WriteLine($"GetAxleSuckerFunc rtn={rtn}, value=0x{funcValue:X}");
 
-            int[] channel = { 1, 1, 1, 1 };             // 1-使能；0-不使能
-            int[] minPress = { 0, 0, 0, 0 };            // 最小真空度
-            int[] maxPress = { 0, 0, 0, 0 };            // 最大真空度(吸盘错误码)
-            rtn = robot.SetAxleSuckerCtrl(id, channel, minPress, maxPress, 5000);
+            rtn = robot.SetAxleSuckerAct(id, 0);        // 0-复位
+            Console.WriteLine($"SetAxleSuckerAct(0): {rtn}");
+
+
+            rtn = robot.SetAxleSuckerAct(id, 1);        // 1-激活
+            Console.WriteLine($"SetAxleSuckerAct(1): {rtn}");
+
+            int[] channel = { 1, 1, 0, 0 };             // 1-使能；0-不使能
+            int[] minPress = { 60, 60, 0, 0 };            // 最小真空度
+            int[] maxPress = { 70, 70, 0, 0 };            // 最大真空度
+            rtn = robot.SetAxleSuckerCtrl(id, channel, minPress, maxPress, 20000);
             Console.WriteLine($"SetAxleSuckerCtrl: {rtn}");
 
-            rtn = robot.SetAxleSuckerAct(id, 1);        // 1-激活；0-复位
-            Console.WriteLine($"SetAxleSuckerAct: {rtn}");
+
 
             int enable = 0;
             int done = 0;
@@ -11725,8 +11765,8 @@ public int RunTrajectoryJ(string localFilePath = "D://zUP/horse.txt", string rem
             rtn = robot.GetAxleSuckerState(0, ref enable, ref done, ref vacuumValue, ref error);
             Console.WriteLine($"GetAxleSuckerState rtn={rtn}, enable={enable}, done={done}, vacuumValue={vacuumValue}, error={error}");
 
-            // 等待通道0吸附物体：state=1，超时5000ms，策略1(超时继续)
-            rtn = robot.WaitAxleSuckerState(0, 1, 5000, 1);
+            // 等待通道0吸附物体：timeout=5000ms，state=1，策略1(超时继续)
+            rtn = robot.WaitAxleSuckerState(0, 5000, 1, 1);
             Console.WriteLine($"WaitAxleSuckerState: {rtn}");
         }
 
