@@ -11774,16 +11774,18 @@ public int RunTrajectoryJ(string localFilePath = "D://zUP/horse.txt", string rem
             }
 
 
-            // 等待前重新下发控制参数：通道全关，阈值 60/70，超时 8000ms
-            rtn = robot.SetAxleSuckerCtrl(id, new int[] { 0, 0, 0, 0 }, new int[] { 60, 60, 0, 0 }, new int[] { 70, 70, 0, 0 }, 8000);
-            Console.WriteLine($"SetAxleSuckerCtrl(等待前): {rtn}");
-
             // 等待通道1(channel=0)吸附物体：
             rtn = robot.WaitAxleSuckerState(0, 6000, 1, 0);
             // 等待通道2(channel=1)吸附物体：
             rtn = robot.WaitAxleSuckerState(1, 6000, 1, 0);
 
             Console.WriteLine($"WaitAxleSuckerState: {rtn}");
+
+            // 等待结束后关闭通道：channel 原值为 {1,1,0,0}(使能)，必须重新赋值为全关
+            // minPress/maxPress 沿用上面的 {60,60,0,0}/{70,70,0,0}
+            channel = new int[] { 0, 0, 0, 0 };
+            rtn = robot.SetAxleSuckerCtrl(id, channel, minPress, maxPress, 8000);
+            Console.WriteLine($"SetAxleSuckerCtrl(等待后关闭通道): {rtn}");
         }
 
     }
