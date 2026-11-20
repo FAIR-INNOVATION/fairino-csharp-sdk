@@ -1,0 +1,60 @@
+{
+  "version": "4.0.2",
+  "date": "20261123",
+  "template": "D:/C#SDK/手册/4.0.1/RD36-协作机器人C#SDK用户手册版本更新(4.0.1)-V1.0-20261026.docx",
+  "output_dir": "D:/C#SDK/手册/4.0.2",
+  "sdk_section_start": "16.43",
+  "changes": [
+    "新增GetDHCompenMode()获取机器人DH补偿模型接口；",
+    "新增GetDHAllParam()获取机器人DH2.0参数接口，输出d、a、alpha、beta、theta五组参数；",
+    "修改WeaveSetPara()设置摆动参数接口，增加weavePendulumLength摇枪摆长、weavePendulumAngle摇枪摆角参数，默认值0；未启用摇枪摆动时仍按原14参数下发，兼容旧版控制器；",
+    "新增SetCartOffsetRT()设置运动实时偏移接口，通过8080指令帧（cmdID 1368）低延迟下发；",
+    "新增焊接参数设置接口SetWeldType()、SetWeldCompany()、SetWeldWFS()、SetWeldArcLen()、SetWeldArcCtrl()、SetWeldSlot()、SetWeldDisable()，以及UDP自定义控制字配置接口SetweldWFSUdpNum()、SetWeldArcLenUdpNum()、SetWeldArcCtrlUdpNum()、SetWeldSlotUdpNum()、SetWeldDisableExtDoNum()、SetWeldSynStateExtDINum()；",
+    "新增焊接状态反馈接口GetWeldSynState()获取协同状态、GetWeldWfsFeedback()获取实际送丝速度，以及状态字配置接口SetWeldWfsFeedbackUdpNum()；",
+    "新增末端吸盘接口SetAxleSuckerFunc()、GetAxleSuckerFunc()、SetAxleSuckerCtrl()、SetAxleSuckerAct()、GetAxleSuckerState()、WaitAxleSuckerState()；",
+    "新增DH参数、摇枪摆动、实时偏移、焊机设置、焊机反馈、末端吸盘代码示例；",
+    "“SDK_VERSION” 更新为 “C#SDK-V1.3.2 Web-4.0.2”。"
+  ],
+  "changed_apis": [
+    {
+      "name": "WeaveSetPara",
+      "title": "设置摆动参数",
+      "sdk_section": "详见完整用户手册“摆动焊接”章节（本次为参数更新）"
+    }
+  ],
+  "new_apis": [
+    {"name": "GetDHCompenMode", "title": "获取机器人DH补偿模型"},
+    {"name": "GetDHAllParam", "title": "获取机器人DH2.0参数"},
+    {"name": "SetCartOffsetRT", "title": "设置运动实时偏移"},
+    {"name": "SetWeldType", "title": "设置焊接类型"},
+    {"name": "SetWeldCompany", "title": "设置焊机厂商"},
+    {"name": "SetWeldWFS", "title": "设置送丝速度"},
+    {"name": "SetWeldArcLen", "title": "设置焊接弧长"},
+    {"name": "SetWeldArcCtrl", "title": "设置电弧控制值"},
+    {"name": "SetWeldSlot", "title": "设置程序槽号"},
+    {"name": "SetWeldDisable", "title": "设置“禁止焊接”"},
+    {"name": "SetweldWFSUdpNum", "title": "设置送丝速度UDP自定义控制字序号"},
+    {"name": "SetWeldArcLenUdpNum", "title": "设置弧长UDP自定义控制字序号"},
+    {"name": "SetWeldArcCtrlUdpNum", "title": "设置电弧控制UDP自定义控制字序号"},
+    {"name": "SetWeldSlotUdpNum", "title": "设置程序槽号UDP自定义控制字序号"},
+    {"name": "SetWeldDisableExtDoNum", "title": "设置“禁止焊接”UDP扩展DO序号"},
+    {"name": "SetWeldSynStateExtDINum", "title": "设置“协同状态”UDP扩展DI序号"},
+    {"name": "GetWeldSynState", "title": "获取“协同状态”"},
+    {"name": "SetWeldWfsFeedbackUdpNum", "title": "设置“送丝速度”UDP自定义状态字序号"},
+    {"name": "GetWeldWfsFeedback", "title": "获取“送丝速度”当前值"},
+    {"name": "SetAxleSuckerFunc", "title": "设置启用末端吸盘动作控制功能码"},
+    {"name": "GetAxleSuckerFunc", "title": "获取末端吸盘动作控制功能码"},
+    {"name": "SetAxleSuckerCtrl", "title": "设置末端吸盘控制参数"},
+    {"name": "SetAxleSuckerAct", "title": "激活/复位吸盘"},
+    {"name": "GetAxleSuckerState", "title": "获取末端吸盘状态"},
+    {"name": "WaitAxleSuckerState", "title": "等待末端吸盘吸附完成信号"}
+  ],
+  "examples": [
+    {"function": "TestGetRobotDHParam", "title": "获取机器人DH补偿模型及DH2.0参数代码示例"},
+    {"function": "TestWeaveSetParaWithParam", "title": "摇枪摆动参数设置代码示例"},
+    {"function": "TestSetCartOffsetRT", "title": "设置运动实时偏移代码示例"},
+    {"function": "TestWeldSetParam", "title": "焊机设置代码示例"},
+    {"function": "TestWeldFeedback", "title": "焊机反馈打印代码示例"},
+    {"function": "TestAxleSucker", "title": "末端吸盘接口代码示例"}
+  ]
+}
