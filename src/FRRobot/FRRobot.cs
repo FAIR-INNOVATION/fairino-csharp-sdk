@@ -18007,7 +18007,7 @@ namespace fairino
                 {
                     resultStr = (string)result[1];
                     string[] parS = resultStr.Split(',');
-                    if (parS.Length != 40)
+                    if (parS.Length != 48)
                     {
 
                         log.LogError($"GetAxleLuaEnableDevice fail, {parS.Length}");
@@ -18107,7 +18107,7 @@ namespace fairino
          * @param [out] gripperEnable 夹爪启用设备编号，0-不启用；1-启用
          * @param [out] IODeviceEnable IO设备启用设备编号，0-不启用；1-启用
          * @param [out] decHandEnable 灵巧手启用设备编号，0-不启用；1-启用
-         * @param [out] suckerEnable 末端吸盘启用设备编号，0-不启用；1-启用
+         * @param [out] suckerEnable 末端吸盘启用设备编号，0-不启用；1-启用（逗号串第40~47项）
          * @return  错误码
          */
         public int GetAxleLuaEnableDevice(ref int[] forceSensorEnable, ref int[] gripperEnable, ref int[] IODeviceEnable, ref int[] decHandEnable, ref int[] suckerEnable)
@@ -18133,7 +18133,7 @@ namespace fairino
                 {
                     resultStr = (string)result[1];
                     string[] parS = resultStr.Split(',');
-                    if (parS.Length != 40)
+                    if (parS.Length != 48)
                     {
                         log.LogError($"GetAxleLuaEnableDevice fail, {parS.Length}");
                         return -1;
@@ -18144,7 +18144,7 @@ namespace fairino
                         gripperEnable[i] = int.Parse(parS[i + 8]);
                         IODeviceEnable[i] = int.Parse(parS[i + 16]);
                         decHandEnable[i] = int.Parse(parS[i + 24]);
-                        suckerEnable[i] = int.Parse(parS[i + 32]);
+                        suckerEnable[i] = int.Parse(parS[i + 40]);
                     }
 
                     return (int)result[0];
