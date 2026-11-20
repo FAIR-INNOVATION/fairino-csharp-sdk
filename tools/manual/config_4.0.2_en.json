@@ -26,7 +26,8 @@
       "sdk_section": "See the \"Weaving\" chapter of the full user manual (parameter update in this version)",
       "example": {
         "function": "TestWeaveSetParaWithParam",
-        "title": "Sample code for pendulum weaving parameter setting"
+        "title": "Sample code for pendulum weaving parameter setting",
+        "sdk_section": "16.43"
       }
     },
     {
@@ -48,65 +49,155 @@
     }
   ],
   "new_apis": [
-    {"name": "GetDHCompenMode", "title": "Get robot DH compensation mode"},
+    {
+      "name": "GetDHCompenMode",
+      "title": "Get robot DH compensation mode",
+      "sdk_section": "8.48"
+    },
     {
       "name": "GetDHAllParam",
       "title": "Get robot DH2.0 parameters",
       "example": {
         "function": "TestGetRobotDHParam",
-        "title": "Sample code for getting DH compensation mode and DH2.0 parameters"
-      }
+        "title": "Sample code for getting DH compensation mode and DH2.0 parameters",
+        "sdk_section": "8.50"
+      },
+      "sdk_section": "8.49"
     },
     {
       "name": "SetCartOffsetRT",
       "title": "Set real-time motion offset",
       "example": {
         "function": "TestSetCartOffsetRT",
-        "title": "Sample code for setting real-time motion offset"
-      }
+        "title": "Sample code for setting real-time motion offset",
+        "sdk_section": "14.92"
+      },
+      "sdk_section": "14.91"
     },
-    {"name": "SetWeldType", "title": "Set welding type"},
-    {"name": "SetWeldCompany", "title": "Set welding power source manufacturer"},
-    {"name": "SetWeldWFS", "title": "Set wire feed speed"},
-    {"name": "SetWeldArcLen", "title": "Set welding arc length"},
-    {"name": "SetWeldArcCtrl", "title": "Set arc control value"},
-    {"name": "SetWeldSlot", "title": "Set program slot number"},
-    {"name": "SetWeldDisable", "title": "Set \"welding inhibit\""},
-    {"name": "SetweldWFSUdpNum", "title": "Set wire feed speed UDP custom control word number"},
-    {"name": "SetWeldArcLenUdpNum", "title": "Set arc length UDP custom control word number"},
-    {"name": "SetWeldArcCtrlUdpNum", "title": "Set arc control UDP custom control word number"},
-    {"name": "SetWeldSlotUdpNum", "title": "Set program slot UDP custom control word number"},
-    {"name": "SetWeldDisableExtDoNum", "title": "Set \"welding inhibit\" UDP extended DO number"},
+    {
+      "name": "SetWeldType",
+      "title": "Set welding type",
+      "sdk_section": "14.93"
+    },
+    {
+      "name": "SetWeldCompany",
+      "title": "Set welding power source manufacturer",
+      "sdk_section": "14.94"
+    },
+    {
+      "name": "SetWeldWFS",
+      "title": "Set wire feed speed",
+      "sdk_section": "14.95"
+    },
+    {
+      "name": "SetWeldArcLen",
+      "title": "Set welding arc length",
+      "sdk_section": "14.96"
+    },
+    {
+      "name": "SetWeldArcCtrl",
+      "title": "Set arc control value",
+      "sdk_section": "14.97"
+    },
+    {
+      "name": "SetWeldSlot",
+      "title": "Set program slot number",
+      "sdk_section": "14.98"
+    },
+    {
+      "name": "SetWeldDisable",
+      "title": "Set \"welding inhibit\"",
+      "sdk_section": "14.99"
+    },
+    {
+      "name": "SetweldWFSUdpNum",
+      "title": "Set wire feed speed UDP custom control word number",
+      "sdk_section": "14.100"
+    },
+    {
+      "name": "SetWeldArcLenUdpNum",
+      "title": "Set arc length UDP custom control word number",
+      "sdk_section": "14.101"
+    },
+    {
+      "name": "SetWeldArcCtrlUdpNum",
+      "title": "Set arc control UDP custom control word number",
+      "sdk_section": "14.102"
+    },
+    {
+      "name": "SetWeldSlotUdpNum",
+      "title": "Set program slot UDP custom control word number",
+      "sdk_section": "14.103"
+    },
+    {
+      "name": "SetWeldDisableExtDoNum",
+      "title": "Set \"welding inhibit\" UDP extended DO number",
+      "sdk_section": "14.104"
+    },
     {
       "name": "SetWeldSynStateExtDINum",
       "title": "Set \"synergy state\" UDP extended DI number",
       "example": {
         "function": "TestWeldSetParam",
-        "title": "Sample code for welding settings"
-      }
+        "title": "Sample code for welding settings",
+        "sdk_section": "14.106"
+      },
+      "sdk_section": "14.105"
     },
-    {"name": "GetWeldSynState", "title": "Get \"synergy state\""},
-    {"name": "SetWeldWfsFeedbackUdpNum", "title": "Set \"wire feed speed\" UDP custom status word number"},
+    {
+      "name": "GetWeldSynState",
+      "title": "Get \"synergy state\"",
+      "sdk_section": "14.107"
+    },
+    {
+      "name": "SetWeldWfsFeedbackUdpNum",
+      "title": "Set \"wire feed speed\" UDP custom status word number",
+      "sdk_section": "14.108"
+    },
     {
       "name": "GetWeldWfsFeedback",
       "title": "Get current wire feed speed",
       "example": {
         "function": "TestWeldFeedback",
-        "title": "Sample code for welding feedback printing"
-      }
+        "title": "Sample code for welding feedback printing",
+        "sdk_section": "14.110"
+      },
+      "sdk_section": "14.109"
     },
-    {"name": "SetAxleSuckerFunc", "title": "Set end-effector suction cup action control function code"},
-    {"name": "GetAxleSuckerFunc", "title": "Get end-effector suction cup action control function code"},
-    {"name": "SetAxleSuckerCtrl", "title": "Set end-effector suction cup control parameters"},
-    {"name": "SetAxleSuckerAct", "title": "Activate/reset suction cup"},
-    {"name": "GetAxleSuckerState", "title": "Get end-effector suction cup state"},
+    {
+      "name": "SetAxleSuckerFunc",
+      "title": "Set end-effector suction cup action control function code",
+      "sdk_section": "11.114"
+    },
+    {
+      "name": "GetAxleSuckerFunc",
+      "title": "Get end-effector suction cup action control function code",
+      "sdk_section": "11.115"
+    },
+    {
+      "name": "SetAxleSuckerCtrl",
+      "title": "Set end-effector suction cup control parameters",
+      "sdk_section": "11.116"
+    },
+    {
+      "name": "SetAxleSuckerAct",
+      "title": "Activate/reset suction cup",
+      "sdk_section": "11.117"
+    },
+    {
+      "name": "GetAxleSuckerState",
+      "title": "Get end-effector suction cup state",
+      "sdk_section": "11.118"
+    },
     {
       "name": "WaitAxleSuckerState",
       "title": "Wait for end-effector suction cup attachment complete signal",
       "example": {
         "function": "TestAxleSucker",
-        "title": "Sample code for end-effector suction cup interfaces"
-      }
+        "title": "Sample code for end-effector suction cup interfaces",
+        "sdk_section": "11.120"
+      },
+      "sdk_section": "11.119"
     }
   ]
 }
