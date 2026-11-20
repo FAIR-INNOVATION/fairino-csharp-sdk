@@ -230,6 +230,12 @@ def build(cfg_path):
         body_item(c)
 
     number = sdk_section_gen(cfg.get("sdk_section_start", "16.1"))
+
+    def render_example(ex):
+        h2(ex["title"])
+        sdk_section("SDK章节：" + ex.get("sdk_section", next(number)))
+        pre(extract_test(test_lines, ex["function"]))
+
     changed = cfg.get("changed_apis", [])
     if changed:
         h1("参数更改接口")
@@ -238,6 +244,8 @@ def build(cfg_path):
             h3("接口描述")
             sdk_section("SDK章节：" + api.get("sdk_section", "—"))
             pre(extract_api(fr_lines, api["name"]))
+            if api.get("example"):
+                render_example(api["example"])
 
     new_apis = cfg.get("new_apis", [])
     if new_apis:
@@ -247,13 +255,11 @@ def build(cfg_path):
             h3("接口描述")
             sdk_section("SDK章节：" + api.get("sdk_section", next(number)))
             pre(extract_api(fr_lines, api["name"]))
+            if api.get("example"):
+                render_example(api["example"])
 
-    examples = cfg.get("examples", [])
-    if examples:
-        for ex in examples:
-            h2(ex["title"])
-            sdk_section("SDK章节：" + ex.get("sdk_section", next(number)))
-            pre(extract_test(test_lines, ex["function"]))
+    for ex in cfg.get("examples", []):
+        render_example(ex)
 
     # ---- 目录域自动更新 ----
     settings = doc.settings.element

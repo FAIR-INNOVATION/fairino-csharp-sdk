@@ -19,13 +19,31 @@
     {
       "name": "WeaveSetPara",
       "title": "设置摆动参数",
-      "sdk_section": "详见完整用户手册“摆动焊接”章节（本次为参数更新）"
+      "sdk_section": "详见完整用户手册“摆动焊接”章节（本次为参数更新）",
+      "example": {
+        "function": "TestWeaveSetParaWithParam",
+        "title": "摇枪摆动参数设置代码示例"
+      }
     }
   ],
   "new_apis": [
     {"name": "GetDHCompenMode", "title": "获取机器人DH补偿模型"},
-    {"name": "GetDHAllParam", "title": "获取机器人DH2.0参数"},
-    {"name": "SetCartOffsetRT", "title": "设置运动实时偏移"},
+    {
+      "name": "GetDHAllParam",
+      "title": "获取机器人DH2.0参数",
+      "example": {
+        "function": "TestGetRobotDHParam",
+        "title": "获取机器人DH补偿模型及DH2.0参数代码示例"
+      }
+    },
+    {
+      "name": "SetCartOffsetRT",
+      "title": "设置运动实时偏移",
+      "example": {
+        "function": "TestSetCartOffsetRT",
+        "title": "设置运动实时偏移代码示例"
+      }
+    },
     {"name": "SetWeldType", "title": "设置焊接类型"},
     {"name": "SetWeldCompany", "title": "设置焊机厂商"},
     {"name": "SetWeldWFS", "title": "设置送丝速度"},
@@ -38,23 +56,36 @@
     {"name": "SetWeldArcCtrlUdpNum", "title": "设置电弧控制UDP自定义控制字序号"},
     {"name": "SetWeldSlotUdpNum", "title": "设置程序槽号UDP自定义控制字序号"},
     {"name": "SetWeldDisableExtDoNum", "title": "设置“禁止焊接”UDP扩展DO序号"},
-    {"name": "SetWeldSynStateExtDINum", "title": "设置“协同状态”UDP扩展DI序号"},
+    {
+      "name": "SetWeldSynStateExtDINum",
+      "title": "设置“协同状态”UDP扩展DI序号",
+      "example": {
+        "function": "TestWeldSetParam",
+        "title": "焊机设置代码示例"
+      }
+    },
     {"name": "GetWeldSynState", "title": "获取“协同状态”"},
     {"name": "SetWeldWfsFeedbackUdpNum", "title": "设置“送丝速度”UDP自定义状态字序号"},
-    {"name": "GetWeldWfsFeedback", "title": "获取“送丝速度”当前值"},
+    {
+      "name": "GetWeldWfsFeedback",
+      "title": "获取“送丝速度”当前值",
+      "example": {
+        "function": "TestWeldFeedback",
+        "title": "焊机反馈打印代码示例"
+      }
+    },
     {"name": "SetAxleSuckerFunc", "title": "设置启用末端吸盘动作控制功能码"},
     {"name": "GetAxleSuckerFunc", "title": "获取末端吸盘动作控制功能码"},
     {"name": "SetAxleSuckerCtrl", "title": "设置末端吸盘控制参数"},
     {"name": "SetAxleSuckerAct", "title": "激活/复位吸盘"},
     {"name": "GetAxleSuckerState", "title": "获取末端吸盘状态"},
-    {"name": "WaitAxleSuckerState", "title": "等待末端吸盘吸附完成信号"}
-  ],
-  "examples": [
-    {"function": "TestGetRobotDHParam", "title": "获取机器人DH补偿模型及DH2.0参数代码示例"},
-    {"function": "TestWeaveSetParaWithParam", "title": "摇枪摆动参数设置代码示例"},
-    {"function": "TestSetCartOffsetRT", "title": "设置运动实时偏移代码示例"},
-    {"function": "TestWeldSetParam", "title": "焊机设置代码示例"},
-    {"function": "TestWeldFeedback", "title": "焊机反馈打印代码示例"},
-    {"function": "TestAxleSucker", "title": "末端吸盘接口代码示例"}
+    {
+      "name": "WaitAxleSuckerState",
+      "title": "等待末端吸盘吸附完成信号",
+      "example": {
+        "function": "TestAxleSucker",
+        "title": "末端吸盘接口代码示例"
+      }
+    }
   ]
 }

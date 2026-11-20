@@ -26,7 +26,10 @@
    - `changes`：版本变更说明条目（每条一句，以“；/。”结尾）
    - `changed_apis`：参数有变化的接口（`name` + `title` + `sdk_section`）
    - `new_apis`：新增接口（`name` + `title`），注释和函数原型**自动从 `src/FRRobot/FRRobot.cs` 抓取**
-   - `examples`：代码示例（`function` 为 `Test.cs` 中的函数名 + `title`），代码**自动从 `examples/testFrRobot/Test.cs` 抓取**
+   - **代码示例跟在对应接口后面**：在 `changed_apis` / `new_apis` 的条目里加
+     `"example": {"function": "TestXxx", "title": "xxx代码示例"}`，
+     该示例会紧跟在接口描述之后、下一节之前输出；
+     确有需要集中放置的示例，才放到顶层 `examples` 数组（会排在文档末尾）。
 3. 运行：
    ```
    python tools/manual/build_release_manual.py tools/manual/config_4.0.3.json
@@ -36,7 +39,8 @@
    - 在仓库根目录生成同名 docx
    - 复制到 `output_dir`
    - 自检代码段边框数量、标题数量，并打印路径与文件大小
-5. 打开生成的 docx，确认目录（Word 提示更新域时选“是”），通读一遍接口注释与代码示例。
+5. 打开生成的 docx，确认目录（Word 提示更新域时选“是”），通读一遍接口注释与代码示例；
+   重点检查每个代码示例是否紧跟对应接口（如 GetDHAllParam 后是 DH 参数示例、WaitAxleSuckerState 后是吸盘示例）。
 
 ## 注意事项
 
