@@ -17899,9 +17899,10 @@ namespace fairino
          * @param [in] gripperEnable 夹爪启用状态，0-不启用；1-启用
          * @param [in] IOEnable IO设备启用状态，0-不启用；1-启用
          * @param [in] dexhandEnable 灵巧手设备启用状态，0-不启用；1-启用
+         * @param [in] suckerEnable 末端吸盘设备启用状态，0-不启用；1-启用，默认0
          * @return  错误码
          */
-        public int SetAxleLuaEnableDeviceType(int forceSensorEnable, int gripperEnable, int IOEnable, int dexhandEnable)
+        public int SetAxleLuaEnableDeviceType(int forceSensorEnable, int gripperEnable, int IOEnable, int dexhandEnable, int suckerEnable = 0)
         {
             if (IsSockComError())
             {
@@ -17909,10 +17910,10 @@ namespace fairino
             }
             try
             {
-                int rtn = proxy.SetAxleLuaEnableDeviceType(forceSensorEnable, gripperEnable, IOEnable, dexhandEnable);
+                int rtn = proxy.SetAxleLuaEnableDeviceType(forceSensorEnable, gripperEnable, IOEnable, dexhandEnable, suckerEnable);
                 if (log != null)
                 {
-                    log.LogInfo($"SetAxleLuaEnableDeviceType({forceSensorEnable},{gripperEnable}, {IOEnable}, {dexhandEnable}) : {rtn}");
+                    log.LogInfo($"SetAxleLuaEnableDeviceType({forceSensorEnable},{gripperEnable}, {IOEnable}, {dexhandEnable}, {suckerEnable}) : {rtn}");
                 }
                 return rtn;
             }
@@ -18018,6 +18019,132 @@ namespace fairino
                         gripperEnable[i] = int.Parse(parS[i + 8]);
                         IODeviceEnable[i] = int.Parse(parS[i + 16]);
                         decHandEnable[i] = int.Parse(parS[i + 24]);
+                    }
+
+                    return (int)result[0];
+                }
+                if (log != null)
+                {
+                    log.LogInfo($"GetAxleLuaEnableDevice(ref {resultStr}) : {(int)result[0]}");
+                }
+                return (int)result[0];
+            }
+            catch (Exception ex)
+            {
+                if (IsSockComError())
+                {
+                    if (log != null)
+                    {
+                        log.LogError($"RPC exception: {ex.Message}");
+                    }
+                    return g_sock_com_err;
+                }
+                if (log != null)
+                {
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief 获取末端LUA末端设备启用类型（含末端吸盘）
+         * @param [out] forceSensorEnable 力传感器启用状态，0-不启用；1-启用
+         * @param [out] gripperEnable 夹爪启用状态，0-不启用；1-启用
+         * @param [out] IOEnable IO设备启用状态，0-不启用；1-启用
+         * @param [out] dexhandEnable 灵巧手设备启用状态，0-不启用；1-启用
+         * @param [out] suckerEnable 末端吸盘设备启用状态，0-不启用；1-启用
+         * @return  错误码
+         */
+        public int GetAxleLuaEnableDeviceType(ref int forceSensorEnable, ref int gripperEnable, ref int IOEnable, ref int dexhandEnable, ref int suckerEnable)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+
+            try
+            {
+                object[] result = proxy.GetAxleLuaEnableDeviceType();
+                if ((int)result[0] == 0)
+                {
+                    forceSensorEnable = (int)result[1];
+                    gripperEnable = (int)result[2];
+                    IOEnable = (int)result[3];
+                    dexhandEnable = (int)result[4];
+                    if (result.Length > 5)
+                    {
+                        suckerEnable = (int)result[5];
+                    }
+                }
+                if (log != null)
+                {
+                    log.LogInfo($"GetAxleLuaEnableDeviceType(ref {forceSensorEnable}, ref {gripperEnable}, ref {IOEnable}, ref {dexhandEnable}, ref {suckerEnable}) : {(int)result[0]}");
+                }
+                return (int)result[0];
+            }
+            catch (Exception ex)
+            {
+                if (IsSockComError())
+                {
+                    if (log != null)
+                    {
+                        log.LogError($"RPC exception: {ex.Message}");
+                    }
+                    return g_sock_com_err;
+                }
+                if (log != null)
+                {
+                    log.LogWarn($"RPC non-communication exception: {ex.Message}");
+                }
+                return (int)RobotError.ERR_RPC_ERROR;
+            }
+        }
+
+        /**
+         * @brief 获取当前配置的末端设备（含末端吸盘）
+         * @param [out] forceSensorEnable 力传感器启用设备编号 0-未启用；1-启用
+         * @param [out] gripperEnable 夹爪启用设备编号，0-不启用；1-启用
+         * @param [out] IODeviceEnable IO设备启用设备编号，0-不启用；1-启用
+         * @param [out] decHandEnable 灵巧手启用设备编号，0-不启用；1-启用
+         * @param [out] suckerEnable 末端吸盘启用设备编号，0-不启用；1-启用
+         * @return  错误码
+         */
+        public int GetAxleLuaEnableDevice(ref int[] forceSensorEnable, ref int[] gripperEnable, ref int[] IODeviceEnable, ref int[] decHandEnable, ref int[] suckerEnable)
+        {
+            if (IsSockComError())
+            {
+                return g_sock_com_err;
+            }
+            if (forceSensorEnable == null || gripperEnable == null || IODeviceEnable == null ||
+                decHandEnable == null || suckerEnable == null ||
+                forceSensorEnable.Length < 8 || gripperEnable.Length < 8 || IODeviceEnable.Length < 8 ||
+                decHandEnable.Length < 8 || suckerEnable.Length < 8)
+            {
+                log?.LogError("GetAxleLuaEnableDevice invalid array, each array length must be at least 8");
+                return (int)RobotError.ERR_PARAM_NUM;
+            }
+
+            try
+            {
+                string resultStr = "";
+                object[] result = proxy.GetAxleLuaEnableDevice();
+                if ((int)result[0] == 0)
+                {
+                    resultStr = (string)result[1];
+                    string[] parS = resultStr.Split(',');
+                    if (parS.Length != 40)
+                    {
+                        log.LogError($"GetAxleLuaEnableDevice fail, {parS.Length}");
+                        return -1;
+                    }
+                    for (int i = 0; i < 8; i++)
+                    {
+                        forceSensorEnable[i] = int.Parse(parS[i]);
+                        gripperEnable[i] = int.Parse(parS[i + 8]);
+                        IODeviceEnable[i] = int.Parse(parS[i + 16]);
+                        decHandEnable[i] = int.Parse(parS[i + 24]);
+                        suckerEnable[i] = int.Parse(parS[i + 32]);
                     }
 
                     return (int)result[0];

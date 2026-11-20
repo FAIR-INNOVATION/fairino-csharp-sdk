@@ -12,6 +12,7 @@
     "新增焊接参数设置接口SetWeldType()、SetWeldCompany()、SetWeldWFS()、SetWeldArcLen()、SetWeldArcCtrl()、SetWeldSlot()、SetWeldDisable()，以及UDP自定义控制字配置接口SetweldWFSUdpNum()、SetWeldArcLenUdpNum()、SetWeldArcCtrlUdpNum()、SetWeldSlotUdpNum()、SetWeldDisableExtDoNum()、SetWeldSynStateExtDINum()；",
     "新增焊接状态反馈接口GetWeldSynState()获取协同状态、GetWeldWfsFeedback()获取实际送丝速度，以及状态字配置接口SetWeldWfsFeedbackUdpNum()；",
     "新增末端吸盘接口SetAxleSuckerFunc()、GetAxleSuckerFunc()、SetAxleSuckerCtrl()、SetAxleSuckerAct()、GetAxleSuckerState()、WaitAxleSuckerState()；",
+    "修改SetAxleLuaEnableDeviceType()、GetAxleLuaEnableDeviceType()、GetAxleLuaEnableDevice()，新增末端吸盘设备使能项；",
     "新增DH参数、摇枪摆动、实时偏移、焊机设置、焊机反馈、末端吸盘代码示例；",
     "“SDK_VERSION” 更新为 “C#SDK-V1.3.2 Web-4.0.2”。"
   ],
@@ -24,6 +25,23 @@
         "function": "TestWeaveSetParaWithParam",
         "title": "摇枪摆动参数设置代码示例"
       }
+    },
+    {
+      "name": "SetAxleLuaEnableDeviceType",
+      "title": "设置末端LUA末端设备启用类型",
+      "sdk_section": "详见完整用户手册“末端设备”章节（本次为参数更新）"
+    },
+    {
+      "name": "GetAxleLuaEnableDeviceType",
+      "title": "获取末端LUA末端设备启用类型",
+      "sdk_section": "详见完整用户手册“末端设备”章节（本次为参数更新）",
+      "match": "suckerEnable"
+    },
+    {
+      "name": "GetAxleLuaEnableDevice",
+      "title": "获取当前配置的末端设备",
+      "sdk_section": "详见完整用户手册“末端设备”章节（本次为参数更新）",
+      "match": "suckerEnable"
     }
   ],
   "new_apis": [

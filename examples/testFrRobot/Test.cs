@@ -1405,8 +1405,9 @@ namespace testFrRobot
             int gripperEnable = 0;
             int ioEnable = 0;
             int dexhandEnable = 0;
-            robot.GetAxleLuaEnableDeviceType(ref forceEnable, ref gripperEnable, ref ioEnable, ref dexhandEnable);
-            Console.WriteLine("GetAxleLuaEnableDeviceType param is {0} {1} {2}", forceEnable, gripperEnable, ioEnable);
+            int suckerEnable = 0;
+            robot.GetAxleLuaEnableDeviceType(ref forceEnable, ref gripperEnable, ref ioEnable, ref dexhandEnable, ref suckerEnable);
+            Console.WriteLine("GetAxleLuaEnableDeviceType param is {0} {1} {2} {3} {4}", forceEnable, gripperEnable, ioEnable, dexhandEnable, suckerEnable);
 
             int[] func = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
             robot.SetAxleLuaGripperFunc(1, func);
@@ -1417,7 +1418,8 @@ namespace testFrRobot
             int[] getgripperEnable = new int[16];
             int[] getioEnable = new int[16];
             int[] dexhandEnable1 = new int[16];
-            robot.GetAxleLuaEnableDevice(ref getforceEnable, ref getgripperEnable, ref getioEnable,ref dexhandEnable1);
+            int[] getSuckerEnable = new int[16];
+            robot.GetAxleLuaEnableDevice(ref getforceEnable, ref getgripperEnable, ref getioEnable, ref dexhandEnable1, ref getSuckerEnable);
             Console.WriteLine("\ngetforceEnable status : ");
             foreach (int i in getforceEnable)
             {

@@ -40,14 +40,19 @@ def norm_api_line(line):
     return s
 
 
-def extract_api(fr_lines, name):
-    start = None
+def extract_api(fr_lines, name, match=None):
+    candidates = []
     for i, ln in enumerate(fr_lines):
         if re.match(r"\s*public int %s\(" % re.escape(name), ln):
-            start = i
-            break
-    if start is None:
+            candidates.append(i)
+    if not candidates:
         raise SystemExit("接口未在 FRRobot.cs 中找到: " + name)
+    start = candidates[0]
+    if match:
+        for i in candidates:
+            if match in fr_lines[i]:
+                start = i
+                break
     c_start = start - 1
     while c_start >= 0 and fr_lines[c_start].strip() == "":
         c_start -= 1
@@ -243,7 +248,7 @@ def build(cfg_path):
             h2(api["title"])
             h3("接口描述")
             sdk_section("SDK章节：" + api.get("sdk_section", "—"))
-            pre(extract_api(fr_lines, api["name"]))
+            pre(extract_api(fr_lines, api["name"], api.get("match")))
             if api.get("example"):
                 render_example(api["example"])
 
@@ -254,7 +259,7 @@ def build(cfg_path):
             h2(api["title"])
             h3("接口描述")
             sdk_section("SDK章节：" + api.get("sdk_section", next(number)))
-            pre(extract_api(fr_lines, api["name"]))
+            pre(extract_api(fr_lines, api["name"], api.get("match")))
             if api.get("example"):
                 render_example(api["example"])
 
