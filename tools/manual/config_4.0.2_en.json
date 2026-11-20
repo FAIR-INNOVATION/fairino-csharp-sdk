@@ -1,0 +1,111 @@
+{
+  "version": "4.0.2",
+  "date": "20261123",
+  "language": "en",
+  "output_name": "RD36-Cobot C# SDK Version Update (4.0.2) User Manual-V1.0-20261123.docx",
+  "template": "D:/C#SDK/手册/4.0.1/RD36-Cobot C# SDK Version Update (4.0.1) User Manual-V1.0-20261026.docx",
+  "output_dir": "D:/C#SDK/手册/4.0.2",
+  "sdk_section_start": "16.43",
+  "body_keep_indent": true,
+  "changes": [
+    "Added the GetDHCompenMode() interface for getting the robot DH compensation model;",
+    "Added the GetDHAllParam() interface for getting robot DH2.0 parameters (d, a, alpha, beta, theta);",
+    "Modified the WeaveSetPara() interface for setting weaving parameters to add weavePendulumLength (pendulum length) and weavePendulumAngle (pendulum angle), default 0; when pendulum weaving is not used, the original 14 parameters are still sent for compatibility with older controllers;",
+    "Added the SetCartOffsetRT() interface for setting real-time motion offset, sent as an 8080 command frame (cmdID 1368) with low latency;",
+    "Added welding parameter interfaces SetWeldType(), SetWeldCompany(), SetWeldWFS(), SetWeldArcLen(), SetWeldArcCtrl(), SetWeldSlot(), SetWeldDisable(), and UDP custom control word configuration interfaces SetweldWFSUdpNum(), SetWeldArcLenUdpNum(), SetWeldArcCtrlUdpNum(), SetWeldSlotUdpNum(), SetWeldDisableExtDoNum(), SetWeldSynStateExtDINum();",
+    "Added welding status feedback interfaces GetWeldSynState() for the synergy state and GetWeldWfsFeedback() for the actual wire feed speed, plus the status word configuration SetWeldWfsFeedbackUdpNum();",
+    "Added end-effector suction cup interfaces SetAxleSuckerFunc(), GetAxleSuckerFunc(), SetAxleSuckerCtrl(), SetAxleSuckerAct(), GetAxleSuckerState() and WaitAxleSuckerState(); the suction cup function code adds Bit11 (channel 1 control enable) and Bit12 (channel 2 control enable);",
+    "Modified SetAxleLuaEnableDeviceType(), GetAxleLuaEnableDeviceType() and GetAxleLuaEnableDevice() to add the end-effector suction cup enable item;",
+    "Updated \"SDK_VERSION\" to \"C#SDK-V1.3.2 Web-4.0.2\"."
+  ],
+  "changed_apis": [
+    {
+      "name": "WeaveSetPara",
+      "title": "Set weaving parameters",
+      "sdk_section": "See the \"Weaving\" chapter of the full user manual (parameter update in this version)",
+      "example": {
+        "function": "TestWeaveSetParaWithParam",
+        "title": "Sample code for pendulum weaving parameter setting"
+      }
+    },
+    {
+      "name": "SetAxleLuaEnableDeviceType",
+      "title": "Set end-effector LUA device enable type",
+      "sdk_section": "See the \"End-effector devices\" chapter of the full user manual (parameter update in this version)"
+    },
+    {
+      "name": "GetAxleLuaEnableDeviceType",
+      "title": "Get end-effector LUA device enable type",
+      "sdk_section": "See the \"End-effector devices\" chapter of the full user manual (parameter update in this version)",
+      "match": "suckerEnable"
+    },
+    {
+      "name": "GetAxleLuaEnableDevice",
+      "title": "Get currently configured end-effector devices",
+      "sdk_section": "See the \"End-effector devices\" chapter of the full user manual (parameter update in this version)",
+      "match": "suckerEnable"
+    }
+  ],
+  "new_apis": [
+    {"name": "GetDHCompenMode", "title": "Get robot DH compensation mode"},
+    {
+      "name": "GetDHAllParam",
+      "title": "Get robot DH2.0 parameters",
+      "example": {
+        "function": "TestGetRobotDHParam",
+        "title": "Sample code for getting DH compensation mode and DH2.0 parameters"
+      }
+    },
+    {
+      "name": "SetCartOffsetRT",
+      "title": "Set real-time motion offset",
+      "example": {
+        "function": "TestSetCartOffsetRT",
+        "title": "Sample code for setting real-time motion offset"
+      }
+    },
+    {"name": "SetWeldType", "title": "Set welding type"},
+    {"name": "SetWeldCompany", "title": "Set welding power source manufacturer"},
+    {"name": "SetWeldWFS", "title": "Set wire feed speed"},
+    {"name": "SetWeldArcLen", "title": "Set welding arc length"},
+    {"name": "SetWeldArcCtrl", "title": "Set arc control value"},
+    {"name": "SetWeldSlot", "title": "Set program slot number"},
+    {"name": "SetWeldDisable", "title": "Set \"welding inhibit\""},
+    {"name": "SetweldWFSUdpNum", "title": "Set wire feed speed UDP custom control word number"},
+    {"name": "SetWeldArcLenUdpNum", "title": "Set arc length UDP custom control word number"},
+    {"name": "SetWeldArcCtrlUdpNum", "title": "Set arc control UDP custom control word number"},
+    {"name": "SetWeldSlotUdpNum", "title": "Set program slot UDP custom control word number"},
+    {"name": "SetWeldDisableExtDoNum", "title": "Set \"welding inhibit\" UDP extended DO number"},
+    {
+      "name": "SetWeldSynStateExtDINum",
+      "title": "Set \"synergy state\" UDP extended DI number",
+      "example": {
+        "function": "TestWeldSetParam",
+        "title": "Sample code for welding settings"
+      }
+    },
+    {"name": "GetWeldSynState", "title": "Get \"synergy state\""},
+    {"name": "SetWeldWfsFeedbackUdpNum", "title": "Set \"wire feed speed\" UDP custom status word number"},
+    {
+      "name": "GetWeldWfsFeedback",
+      "title": "Get current wire feed speed",
+      "example": {
+        "function": "TestWeldFeedback",
+        "title": "Sample code for welding feedback printing"
+      }
+    },
+    {"name": "SetAxleSuckerFunc", "title": "Set end-effector suction cup action control function code"},
+    {"name": "GetAxleSuckerFunc", "title": "Get end-effector suction cup action control function code"},
+    {"name": "SetAxleSuckerCtrl", "title": "Set end-effector suction cup control parameters"},
+    {"name": "SetAxleSuckerAct", "title": "Activate/reset suction cup"},
+    {"name": "GetAxleSuckerState", "title": "Get end-effector suction cup state"},
+    {
+      "name": "WaitAxleSuckerState",
+      "title": "Wait for end-effector suction cup attachment complete signal",
+      "example": {
+        "function": "TestAxleSucker",
+        "title": "Sample code for end-effector suction cup interfaces"
+      }
+    }
+  ]
+}

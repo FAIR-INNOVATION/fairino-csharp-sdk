@@ -102,9 +102,24 @@ def build(cfg_path):
 
     version = cfg["version"]
     date = cfg["date"]
+    lang = cfg.get("language", "zh")
+    if lang == "en":
+        labels = {"change": "Explanation of version changes",
+                  "changed": "Parameter change interface",
+                  "new": "Added interfaces",
+                  "desc": "Interface description",
+                  "sdk": "SDK Chapter: "}
+    else:
+        labels = {"change": "版本变更说明",
+                  "changed": "参数更改接口",
+                  "new": "新增接口",
+                  "desc": "接口描述",
+                  "sdk": "SDK章节："}
+    labels.update(cfg.get("labels", {}))
     template = scale_path(cfg["template"])
     out_dir = scale_path(cfg["output_dir"])
-    out_name = "RD36-协作机器人C#SDK用户手册版本更新(%s)-V1.0-%s.docx" % (version, date)
+    default_name = "RD36-协作机器人C#SDK用户手册版本更新(%s)-V1.0-%s.docx" % (version, date)
+    out_name = cfg.get("output_name", default_name)
     out_ws = os.path.join(REPO_ROOT, out_name)
     fr_path = scale_path(cfg.get("frrobot_cs", "src/FRRobot/FRRobot.cs"))
     test_path = scale_path(cfg.get("test_cs", "examples/testFrRobot/Test.cs"))
@@ -125,6 +140,14 @@ def build(cfg_path):
         raise SystemExit("模板中未找到代码段样式段落")
     tpl_ppr = deepcopy(tpl_p._p.pPr)
     tpl_rpr = deepcopy(tpl_p.runs[0]._r.rPr)
+
+    # ---- 标题字体：沿用模板标题 run 的字体，避免英文模板字体缺失时走错字体 ----
+    heading_rpr = {}
+    for level in ("Heading 1", "Heading 2", "Heading 3"):
+        for p in doc.paragraphs:
+            if p.style.name == level and p.runs and p.runs[0]._r.rPr is not None:
+                heading_rpr[level] = deepcopy(p.runs[0]._r.rPr)
+                break
 
     # ---- 行号编号：每块独立 numId + startOverride=1 ----
     numbering = doc.part.numbering_part.element
@@ -162,42 +185,55 @@ def build(cfg_path):
             continue
         body.remove(child)
 
-    # ---- 封面版本号 ----
-    new_minor = version.split(".")[-1]
+    # ---- 封面版本号（兼容整段文本与拆成 "4.0." + "1" 两种模板） ----
     for p in body[0].iter(qn('w:p')):
+        for t in p.iter(qn('w:t')):
+            if t.text and re.search(r"4\.0\.\d+", t.text):
+                t.text = re.sub(r"4\.0\.\d+", version, t.text)
         texts = [t for t in p.iter(qn('w:t'))]
         vals = [t.text for t in texts]
         if "4.0." in vals:
             idx = vals.index("4.0.")
-            if idx + 1 < len(texts):
-                texts[idx + 1].text = new_minor
+            if idx + 1 < len(texts) and texts[idx + 1].text and texts[idx + 1].text.isdigit():
+                texts[idx + 1].text = version.split(".")[-1]
 
     # ---- 文档属性 ----
     cp = doc.core_properties
-    cp.title = "RD36-协作机器人C#SDK用户手册版本更新(%s)" % version
-    cp.subject = "C#SDK 版本更新说明"
+    cp.title = cfg.get("doc_title", out_name[:-5])
+    cp.subject = "C#SDK Version Update" if lang == "en" else "C#SDK 版本更新说明"
     modified = date
     if len(modified) == 8:
         cp.comments = "V1.0-%s" % modified
 
     # ---- 排版辅助 ----
+    def heading(text, style):
+        p = doc.add_paragraph(text, style=style)
+        rpr = heading_rpr.get(style)
+        if rpr is not None and p.runs:
+            r = p.runs[0]._r
+            if r.rPr is not None:
+                r.remove(r.rPr)
+            r.insert(0, deepcopy(rpr))
+        return p
+
     def h1(text):
-        return doc.add_paragraph(text, style="Heading 1")
+        return heading(text, "Heading 1")
 
     def h2(text):
-        return doc.add_paragraph(text, style="Heading 2")
+        return heading(text, "Heading 2")
 
     def h3(text):
-        return doc.add_paragraph(text, style="Heading 3")
+        return heading(text, "Heading 3")
 
     def body_item(text):
         p = doc.add_paragraph(style="Normal")
         r = p.add_run(text)
         r.font.size = Pt(10.5)
-        p.paragraph_format.first_line_indent = Pt(0)
-        ind = p._p.pPr.find(qn('w:ind'))
-        if ind is not None:
-            ind.set(qn('w:firstLineChars'), '0')
+        if not cfg.get("body_keep_indent"):
+            p.paragraph_format.first_line_indent = Pt(0)
+            ind = p._p.pPr.find(qn('w:ind'))
+            if ind is not None:
+                ind.set(qn('w:firstLineChars'), '0')
         return p
 
     def sdk_section(text):
@@ -230,7 +266,7 @@ def build(cfg_path):
     test_lines = read_lines(test_path)
 
     # ---- 正文 ----
-    h1("版本变更说明")
+    h1(labels["change"])
     for c in cfg["changes"]:
         body_item(c)
 
@@ -238,27 +274,27 @@ def build(cfg_path):
 
     def render_example(ex):
         h2(ex["title"])
-        sdk_section("SDK章节：" + ex.get("sdk_section", next(number)))
+        sdk_section(labels["sdk"] + ex.get("sdk_section", next(number)))
         pre(extract_test(test_lines, ex["function"]))
 
     changed = cfg.get("changed_apis", [])
     if changed:
-        h1("参数更改接口")
+        h1(labels["changed"])
         for api in changed:
             h2(api["title"])
-            h3("接口描述")
-            sdk_section("SDK章节：" + api.get("sdk_section", "—"))
+            h3(labels["desc"])
+            sdk_section(labels["sdk"] + api.get("sdk_section", "—"))
             pre(extract_api(fr_lines, api["name"], api.get("match")))
             if api.get("example"):
                 render_example(api["example"])
 
     new_apis = cfg.get("new_apis", [])
     if new_apis:
-        h1("新增接口")
+        h1(labels["new"])
         for api in new_apis:
             h2(api["title"])
-            h3("接口描述")
-            sdk_section("SDK章节：" + api.get("sdk_section", next(number)))
+            h3(labels["desc"])
+            sdk_section(labels["sdk"] + api.get("sdk_section", next(number)))
             pre(extract_api(fr_lines, api["name"], api.get("match")))
             if api.get("example"):
                 render_example(api["example"])
