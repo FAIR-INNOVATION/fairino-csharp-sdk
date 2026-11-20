@@ -16,7 +16,7 @@ DEST = r"D:\C#SDK\手册\4.0.2\末端吸盘适配SDK.txt"
 HEADER = """// 4.0.2 末端吸盘适配 SDK 接口与用例（自动生成，与源码同步）
 // 1. SetAxleSuckerFunc / GetAxleSuckerFunc 为 16 项功能码数组形式，func[0]~func[15] 对应 Bit0~Bit15；
 //    新增 Bit11-通道一控制使能、Bit12-通道二控制使能。
-// 2. SetAxleLuaEnableDeviceType 第 5 参 suckerEnable 默认 -1：不传时仍按原四参数下发，兼容旧固件。
+// 2. SetAxleLuaEnableDeviceType 第 5 参 suckerEnable 默认 0（0-不启用，1-启用）；传 -1 时按原四参数下发，兼容旧固件。
 // 3. GetAxleLuaEnableDevice 返回 48 项（0-7 力传感器、8-15 夹爪、16-23 IO 预留、24-39 灵巧手、40-47 末端吸盘）；
 //    四数组重载兼容 >=40 项的旧返回，吸盘使能由五数组重载读取第 40~47 项。
 // 4. WaitAxleSuckerState 参数顺序为 (channel, timeout, state, strategy)。
