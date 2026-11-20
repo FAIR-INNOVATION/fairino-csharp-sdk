@@ -11729,7 +11729,8 @@ public int RunTrajectoryJ(string localFilePath = "D://zUP/horse.txt", string rem
         }
 
         /// <summary>
-        /// 4.0.2 末端吸盘接口测试：功能码设置/读取、控制参数、激活、状态查询、等待吸附完成
+        /// 4.0.2 末端吸盘接口测试：末端设备使能、16项功能码设置/读取（含Bit11/Bit12通道控制使能）、
+        /// 控制参数、激活、状态查询、等待吸附完成
         /// 注意：channel 0~3 对应通道1~通道4；minPress/maxPress 为实际真空度阈值，示例用 0，联调时按吸盘参数修改
         /// </summary>
         public void TestAxleSucker()
@@ -11767,15 +11768,17 @@ public int RunTrajectoryJ(string localFilePath = "D://zUP/horse.txt", string rem
             rtn = robot.GetAxleLuaEnableDevice(ref forceArr, ref gripperArr, ref ioArr, ref dexArr, ref suckArr);
             Console.WriteLine($"GetAxleLuaEnableDevice rtn={rtn}, sucker=[{string.Join(",", suckArr)}]");
 
-            // 功能码数组 func[0]~func[10] 对应 Bit0~Bit10，全部启用
+            // 功能码数组 func[0]~func[12] 对应 Bit0~Bit12，全部启用
+            // 其中 func[11]=Bit11-通道一控制使能，func[12]=Bit12-通道二控制使能
             int[] suckerFunc = new int[16];
-            for (int i = 0; i <= 10; i++)
+            for (int i = 0; i <= 12; i++)
             {
                 suckerFunc[i] = 1;
             }
             rtn = robot.SetAxleSuckerFunc(id, suckerFunc);
             Console.WriteLine($"SetAxleSuckerFunc: {rtn}");
 
+            // 读回16项功能码：func[11]/func[12] 为通道一/通道二控制使能
             int[] funcValue = new int[16];
             rtn = robot.GetAxleSuckerFunc(id, ref funcValue);
             Console.WriteLine($"GetAxleSuckerFunc rtn={rtn}, value=[{string.Join(",", funcValue)}]");
