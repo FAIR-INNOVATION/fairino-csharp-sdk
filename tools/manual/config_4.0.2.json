@@ -11,7 +11,7 @@
     "新增SetCartOffsetRT()设置运动实时偏移接口，通过8080指令帧（cmdID 1368）低延迟下发；",
     "新增焊接参数设置接口SetWeldType()、SetWeldCompany()、SetWeldWFS()、SetWeldArcLen()、SetWeldArcCtrl()、SetWeldSlot()、SetWeldDisable()，以及UDP自定义控制字配置接口SetweldWFSUdpNum()、SetWeldArcLenUdpNum()、SetWeldArcCtrlUdpNum()、SetWeldSlotUdpNum()、SetWeldDisableExtDoNum()、SetWeldSynStateExtDINum()；",
     "新增焊接状态反馈接口GetWeldSynState()获取协同状态、GetWeldWfsFeedback()获取实际送丝速度，以及状态字配置接口SetWeldWfsFeedbackUdpNum()；",
-    "新增末端吸盘接口SetAxleSuckerFunc()、GetAxleSuckerFunc()、SetAxleSuckerCtrl()、SetAxleSuckerAct()、GetAxleSuckerState()、WaitAxleSuckerState()；",
+    "新增末端吸盘接口SetAxleSuckerFunc()、GetAxleSuckerFunc()、SetAxleSuckerCtrl()、SetAxleSuckerAct()、GetAxleSuckerState()、WaitAxleSuckerState()；末端吸盘功能码新增Bit11-通道一控制使能、Bit12-通道二控制使能；",
     "修改SetAxleLuaEnableDeviceType()、GetAxleLuaEnableDeviceType()、GetAxleLuaEnableDevice()，新增末端吸盘设备使能项；",
     "新增DH参数、摇枪摆动、实时偏移、焊机设置、焊机反馈、末端吸盘代码示例；",
     "“SDK_VERSION” 更新为 “C#SDK-V1.3.2 Web-4.0.2”。"

@@ -17903,7 +17903,7 @@ namespace fairino
          * 不传或传-1时按原四参数下发，兼容未升级控制器
          * @return  错误码
          */
-        public int SetAxleLuaEnableDeviceType(int forceSensorEnable, int gripperEnable, int IOEnable, int dexhandEnable, int suckerEnable = -1)
+        public int SetAxleLuaEnableDeviceType(int forceSensorEnable, int gripperEnable, int IOEnable, int dexhandEnable, int suckerEnable = 0)
         {
             if (IsSockComError())
             {
@@ -28628,6 +28628,7 @@ namespace fairino
          * 0-吸盘初始化；1-设置通道一最大真空度；2-设置通道一最小真空度；
          * 3-设置通道二最大真空度；4-设置通道二最小真空度；5-读通道一状态；6-读通道二状态；
          * 7-读初始化状态；8-读故障码；9-读通道一实际真空度；10-读通道二实际真空度；
+         * 11-通道一控制使能；12-通道二控制使能；
          * 每项 0-不启用；1-启用
          * @return 错误码
          */
