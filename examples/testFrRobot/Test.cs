@@ -11744,6 +11744,29 @@ public int RunTrajectoryJ(string localFilePath = "D://zUP/horse.txt", string rem
             int rtn;
             int id = 1;                                 // 站号
 
+            // 末端设备使能：使能末端吸盘，并回读确认（不传吸盘参数时仍按原四参数下发）
+            int forceEn = 0;
+            int gripEn = 0;
+            int ioEn = 0;
+            int dexEn = 0;
+            int suckEn = 0;
+            rtn = robot.GetAxleLuaEnableDeviceType(ref forceEn, ref gripEn, ref ioEn, ref dexEn, ref suckEn);
+            Console.WriteLine($"GetAxleLuaEnableDeviceType rtn={rtn}, force={forceEn}, gripper={gripEn}, io={ioEn}, dexhand={dexEn}, sucker={suckEn}");
+
+            rtn = robot.SetAxleLuaEnableDeviceType(forceEn, gripEn, ioEn, dexEn, 1);
+            Console.WriteLine($"SetAxleLuaEnableDeviceType(sucker=1): {rtn}");
+
+            rtn = robot.GetAxleLuaEnableDeviceType(ref forceEn, ref gripEn, ref ioEn, ref dexEn, ref suckEn);
+            Console.WriteLine($"GetAxleLuaEnableDeviceType(after set) rtn={rtn}, sucker={suckEn}");
+
+            int[] forceArr = new int[8];
+            int[] gripperArr = new int[8];
+            int[] ioArr = new int[8];
+            int[] dexArr = new int[8];
+            int[] suckArr = new int[8];
+            rtn = robot.GetAxleLuaEnableDevice(ref forceArr, ref gripperArr, ref ioArr, ref dexArr, ref suckArr);
+            Console.WriteLine($"GetAxleLuaEnableDevice rtn={rtn}, sucker=[{string.Join(",", suckArr)}]");
+
             // 功能码数组 func[0]~func[10] 对应 Bit0~Bit10，全部启用
             int[] suckerFunc = new int[16];
             for (int i = 0; i <= 10; i++)

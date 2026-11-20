@@ -1930,7 +1930,11 @@ namespace fairino
         object[] GetAxleLuaEnableStatus();
 
         [XmlRpcMethod("SetAxleLuaEnableDeviceType")]
-        int SetAxleLuaEnableDeviceType(int forceSensorEnable, int gripperEnable, int IOEnable, int dexhandEnable, int suckerEnable);
+        int SetAxleLuaEnableDeviceType(int forceSensorEnable, int gripperEnable, int IOEnable, int dexhandEnable);
+
+        /** 五参数版本：在原四参数基础上追加末端吸盘使能 */
+        [XmlRpcMethod("SetAxleLuaEnableDeviceType")]
+        int SetAxleLuaEnableDeviceTypeEx(int forceSensorEnable, int gripperEnable, int IOEnable, int dexhandEnable, int suckerEnable);
 
         [XmlRpcMethod("GetAxleLuaEnableDeviceType")]
         object[] GetAxleLuaEnableDeviceType();

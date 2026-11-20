@@ -17899,10 +17899,11 @@ namespace fairino
          * @param [in] gripperEnable 夹爪启用状态，0-不启用；1-启用
          * @param [in] IOEnable IO设备启用状态，0-不启用；1-启用
          * @param [in] dexhandEnable 灵巧手设备启用状态，0-不启用；1-启用
-         * @param [in] suckerEnable 末端吸盘设备启用状态，0-不启用；1-启用，默认0
+         * @param [in] suckerEnable 末端吸盘设备启用状态，0-不启用；1-启用；
+         * 不传或传-1时按原四参数下发，兼容未升级控制器
          * @return  错误码
          */
-        public int SetAxleLuaEnableDeviceType(int forceSensorEnable, int gripperEnable, int IOEnable, int dexhandEnable, int suckerEnable = 0)
+        public int SetAxleLuaEnableDeviceType(int forceSensorEnable, int gripperEnable, int IOEnable, int dexhandEnable, int suckerEnable = -1)
         {
             if (IsSockComError())
             {
@@ -17910,7 +17911,15 @@ namespace fairino
             }
             try
             {
-                int rtn = proxy.SetAxleLuaEnableDeviceType(forceSensorEnable, gripperEnable, IOEnable, dexhandEnable, suckerEnable);
+                int rtn;
+                if (suckerEnable < 0)
+                {
+                    rtn = proxy.SetAxleLuaEnableDeviceType(forceSensorEnable, gripperEnable, IOEnable, dexhandEnable);
+                }
+                else
+                {
+                    rtn = proxy.SetAxleLuaEnableDeviceTypeEx(forceSensorEnable, gripperEnable, IOEnable, dexhandEnable, suckerEnable);
+                }
                 if (log != null)
                 {
                     log.LogInfo($"SetAxleLuaEnableDeviceType({forceSensorEnable},{gripperEnable}, {IOEnable}, {dexhandEnable}, {suckerEnable}) : {rtn}");
@@ -18007,7 +18016,7 @@ namespace fairino
                 {
                     resultStr = (string)result[1];
                     string[] parS = resultStr.Split(',');
-                    if (parS.Length != 48)
+                    if (parS.Length < 40)
                     {
 
                         log.LogError($"GetAxleLuaEnableDevice fail, {parS.Length}");
