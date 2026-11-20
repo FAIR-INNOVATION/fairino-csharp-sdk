@@ -14,7 +14,6 @@ import re
 import shutil
 import sys
 from copy import deepcopy
-
 from docx import Document
 from docx.shared import Pt
 from docx.oxml import OxmlElement
@@ -22,6 +21,7 @@ from docx.oxml.ns import qn
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT = os.path.dirname(os.path.dirname(SCRIPT_DIR))
+CJK_RE = re.compile(r"[\u4e00-\u9fff]")
 
 
 def read_lines(path):
@@ -265,6 +265,20 @@ def build(cfg_path):
     fr_lines = read_lines(fr_path)
     test_lines = read_lines(test_path)
 
+    line_map = {}
+    if lang == "en" and cfg.get("line_map"):
+        with open(scale_path(cfg["line_map"]), encoding="utf-8") as f:
+            line_map = json.load(f)
+
+    def localize(lines):
+        if lang != "en":
+            return lines
+        out = [line_map.get(ln, ln) for ln in lines]
+        left = [ln for ln in out if CJK_RE.search(ln)]
+        if left:
+            raise SystemExit("英文手册缺少以下中文行翻译:\n" + "\n".join(left))
+        return out
+
     # ---- 正文 ----
     h1(labels["change"])
     for c in cfg["changes"]:
@@ -275,7 +289,7 @@ def build(cfg_path):
     def render_example(ex):
         h2(ex["title"])
         sdk_section(labels["sdk"] + ex.get("sdk_section", next(number)))
-        pre(extract_test(test_lines, ex["function"]))
+        pre(localize(extract_test(test_lines, ex["function"])))
 
     changed = cfg.get("changed_apis", [])
     if changed:
@@ -284,7 +298,7 @@ def build(cfg_path):
             h2(api["title"])
             h3(labels["desc"])
             sdk_section(labels["sdk"] + api.get("sdk_section", "—"))
-            pre(extract_api(fr_lines, api["name"], api.get("match")))
+            pre(localize(extract_api(fr_lines, api["name"], api.get("match"))))
             if api.get("example"):
                 render_example(api["example"])
 
@@ -295,7 +309,7 @@ def build(cfg_path):
             h2(api["title"])
             h3(labels["desc"])
             sdk_section(labels["sdk"] + api.get("sdk_section", next(number)))
-            pre(extract_api(fr_lines, api["name"], api.get("match")))
+            pre(localize(extract_api(fr_lines, api["name"], api.get("match"))))
             if api.get("example"):
                 render_example(api["example"])
 
@@ -317,6 +331,12 @@ def build(cfg_path):
         saved_ws = out_ws[:-5] + "-new.docx"
         doc.save(saved_ws)
         print("WARN: 原文件被占用，已另存为", saved_ws)
+
+    if lang == "en":
+        chk = Document(saved_ws)
+        bad = [p.text for p in chk.paragraphs if CJK_RE.search(p.text)]
+        if bad:
+            raise SystemExit("英文手册仍含中文:\n" + "\n".join(bad[:10]))
 
     os.makedirs(out_dir, exist_ok=True)
     dest = os.path.join(out_dir, out_name)

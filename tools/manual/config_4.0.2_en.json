@@ -7,6 +7,7 @@
   "output_dir": "D:/C#SDK/手册/4.0.2",
   "sdk_section_start": "16.43",
   "body_keep_indent": true,
+  "line_map": "tools/manual/en_line_map_4.0.2.json",
   "changes": [
     "Added the GetDHCompenMode() interface for getting the robot DH compensation model;",
     "Added the GetDHAllParam() interface for getting robot DH2.0 parameters (d, a, alpha, beta, theta);",
