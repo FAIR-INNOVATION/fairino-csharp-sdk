@@ -17899,11 +17899,11 @@ namespace fairino
          * @param [in] gripperEnable 夹爪启用状态，0-不启用；1-启用
          * @param [in] IOEnable IO设备启用状态，0-不启用；1-启用
          * @param [in] dexhandEnable 灵巧手设备启用状态，0-不启用；1-启用
-         * @param [in] suckerEnable 末端吸盘设备启用状态，0-不启用；1-启用，默认0；
-         * 传-1时按原四参数下发，兼容未升级控制器
+         * @param [in] suckerEnable 末端吸盘设备启用状态，0-不启用；1-启用；
+         * 默认-1：不传或传-1时按原四参数下发，兼容未升级控制器
          * @return  错误码
          */
-        public int SetAxleLuaEnableDeviceType(int forceSensorEnable, int gripperEnable, int IOEnable, int dexhandEnable, int suckerEnable = 0)
+        public int SetAxleLuaEnableDeviceType(int forceSensorEnable, int gripperEnable, int IOEnable, int dexhandEnable, int suckerEnable = -1)
         {
             if (IsSockComError())
             {
