@@ -4570,10 +4570,10 @@ namespace testFrRobot
 
             //TestGetRobotDHParam();
             //TestWeaveSetParaWithParam();
-            //for (int i = 1; i <= 10000000000; i++)
+            //for (int i = 1; i <= 10000; i++)
             //{
-            //    TestWeldSetParam();      // 4.0.2 焊机设置测试(PLC D242~D249、D257.2)
-            //    TestWeldFeedback();      // 4.0.2 焊机反馈打印测试(电压/电流/送丝/协同/故障码)
+            //TestWeldSetParam();      // 4.0.2 焊机设置测试(PLC D242~D249、D257.2)
+            //TestWeldFeedback();      // 4.0.2 焊机反馈打印测试(电压/电流/送丝/协同/故障码)
             //}
 
             TestAxleSucker();        // 4.0.2 末端吸盘接口
@@ -11589,15 +11589,15 @@ public int RunTrajectoryJ(string localFilePath = "D://zUP/horse.txt", string rem
         public void TestWeldSetParam()
         {
 
-            //JointPos j1 = new JointPos(-115.844, -49.503, 92.747, -133.077, -89.998, -25.868);
-            //JointPos j2 = new JointPos(-149.585, -45.684, 82.489, -126.665, -90.092, -59.608);
-            //DescPose d1 = new DescPose(198.357, 643.556, 103.910, 179.851, 0.075, 0.023);
-            //DescPose d2 = new DescPose(565.183, 449.906, 118.825, 179.849, 0.074, 0.023);
+            JointPos j1 = new JointPos(-115.844, -49.503, 92.747, -133.077, -89.998, -25.868);
+            JointPos j2 = new JointPos(-149.585, -45.684, 82.489, -126.665, -90.092, -59.608);
+            DescPose d1 = new DescPose(198.357, 643.556, 103.910, 179.851, 0.075, 0.023);
+            DescPose d2 = new DescPose(565.183, 449.906, 118.825, 179.849, 0.074, 0.023);
 
-            JointPos j1 = new JointPos(-143.902, -59.161, 101.339, -130.844, -90.116, -56.026);
-            JointPos j2 = new JointPos(-112.507, -77.118, 129.920, -141.195, -89.783, -24.639);
-            DescPose d1 = new DescPose(436.675, 437.436, 148.030, 178.907, 0.265, 1.550);
-            DescPose d2 = new DescPose(75.368, 437.428, 148.031, 178.907, 0.265, 1.549);
+            //JointPos j1 = new JointPos(-143.902, -59.161, 101.339, -130.844, -90.116, -56.026);
+            //JointPos j2 = new JointPos(-112.507, -77.118, 129.920, -141.195, -89.783, -24.639);
+            //DescPose d1 = new DescPose(436.675, 437.436, 148.030, 178.907, 0.265, 1.550);
+            //DescPose d2 = new DescPose(75.368, 437.428, 148.031, 178.907, 0.265, 1.549);
             ExaxisPos ex = new ExaxisPos(0.0f, 0.0f, 0.0f, 0.0f);
             DescPose zeroOff = new DescPose(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 
@@ -11732,16 +11732,28 @@ public int RunTrajectoryJ(string localFilePath = "D://zUP/horse.txt", string rem
         /// </summary>
         public void TestAxleSucker()
         {
+            JointPos j1 = new JointPos(168.610, -49.414, 19.171, -59.520, -90.466, -9.516);
+            JointPos j2 = new JointPos(168.610, -53.606, 31.351, -67.508, -90.466, -9.516);
+            DescPose d1 = new DescPose(725.139, -42.866, 573.293, 179.690, -0.420, -91.872);
+            DescPose d2 = new DescPose(725.147, -42.866, 543.279, 179.689, -0.421, -91.872);
+            ExaxisPos ex = new ExaxisPos(0.0f, 0.0f, 0.0f, 0.0f);
+            DescPose zeroOff = new DescPose(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+
             int rtn;
             int id = 1;                                 // 站号
 
-            // 功能码 bit0~bit10 全部启用
-            rtn = robot.SetAxleSuckerFunc(id, 0x7FF);
+            // 功能码数组 func[0]~func[10] 对应 Bit0~Bit10，全部启用
+            int[] suckerFunc = new int[16];
+            for (int i = 0; i <= 10; i++)
+            {
+                suckerFunc[i] = 1;
+            }
+            rtn = robot.SetAxleSuckerFunc(id, suckerFunc);
             Console.WriteLine($"SetAxleSuckerFunc: {rtn}");
 
-            int funcValue = 0;
+            int[] funcValue = new int[16];
             rtn = robot.GetAxleSuckerFunc(id, ref funcValue);
-            Console.WriteLine($"GetAxleSuckerFunc rtn={rtn}, value=0x{funcValue:X}");
+            Console.WriteLine($"GetAxleSuckerFunc rtn={rtn}, value=[{string.Join(",", funcValue)}]");
 
             rtn = robot.SetAxleSuckerAct(id, 0);        // 0-复位
             Console.WriteLine($"SetAxleSuckerAct(0): {rtn}");
@@ -11750,14 +11762,22 @@ public int RunTrajectoryJ(string localFilePath = "D://zUP/horse.txt", string rem
             rtn = robot.SetAxleSuckerAct(id, 1);        // 1-激活
             Console.WriteLine($"SetAxleSuckerAct(1): {rtn}");
 
+            Thread.Sleep(2000);
+            rtn = robot.MoveL(j2, d2, 0, 0, 100, 100, 100, -1, 0, ex, 0, 0, zeroOff, 100, 0, 0, 10);
+            Console.WriteLine($"moveL errcode:{rtn}");
             int[] channel = { 1, 1, 0, 0 };               // 1-使能；0-不使能
             int[] minPress = { 60, 60, 0, 0 };            // 最小真空度
             int[] maxPress = { 70, 70, 0, 0 };            // 最大真空度
-            rtn = robot.SetAxleSuckerCtrl(id, channel, minPress, maxPress, 20000);
+            rtn = robot.SetAxleSuckerCtrl(id, channel, minPress, maxPress, 6000);
             Console.WriteLine($"SetAxleSuckerCtrl: {rtn}");
 
+            // 等待通道1(channel=0)吸附物体：
+            rtn = robot.WaitAxleSuckerState(0, 6000, 1, 0);
+            // 等待通道2(channel=1)吸附物体：
+            rtn = robot.WaitAxleSuckerState(1, 6000, 1, 0);
+            Console.WriteLine($"WaitAxleSuckerState: {rtn}");
 
-            int count = 30;
+            int count = 10;
             for (int i = 0; i < count; i++)
             {
                 // channel 0~3 依次对应通道1~通道4，这里打印前两个通道的数据
@@ -11771,21 +11791,22 @@ public int RunTrajectoryJ(string localFilePath = "D://zUP/horse.txt", string rem
                     Console.WriteLine($"[{i + 1}/{count}] 通道{ch + 1}(channel={ch}) rtn={rtn}, enable={enable}, done={done}, vacuumValue={vacuumValue}, error={error}");
                 }
                 Thread.Sleep(500);
+                Console.WriteLine($"00000: {rtn}");
             }
-
-
-            // 等待通道1(channel=0)吸附物体：
-            rtn = robot.WaitAxleSuckerState(0, 6000, 1, 0);
-            // 等待通道2(channel=1)吸附物体：
-            rtn = robot.WaitAxleSuckerState(1, 6000, 1, 0);
-
-            Console.WriteLine($"WaitAxleSuckerState: {rtn}");
-
+            Console.WriteLine($"11111111: {rtn}");
+            rtn = robot.MoveL(j1, d1, 0, 0, 100, 100, 100, -1, 0, ex, 0, 0, zeroOff, 100, 0, 0, 10);
+            Console.WriteLine($"moveL errcode:{rtn}");
             // 等待结束后关闭通道：channel 原值为 {1,1,0,0}(使能)，必须重新赋值为全关
-            // minPress/maxPress 沿用上面的 {60,60,0,0}/{70,70,0,0}
             channel = new int[] { 0, 0, 0, 0 };
             rtn = robot.SetAxleSuckerCtrl(id, channel, minPress, maxPress, 8000);
             Console.WriteLine($"SetAxleSuckerCtrl(等待后关闭通道): {rtn}");
+
+            // 等待通道1(channel=0)释放物体：
+            rtn = robot.WaitAxleSuckerState(0, 6000, 0, 0);
+            // 等待通道2(channel=1)释放物体：
+            rtn = robot.WaitAxleSuckerState(1, 6000, 0, 0);
+            Console.WriteLine($"WaitAxleSuckerState: {rtn}");
+
         }
 
     }

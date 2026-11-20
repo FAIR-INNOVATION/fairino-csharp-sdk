@@ -28488,22 +28488,28 @@ namespace fairino
         /**
          * @brief 设置启用末端吸盘动作控制功能码
          * @param [in] id 站号
-         * @param [in] value 功能码：Bit0-吸盘初始化；Bit1-设置通道一最大真空度；Bit2-设置通道一最小真空度；
-         * Bit3-设置通道二最大真空度；Bit4-设置通道二最小真空度；Bit5-读通道一状态；Bit6-读通道二状态；
-         * Bit7-读初始化状态；Bit8-读故障码；Bit9-读通道一实际真空度；Bit10-读通道二实际真空度。
-         * 设置内容 0-不启用；1-启用
+         * @param [in] func 功能码数组，长度16，下标0~15对应Bit0~Bit15：
+         * 0-吸盘初始化；1-设置通道一最大真空度；2-设置通道一最小真空度；
+         * 3-设置通道二最大真空度；4-设置通道二最小真空度；5-读通道一状态；6-读通道二状态；
+         * 7-读初始化状态；8-读故障码；9-读通道一实际真空度；10-读通道二实际真空度；
+         * 每项 0-不启用；1-启用
          * @return 错误码
          */
-        public int SetAxleSuckerFunc(int id, int value)
+        public int SetAxleSuckerFunc(int id, int[] func)
         {
             if (IsSockComError())
             {
                 return g_sock_com_err;
             }
+            if (func == null || func.Length == 0 || func.Length > 16)
+            {
+                log?.LogError("SetAxleSuckerFunc invalid func array, length must be 1~16");
+                return (int)RobotError.ERR_PARAM_NUM;
+            }
             try
             {
-                int rtn = proxy.SetAxleSuckerFunc(id, value);
-                log?.LogInfo($"SetAxleSuckerFunc({id},{value}) : {rtn}");
+                int rtn = proxy.SetAxleSuckerFunc(id, func);
+                log?.LogInfo($"SetAxleSuckerFunc({id}, func[16]) : {rtn}");
                 return rtn;
             }
             catch
@@ -28520,14 +28526,19 @@ namespace fairino
         /**
          * @brief 获取末端吸盘动作控制功能码
          * @param [in] id 站号
-         * @param [out] value 功能码，位定义同 SetAxleSuckerFunc
+         * @param [out] func 功能码数组，长度16，下标0~15对应Bit0~Bit15，含义同 SetAxleSuckerFunc
          * @return 错误码
          */
-        public int GetAxleSuckerFunc(int id, ref int value)
+        public int GetAxleSuckerFunc(int id, ref int[] func)
         {
             if (IsSockComError())
             {
                 return g_sock_com_err;
+            }
+            if (func == null || func.Length < 16)
+            {
+                log?.LogError("GetAxleSuckerFunc invalid func array, length must be at least 16");
+                return (int)RobotError.ERR_PARAM_NUM;
             }
             try
             {
@@ -28535,9 +28546,19 @@ namespace fairino
                 int errcode = (int)result[0];
                 if (errcode == 0)
                 {
-                    value = (int)result[1];
+                    string resultStr = (string)result[1];
+                    string[] items = resultStr.Split(',');
+                    if (items.Length != 16)
+                    {
+                        log?.LogError($"GetAxleSuckerFunc size fail: {items.Length}");
+                        return -1;
+                    }
+                    for (int i = 0; i < 16; i++)
+                    {
+                        func[i] = int.Parse(items[i]);
+                    }
                 }
-                log?.LogInfo($"GetAxleSuckerFunc({id}, ref {value}) : {errcode}");
+                log?.LogInfo($"GetAxleSuckerFunc({id}, ref func[16]) : {errcode}");
                 return errcode;
             }
             catch

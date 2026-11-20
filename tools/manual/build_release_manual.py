@@ -284,7 +284,9 @@ def build(cfg_path):
         shutil.copyfile(saved_ws, dest)
     except PermissionError:
         copied = False
-        print("WARN: 手册目录目标文件被占用，未覆盖:", dest)
+        dest_alt = dest[:-5] + "-new.docx"
+        shutil.copyfile(saved_ws, dest_alt)
+        print("WARN: 手册目录目标文件被占用，已另存为:", dest_alt)
 
     # ---- 自检 ----
     chk = Document(saved_ws)

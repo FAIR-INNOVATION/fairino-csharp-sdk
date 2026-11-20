@@ -2605,7 +2605,7 @@ namespace fairino
 
         // === 4.0.2 末端吸盘接口 ===
         [XmlRpcMethod("SetAxleSuckerFunc")]
-        int SetAxleSuckerFunc(int id, int value);
+        int SetAxleSuckerFunc(int id, int[] func);
 
         [XmlRpcMethod("GetAxleSuckerFunc")]
         object[] GetAxleSuckerFunc(int id);
