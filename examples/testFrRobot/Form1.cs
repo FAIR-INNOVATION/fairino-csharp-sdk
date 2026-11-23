@@ -36,6 +36,9 @@ namespace testFrRobot
             robot.LoggerInit(FrLogType.BUFFER, FrLogLevel.INFO, path, 5, 5);
             robot.SetLoggerLevel(FrLogLevel.INFO);
 
+            robot.AddRobotRealtimeState(RobotState.WeldVoltage);
+            robot.AddRobotRealtimeState(RobotState.WeldCurrent);
+
             // 查看最终CNDE配置
             List<RobotState> finalStates;
             int finalPeriod;

@@ -4572,14 +4572,14 @@ namespace testFrRobot
 
             //TestGetRobotDHParam();
             //TestWeaveSetParaWithParam();
-            //for (int i = 1; i <= 10000; i++)
+            //for (int i = 1; i <= 100; i++)
             //{
             //TestWeldSetParam();      // 4.0.2 焊机设置测试(PLC D242~D249、D257.2)
             //TestWeldFeedback();      // 4.0.2 焊机反馈打印测试(电压/电流/送丝/协同/故障码)
             //}
-
-            TestAxleSucker();        // 4.0.2 末端吸盘接口
+            //TestAxleSucker();        // 4.0.2 末端吸盘接口
             //TestSetCartOffsetRT();   // 弹窗输入 y 偏移(后台MoveL往返)，点取消结束
+            //TestDataPackageUpgrade();  // 上传数据数据备份包上传升级
 
             //401测试函数
             //TestServoCartwithParam();
