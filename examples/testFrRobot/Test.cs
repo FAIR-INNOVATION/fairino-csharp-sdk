@@ -11377,11 +11377,12 @@ public int RunTrajectoryJ(string localFilePath = "D://zUP/horse.txt", string rem
         }
 
         /// <summary>
-        /// 数据备份包上传升级 + 升级进度查询
+        /// 数据备份包上传升级 + 升级进度查询（含安全配置参数升级）
         /// </summary>
         public void TestDataPackageUpgrade()
         {
-            int rtn = robot.DataPackageUpgrade("D://zUP/upgrade/FR5/fr_user_data.tar.gz");
+            // 第2参 true=升级安全配置参数，第3参为安全密码
+            int rtn = robot.DataPackageUpgrade("D://zUP/upgrade/FR5/fr_user_data.tar.gz", true, "12345678");
             Console.WriteLine($"robot DataPackageUpgrade rtn is {rtn}");
 
             int upgradeProgress = 0;

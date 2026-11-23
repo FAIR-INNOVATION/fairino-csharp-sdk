@@ -14,96 +14,198 @@
     "新增末端吸盘接口SetAxleSuckerFunc()、GetAxleSuckerFunc()、SetAxleSuckerCtrl()、SetAxleSuckerAct()、GetAxleSuckerState()、WaitAxleSuckerState()；末端吸盘功能码新增Bit11-通道一控制使能、Bit12-通道二控制使能；",
     "修改SetAxleLuaEnableDeviceType()、GetAxleLuaEnableDeviceType()、GetAxleLuaEnableDevice()，新增末端吸盘设备使能项；",
     "新增DH参数、摇枪摆动、实时偏移、焊机设置、焊机反馈、末端吸盘代码示例；",
+    "修改DataPackageUpgrade()数据备份包上传升级接口，新增isSafetyParamUpgrade是否升级安全配置参数、pwd安全密码参数；默认false/null时仍按原无参数接口下发，兼容旧版控制器；",
     "“SDK_VERSION” 更新为 “C#SDK-V1.3.2 Web-4.0.2”。"
   ],
   "changed_apis": [
     {
       "name": "WeaveSetPara",
       "title": "设置摆动参数",
-      "sdk_section": "详见完整用户手册“摆动焊接”章节（本次为参数更新）",
+      "sdk_section": "14.9（本次为参数更新）",
       "example": {
         "function": "TestWeaveSetParaWithParam",
-        "title": "摇枪摆动参数设置代码示例"
+        "title": "摇枪摆动参数设置代码示例",
+        "sdk_section": "16.43"
       }
     },
     {
       "name": "SetAxleLuaEnableDeviceType",
       "title": "设置末端LUA末端设备启用类型",
-      "sdk_section": "详见完整用户手册“末端设备”章节（本次为参数更新）"
+      "sdk_section": "11.54（本次为参数更新）"
     },
     {
       "name": "GetAxleLuaEnableDeviceType",
       "title": "获取末端LUA末端设备启用类型",
-      "sdk_section": "详见完整用户手册“末端设备”章节（本次为参数更新）",
+      "sdk_section": "11.55（本次为参数更新）",
       "match": "suckerEnable"
     },
     {
       "name": "GetAxleLuaEnableDevice",
       "title": "获取当前配置的末端设备",
-      "sdk_section": "详见完整用户手册“末端设备”章节（本次为参数更新）",
+      "sdk_section": "11.56（本次为参数更新）",
       "match": "suckerEnable"
+    },
+    {
+      "name": "DataPackageUpgrade",
+      "title": "数据备份包上传升级",
+      "sdk_section": "16.38（参数更新）",
+      "example": {
+        "function": "TestDataPackageUpgrade",
+        "title": "数据备份包上传升级代码示例",
+        "sdk_section": "16.39（参数更新）"
+      }
     }
   ],
   "new_apis": [
-    {"name": "GetDHCompenMode", "title": "获取机器人DH补偿模型"},
+    {
+      "name": "GetDHCompenMode",
+      "title": "获取机器人DH补偿模型",
+      "sdk_section": "8.48"
+    },
     {
       "name": "GetDHAllParam",
       "title": "获取机器人DH2.0参数",
       "example": {
         "function": "TestGetRobotDHParam",
-        "title": "获取机器人DH补偿模型及DH2.0参数代码示例"
-      }
+        "title": "获取机器人DH补偿模型及DH2.0参数代码示例",
+        "sdk_section": "8.50"
+      },
+      "sdk_section": "8.49"
     },
     {
       "name": "SetCartOffsetRT",
       "title": "设置运动实时偏移",
       "example": {
         "function": "TestSetCartOffsetRT",
-        "title": "设置运动实时偏移代码示例"
-      }
+        "title": "设置运动实时偏移代码示例",
+        "sdk_section": "14.92"
+      },
+      "sdk_section": "14.91"
     },
-    {"name": "SetWeldType", "title": "设置焊接类型"},
-    {"name": "SetWeldCompany", "title": "设置焊机厂商"},
-    {"name": "SetWeldWFS", "title": "设置送丝速度"},
-    {"name": "SetWeldArcLen", "title": "设置焊接弧长"},
-    {"name": "SetWeldArcCtrl", "title": "设置电弧控制值"},
-    {"name": "SetWeldSlot", "title": "设置程序槽号"},
-    {"name": "SetWeldDisable", "title": "设置“禁止焊接”"},
-    {"name": "SetweldWFSUdpNum", "title": "设置送丝速度UDP自定义控制字序号"},
-    {"name": "SetWeldArcLenUdpNum", "title": "设置弧长UDP自定义控制字序号"},
-    {"name": "SetWeldArcCtrlUdpNum", "title": "设置电弧控制UDP自定义控制字序号"},
-    {"name": "SetWeldSlotUdpNum", "title": "设置程序槽号UDP自定义控制字序号"},
-    {"name": "SetWeldDisableExtDoNum", "title": "设置“禁止焊接”UDP扩展DO序号"},
+    {
+      "name": "SetWeldType",
+      "title": "设置焊接类型",
+      "sdk_section": "14.93"
+    },
+    {
+      "name": "SetWeldCompany",
+      "title": "设置焊机厂商",
+      "sdk_section": "14.94"
+    },
+    {
+      "name": "SetWeldWFS",
+      "title": "设置送丝速度",
+      "sdk_section": "14.95"
+    },
+    {
+      "name": "SetWeldArcLen",
+      "title": "设置焊接弧长",
+      "sdk_section": "14.96"
+    },
+    {
+      "name": "SetWeldArcCtrl",
+      "title": "设置电弧控制值",
+      "sdk_section": "14.97"
+    },
+    {
+      "name": "SetWeldSlot",
+      "title": "设置程序槽号",
+      "sdk_section": "14.98"
+    },
+    {
+      "name": "SetWeldDisable",
+      "title": "设置“禁止焊接”",
+      "sdk_section": "14.99"
+    },
+    {
+      "name": "SetweldWFSUdpNum",
+      "title": "设置送丝速度UDP自定义控制字序号",
+      "sdk_section": "14.100"
+    },
+    {
+      "name": "SetWeldArcLenUdpNum",
+      "title": "设置弧长UDP自定义控制字序号",
+      "sdk_section": "14.101"
+    },
+    {
+      "name": "SetWeldArcCtrlUdpNum",
+      "title": "设置电弧控制UDP自定义控制字序号",
+      "sdk_section": "14.102"
+    },
+    {
+      "name": "SetWeldSlotUdpNum",
+      "title": "设置程序槽号UDP自定义控制字序号",
+      "sdk_section": "14.103"
+    },
+    {
+      "name": "SetWeldDisableExtDoNum",
+      "title": "设置“禁止焊接”UDP扩展DO序号",
+      "sdk_section": "14.104"
+    },
     {
       "name": "SetWeldSynStateExtDINum",
       "title": "设置“协同状态”UDP扩展DI序号",
       "example": {
         "function": "TestWeldSetParam",
-        "title": "焊机设置代码示例"
-      }
+        "title": "焊机设置代码示例",
+        "sdk_section": "14.106"
+      },
+      "sdk_section": "14.105"
     },
-    {"name": "GetWeldSynState", "title": "获取“协同状态”"},
-    {"name": "SetWeldWfsFeedbackUdpNum", "title": "设置“送丝速度”UDP自定义状态字序号"},
+    {
+      "name": "GetWeldSynState",
+      "title": "获取“协同状态”",
+      "sdk_section": "14.107"
+    },
+    {
+      "name": "SetWeldWfsFeedbackUdpNum",
+      "title": "设置“送丝速度”UDP自定义状态字序号",
+      "sdk_section": "14.108"
+    },
     {
       "name": "GetWeldWfsFeedback",
       "title": "获取“送丝速度”当前值",
       "example": {
         "function": "TestWeldFeedback",
-        "title": "焊机反馈打印代码示例"
-      }
+        "title": "焊机反馈打印代码示例",
+        "sdk_section": "14.110"
+      },
+      "sdk_section": "14.109"
     },
-    {"name": "SetAxleSuckerFunc", "title": "设置启用末端吸盘动作控制功能码"},
-    {"name": "GetAxleSuckerFunc", "title": "获取末端吸盘动作控制功能码"},
-    {"name": "SetAxleSuckerCtrl", "title": "设置末端吸盘控制参数"},
-    {"name": "SetAxleSuckerAct", "title": "激活/复位吸盘"},
-    {"name": "GetAxleSuckerState", "title": "获取末端吸盘状态"},
+    {
+      "name": "SetAxleSuckerFunc",
+      "title": "设置启用末端吸盘动作控制功能码",
+      "sdk_section": "11.114"
+    },
+    {
+      "name": "GetAxleSuckerFunc",
+      "title": "获取末端吸盘动作控制功能码",
+      "sdk_section": "11.115"
+    },
+    {
+      "name": "SetAxleSuckerCtrl",
+      "title": "设置末端吸盘控制参数",
+      "sdk_section": "11.116"
+    },
+    {
+      "name": "SetAxleSuckerAct",
+      "title": "激活/复位吸盘",
+      "sdk_section": "11.117"
+    },
+    {
+      "name": "GetAxleSuckerState",
+      "title": "获取末端吸盘状态",
+      "sdk_section": "11.118"
+    },
     {
       "name": "WaitAxleSuckerState",
       "title": "等待末端吸盘吸附完成信号",
       "example": {
         "function": "TestAxleSucker",
-        "title": "末端吸盘接口代码示例"
-      }
+        "title": "末端吸盘接口代码示例",
+        "sdk_section": "11.120"
+      },
+      "sdk_section": "11.119"
     }
   ]
 }

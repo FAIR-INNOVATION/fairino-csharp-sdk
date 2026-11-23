@@ -2117,6 +2117,10 @@ namespace fairino
         [XmlRpcMethod("DataPackageUpgrade")]
         int DataPackageUpgrade();
 
+        /** 带安全配置参数升级的版本：isSafetyParamUpgrade 0-否；1-是；pwd 安全密码 */
+        [XmlRpcMethod("DataPackageUpgrade")]
+        int DataPackageUpgradeEx(int isSafetyParamUpgrade, string pwd);
+
         [XmlRpcMethod("GetDataPackageUpgradeProgress")]
         object[] GetDataPackageUpgradeProgress();
 

@@ -20898,9 +20898,11 @@ namespace fairino
         /**
          * @brief 数据备份包上传升级
          * @param [in] filePath 上传数据备份包文件路径；D://zUP/fr_user_data.tar.gz
+         * @param [in] isSafetyParamUpgrade 是否升级安全配置参数，false-否；true-是，默认false
+         * @param [in] pwd 安全密码；默认null时按原无参数接口下发，兼容旧版控制器
          * @return 错误码
          */
-        public int DataPackageUpgrade(string filePath)
+        public int DataPackageUpgrade(string filePath, bool isSafetyParamUpgrade = false, string pwd = null)
         {
             if (IsSockComError())
             {
@@ -20912,7 +20914,16 @@ namespace fairino
             {
                 try
                 {
-                    int rtn = proxy.DataPackageUpgrade();
+                    int rtn;
+                    // pwd 为 null 时保持原无参数调用，兼容旧固件；否则下发安全升级标志与密码
+                    if (pwd == null)
+                    {
+                        rtn = proxy.DataPackageUpgrade();
+                    }
+                    else
+                    {
+                        rtn = proxy.DataPackageUpgradeEx(isSafetyParamUpgrade ? 1 : 0, pwd);
+                    }
                     if (rtn != 0)
                     {
                         log?.LogError($"DataPackageUpgrade failed error code is: {rtn}");

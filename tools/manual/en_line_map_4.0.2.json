@@ -152,5 +152,10 @@
   "    // 等待结束后关闭通道：channel 原值为 {1,1,0,0}(使能)，必须重新赋值为全关": "    // Close the channels after waiting: channel was {1,1,0,0} (enabled), reassign all to 0",
   "    Console.WriteLine($\"SetAxleSuckerCtrl(等待后关闭通道): {rtn}\");": "    Console.WriteLine($\"SetAxleSuckerCtrl(close channels after wait): {rtn}\");",
   "    // 等待通道1(channel=0)释放物体：": "    // Wait for channel 1 (channel=0) to release the object:",
-  "    // 等待通道2(channel=1)释放物体：": "    // Wait for channel 2 (channel=1) to release the object:"
+  "    // 等待通道2(channel=1)释放物体：": "    // Wait for channel 2 (channel=1) to release the object:",
+  " * @brief 数据备份包上传升级": " * @brief Data backup package upload upgrade",
+  " * @param [in] filePath 上传数据备份包文件路径；D://zUP/fr_user_data.tar.gz": " * @param [in] filePath Path of the data backup package to upload; D://zUP/fr_user_data.tar.gz",
+  " * @param [in] isSafetyParamUpgrade 是否升级安全配置参数，false-否；true-是，默认false": " * @param [in] isSafetyParamUpgrade Whether to upgrade safety configuration parameters: false-no; true-yes, default false",
+  " * @param [in] pwd 安全密码；默认null时按原无参数接口下发，兼容旧版控制器": " * @param [in] pwd Safety password; default null keeps the original no-parameter interface for compatibility with older controllers",
+  "    // 第2参 true=升级安全配置参数，第3参为安全密码": "    // 2nd arg true = upgrade safety configuration parameters; 3rd arg is the safety password"
 }

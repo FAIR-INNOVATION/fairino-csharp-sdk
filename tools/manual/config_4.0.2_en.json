@@ -17,6 +17,7 @@
     "Added welding status feedback interfaces GetWeldSynState() for the synergy state and GetWeldWfsFeedback() for the actual wire feed speed, plus the status word configuration SetWeldWfsFeedbackUdpNum();",
     "Added end-effector suction cup interfaces SetAxleSuckerFunc(), GetAxleSuckerFunc(), SetAxleSuckerCtrl(), SetAxleSuckerAct(), GetAxleSuckerState() and WaitAxleSuckerState(); the suction cup function code adds Bit11 (channel 1 control enable) and Bit12 (channel 2 control enable);",
     "Modified SetAxleLuaEnableDeviceType(), GetAxleLuaEnableDeviceType() and GetAxleLuaEnableDevice() to add the end-effector suction cup enable item;",
+    "Modified the DataPackageUpgrade() data backup package upload upgrade interface to add isSafetyParamUpgrade (whether to upgrade safety configuration parameters) and pwd (safety password); when they are false/null, the original no-parameter interface is still used for compatibility with older controllers;",
     "Updated \"SDK_VERSION\" to \"C#SDK-V1.3.2 Web-4.0.2\"."
   ],
   "changed_apis": [
@@ -46,6 +47,16 @@
       "title": "Get currently configured end-effector devices",
       "sdk_section": "See the \"End-effector devices\" chapter of the full user manual (parameter update in this version)",
       "match": "suckerEnable"
+    },
+    {
+      "name": "DataPackageUpgrade",
+      "title": "Data backup package upload upgrade",
+      "sdk_section": "16.38 (parameter update)",
+      "example": {
+        "function": "TestDataPackageUpgrade",
+        "title": "Sample code for data backup package upload upgrade",
+        "sdk_section": "16.39 (parameter update)"
+      }
     }
   ],
   "new_apis": [
